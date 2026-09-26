@@ -1,0 +1,1 @@
+User reports that the climbing turn worked visually, with small wing micro-stutters while banked in F2. Cause unconfirmed: could involve commanded poses, AI updates, interpolation, or the camera. User requested a closer human-aircraft start to inspect from the cockpit. Quantitative tracking analysis remains pending. Logs preserved before another mission can overwrite dcs.log.

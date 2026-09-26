@@ -1,0 +1,13 @@
+{
+  "statuses": {
+    "captured": 1,
+    "called": 1901,
+    "released": 1
+  },
+  "callback_intervals_s": {
+    "0.02": 1900
+  },
+  "maximum_immediate_orientation_error_deg": 0.017503468062622252,
+  "start": "5",
+  "end": "43"
+}

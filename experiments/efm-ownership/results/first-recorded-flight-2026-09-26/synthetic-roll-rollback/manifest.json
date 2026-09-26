@@ -1,0 +1,10 @@
+[
+  {
+    "Path": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\first-recorded-flight-2026-09-26\\synthetic-roll-rollback\\EFM-Probe-Hornet-left-roll-400KIAS.miz",
+    "Hash": "BE9E8D7095A60A70F35A580FDCFFAA9FAB84BC8ABB21C63B634DF26EC4F94082"
+  },
+  {
+    "Path": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\first-recorded-flight-2026-09-26\\synthetic-roll-rollback\\HornetProbe.dll",
+    "Hash": "04643E4F205A4A13ABDAB82117688FCA221FAEE25EAB98C0CBE1487879DA9B76"
+  }
+]

@@ -1,0 +1,51 @@
+{
+  "samples": 1940,
+  "simulation_duration": 38.78,
+  "sample_dt_range": [
+    0.01999999999999602,
+    0.020000000000003126
+  ],
+  "speed_m_s": [
+    221.7852399079638,
+    227.67714294882617
+  ],
+  "altitude_m": [
+    1994.59452662,
+    2105.41977407
+  ],
+  "initial_pitch_deg": 1.9994117521181054,
+  "initial_up_y": 0.999345242977,
+  "log_wall_duration": 38.77800011634827,
+  "largest_wall_gaps": [
+    {
+      "real_seconds": 0.03299999237060547,
+      "simulation_seconds": 0.019999999999999574,
+      "after_sample": 656
+    },
+    {
+      "real_seconds": 0.029000043869018555,
+      "simulation_seconds": 0.019999999999999574,
+      "after_sample": 430
+    },
+    {
+      "real_seconds": 0.026999950408935547,
+      "simulation_seconds": 0.019999999999999574,
+      "after_sample": 101
+    },
+    {
+      "real_seconds": 0.026000022888183594,
+      "simulation_seconds": 0.020000000000000462,
+      "after_sample": 35
+    },
+    {
+      "real_seconds": 0.026000022888183594,
+      "simulation_seconds": 0.020000000000000462,
+      "after_sample": 52
+    },
+    {
+      "real_seconds": 0.026000022888183594,
+      "simulation_seconds": 0.020000000000000462,
+      "after_sample": 65
+    }
+  ]
+}

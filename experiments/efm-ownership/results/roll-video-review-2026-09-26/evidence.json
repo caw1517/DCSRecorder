@@ -1,0 +1,11 @@
+{
+  "video_path": "C:\\Users\\w_can\\Downloads\\Roll.mp4",
+  "video_sha256": "344aa96bfa0319362fbdae50f936fdd18a22b1d8c47756067b2696e207815847",
+  "duration_seconds": 17.59,
+  "width": 2560,
+  "height": 1070,
+  "nominal_fps": 59.98,
+  "log_process": 39268,
+  "log_snapshot_sha256": "a0827ca37bb0f64c0f152336df6c9d3adb5724557d43e18023d04b856246a0db",
+  "scope": "Evidence review only. No controller, mission or DLL changes."
+}

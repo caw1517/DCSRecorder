@@ -1,0 +1,20 @@
+{
+  "prototype": "Hornet positive-g left roll; live validation pending",
+  "mission_filename": "EFM-Probe-Hornet-left-roll-400KIAS.miz",
+  "dll_sha256": "16f6c7cc931d875bf9a1d0917aacf38b8b4025ecf2bce5b3722c995bf724472f",
+  "mission_sha256": "3b501f969eefdb45c03b3edb07b68eb3102a034838d7d8ecc0bca4d5ca7f8b80",
+  "initial_mission_speed_m_s": 225.0215739890135,
+  "nominal_kias": 400,
+  "speed_schedule": "400 KCAS in ISA, reference altitude 2000m; position offset follows captured altitude",
+  "pull_start_mission_seconds": 7,
+  "roll_start_mission_seconds": 15.92780913418998,
+  "roll_end_mission_seconds": 41.0391973319904,
+  "release_mission_seconds": 47.0391973319904,
+  "roll_degrees": -360,
+  "geometric_normal_load_factor": 1.8,
+  "recovery_seconds": 6,
+  "geometry_data_sha256": "b808cb162ab4314e355b7890778c692d009a54ebd6983112dfee5dbfa7d4f817",
+  "livery": "Blue Angels Jet Team",
+  "player_type": "FA-18C_hornet",
+  "playback_type": "DCSRecorder-Hornet-Probe"
+}

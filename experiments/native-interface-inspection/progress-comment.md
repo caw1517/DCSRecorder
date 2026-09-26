@@ -1,0 +1,5 @@
+The pre-command diagnostic measured a substantial between-update attitude conflict. All 1901 commands execute on 20 ms simulation intervals. DCS changes orientation by up to 1.0835 degrees between our commands, predominantly roll; the intended path changes average only 0.0936 degrees per tick. Immediate post-command pose agrees with target within about 0.0000024 degrees per axis.
+
+At 40 s, forward/up/right intertick changes are 0.0058/1.0758/1.0758 degrees, clearly indicating predominantly roll. Repeated native rotation followed by our correction is a strong candidate for the wing jitter. We have not directly correlated renderer frames with these samples. Wall timing is fairly steady (20 ms mean, 22.875 ms p95, 34.147 ms max); no simulation callbacks were missed.
+
+Next target is identifying/synchronizing the rotational state or AI update behind this conflict, not blindly increasing command rate. No behavior change applied yet. Evidence: experiments/efm-ownership/results/intertick-2026-09-25/README.md and summary.json.

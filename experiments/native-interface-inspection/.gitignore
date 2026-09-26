@@ -1,0 +1,7 @@
+/tools/
+/local-binaries/
+/snapshots/
+__pycache__/
+# Generated exports, disassembly, and binary indexes remain local evidence.
+/*.txt
+/*.json

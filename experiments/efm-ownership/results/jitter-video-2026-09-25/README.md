@@ -1,0 +1,11 @@
+# User-provided jitter clip
+
+Source: C:/Users/w_can/Downloads/Clip_-_9252026_30217_PM.mp4. Inspected 2026-09-25. Clip is 9.48 seconds, 2560x1070, nominal 60 fps. Contact sheets preserve an overview and 18 consecutive frames starting at 4 seconds. User observes wing micro-stutter; footage is from the occupied cockpit, not F2. This rules out an F2-only explanation, but does not isolate camera, recording cadence, or rendering effects.
+
+Latest motion log PID 43688 contains 1901 successful commands from model time 5 through 43 and one release. All 1900 consecutive command intervals are exactly 0.02 simulation seconds. Thus there is no missing/irregular simulation-time callback in this log. Wall-time rendering stalls remain possible. Immediate pose rotation discrepancy estimated from matrix trace is at most 0.0175 degrees; float rounding affects that estimate, so do not interpret it as exact angular error.
+
+Current evidence does not isolate the cause. Candidates are visual interpolation between 50 Hz pose updates and rendering, inconsistent retained velocity/angular state, and AI updates between forced poses. The video alone cannot prove any of these. The 60 fps recording is not a measurement of game render rate. No change to the controller was made during this inspection.
+
+Next useful diagnostic: compare pre-command state to the preceding command/path at each tick, and compare reported linear/angular motion with the path derivative. Current after-call logs cannot show what the renderer or AI did between calls. Preserve this clip as the visual regression reference.
+
+Follow-up prepared: native-motion CSV now includes all 16 pre-command pose values, monotonic wall time, and ForcePosition application duration. The trajectory and speed are unchanged. analyze_intertick.py compares pre-command orientation with both the last applied pose and current target, reports position error, and summarizes wall/simulation timing. Its angular comparison uses cross/dot atan2 to avoid trace/acos float precision loss near zero. A synthetic 1-degree between-command disturbance is detected with zero post-command error. Build and both existing CTests pass. The new live run remains pending; adding telemetry is not itself a jitter fix. Wall intervals can include pauses or capture stalls and do not measure renderer timing directly.

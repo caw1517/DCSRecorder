@@ -1,0 +1,14 @@
+{
+  "native_displacement_minus_written_velocity_mean_m_s": [
+    2.5233216807142678,
+    -0.000502372246396801,
+    -6.496697922976312
+  ],
+  "mission_2000m_wind_vector_candidate_m_s": [
+    2.5085756468171025,
+    0,
+    -6.535062985480412
+  ],
+  "difference_m_s": 0.04110445127372158,
+  "note": "Finite float position differences, native integration and wind interpolation can affect residual. This is strong directional evidence, not a measured atmosphere API value."
+}

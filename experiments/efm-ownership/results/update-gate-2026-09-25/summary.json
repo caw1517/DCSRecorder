@@ -1,0 +1,96 @@
+[
+  {
+    "run": 1,
+    "statuses": {
+      "captured": 1,
+      "called": 1526
+    },
+    "gates": {
+      "": 1,
+      "inactive": 775,
+      "suppressed": 750,
+      "restored": 1
+    },
+    "last_time": "35.5",
+    "metrics": {
+      "pre_command_error_deg": {
+        "count": 1526,
+        "mean": 0.3401873458259661,
+        "p95": 1.0022018049937496,
+        "max": 1.100764056080296
+      },
+      "post_command_error_deg": {
+        "count": 1526,
+        "mean": 9.159811916233189e-07,
+        "p95": 1.9301894444326183e-06,
+        "max": 2.390403478307247e-06
+      },
+      "intertick_attitude_change_deg": {
+        "count": 1525,
+        "mean": 0.2853156331351837,
+        "p95": 1.073524165233518,
+        "max": 1.0750432488589936
+      },
+      "command_attitude_step_deg": {
+        "count": 1525,
+        "mean": 0.09151812838181188,
+        "p95": 0.11333325995330547,
+        "max": 0.11481895208820542
+      },
+      "pre_position_error_m": {
+        "count": 1526,
+        "mean": 1.1005025176459362,
+        "p95": 2.1200736231479773,
+        "max": 2.1344297613057526
+      },
+      "wall_interval_ms": {
+        "count": 1525,
+        "mean": 19.99818688523803,
+        "p95": 23.035000020172447,
+        "max": 25.006999989273027
+      },
+      "simulation_interval_ms": {
+        "count": 1525,
+        "mean": 20.0,
+        "p95": 20.000000000003126,
+        "max": 20.000000000003126
+      },
+      "apply_ms": {
+        "count": 1526,
+        "mean": 0.622263630406291,
+        "p95": 0.8779,
+        "max": 1.2762
+      }
+    },
+    "gate_ab": {
+      "normal": {
+        "intertick_attitude_change_deg": {
+          "count": 775,
+          "mean": 0.5614275361692325,
+          "p95": 1.0744703777927012,
+          "max": 1.0750432488589936
+        },
+        "intertick_position_change_m": {
+          "count": 775,
+          "mean": 2.204524368259597,
+          "p95": 2.276138015920447,
+          "max": 2.2986291039514835
+        }
+      },
+      "suppressed": {
+        "intertick_attitude_change_deg": {
+          "count": 750,
+          "mean": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "intertick_position_change_m": {
+          "count": 750,
+          "mean": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        }
+      }
+    }
+  }
+]

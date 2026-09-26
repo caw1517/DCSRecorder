@@ -1,0 +1,38 @@
+{
+  "statuses": {
+    "captured": 1,
+    "called": 1901,
+    "released": 1
+  },
+  "last_command_time": 43.0,
+  "release_times": [
+    43.02
+  ],
+  "commands_without_motion_matching": 0,
+  "matched_15_to_30": {
+    "pre_position_error_m": {
+      "count": 750,
+      "mean": 0.01819658913008653,
+      "p95": 0.03143358877062383,
+      "max": 0.0356485229954039
+    },
+    "pre_attitude_error_deg": {
+      "count": 750,
+      "mean": 0.08461493675841546,
+      "p95": 0.0914580826131213,
+      "max": 0.09150766145953547
+    },
+    "velocity_change_m_s": {
+      "count": 750,
+      "mean": 0.013057597967936263,
+      "p95": 0.016878660469911665,
+      "max": 0.016926986175617244
+    },
+    "angular_change_rad_s": {
+      "count": 750,
+      "mean": 0.07397905352329452,
+      "p95": 0.07997157662235542,
+      "max": 0.08001447490725516
+    }
+  }
+}

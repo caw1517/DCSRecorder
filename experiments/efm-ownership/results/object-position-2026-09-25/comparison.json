@@ -1,0 +1,35 @@
+{
+  "native_samples": 130,
+  "statuses": {
+    "object_position_candidate": 130
+  },
+  "native_time_range": [
+    0.0,
+    13.1
+  ],
+  "same_timestamp": {
+    "pairs": 128,
+    "rms_m": 2.9182183892971474,
+    "max_m": 2.9533100667177004,
+    "median_m": 2.9189827961208357
+  },
+  "fixed_20ms_delay": {
+    "pairs": 128,
+    "rms_m": 0.020544845513537167,
+    "max_m": 0.033810288051337546,
+    "median_m": 0.018150254327045923
+  },
+  "best_delay_s": 0.02,
+  "best_fit": {
+    "pairs": 128,
+    "rms_m": 0.020544845513537167,
+    "max_m": 0.033810288051337546,
+    "median_m": 0.018150254327045923
+  },
+  "other_aircraft_at_best_delay": {
+    "pairs": 128,
+    "rms_m": 1025.7616138379442,
+    "max_m": 1053.9173995002877,
+    "median_m": 1024.982121527303
+  }
+}

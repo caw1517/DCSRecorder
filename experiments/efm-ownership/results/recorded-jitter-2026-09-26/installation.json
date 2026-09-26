@@ -1,0 +1,9 @@
+{
+  "status": "Installed; DCS visual and native telemetry validation pending",
+  "dll": "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Probe\\bin\\HornetProbe.dll",
+  "sha256": "8997882E816F388FD719A4492B318B09678677AAEB94007B53B9B167D1A1A473",
+  "mission": "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\EFM-Probe-Hornet-recorded-flight.miz",
+  "recording_unchanged": true,
+  "rollback": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\recorded-jitter-2026-09-26\\rollback",
+  "installed_at": "2026-09-26T13:30:46.5837267-07:00"
+}

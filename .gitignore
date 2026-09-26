@@ -1,0 +1,21 @@
+/experiments/video-tools/
+/.publication/
+__pycache__/
+*.pyc
+# Generated native binaries, local mission packages, and proprietary image data.
+*.dll
+*.exe
+*.pdb
+*.obj
+*.lib
+*.exp
+*.bin
+*.miz
+*.zip
+# Keep authored result summaries; large raw runs and user media stay local.
+/experiments/efm-ownership/results/**/*.csv
+/experiments/efm-ownership/results/**/*.txt
+/experiments/efm-ownership/results/**/*.log
+/experiments/efm-ownership/results/**/*.jpg
+/experiments/efm-ownership/results/**/*.png
+/experiments/efm-ownership/results/**/*.mp4

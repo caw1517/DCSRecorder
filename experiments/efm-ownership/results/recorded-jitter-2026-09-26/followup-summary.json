@@ -1,0 +1,48 @@
+{
+  "position_correction_m": {
+    "mean": 0.01882526681359653,
+    "p95": 0.03229711137190622,
+    "max": 0.03890716894627759
+  },
+  "command_integration_error_m": {
+    "mean": 0.018785771117934665,
+    "p95": 0.03171921242065867,
+    "max": 0.03850897228746424
+  },
+  "velocity_overwrite_m_s": {
+    "mean": 0.0,
+    "p95": 0.0,
+    "max": 0.0
+  },
+  "nose_velocity_fit_m_s": {
+    "mean": 9.662332987778823,
+    "p95": 13.930227382997812,
+    "max": 14.000220129698608
+  },
+  "predicted_drift_residual_m": {
+    "mean": 0.1955400379509768,
+    "p95": 0.2927420227549772,
+    "max": 0.32785364832341
+  },
+  "step_hook": {
+    "samples": 1749,
+    "confirmed_samples": 1749,
+    "calls": 1849,
+    "applied": 1849
+  },
+  "session": 45780,
+  "status_counts": {
+    "captured": 1,
+    "called": 1940,
+    "released": 1
+  },
+  "release": [
+    {
+      "object_time": "43.8",
+      "step_hook_calls": "1940",
+      "step_hook_applied": "1940",
+      "step_hook_status": "step_hook_restored"
+    }
+  ],
+  "user_observation": "SO much better"
+}

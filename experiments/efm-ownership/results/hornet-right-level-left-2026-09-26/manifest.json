@@ -1,0 +1,21 @@
+{
+  "prototype": "Hornet right-level-left path; live validation pending",
+  "mission_filename": "EFM-Probe-Hornet-right-level-left-400KIAS.miz",
+  "dll_sha256": "8acdc44b9061b28b6f3926d85fbe7eb8855165122246467ddd8fa6df13add1a8",
+  "mission_sha256": "35ed69f8d5a4988106282ef33b33992c060ed09b1a9b7b03a97b1ff29e033074",
+  "speed_m_s": 225.0215739890135,
+  "nominal_kias": 400,
+  "turn_seconds": 35.9610855441821,
+  "straight_seconds": 10,
+  "first_turn_end_mission_seconds": 42.9610855441821,
+  "second_turn_start_mission_seconds": 52.9610855441821,
+  "second_turn_end_mission_seconds": 88.9221710883642,
+  "release_mission_seconds": 94.9221710883642,
+  "turn_degrees": 180,
+  "geometric_load_factor": 2.5,
+  "roll_in_seconds": 6,
+  "roll_out_seconds": 3,
+  "livery": "Blue Angels Jet Team",
+  "player_type": "FA-18C_hornet",
+  "playback_type": "DCSRecorder-Hornet-Probe"
+}

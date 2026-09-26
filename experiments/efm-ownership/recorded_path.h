@@ -1,0 +1,102 @@
+#pragma once
+#include "turn_path.h"
+#include <filesystem>
+#include <fstream>
+#include <string>
+
+// Recorded world-space samples. Translation aligns the first sample to the
+// captured aircraft; axes and recorded heading remain in the original frame.
+namespace recorded_path {
+using turn_path::Pose;
+using turn_path::Motion;
+using Quaternion=std::array<double,4>; // w,x,y,z; matrix columns are F,U,R
+inline double dot(const Quaternion& a,const Quaternion& b) {
+    double d=0;for(int i=0;i<4;++i)d+=a[i]*b[i];return d;
+}
+inline Quaternion slerp(Quaternion a,Quaternion b,double u) {
+    double d=dot(a,b);if(d<0) {for(auto& v:b)v=-v;d=-d;}
+    double x=1-u,y=u;
+    if(d<0.9995) {const double angle=std::acos(std::clamp(d,-1.0,1.0));
+        x=std::sin((1-u)*angle)/std::sin(angle);y=std::sin(u*angle)/std::sin(angle);}
+    Quaternion q{};for(int i=0;i<4;++i)q[i]=a[i]*x+b[i]*y;
+    const double n=std::sqrt(dot(q,q));for(auto& v:q)v/=n;return q;
+}
+inline Pose basis(const Quaternion& q) {
+    const double w=q[0],x=q[1],y=q[2],z=q[3];Pose p{};
+    p[0]=1-2*(y*y+z*z);p[1]=2*(x*y+w*z);p[2]=2*(x*z-w*y);
+    p[4]=2*(x*y-w*z);p[5]=1-2*(x*x+z*z);p[6]=2*(y*z+w*x);
+    p[8]=2*(x*z+w*y);p[9]=2*(y*z-w*x);p[10]=1-2*(x*x+y*y);p[15]=1;return p;
+}
+inline Quaternion quaternion(const Pose& p) {
+    double m[3][3]{};for(int i=0;i<3;++i)for(int j=0;j<3;++j)m[i][j]=p[j*4+i];
+    const double trace=m[0][0]+m[1][1]+m[2][2];Quaternion q{};
+    if(trace>0) {const double s=2*std::sqrt(1+trace);q={s/4,(m[2][1]-m[1][2])/s,(m[0][2]-m[2][0])/s,(m[1][0]-m[0][1])/s};}
+    else {int i=0;for(int j=1;j<3;++j)if(m[j][j]>m[i][i])i=j;
+        const int j=(i+1)%3,k=(i+2)%3;const double s=2*std::sqrt(1+m[i][i]-m[j][j]-m[k][k]);
+        q[0]=(m[k][j]-m[j][k])/s;q[i+1]=s/4;q[j+1]=(m[i][j]+m[j][i])/s;q[k+1]=(m[i][k]+m[k][i])/s;}
+    const double n=std::sqrt(dot(q,q));for(auto& v:q)v/=n;return q;
+}
+struct Sample { double t=0;std::array<double,3> p{},v{};Quaternion q{};double brake=0; };
+struct Path {
+    std::vector<Sample> samples;
+    std::array<double,3> translation{};
+    Quaternion initial_q{1,0,0,0};
+    double duration() const { return samples.empty()?0:samples.back().t; }
+    const char* load(const std::filesystem::path& filename) {
+        samples.clear();std::ifstream f(filename);std::string header;size_t n=0;
+        if(!(f>>header>>n) || header!="DCSREC_PLAYBACK_V1" || n<2 || n>100000) return "recording_header_rejected";
+        std::vector<Sample> loaded;loaded.reserve(n);
+        for(size_t i=0;i<n;++i) {
+            Sample s;f>>s.t;for(auto& v:s.p)f>>v;for(auto& v:s.q)f>>v;for(auto& v:s.v)f>>v;f>>s.brake;
+            if(!f || !std::isfinite(s.t) || !std::isfinite(s.brake))return "recording_sample_rejected";
+            for(double v:s.p)if(!std::isfinite(v))return "recording_sample_rejected";
+            for(double v:s.q)if(!std::isfinite(v))return "recording_sample_rejected";
+            double speed2=0;for(double v:s.v) {if(!std::isfinite(v))return "recording_sample_rejected";speed2+=v*v;}
+            if(s.p[1]<1000 || s.p[1]>5000 || speed2<70*70 || speed2>260*260 ||
+               std::abs(dot(s.q,s.q)-1)>0.001 || s.brake<0 || s.brake>1)return "recording_limits_rejected";
+            if(i==0 && s.t!=0)return "recording_clock_rejected";
+            if(i) {
+                const auto& prev=loaded.back();const double dt=s.t-prev.t;
+                if(!(dt>0 && dt<=0.15))return "recording_clock_rejected";
+                double d=dot(prev.q,s.q);if(d<0) {for(auto& v:s.q)v=-v;d=-d;}
+                if(2*std::acos(std::clamp(d,-1.0,1.0))/dt>0.9)return "recording_rotation_rejected";
+                double error2=0;for(int k=0;k<3;++k)error2+=std::pow(s.p[k]-prev.p[k]-dt*(s.v[k]+prev.v[k])/2,2);
+                if(error2>std::pow(std::max(0.5,dt*8),2))return "recording_discontinuity_rejected";
+            }
+            loaded.push_back(s);
+        }
+        std::string extra;if(f>>extra)return "recording_trailing_data_rejected";
+        if(loaded.back().t<5 || loaded.back().t>300)return "recording_duration_rejected";
+        samples=std::move(loaded);initial_q=samples.front().q;return "recording_loaded";
+    }
+    bool initialize(const Pose& initial,double /*measured_speed*/) {
+        if(samples.empty())return false;
+        initial_q=quaternion(initial);
+        if(2*std::acos(std::clamp(std::abs(dot(initial_q,samples.front().q)),0.0,1.0))>0.35)return false;
+        for(int k=0;k<3;++k)translation[k]=initial[12+k]-samples.front().p[k];
+        for(const auto& s:samples)if(s.p[1]+translation[1]<1000 || s.p[1]+translation[1]>5000)return false;
+        return true;
+    }
+    Sample at_sample(double t) const {
+        t=std::clamp(t,0.0,duration());
+        auto it=std::upper_bound(samples.begin(),samples.end(),t,[](double t,const Sample& s){return t<s.t;});
+        const size_t i=std::clamp<size_t>(it-samples.begin(),1,samples.size()-1)-1;
+        const auto& a=samples[i];const auto& b=samples[i+1];const double dt=b.t-a.t,u=(t-a.t)/dt;
+        Sample s;s.t=t;s.q=slerp(a.q,b.q,u);s.brake=a.brake+(b.brake-a.brake)*u;
+        for(int k=0;k<3;++k)s.p[k]=(2*u*u*u-3*u*u+1)*a.p[k]+(u*u*u-2*u*u+u)*dt*a.v[k]+
+            (-2*u*u*u+3*u*u)*b.p[k]+(u*u*u-u*u)*dt*b.v[k];
+        return s;
+    }
+    Pose at(double t) const {
+        auto s=at_sample(t);
+        // Two-second attitude acquisition; afterward the recorded attitude is exact.
+        if(t<2)s.q=slerp(initial_q,s.q,turn_path::smooth(t/2));
+        auto p=basis(s.q);for(int k=0;k<3;++k)p[12+k]=s.p[k]+translation[k];return p;
+    }
+    Motion motion_at(double t) const {
+        t=std::clamp(t,0.0,duration());const double lo=std::max(0.0,t-0.001),hi=std::min(duration(),t+0.001);
+        return turn_path::motion_between(at(lo),at(hi),at(t),hi-lo);
+    }
+    float brake_at(double t) const {return static_cast<float>(at_sample(t).brake);}
+};
+}

@@ -1,0 +1,17 @@
+{
+  "prototype": "User-validated Hornet baseline: clean exterior, 6s entry, 2.5g geometric 180-degree turn",
+  "dll_sha256": "7ca81dd728fb53b99fbc840c7158d0b21ac227b0cd20572c26f1ccf6410c05b3",
+  "mission_sha256": "32c38d63796880650e4fef6f5d0dfdddc15302014cf01b3cfea700872c16cbc0",
+  "speed_m_s": 225.0215739890135,
+  "nominal_kias": 400,
+  "turn_seconds": 35.9610855441821,
+  "release_mission_seconds": 48.9610855441821,
+  "turn_degrees": 180,
+  "geometric_load_factor": 2.5,
+  "roll_in_seconds": 6,
+  "roll_out_seconds": 3,
+  "livery": "Blue Angels Jet Team",
+  "player_type": "FA-18C_hornet",
+  "playback_type": "DCSRecorder-Hornet-Probe",
+  "validation": "User confirmed: That worked great. Engine state, sound, recording and layered playback remain unvalidated."
+}
