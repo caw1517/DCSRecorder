@@ -2,7 +2,7 @@
 
 Question: can an occupied stock Hornet wait at a fixed airborne position, accept F10 Start, run a short countdown, and be released approximately 150 feet behind a second aircraft without losing independent player control?
 
-**Status: prepared; live DCS result pending. This is not recorded playback and does not establish exact-start support.** The user selected this investigation in the confirmed workflow discussion. It preserves F10 start rather than substituting automatic start or asking the player to circle back.
+**Status: first live stock-Hornet staging run accepted on 26 September 2026. Recorded-playback integration and exact initial state remain unverified.** The user selected this investigation in the confirmed workflow discussion. It preserves F10 start rather than substituting automatic start or asking the player to circle back.
 
 ## Evidence behind the experiment
 
@@ -46,3 +46,22 @@ No universal flight fidelity tolerance is selected here. Inspect actual drift an
 ## Decision after the run
 
 If staging works, integrate it with an explicit recorded-playback start clock and exact initial pose/state, and revalidate the custom aircraft's activation/runtime identity and native motion guards. A passing stock-aircraft experiment alone cannot close the workflow or exact-start ticket. If it fails, retain the evidence and investigate the remaining pause/control bridge without changing the user's F10 requirement.
+
+## Accepted live staging result — 26 September 2026
+
+The user reported **"Complete and working"**. Telemetry from DCS **2.9.29.27468** corroborates the first stock-Hornet staging run:
+
+| Observation | Result |
+| --- | --- |
+| Held player position drift | 0.000 m across 691 samples, at logged precision |
+| Initial player/lead separation | 45.714467 m; target 45.72 m / 150 ft |
+| Countdown | 3.000 s to release request |
+| Additional mission-trigger delay | 0.450 s before actual release |
+| Lead removal | Exactly 10 simulation seconds after release |
+| Player telemetry after lead removal | 267 samples; mission continued |
+
+**Decision:** Active Pause, F10 countdown and late activation are a demonstrated candidate for the next recorded-playback integration experiment. Anchor the playback clock to actual release/activation, not the countdown deadline.
+
+**Remaining limitation:** the stock lead spawned approximately 2.383 m below the recorded starting altitude. Its level attitude and zero vertical velocity also do not reproduce the recorded initial state. Native-controller integration must restore the exact first-sample pose, velocity and supported aircraft state before advancing playback.
+
+Only one staging run is established. Longer waits, mission restarts, multiple frame rates, recorded-controller synchronization and independent recording continuation still need validation. The full workflow and exact-start tickets remain open. Raw logs and recordings remain local.
