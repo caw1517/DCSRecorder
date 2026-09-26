@@ -16,6 +16,42 @@ historical experiment instructions do not override them.
   remaining physics requirements prevent a finished-product feasibility claim.
 - Voice calls synchronized to the flight belong in the future roadmap. Their
   capture/playback interfaces and attainable timing accuracy need investigation.
+- A chosen playback start must reproduce its original location, heading,
+  attitude, movement and supported aircraft state together. Ground starts from
+  a specific parking/demo spot, including after engine startup, are an explicit
+  requirement. Current airborne acquisition/translation is a prototype convenience.
+
+## Companion application and exact starts
+
+Proposed workflow: fly and record in DCS, select a saved take in a companion app,
+generate a playback mission, then load it in DCS. The existing extraction,
+validation and mission tools provide a starting point; a finished app does not
+exist. Issue #5 should resolve the app's scope and division of responsibilities
+before choosing a UI/framework. The in-DCS component still samples and controls
+aircraft; the external app manages takes and prepares files/missions.
+
+Exact start means location and state at **the same recorded moment**: for example,
+the original parking spot after engines are running, with matching gear, flaps,
+canopy, brake, lights and supported engine/animation values. Save an initial state
+snapshot, not only subsequent changes. If selecting a later timestamp is offered,
+reconstruct its state too. Initialize and hold the state until playback starts,
+without spending the opening seconds sliding or blending into alignment. Verify
+original mission/terrain context, parking/contact placement and timing. Exact
+cockpit-system restoration and engine internals are distinct from the external
+state we can actually observe/control; capability gaps must remain explicit.
+
+The current five-second lead-in, two-second attitude acquisition, capture-relative
+translation and airborne-only guards cannot satisfy ground starts. Coordinate
+exact-start work with #6 state fidelity, #7 ground transitions and #3 physics.
+Relocating playback could be a separate deliberate mode; preserving the original
+start is the baseline requirement.
+
+Cross-aircraft ambition is one reusable motion controller plus tested setup and
+state mappings for each type. The current Hornet registration is custom-built
+from installed assets. Automatically switching between F/A-18C, F-16 and a chosen
+F-15 variant is not implemented or validated. Save precise module/type/livery
+identity and reject unsupported combinations rather than substituting. This
+belongs to #6 and #8 as support grows.
 
 ## Sequence and completion gates
 
@@ -40,6 +76,7 @@ Completed: [independent control #2](https://github.com/caw1517/DCSRecorder/issue
 and [initial proof of concept #4](https://github.com/caw1517/DCSRecorder/issues/4).
 
 1. [Reliable single-aircraft workflow #5](https://github.com/caw1517/DCSRecorder/issues/5).
+   Plan its start contract with [exact position and state #11](https://github.com/caw1517/DCSRecorder/issues/11).
 2. [Visual and engine state #6](https://github.com/caw1517/DCSRecorder/issues/6).
 3. [Flight envelope and takeoff/landing #7](https://github.com/caw1517/DCSRecorder/issues/7),
    with [essential physical interactions #3](https://github.com/caw1517/DCSRecorder/issues/3).

@@ -32,6 +32,21 @@ before adding recording. We then replaced that invented path with a real take.
 Playback does not need to guess the original throttle or aerodynamic forces to
 reproduce the measured movement. Engine appearance and sound are separate work.
 
+The mod registers a separate playback aircraft using a locally prepared aircraft
+definition and references to the installed Hornet model/textures/livery. Your
+stock flyable Hornet and its normal flight model remain separate. Although the
+early experiment used the external-flight-model (EFM) SDK, ordinary player EFM
+callbacks did not run for the unoccupied playback object. Its demonstrated motion
+comes from our recorded-path controller and native integration, not a newly
+written Hornet aerodynamic model. Other aircraft require their own validated
+registration, appearance/state mappings and compatibility checks.
+
+A companion app to select takes and generate missions is a proposed workflow;
+today's local preparation tools are its starting point. DCS still needs the mod
+to execute playback. Exact original starting position plus matching aircraft
+state, including a ground start after engines are running, is a requirement still
+to implement. See the roadmap for the current acquisition/placement limitations.
+
 The main obstacle was that DCS was also changing the playback aircraft's motion.
 Stopping all native movement caused jumps. Letting it move with the recorded
 speed and rotation worked better, but DCS still redirected velocity along the
