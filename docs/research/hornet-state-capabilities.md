@@ -5,7 +5,10 @@ Source baseline: `ee3b1d34cdba660b17f5ce3ae67310cdd73f9c5a`.
 Installed DCS: `2.9.29.27468`, verified in `D:/DCS World/autoupdate.cfg`.
 The matrix began as an interface inspection. A subsequent
 [live stock-aircraft capture](../../experiments/efm-ownership/results/exterior-state-2026-09-27/README.md)
-confirmed readable responses for the selected exterior channels. No new playback fidelity result is claimed.
+confirmed readable responses for the selected exterior channels. The subsequent
+[isolated stabilator replay](../../experiments/efm-ownership/results/stabilator-animation-2026-09-27/README.md)
+passed visual review and retained-trace checks. The matrix below describes the
+main recording/playback pipeline; the isolated actuator is not yet integrated.
 
 ## Result
 
@@ -114,8 +117,11 @@ overwrites occur on some visually accepted channels too. These prototype results
 do not change the production capability claims or establish effects/sound support.
 The [post-physics comparison](../../experiments/efm-ownership/results/stabilator-poststep-2026-09-27/README.md)
 also failed visibly and numerically. Installed-build analysis found a later update
-that writes both stabilators. A separate post-animation experiment is installed;
-its offline checks pass, with live retention/rendering still pending.
+that writes both stabilators. The separate post-animation experiment then
+[passed live](../../experiments/efm-ownership/results/stabilator-animation-2026-09-27/README.md):
+the user accepted the appearance and both channels retained the requested values
+in later mission reads. Interrupted destruction released ownership correctly;
+automatic completion/hold remains for the integrated test.
 The parent visual/engine-state ticket remains open. The user selected exterior
 animation first; the proposed recording contract remains a proposal. The
 [read-only diagnostic prototype](../../experiments/efm-ownership/state-prototype/README.md)
@@ -123,7 +129,7 @@ collects the stock-aircraft observations needed before playback implementation.
 
 ## Confirmed remaining exterior scope
 
-Fix stabilator retention first, then integrate the verified surface group with
+With the stabilator timing repair verified, integrate the surface group with
 the recording clock. Preserve these user-requested requirements for subsequent
 groups: suspension compression and wheel spin (ground/touchdown tests), separate
 left/right nozzle motion with engine/afterburner appearance and sound, canopy

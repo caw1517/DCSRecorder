@@ -173,7 +173,11 @@ identify a later update that writes both channels.
 `DCSRecorder-Hornet-State-PostAnimation` registration. Restart DCS and run
 **DCSRecorder-Stabilator-Animation** from Missions, with the same F10/F2 flow.
 Only the stabilator timing changes. `post-animation-*.csv` records values at the
-new boundary; other trace files retain their format. Live success remains pending.
+new boundary; other trace files retain their format. The subsequent
+[live result passed](../results/stabilator-animation-2026-09-27/README.md): the user
+accepted the appearance and both stabilators retained the requested values through
+later mission reads. The run stopped before completion/hold; interrupted cleanup
+was observed. Integration with normal recording and motion playback is next.
 
 The retention comparator defaults to the last complete set of trace rows for a
 mission run, including interrupted runs. Use `--run 1` for the first. Native and
