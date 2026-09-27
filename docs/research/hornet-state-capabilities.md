@@ -164,3 +164,12 @@ validators pass; eight protected existing files match their pre-install hashes.
 Live capture, left/right nozzle mapping, effects and audible comparison remain
 pending. The production recording schema and accepted playback actuator are
 unchanged.
+
+The [first live engine diagnostic](../../experiments/efm-ownership/results/engine-capture-2026-09-27/README.md)
+retained 1,745 mission samples and all phase markers. Arguments 89/90 respond
+asymmetrically, and 28/29 respond in afterburner-marked phases; their exact visual
+semantics remain candidates. Every Export reading was rejected by an identity
+assertion before engine measurement. The corrected observation hook is installed:
+it records actual identity fields and available engine values, while the analyzer
+continues to flag unverified identity. A short baseline recheck is next; RPM,
+temperature, fuel-flow availability and clock alignment are not yet live-verified.

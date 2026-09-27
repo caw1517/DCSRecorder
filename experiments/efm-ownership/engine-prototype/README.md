@@ -87,7 +87,8 @@ and hook. It checks independent synthetic left/right readings, initial state,
 pause and stop, plus unavailable API, wrong ownship and delayed-reading modes.
 It does not validate actual DCS Export availability or visual mappings. Run with
 the installed luae.exe, passing this directory, the generated `mission` file,
-an output log path, and optionally `unavailable`, `identity` or `stale`.
+an output log path, and optionally `unavailable`, `identity`, `missing_name`,
+`missing_self` or `stale`.
 
 ## Prepared checkpoint — 27 September 2026
 
@@ -102,3 +103,18 @@ paired samples over six seconds with a known 4 ms synthetic delivery delay;
 separate left/right values are retained. Unavailable engine data, wrong ownship,
 one-second delivery delay, missing rows and duplicates are rejected by the
 analysis gate. These are offline checks only. Live observation remains pending.
+
+## First live result and corrected observation hook
+
+The [first capture](../results/engine-capture-2026-09-27/README.md) retained 1,745
+mission samples and all phase markers, but the original identity assertion
+rejected every Export reading before measuring engines. It did not record which
+identity field differed, so the actual runtime cause remains unknown.
+
+The installed correction records actual identities (empty fields for unavailable
+names) and retains available measurements even if the name differs. The analyzer
+still flags uncertain identity; raw observations do not imply verified alignment.
+It also summarizes mission channels when Export readings are absent.
+
+Next run only a ten-second baseline capture after restarting DCS. Check identity
+and engine-feed availability before repeating the full throttle sequence.

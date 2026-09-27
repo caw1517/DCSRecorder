@@ -9,16 +9,26 @@ local function field(info,group,side)
     assert(type(info[group])=='table','unavailable_'..group)
     return number(info[group][side])
 end
+local function text(v)
+    -- Empty means unavailable, not a substituted identity. Quote observed text.
+    return '"'..tostring(v or ''):sub(1,200):gsub('[\r\n]',' '):gsub('"','""')..'"'
+end
 local function sample(take,seq)
     assert(type(Export)=='table','export_api_unavailable')
     local start=Export.LoGetModelTime()
     local self=Export.LoGetSelfData()
-    assert(self and self.Name=='FA-18C_hornet' and self.UnitName=='Observer','ownship_identity_mismatch')
     local id=Export.LoGetPlayerPlaneId()
+    local observed=table.concat({text(type(self)),text(id),text(self and self.Name),text(self and self.UnitName)},',')
+    if active.identity~=observed then
+        emit('IDENTITY,'..take..','..seq..','..observed);active.identity=observed
+    end
+    -- This is an observation probe: retain raw identity beside engine readings.
+    -- The analyzer gates alignment; unexpected/absent names must not discard data.
+    assert(type(self)=='table','ownship_data_unavailable')
     local info=Export.LoGetEngineInfo()
     assert(type(info)=='table','engine_info_unavailable')
     local p=assert(self.Position,'position_unavailable')
-    local row={number(start),number(id),self.Name,self.UnitName,number(p.x),number(p.y),number(p.z)}
+    local row={number(start),number(id),text(self.Name),text(self.UnitName),number(p.x),number(p.y),number(p.z)}
     for _,group in ipairs({'RPM','Temperature','FuelConsumption'}) do
         for _,side in ipairs({'left','right'}) do row[#row+1]=field(info,group,side) end
     end

@@ -16,7 +16,12 @@ local gui={assert=assert,type=type,tostring=tostring,tonumber=tonumber,pcall=pca
     Export={
         LoGetModelTime=function()return now+(mode=='stale' and 1 or 0.004) end,
         LoGetPlayerPlaneId=function()return 42 end,
-        LoGetSelfData=function()return {Name='FA-18C_hornet',UnitName=mode=='identity' and 'Other' or 'Observer',Position={x=now*200,y=2000,z=0}} end,
+        LoGetSelfData=function()
+            if mode=='missing_self' then return nil end
+            local result={Name='FA-18C_hornet',UnitName=mode=='identity' and 'Other' or 'Observer',Position={x=now*200,y=2000,z=0}}
+            if mode=='missing_name' then result.UnitName=nil end
+            return result
+        end,
         LoGetEngineInfo=function()
             engine_calls=engine_calls+1
             if mode=='unavailable' then return nil end

@@ -23,7 +23,7 @@ def analyze(path):
             row=next(csv.reader([line.split(prefix,1)[1]]))
             event=row[0]
             if kind=='MISSION' and event=='BEGIN':
-                current={'take':row[1],'mission_id':int(row[3]),'mission':[], 'export':{},'issues':[], 'marks':[]}
+                current={'take':row[1],'mission_id':int(row[3]),'mission':[], 'export':{},'issues':[], 'marks':[], 'identities':[]}
                 takes.append(current)
             if current is None or event=='READY':
                 continue
@@ -34,6 +34,9 @@ def analyze(path):
                 current['channels']=list(map(int,row[2:]))
             elif kind=='MISSION' and event=='MARK':
                 current['marks'].append({'time':float(row[2]),'segment':row[3]})
+            elif kind=='EXPORT' and event=='IDENTITY':
+                current['identities'].append({'seq':int(row[2]),'self_type':row[3],
+                    'export_id':row[4],'aircraft_type':row[5],'unit_name':row[6]})
             elif event in ('ERROR','UNAVAILABLE'):
                 current['issues'].append(','.join(row))
             elif event=='DATA':
@@ -65,6 +68,9 @@ def analyze(path):
             if previous is not None and row['t']<=previous: raise ValueError('Non-monotonic mission clock')
             previous=row['t']
             if not all(math.isfinite(v) for v in [row['t'],*row['position'],*row['args']]): raise ValueError('Nonfinite mission sample')
+            group=groups.setdefault(row['segment'],{})
+            for name,value in zip([f'arg_{i}' for i in take['channels']],row['args']):
+                bounds=group.setdefault(name,[value,value]);bounds[0]=min(bounds[0],value);bounds[1]=max(bounds[1],value)
             obs=exports.get(row['seq'])
             if obs is None: continue
             if obs['type']!='FA-18C_hornet' or obs['name']!='Observer': issues.append('Ownship identity mismatch')
@@ -72,8 +78,7 @@ def analyze(path):
             if not all(math.isfinite(v) for v in values): raise ValueError('Nonfinite Export sample')
             ids.add(obs['id']);delays.append(obs['t']-row['t']);spans.append(obs['end']-obs['t'])
             separations.append(math.dist(row['position'],obs['position']))
-            group=groups.setdefault(row['segment'],{})
-            for name,value in zip([f'arg_{i}' for i in take['channels']]+ENGINE,row['args']+obs['engine']):
+            for name,value in zip(ENGINE,obs['engine']):
                 bounds=group.setdefault(name,[value,value]);bounds[0]=min(bounds[0],value);bounds[1]=max(bounds[1],value)
         # These are screening bounds for this diagnostic, not product guarantees.
         timely=bool(delays) and min(delays)>=-0.02 and max(delays)<=0.1 and min(spans)>=0 and max(spans)<=0.02
@@ -85,7 +90,7 @@ def analyze(path):
             'export_read_span_seconds':[min(spans),max(spans)] if spans else None,
             'max_position_separation_m':max(separations) if separations else None,
             'alignment_screen_passes':complete and not issues and timely and identity,
-            'markers':take['marks'],'segments':groups})
+            'markers':take['marks'],'segments':groups,'observed_identities':take['identities']})
     return results
 
 
