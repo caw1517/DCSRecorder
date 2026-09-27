@@ -1,4 +1,4 @@
-# Recorded native core RPM test — live result pending
+# Recorded native core RPM test — consumed, partial audible response
 
 Question: does substituting the recorded core RPM in the native aircraft getter
 reach DCS's normal sound renderer, and does audible engine pitch follow it?
@@ -75,4 +75,53 @@ If Sound.dll consumes the recorded values but sound still stays idle-like, that
 rejects core RPM alone as a sufficient explanation; investigate other native
 inputs next. If no Sound.dll calls reach the getter, the audio consumer path
 remains unresolved. A pitch change supports this RPM path, but does not validate
-afterburner sound or full engine-state fidelity. No live verdict exists yet.
+afterburner sound or full engine-state fidelity.
+
+## Live result
+
+The user reports: sounds changed a little, no afterburner, and the result was
+less aggressive than the actual aircraft at those power settings. **Core RPM
+alone is insufficient for the required sound fidelity.** This is partial audible
+response, not acceptance of engine sound or afterburner playback.
+
+Saved this run's `dcs.log`, `calls-46668-338942953.csv` and
+`events-46668-338942953.csv` under the ignored `live-run/` directory. Mission
+completion is recorded at 59.276 s after activation at 4.326 s. The hook restored
+at 56.226 s, before destruction at 59.266 s; no overflow/rejection event appears.
+
+`analyze_rpm_live.py <calls.csv> <events.csv> <recorded-rpm.txt> <summary.json>`
+passes on the retained run. It found 63,228 getter observations, including 33,735
+from Sound.dll. All **24,450 overridden Sound.dll core-RPM calls** matched the
+recorded interpolation to within **5.78e-8** normalized RPM, using the observed
+20 ms publication-to-drain delay. The test checks that delay against the logged
+SDK steps; drain timestamps remain distinct from precise call timestamps.
+
+| Sound consumer return address | Input | Live observation |
+| --- | --- | --- |
+| Sound.dll + 0x134c65 | Engine 1/2 core RPM | 2,445 replay calls per engine; 0.692940–0.999716 returned |
+| Sound.dll + 0x134c92 | Engine 1/2 fan RPM | 2,595 calls per engine; original 0–0.379916 forwarded |
+| Sound.dll + 0x13dcc3 | Engine 1/2 core RPM | 9,780 replay calls per engine; recorded values returned |
+| Sound.dll + 0x130d3f | Engine index 0 | Original zero forwarded; not evidence that engines 1/2 stopped |
+
+The exported `Sound::JetEngineSounder::update` starts at Sound.dll RVA 0x134be0.
+Its disassembly independently places the observed core and fan calls in that
+routine. It also reads aircraft slots 0xf0 and 0xe0, as well as another parameter
+at 0xf8. In this AI aircraft's retained vtable, 0xf0 forwards to 0xe0; it is not
+evidence of a separate afterburner boolean. The routine uses the fan result in
+several subsequent pitch/gain calculations, falling back to core RPM in some
+places only when fan RPM equals zero. It also uses the thrust-related result in
+gain calculations. Raw disassembly remains local.
+
+This confirms the recording reached actual native sound consumers. It rules out
+missing RPM delivery as the explanation for this run's weak response. The fan
+and power inputs still describe the independently simulated playback aircraft;
+they do not describe the original recorded power setting. They are the next
+inputs to investigate, without claiming either is the sole cause. Exact
+afterburner gating and the real aircraft's fan/thrust mapping remain unverified.
+
+Next: establish a capture path for the real aircraft's native fan and power/AB
+inputs, then replay measured values through validated getters. The original
+capture contains RPM, temperature, fuel flow and appearance, but no established
+fan-RPM/thrust channels. Do not invent those values from RPM or treat a visible
+flame argument as a calibrated thrust value. No replacement module or mission
+was installed while collecting and analyzing this result.

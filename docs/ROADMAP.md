@@ -90,8 +90,12 @@ state. A separate **DCSRecorder-Native-RPM-Playback.miz** is now installed for t
 first native getter replay: 3 seconds original RPM, 48.899 seconds of recorded
 core RPM, then 3 seconds after restoration. It retains DCS's stock renderer and
 logs actual callers and returned values. Offline boundary, package and mission
-checks pass; live native consumption and audible behavior remain unverified.
-Only core RPM is substituted; thrust, fan RPM and afterburner state remain open.
+checks pass. The first live run confirms 24,450 Sound.dll core-RPM overrides
+matching the recording and clean restoration. The user heard a slight change,
+but no afterburner and less intensity than the real aircraft. Core RPM delivery
+is established; sound fidelity is not accepted. Native sound also consumes fan
+RPM and thrust-related inputs. Establish capture of the real aircraft's missing
+fan and power/AB inputs before replaying them; do not infer thrust from RPM alone.
 See the [native RPM test](../experiments/efm-ownership/results/native-rpm-2026-09-27/README.md) and
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
 

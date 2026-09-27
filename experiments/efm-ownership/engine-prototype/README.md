@@ -264,7 +264,7 @@ RPM exists in the original capture, but has not been driven through the native
 engine interface. Investigate that interface while retaining DCS's normal sound
 renderer; do not build a production sample mixer from these diagnostic scripts.
 
-## Recorded RPM through the native getter (live result pending)
+## Recorded RPM through the native getter (partial audible response)
 
 `prepare_playback.py <capture.log> <new-package> --rpm-probe` prepares the separate
 **DCSRecorder-Native-RPM-Playback.miz** and **DCSRecorder-Hornet-Native-RPM** module.
@@ -296,3 +296,12 @@ hashes and the installed Sound.dll call-site guard. The existing
 `check_sound_layout.py` checks the remaining guards against retained snapshots.
 These checks do not establish audible fidelity. See the
 [native RPM test record](../results/native-rpm-2026-09-27/README.md).
+
+The first live run confirmed 24,450 native Sound.dll core-RPM overrides matching
+the tape within 5.78e-8, followed by clean restoration. The user heard a slight
+change, but no afterburner and less intensity than the real aircraft. Core-RPM
+delivery is demonstrated; full sound fidelity is not. Native sound also consumed
+unchanged fan RPM and reads thrust-related inputs. Next establish measured fan
+and power/AB capture, rather than deriving those from RPM or draw arguments.
+`analyze_rpm_live.py <calls> <events> <tape> <output-json>` checks the retained run
+independently of its listening verdict.
