@@ -86,7 +86,13 @@ heard no beeps and was uncertain about other changes; audibility is not accepted
 The user reaffirmed recording/replaying engine parameters with DCS deriving the
 sound. Sample-routing tests are set aside; investigate the native engine-parameter
 interface using the existing RPM capture and independently validated afterburner
-state. Recorded RPM has not yet been replayed through that interface. See the
+state. A separate **DCSRecorder-Native-RPM-Playback.miz** is now installed for the
+first native getter replay: 3 seconds original RPM, 48.899 seconds of recorded
+core RPM, then 3 seconds after restoration. It retains DCS's stock renderer and
+logs actual callers and returned values. Offline boundary, package and mission
+checks pass; live native consumption and audible behavior remain unverified.
+Only core RPM is substituted; thrust, fan RPM and afterburner state remain open.
+See the [native RPM test](../experiments/efm-ownership/results/native-rpm-2026-09-27/README.md) and
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
 
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the

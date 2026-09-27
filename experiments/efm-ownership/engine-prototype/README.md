@@ -263,3 +263,36 @@ DCS-derived audio**; further sample-routing diagnostics are set aside. Recorded
 RPM exists in the original capture, but has not been driven through the native
 engine interface. Investigate that interface while retaining DCS's normal sound
 renderer; do not build a production sample mixer from these diagnostic scripts.
+
+## Recorded RPM through the native getter (live result pending)
+
+`prepare_playback.py <capture.log> <new-package> --rpm-probe` prepares the separate
+**DCSRecorder-Native-RPM-Playback.miz** and **DCSRecorder-Hornet-Native-RPM** module.
+The stock aircraft descriptor and DCS sound renderer remain in use. There are
+no custom sound scripts, sound definitions or wave assets in this module.
+
+F10 > **Native RPM playback** > **Start recorded RPM test**, then F2 to the lead.
+It forwards original RPM for 3 seconds, returns the captured left/right core RPM
+for 48.899 seconds, restores the original getter for 3 seconds, then removes the
+lead. The candidate conversion is Export RPM percentage divided by 100. That
+mapping and audible behavior still require live validation. Fan RPM, thrust,
+afterburner state, physical engine simulation, captured appearance and recorded
+motion are not replayed by this bounded test; the lead follows its AI route.
+
+`rpm_hook.h` replaces only one aircraft's core-RPM virtual getter using an owned
+copy of its table; all other slots and unsupported getter arguments forward to
+their original functions. Version, identity, table and instruction guards must
+pass before installation. This is private access for DCS 2.9.29.27468 only.
+`rpm_playback.cpp` records native caller module/address, engine index, core/fan
+selection, original and returned values under `bin/rpm-logs`. `drain_time` is the
+SDK clock when buffered calls are written, not the exact native call timestamp.
+Lifecycle events record baseline/replay/restoration. Native sound consumption
+and the user's listening result must be assessed separately.
+
+Checks: CTest `native_rpm_boundary` and `native_rpm_mission`;
+`rpm_module_check <packaged-DLL>` for actual DLL rejection of a non-DCS object;
+`check_rpm_package.py <package> <capture>` for capture equality, stock descriptor,
+hashes and the installed Sound.dll call-site guard. The existing
+`check_sound_layout.py` checks the remaining guards against retained snapshots.
+These checks do not establish audible fidelity. See the
+[native RPM test record](../results/native-rpm-2026-09-27/README.md).

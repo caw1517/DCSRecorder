@@ -1,0 +1,4 @@
+# Keep game binaries, captures, generated packages and raw logs local.
+*
+!.gitignore
+!README.md
