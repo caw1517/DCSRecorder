@@ -29,6 +29,9 @@ milestone, not the full one-aircraft product milestone.
 - Reproduce measured flight motion rather than guessing pilot inputs.
 - Zero wind remains the supported baseline; wind compensation is not a current gate.
 - Preserve original recordings and original placement by default.
+- Place generated missions directly in the user's `Saved Games/DCS/Missions`
+  folder. This includes diagnostic missions; retain existing files and use a new
+  filename when needed. The user confirmed this preference after the exterior-state diagnostic.
 - Full ground-to-ground demonstrations are required eventually: stationary hot
   start, taxi, takeoff, 250–500 ft low passes, hard turns, approach, touchdown and
   rollout. The requested 7.5-G / 350-knot turn is an acceptance target. Artificial

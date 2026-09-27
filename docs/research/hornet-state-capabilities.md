@@ -3,7 +3,9 @@
 Inspected 27 September 2026 UTC for [Complete single-aircraft visual and engine-state fidelity](https://github.com/caw1517/DCSRecorder/issues/6).
 Source baseline: `ee3b1d34cdba660b17f5ce3ae67310cdd73f9c5a`.
 Installed DCS: `2.9.29.27468`, verified in `D:/DCS World/autoupdate.cfg`.
-This is an interface inspection and proposed experiment, not a live fidelity result.
+The matrix began as an interface inspection. A subsequent
+[live stock-aircraft capture](../../experiments/efm-ownership/results/exterior-state-2026-09-27/README.md)
+confirmed readable responses for the selected exterior channels. No new playback fidelity result is claimed.
 
 ## Result
 
@@ -95,10 +97,15 @@ the existing ground-state and flight-envelope tickets.
 - Keep playback state mappings specific to tested aircraft/module variants.
   Reuse motion playback without claiming untested aircraft support.
 
-## Remaining gate
+## Live capture and remaining gate
 
-The capability matrix is complete as a static inspection. No new live run,
-channel replay implementation, effect/sound proof or user acceptance is claimed.
+The user completed the exterior diagnostic: 2,612 consecutive finite samples
+over 130.55 seconds, all six control markers, 20 Hz cadence and explicit stop.
+The [result](../../experiments/efm-ownership/results/exterior-state-2026-09-27/README.md)
+supports readable gear/flap/surface/brake channels. Coupled motion and negative
+flap values require per-channel recorded values, not reconstructed pilot inputs
+or blanket 0..1 clamping. The matrix's playback-status columns remain unchanged.
+No channel replay implementation or effect/sound proof is claimed.
 The parent visual/engine-state ticket remains open. The user selected exterior
 animation first; the proposed recording contract remains a proposal. The
 [read-only diagnostic prototype](../../experiments/efm-ownership/state-prototype/README.md)

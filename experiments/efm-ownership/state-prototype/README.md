@@ -22,6 +22,10 @@ Use a fresh output directory each time. Generated mission content and installed
 DCS assets stay local. The builder uses the existing mission/route/configuration
 validators and refuses a different installed DCS build.
 
+The user subsequently requested direct placement of generated missions in
+`Saved Games/DCS/Missions`. After preparing a mission, copy it there without
+overwriting an existing different mission. The builder itself still only packages.
+
 ## One live observation
 
 1. Load `DCSRecorder-Exterior-State-Diagnostic.miz` from the generated output
@@ -59,3 +63,10 @@ Next, compare verified source channels against an isolated playback writer's
 requested values, immediate and next-step readbacks, and visible behavior.
 Initial-state alignment, pause/restart, motion and hook restoration remain gates.
 Do not close the fidelity ticket on the basis of this capture-only diagnostic.
+
+## Completed observation
+
+The [first live result](../results/exterior-state-2026-09-27/README.md) contains
+2,612 complete samples across all marked control groups. `analyze.py <log> <output>`
+checks the single-take protocol and produces a CSV plus per-segment ranges.
+It does not infer visual identity, full valid limits or playback support.
