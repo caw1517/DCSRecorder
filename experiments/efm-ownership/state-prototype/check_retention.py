@@ -9,12 +9,29 @@ from pathlib import Path
 
 CHANNELS = [0, 3, 5, *range(9, 19), 21]
 
-def analyze(trace, logfile):
+def analyze(trace, logfile, run=-1):
+    # Mission restarts reuse object IDs and elapsed clocks. Never combine runs.
+    native_runs = []
+    with trace.open(newline='') as stream:
+        for row in csv.DictReader(stream):
+            if int(row['call']) == 1 and int(row['arg']) == CHANNELS[0]:
+                native_runs.append([])
+            assert native_runs, 'Native trace starts mid-run'
+            native_runs[-1].append(row)
+    mission_runs = []
+    for line in logfile.read_text(encoding='utf-8', errors='replace').splitlines():
+        if 'DCSSTATE_PLAYBACK,BEGIN,' in line:
+            mission_runs.append([])
+        if 'DCSSTATE_PLAYBACK,DATA,' in line:
+            assert mission_runs, 'Mission trace starts mid-run'
+            mission_runs[-1].append(line)
+    assert len(native_runs) == len(mission_runs), 'Native/mission run counts differ; provide matching logs'
+    index = len(native_runs)-1 if run == -1 else run-1
+    assert 0 <= index < len(native_runs), 'Requested run unavailable'
     frames = {}
     immediate = {c: [] for c in CHANNELS}
     retention = {c: [] for c in CHANNELS}
-    with trace.open(newline='') as stream:
-        for row in csv.DictReader(stream):
+    for row in native_runs[index]:
             c = int(row['arg'])
             t = float(row['elapsed'])
             requested = float(row['requested'])
@@ -26,9 +43,7 @@ def analyze(trace, logfile):
     assert times and all(set(values) == set(CHANNELS) for values in frames.values()), 'Incomplete native frame'
     observed = {c: [] for c in CHANNELS}
     pitch = {c: {'requested': [], 'observed': []} for c in (15, 16)}
-    for line in logfile.read_text(encoding='utf-8', errors='replace').splitlines():
-        if 'DCSSTATE_PLAYBACK,DATA,' not in line:
-            continue
+    for line in mission_runs[index]:
         row = next(csv.reader([line.split('DCSSTATE_PLAYBACK,DATA,', 1)[1]]))
         assert len(row) == 3 + len(CHANNELS), 'Malformed mission row'
         elapsed = float(row[1])
@@ -48,12 +63,12 @@ def analyze(trace, logfile):
         assert values, 'Missing observations'
         return {'mean': statistics.mean(values), 'max': max(values),
                 'p95': sorted(values)[int((len(values)-1)*0.95)]}
-    summary = {'native_frames': len(times), 'mission_samples': len(observed[15]), 'channels': {}}
+    summary = {'run': index+1, 'runs': len(native_runs), 'native_frames': len(times), 'mission_samples': len(observed[15]), 'channels': {}}
     for c in CHANNELS:
         summary['channels'][str(c)] = {'immediate': stats(immediate[c]),
                                      'next_callback': stats(retention[c]),
                                      'mission': stats(observed[c])}
-    summary['pitch_ranges'] = {str(c): {key: [min(values), max(values)] for key, values in data.items()}
+    summary['pitch_ranges'] = {str(c): {key: [min(values), max(values)] if values else None for key, values in data.items()}
                                for c, data in pitch.items()}
     return summary
 
@@ -63,8 +78,10 @@ if __name__ == '__main__':
     parser.add_argument('logfile', type=Path)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--assert-stabilators', action='store_true')
+    parser.add_argument('--run', type=int, default=-1, help='1-based mission run; default last')
     args = parser.parse_args()
-    summary = analyze(args.trace, args.logfile)
+    summary = analyze(args.trace, args.logfile, args.run)
+    print(f"Run {summary['run']} of {summary['runs']}")
     print('arg | immediate max | next callback MAE | mission MAE | mission p95')
     for c, data in summary['channels'].items():
         print(f"{c:>3} | {data['immediate']['max']:.6f} | {data['next_callback']['mean']:.6f} | {data['mission']['mean']:.6f} | {data['mission']['p95']:.6f}")

@@ -112,6 +112,10 @@ no travel. [Live evidence and the timing experiment](../../experiments/efm-owner
 show exact immediate writes followed by overwritten stabilator values. Smaller
 overwrites occur on some visually accepted channels too. These prototype results
 do not change the production capability claims or establish effects/sound support.
+The [post-physics comparison](../../experiments/efm-ownership/results/stabilator-poststep-2026-09-27/README.md)
+also failed visibly and numerically. Installed-build analysis found a later update
+that writes both stabilators. A separate post-animation experiment is installed;
+its offline checks pass, with live retention/rendering still pending.
 The parent visual/engine-state ticket remains open. The user selected exterior
 animation first; the proposed recording contract remains a proposal. The
 [read-only diagnostic prototype](../../experiments/efm-ownership/state-prototype/README.md)

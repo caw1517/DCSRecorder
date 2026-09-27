@@ -162,3 +162,19 @@ Let the lead disappear at completion, then leave DCS open for collection.
 later reads against actual requested values. Its red baseline is preserved in
 the result folder. Passing this numeric diagnostic must be accompanied by visual
 review and a successful hook-restoration event before calling the repair complete.
+
+### Current test: after the native animation update
+
+The post-physics test above **failed live**: the stabilators still jittered.
+[Video/trace findings and installed-build call order](../results/stabilator-poststep-2026-09-27/README.md)
+identify a later update that writes both channels.
+
+`prepare_playback.py ... --post-animation` builds the package for the separate
+`DCSRecorder-Hornet-State-PostAnimation` registration. Restart DCS and run
+**DCSRecorder-Stabilator-Animation** from Missions, with the same F10/F2 flow.
+Only the stabilator timing changes. `post-animation-*.csv` records values at the
+new boundary; other trace files retain their format. Live success remains pending.
+
+The retention comparator defaults to the last complete set of trace rows for a
+mission run, including interrupted runs. Use `--run 1` for the first. Native and
+mission run counts must match; elapsed-clock collisions are never merged.

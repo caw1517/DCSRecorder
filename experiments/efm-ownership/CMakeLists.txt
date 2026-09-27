@@ -90,3 +90,14 @@ target_include_directories(HornetStatePostStepProbe PRIVATE "${DCS_ROOT}/API/Ext
 target_compile_definitions(HornetStatePostStepProbe PRIVATE STATE_POSTSTEP HORNET_RECORDED_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
 target_compile_features(HornetStatePostStepProbe PRIVATE cxx_std_17)
 set_property(TARGET HornetStatePostStepProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+# Later animation update contains the stabilator writer on the pinned DCS build.
+add_library(HornetStateAnimationProbe SHARED probe.cpp state-prototype/playback.cpp)
+target_include_directories(HornetStateAnimationProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetStateAnimationProbe PRIVATE STATE_POSTANIMATION HORNET_RECORDED_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetStateAnimationProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetStateAnimationProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_executable(state_animation_check state-prototype/check_animation.cpp)
+target_compile_features(state_animation_check PRIVATE cxx_std_17)
+target_compile_definitions(state_animation_check PRIVATE NOMINMAX)
+add_test(NAME stabilator_animation_boundary COMMAND state_animation_check)

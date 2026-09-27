@@ -1,5 +1,5 @@
-// THROWAWAY: SDK-only appearance replay on a separately registered Hornet.
-// No pose/velocity writes, physical-control commands, or private native access.
+// THROWAWAY: appearance replay on a separately registered Hornet.
+// Optional guarded native timing variants; no pose/velocity or control writes.
 #include <windows.h>
 #include <cstdint>
 #include <cstddef>
@@ -15,9 +15,12 @@
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
-#ifdef STATE_POSTSTEP
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
 #include "../native_body.h"
 #include "../native_step_hook.h"
+#ifdef STATE_POSTANIMATION
+#include "../native_animation_hook.h"
+#endif
 #endif
 
 namespace {
@@ -30,7 +33,7 @@ struct Object {
     double start=-1,last=-1;
     bool valid=false,previous=false;
     Values requested{};
-#ifdef STATE_POSTSTEP
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
     bool hooked=false,pending=false;
     uint64_t repaired=0;
 #endif
@@ -40,7 +43,7 @@ std::mutex guard;
 std::unordered_map<ED_OBJECT_HANDLE,Object> objects;
 std::vector<Sample> tape;
 std::ofstream trace,events;
-#ifdef STATE_POSTSTEP
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
 std::ofstream post_trace;
 #endif
 bool initialized=false,loaded=false;
@@ -62,8 +65,14 @@ void initialize() {
     trace.open(folder/"state-logs"/("state-"+run+".csv"));
     events.open(folder/"state-logs"/("events-"+run+".csv"));
     if(!trace || !events)return;
-#ifdef STATE_POSTSTEP
-    post_trace.open(folder/"state-logs"/("post-step-"+run+".csv"));
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
+    post_trace.open(folder/"state-logs"/(
+#ifdef STATE_POSTANIMATION
+        "post-animation-"+run
+#else
+        "post-step-"+run
+#endif
+        +".csv"));
     if(!post_trace)return;
     post_trace << std::setprecision(10) << "id,call,arg,requested,before,after\n";
 #endif
@@ -108,14 +117,18 @@ bool available(ED_OBJECT_HANDLE handle) {
 void event(const char* name,const Object& object,double t,const char* detail) {
     if(events) {events << name << ',' << object.id << ',' << t << ',' << detail << '\n';events.flush();}
 }
-#ifdef STATE_POSTSTEP
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
 void after_native_step(const void* pointer) {
     std::lock_guard<std::mutex> held(guard);
     auto handle=reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(pointer));
     const auto found=objects.find(handle);if(found==objects.end())return;
     auto& object=found->second;
     if(!object.valid || !object.pending || !available(handle) || api->ed_get_object_id(handle)!=object.id)return;
+    // The animation update may run more than once per SDK sample. Repair each
+    // invocation until the next sample or lifecycle invalidation.
+#ifndef STATE_POSTANIMATION
     object.pending=false;
+#endif
     // Only repair the two failing stabilators; preserve the baseline on all others.
     bool ok=true;
     for(size_t i: {size_t(9),size_t(10)}) {
@@ -136,6 +149,20 @@ const char* install_after(ED_OBJECT_HANDLE handle) {
     uintptr_t locator=0,next_locator=0;
     if(!native_identity::read(image+0x11461f8,locator) || locator!=image+0x133b650 ||
        !native_identity::read(image+0x1146ff0,next_locator) || next_locator!=image+0x133b770)return "step_table_boundary_mismatch";
+#ifdef STATE_POSTANIMATION
+    std::array<unsigned char,18> prologue{};
+    if(!native_identity::read(image+0x6b6070,prologue) ||
+       prologue!=std::array<unsigned char,18>{0x48,0x8b,0xc4,0x48,0x89,0x58,0x10,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57})return "animation_entry_mismatch";
+    std::array<unsigned char,15> callsite{};
+    if(!native_identity::read(image+0x67529c,callsite) ||
+       callsite!=std::array<unsigned char,15>{0x41,0xb0,1,0x0f,0x28,0xce,0x48,0x8b,1,0xff,0x90,0x10,0x0c,0,0})return "animation_callsite_mismatch";
+    // This update calls the routine that writes draw arguments 15/16.
+    std::array<unsigned char,5> writer_call{};
+    if(!native_identity::read(image+0x6b73a7,writer_call) ||
+       writer_call!=std::array<unsigned char,5>{0xe8,0x44,0x1f,0xfb,0xff})return "animation_writer_mismatch";
+    return native_animation_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+0x1146200,
+        reinterpret_cast<native_animation_hook::Step>(image+0x6b6070),nullptr,&after_native_step);
+#else
     std::array<unsigned char,15> prologue{};
     if(!native_identity::read(image+0x70fef0,prologue) ||
        prologue!=std::array<unsigned char,15>{0x48,0x8b,0xc4,0x48,0x89,0x58,0x10,0x48,0x89,0x70,0x18,0x48,0x89,0x78,0x20})return "step_entry_mismatch";
@@ -144,12 +171,18 @@ const char* install_after(ED_OBJECT_HANDLE handle) {
        callsite!=std::array<unsigned char,10>{0xff,0x90,0x70,0x0c,0,0,0x48,0x8b,0x4b,0x58})return "step_callsite_mismatch";
     return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+0x1146200,
         reinterpret_cast<native_step_hook::Step>(image+0x70fef0),nullptr,&after_native_step);
+#endif
 }
 void restore_after(ED_OBJECT_HANDLE handle,Object& object) {
     object.pending=false;
     if(object.hooked) {
+#ifdef STATE_POSTANIMATION
+        const auto result=native_animation_hook::restore(reinterpret_cast<uintptr_t>(handle)-8);
+        event(result,object,object.last,"post_animation");
+#else
         const auto result=native_step_hook::restore(reinterpret_cast<uintptr_t>(handle)-8);
         event(result,object,object.last,"post_step");
+#endif
         object.hooked=false;
     }
 }
@@ -170,7 +203,7 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     std::lock_guard<std::mutex> held(guard);
     const auto found=objects.find(handle);if(found==objects.end())return;
     auto& object=found->second;
-#ifdef STATE_POSTSTEP
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
     if(!object.valid) {restore_after(handle,object);return;}
 #endif
     if(!object.valid || object.cookie!=cookie || !available(handle) || api->ed_get_object_id(handle)!=object.id)return;
@@ -178,11 +211,15 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         object.valid=false;api->ed_set_single_arg(handle,status_arg,0.75f);event("clock_rejected",object,time,"stopped");return;
     }
     if(object.start<0) {object.start=time;event("start",object,time,"sdk_only");}
-#ifdef STATE_POSTSTEP
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
     if(!object.hooked) {
         const auto status=install_after(handle);
+#ifdef STATE_POSTANIMATION
+        object.hooked=std::string(status)=="animation_hook_installed";
+#else
         object.hooked=std::string(status)=="step_hook_installed";
-        event(status,object,time,"post_step_stabilators");
+#endif
+        event(status,object,time,"stabilator_timing");
         if(!object.hooked) {object.valid=false;api->ed_set_single_arg(handle,status_arg,0.75f);return;}
     }
     if(time-object.start>1 && object.repaired==0) {
@@ -215,7 +252,7 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     if(!matches) {object.valid=false;event("write_rejected",object,time,"stopped");}
     if(object.last>=0 && object.last-object.start<tape.back().t && elapsed>=tape.back().t)event("sequence_complete",object,time,"holding_endpoint");
     object.requested=values;object.previous=true;object.last=time;
-#ifdef STATE_POSTSTEP
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
     object.pending=matches;
     if(!object.valid)restore_after(handle,object);
 #endif
@@ -224,7 +261,7 @@ extern "C" __declspec(dllexport) void ed_on_object_destroy(ED_OBJECT_HANDLE hand
     std::lock_guard<std::mutex> held(guard);
     const auto found=objects.find(handle);
     if(found!=objects.end()) {
-#ifdef STATE_POSTSTEP
+#if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
         restore_after(handle,found->second);
 #endif
         event("destroy",found->second,found->second.last,"finished");objects.erase(found);
