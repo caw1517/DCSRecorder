@@ -9,15 +9,17 @@ confirmed readable responses for the selected exterior channels. The subsequent
 [isolated stabilator replay](../../experiments/efm-ownership/results/stabilator-animation-2026-09-27/README.md)
 passed visual review and retained-trace checks. The matrix below describes the
 recording/playback implementation and its validation status. The integrated
-exterior controller is now installed for a fresh synchronized live comparison.
+exterior controller has now passed the user's synchronized visual comparison.
+See the [integrated result](../../experiments/efm-ownership/results/exterior-integration-2026-09-27/README.md).
 
 ## Result
 
 Legacy version-one recordings carry motion and speed brake only and remain
 unchanged. Version-two recordings add the thirteen gear/flap/control-surface
 channels under `hornet-exterior-v1`, on the same sample clock. The integrated
-controller and companion path pass offline tests; fresh live validation is
-pending. RPM fields remain empty, and lights/smoke/engine state are not captured.
+controller and companion path pass offline tests and the user visually accepted
+combined motion/surface playback. Integrated numerical and lifecycle evidence
+remains to be reviewed. RPM fields remain empty, and lights/smoke/engine state are not captured.
 
 The installed object SDK exposes bounded animation-array reads and individual
 animation writes. This is a credible route for exterior animation. It exposes
@@ -34,12 +36,12 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | --- | --- | --- | --- |
 | Type and livery | Mission recorder stores `getTypeName()` and mission livery. | Staged packager rejects types other than `FA-18C_hornet` and liveries other than `Blue Angels Jet Team`. | Supported bounded identity; no silent substitution. F-16/F-15 registrations remain unsupported. |
 | Speed brake | Mission recorder reads argument 21 each sample. | Tape includes brake; `hornet_appearance::apply` writes 21 and checks immediate readback. | Existing implemented channel. Retain it as the control in new comparisons. |
-| Gear | Live capture confirmed arguments 0 (nose), 5 (left), 3 (right). | Isolated SDK replay visually accepted. | Version-two capture/replay implemented; combined motion/state validation pending. Animated deployment does not prove ground contact. |
+| Gear | Live capture confirmed arguments 0 (nose), 5 (left), 3 (right). | Isolated SDK replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. Animated deployment does not prove ground contact. |
 | Gear compression / wheels | FM configuration identifies compression 1/6/4 and rotation 101/103/102 in nose/left/right order. | Same candidate argument route. | Not recorded/replayed. Rotation wrap and contact behavior need separate handling; do not interpolate wrapped rotations naively. |
 | Canopy opening / closing | Explicitly requested by the user; no validated Hornet exterior mapping established in this inspection. | Candidate argument route, pending mapping and live test. | Not captured/replayed. Include the initial canopy position and transitions; opening animation does not establish jettison or internal cockpit-system replay. |
-| Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Version-two capture/replay implemented; combined motion/state validation pending. |
-| Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two capture/replay implemented; combined motion/state validation pending. |
-| Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two capture/replay implemented; combined motion/state validation pending. |
+| Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
+| Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
+| Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Exterior lights | Descriptor identifies formation 88; navigation 190/191/192; strobe 193; landing/taxi 210; refuel 212. | Existing adapter writes every listed channel to zero on each invocation. | Off-only behavior. Capture brightness and transitions; validate strobe phase and actual illumination independently of immediate readback. |
 | Demonstration smoke | Hornet descriptor lists selectable `INV-SMOKE-*` stores. This establishes configuration availability, not an emitter-state capture API. | No verified emitter setter found in inspected object SDK. | Unsupported in current pipeline. Determine actual source loadout, color, emitter enable and timing; do not confuse gun smoke with demonstration smoke. |
 | Engine RPM, left/right | Installed `Scripts/Export.lua` documents `LoGetEngineInfo().RPM.left/right` as percentages. Current mission-only capture does not use it. | Object SDK has no RPM setter. Ordinary EFM callbacks expose RPM-related parameters, but their execution on this unoccupied object is not established. | Capture candidate in Export context; not wired or tested. Need clock/aircraft identity alignment with mission samples and an independently proven playback actuator. |
@@ -87,7 +89,7 @@ Keep engine/afterburner/sound as a separate evidence gate. Gear animation does
 not enable ground starts by itself; coordinate contact and initialization with
 the existing ground-state and flight-envelope tickets.
 
-## Proposed recording contract (not yet implemented or accepted)
+## Recording contract (version-two exterior subset implemented)
 
 - Preserve version-one source files byte for byte and retain legacy playback.
   Missing version-one channels mean **not captured**, never “off” or zero RPM.
@@ -125,14 +127,15 @@ the user accepted the appearance and both channels retained the requested values
 in later mission reads. Interrupted destruction released ownership correctly;
 automatic completion/hold remains for the integrated test.
 The parent visual/engine-state ticket remains open. The user selected exterior
-animation first; the proposed recording contract remains a proposal. The
+animation first; the version-two exterior subset of the recording contract is
+implemented and visually accepted in combined playback. Engine capture remains
+unimplemented. The
 [read-only diagnostic prototype](../../experiments/efm-ownership/state-prototype/README.md)
 collects the stock-aircraft observations needed before playback implementation.
 
 ## Confirmed remaining exterior scope
 
-With the stabilator timing repair verified, integrate the surface group with
-the recording clock. Preserve these user-requested requirements for subsequent
+The surface group is integrated with the recording clock and visually accepted. Preserve these user-requested requirements for subsequent
 groups: suspension compression and wheel spin (ground/touchdown tests), separate
 left/right nozzle motion with engine/afterburner appearance and sound, canopy
 state, demonstration-smoke emitter/color/timing, and exterior-light state and

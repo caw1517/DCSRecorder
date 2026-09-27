@@ -1,7 +1,7 @@
 # Synchronized exterior recording/playback integration
 
-Status: implemented, installed, offline checks passed; fresh live capture and
-combined motion/state playback remain pending. This continues the visually and
+Status: implemented, installed, offline checks and fresh live capture passed;
+the user visually accepted combined motion/state playback. This continues the visually and
 numerically accepted isolated stabilator test. The broader visual/engine-state
 issue remains open.
 
@@ -75,16 +75,35 @@ same loopback URL. The API confirms the current hook hash and all four existing
 recordings remain supported. Local manifests and scratch artifacts are under
 `package/exterior-integration-setup` (ignored).
 
-## Next live comparison
+## Fresh synchronized capture and live acceptance
 
-Start DCS and fly **DCSRecorder-Exterior-Integrated-Capture**. Begin nearly level,
-use F10 Start, then exercise pitch/roll/rudder and gear/flaps/brake while airborne.
-Use F10 Stop and confirm the take appears in the companion. A fresh capture is
-required: the older motion take and separate surface diagnostic are different
-flights and must not be spliced together.
+The fresh take `20260927T033114Z-0002.csv` passes companion validation: 35.48 seconds,
+1,775 synchronized version-two samples, `hornet-exterior-v1`, DCS 2.9.29.27468.
+Ground speed stays between 101.29 and 218.12 m/s. All three gear channels and the
+speedbrake span 0..1; both stabilators, flaps, ailerons, leading-edge flaps and
+rudders vary. The earlier take containing a landing remains preserved but is
+unsupported by the current airborne speed guard.
 
-With DCS closed, generate playback for the new take in the companion. Start its
-F10 countdown, inspect the lead, allow completion, and test mission restart.
-Compare source/requested/post-animation/mission values, initial pose/state, path
-continuity and cleanup before accepting this group. Suspension/wheels, canopy,
-smoke, lights and engine/nozzle/effects/sound remain outstanding groups.
+The new take passes module-dependency, route timing, clean-controls and native
+tape evaluation checks. After the user closed DCS, the companion activation path
+installed **DCSRecorder-Playback-exterior.miz** directly in Saved Games/DCS/Missions.
+The source CSV is byte-identical (SHA256
+`93705d1e7364f0133519ab90b4f81fb955728208a5635aa05d264861978815d4`), the installed
+controller matches the build, and the accepted legacy DLL and tape are unchanged.
+Local verification and activation manifests are under
+`package/exterior-live-20260927T033114` (ignored).
+
+The user reports: “Everything looked great” and “all the flight controls we were
+testing worked flawlessly.” This accepts the combined flight-path and tested
+gear/flap/control-surface appearance, including the repaired stabilators. The
+user also observed continuous afterburner appearance. Engine state is not captured
+or actuated by this profile, so that remains an outstanding fidelity defect;
+this acceptance does not cover nozzles, afterburner effects or sound.
+
+This checkpoint records visual feedback only. It does not independently establish
+numerical retention, automatic completion/removal or mission-restart behavior;
+those require the integrated runtime traces. Suspension/wheels, canopy, smoke,
+lights and engine/nozzle/effects/sound remain outstanding groups. Next engine
+work must establish synchronized per-engine capture and playback actuation,
+including a non-afterburning case and separate left/right transitions. Nozzle
+geometry and audible engine behavior require their own comparisons.
