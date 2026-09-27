@@ -70,3 +70,70 @@ The [first live result](../results/exterior-state-2026-09-27/README.md) contains
 2,612 complete samples across all marked control groups. `analyze.py <log> <output>`
 checks the single-take protocol and produces a CSV plus per-segment ranges.
 It does not infer visual identity, full valid limits or playback support.
+
+## Isolated playback actuator
+
+`playback.cpp` builds as `HornetStateProbe.dll` and registers through the copied
+local Hornet descriptor as `DCSRecorder-Hornet-State`. It uses the documented
+object SDK to write only arguments 0/3/5, 9-18 and 21, plus the existing-style
+elapsed/status transport on 998/999. It has no private native-memory access,
+motion controller or step hook. The unoccupied aircraft follows a normal AI route.
+The ordinary sample EFM is linked for the same registration structure as the
+existing prototype; ordinary EFM execution is not assumed for this object.
+
+The captured state sequence is linear-interpolated on its own clock. It retains
+signed surface values and initializes every selected channel on the first
+callback. Gear/brake are bounded to 0..1; the other selected arguments use a
+provisional -1..1 diagnostic bound. Invalid tapes are rejected rather than clamped.
+This is a bounded actuator experiment, not the production recording schema.
+
+Preparation, using the retained local capture:
+
+```powershell
+cmake --build experiments/efm-ownership/build --config Release --target HornetStateProbe state_playback_check
+python experiments/efm-ownership/state-prototype/prepare_playback.py experiments/efm-ownership/results/exterior-state-2026-09-27/dcs.log experiments/efm-ownership/package/state-playback
+```
+
+Use a fresh package folder for subsequent preparations. The prepared mod directory
+is copied into `Saved Games/DCS/Mods/aircraft`; the mission is copied directly into
+`Saved Games/DCS/Missions`. Refuse overwriting an unrelated existing destination.
+The current installation has been verified against the package manifest.
+
+### Run the installed playback test
+
+1. Restart DCS to load the new module, then load
+   **DCSRecorder-Exterior-State-Playback** from Missions.
+2. The player starts in Active Pause. Use **F10 > Exterior state playback >
+   Start captured surface sequence**. This spawns the lead and releases the player.
+   Do not toggle Active Pause manually before this start.
+3. Press **F2** to select the test lead. Watch its exterior surfaces while the
+   screen identifies the current segment: baseline, roll, pitch, rudder, gear,
+   flaps, speed brake. The lead's attitude/path will not match the capture flight;
+   the surface sequence is the subject of this test.
+4. The sequence takes 130.55 seconds. The final state is held for eight seconds,
+   then the lead is removed. A failed handshake or write reports an error instead.
+   **Stop and remove test aircraft** aborts; restarting the mission repeats it.
+5. Report whether the surfaces move smoothly, whether they snap back or flicker,
+   and whether gear/brake extend and retract. Keep DCS open for log collection.
+
+### Evidence and verification
+
+- `bin/state-logs/state-<process>-<run>.csv` in the installed test module records
+  each requested value, immediate readback, next callback's pre-write value,
+  previous request and callback interval. The pre-write comparison measures
+  retention between callbacks, not a proven post-render sample.
+- `events-*.csv` records creation, start, completion, rejection and destruction.
+- `DCS.log` records mission-context reads under `DCSSTATE_PLAYBACK`, providing a
+  second observation phase. This also does not replace visual inspection.
+- The separate offline `state_playback_check` loads an isolated copy of the real
+  DLL beside the captured tape. It passed all 2,612 source samples, signed values,
+  midpoint interpolation, endpoint and identity/cookie/bounds/lifecycle/clock
+  guards. Its fake SDK deliberately overwrites arguments before callbacks, so
+  this is not evidence of DCS retaining the values.
+- The prepared mission passed installed module-dependency, route and aircraft
+  configuration checks. The accepted staged DLL and motion tape hashes were
+  checked unchanged after installing this separate experiment.
+
+Live write retention and visible rendering remain unverified. If DCS overwrites
+the channels between callbacks, investigate the ownership/timing evidence before
+adding these channels to the main recorder or declaring the exterior group done.
