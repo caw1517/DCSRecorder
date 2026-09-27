@@ -330,3 +330,15 @@ Export within 3.82e-8, and time-associated position checks. `analyze_native_capt
 <log> <summary.json>` reproduces those checks and reports per-phase channel ranges.
 Proceed with the full labeled throttle sweep using the same installed diagnostic;
 fan/power mappings and afterburner fidelity are still unvalidated.
+
+The full native capture subsequently passed with 2,039 samples over 101.905 s.
+`prepare_playback.py <capture.log> <new-package> --parameter-probe` prepares
+**DCSRecorder-Native-Engine-Playback.miz**, a separate core/fan/power replay module.
+It preserves measured values above one and requires exact E0/F0 equality in the
+capture before using the playback aircraft's guarded F0-to-E0 forwarding path.
+No synthetic phase values or custom audio sources are used. Run CTest
+`native_parameter_boundary`/`native_parameter_mission`, then
+`check_parameter_package.py <package> <capture>` and the actual packaged DLL
+through `rpm_module_check`. Install with the existing additive installer after
+DCS closes. See the [measured engine playback record](../results/native-engine-playback-2026-09-27/README.md)
+for scope, checks, installation status and the pending live acceptance.

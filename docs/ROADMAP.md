@@ -100,8 +100,12 @@ An additive read-only player capture helper is now installed using the cockpit's
 current-aircraft interface. Its offline Lua/loading/lifecycle checks pass. The
 first steady run captured 235 valid native samples: core RPM agrees with Export,
 fan/power values are present, and aircraft identity/timing association passes.
-Next run the full labeled idle/military/independent-left-and-right-AB sequence
-with the same installed diagnostic to establish fan/power response and mappings.
+The full labeled run also passed: 2,039 samples over 101.905 s, measured fan/power
+values above one, and exact equality between the two captured power getters.
+A separate **DCSRecorder-Native-Engine-Playback.miz** is installed to replay the
+measured core/fan/power values through guarded getters and stock DCS sound.
+Offline checks pass; installation verified 10 hashes and 88 protected files
+unchanged. Live parameter consumption and sound fidelity remain open.
 See the [native capture record](../experiments/efm-ownership/results/native-engine-capture-2026-09-27/README.md).
 See the [native RPM test](../experiments/efm-ownership/results/native-rpm-2026-09-27/README.md) and
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).

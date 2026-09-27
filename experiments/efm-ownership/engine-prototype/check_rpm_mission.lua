@@ -1,5 +1,9 @@
 -- Drive the actual mission script through completion and failure/stop paths.
 local script=assert(arg[1])
+local parameters=arg[2]=='--parameters'
+local start_command=parameters and 'Start recorded engine test' or 'Start recorded RPM test'
+local stop_command=parameters and 'Stop engine test' or 'Stop RPM test'
+local prefix=parameters and 'DCS_PARAMETER_MISSION' or 'DCS_RPM_MISSION'
 local function scenario(mode,reason)
     local now,elapsed,status=0,0,0
     local exists,removed,scheduled=false,0,nil
@@ -15,19 +19,19 @@ local function scenario(mode,reason)
     missionCommands={addSubMenu=function()return {}end,addCommand=function(n,_,fn)commands[n]=fn end}
     DCS_STATE_CONFIG={duration=48.9,markers={{time=0,segment='both_idle'},{time=6,segment='both_military'}}}
     assert(loadfile(script))()
-    commands['Start recorded RPM test']();assert(scheduled and exists)
+    commands[start_command]();assert(scheduled and exists)
     for i=1,1300 do
         now=i*0.05;elapsed=now
         status=elapsed<51.9 and 0.25 or 0.5
         if mode=='guard' then status=0.75 end
         if mode=='handshake' then status=0 end
         if mode=='stalled' then elapsed=0 end
-        if mode=='stop' and now>=1 then commands['Stop RPM test']()end
+        if mode=='stop' and now>=1 then commands[stop_command]()end
         if not scheduled()then break end
     end
     assert(removed==1 and not exists,'lead must be removed exactly once: '..mode)
-    assert(logs[#logs]:find('DCS_RPM_MISSION,END,'..reason..',',1,true),'wrong termination: '..mode)
-    commands['Start recorded RPM test']();assert(not exists,'second activation allowed')
+    assert(logs[#logs]:find(prefix..',END,'..reason..',',1,true),'wrong termination: '..mode)
+    commands[start_command]();assert(not exists,'second activation allowed')
     assert(scheduled()==nil,'timer remains active')
 end
 scenario('complete','complete')

@@ -107,3 +107,28 @@ hold about eight seconds: both idle; both military/max dry; left AB with right
 dry; right AB with left dry; both AB; both dry. Stop capture and preserve the
 session. The next analysis must compare native fan/power response with the
 independent appearance and Export data before selecting playback mappings.
+
+## Full sequence result
+
+The subsequent take passed: **2,039 samples over 101.905 seconds**. Both mission
+runs used take ID 1, so analysis selects the latest BEGIN occurrence rather than
+merging by numeric take ID. Raw logs and summaries are retained in `full-live/`.
+All native rows, sample counts and footers agree; identity and getter addresses
+remained stable. Maximum native core/Export error is 3.82e-8. The independent
+Export hook differs by at most 8 ms; 2,038 time-associated native positions have
+a maximum mission interpolation residual of 0.00639 m.
+
+Measured channels include fan values above 1.0 (maximum 1.065868) and a maximum
+power value of 2.341144. These must not be clamped to 0–1. All 4,078 paired E0/F0
+readings are exactly equal within the logged precision. Power varies separately
+from core RPM, and the independent appearance trace includes flame transitions.
+Military-labeled power exceeds 1.0 in this run, so do not infer afterburner from
+a universal threshold of 1.0. The labeled phases include actual transitions and
+changes within phases; they are not certified steady calibration plateaus.
+
+The next [native engine playback test](../native-engine-playback-2026-09-27/README.md)
+returns the measured per-engine core RPM, fan RPM and E0 power without scaling.
+The pinned playback aircraft's F0 getter is a verified forwarder to E0, so it
+also receives the captured value, conditional on exact captured E0/F0 equality.
+This is a concrete input mapping to test, not acceptance of power normalization,
+physical engine restoration or audible afterburner fidelity.
