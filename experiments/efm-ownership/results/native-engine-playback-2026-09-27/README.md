@@ -1,4 +1,4 @@
-# Measured native engine playback — installed, live result pending
+# Measured native engine playback — live sound accepted
 
 Continues [Complete single-aircraft visual and engine-state fidelity](https://github.com/caw1517/DCSRecorder/issues/6)
 after native core RPM alone reached the sound renderer but sounded weak and did
@@ -67,7 +67,7 @@ Local package: `package/native-engine-test`. New module:
 DCS closed; prior tests, recordings and the native capture helper are protected.
 After the user closed DCS, installation passed: 10 installed hashes verified and
 88 protected files unchanged. The local package's `installation.json` retains
-the exact installed and protected hashes. The live result is pending.
+the exact installed and protected hashes. The first live result is recorded below.
 
 ## Live procedure after installation
 
@@ -78,5 +78,37 @@ lead disappear after about 108 seconds. Retain the session for log collection.
 
 Require native consumption of core, fan and both forwarded power requests before
 interpreting the listening result. Parameter delivery, audible strength/AB,
-visible appearance and integrated flight playback remain distinct checks. This
-test is installed, not a demonstrated sound fix.
+visible appearance and integrated flight playback remain distinct checks.
+
+## First live result
+
+The user reported: “That seemed to work much better. I never saw the afterburner
+visual effect, but the sounds all seemed really good and accurate.” This accepts
+the audible result of this isolated measured-parameter test. Nozzle/flame writes
+were intentionally absent, so this run does not test the previously accepted
+appearance implementation or establish that sound parameters drive flame visuals.
+
+The session and native traces are preserved locally in `live/`. The mission
+started at 3.476 and reported `END,complete,111.426`. The native hook restored at
+108.396 and the aircraft was destroyed at 111.416; no guard failure or trace
+overflow occurred in the lifecycle record.
+
+`analyze_parameter_live.py <calls.csv> <events.csv> <recorded-engine.txt>
+<summary.json>` passed against this run:
+
+- 242,852 total getter observations; 230,856 overridden calls across all callers.
+- 141,642 Sound.dll calls, including 132,496 overrides across core/fan/power for
+  both engines. Both power callsites, 0x134cab and 0x134cc1, consumed the tape.
+- Every overridden return matched its recorded/interpolated channel within
+  1.20e-7. The verified publication-to-drain delay was one 20 ms SDK step; the
+  logged drain clock is not relabeled as the call timestamp.
+- Baseline values forwarded unchanged. Fan values above 1 and power above 2
+  reached native sound without clamping. The original getter table restored.
+
+Decision: retain measured native core RPM, fan RPM and power for stock DCS sound.
+Core RPM alone was insufficient in the prior test. This combined result does not
+isolate which additional input controls each sound layer or establish a universal
+afterburner threshold. Next combine the separately validated nozzle/flame values
+from the same capture with these parameters on one playback clock, then integrate
+with recorded motion and the normal capture/library workflow. Those integration
+steps and live combined acceptance remain open.

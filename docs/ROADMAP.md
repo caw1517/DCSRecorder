@@ -105,7 +105,13 @@ values above one, and exact equality between the two captured power getters.
 A separate **DCSRecorder-Native-Engine-Playback.miz** is installed to replay the
 measured core/fan/power values through guarded getters and stock DCS sound.
 Offline checks pass; installation verified 10 hashes and 88 protected files
-unchanged. Live parameter consumption and sound fidelity remain open.
+unchanged. Its first live run passed: 132,496 Sound.dll overrides across all six
+channels matched the recording within 1.20e-7, both power consumers were reached,
+and the original getters restored. The user found the sounds good and accurate.
+No afterburner visual appeared; this isolated test omitted nozzle/flame writes.
+Combine the accepted engine-parameter sound path and captured appearance on one
+clock before integrating with recorded motion and the normal recording workflow.
+See the [accepted native sound test](../experiments/efm-ownership/results/native-engine-playback-2026-09-27/README.md).
 See the [native capture record](../experiments/efm-ownership/results/native-engine-capture-2026-09-27/README.md).
 See the [native RPM test](../experiments/efm-ownership/results/native-rpm-2026-09-27/README.md) and
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).

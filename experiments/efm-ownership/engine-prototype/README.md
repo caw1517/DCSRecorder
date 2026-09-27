@@ -341,4 +341,8 @@ No synthetic phase values or custom audio sources are used. Run CTest
 `check_parameter_package.py <package> <capture>` and the actual packaged DLL
 through `rpm_module_check`. Install with the existing additive installer after
 DCS closes. See the [measured engine playback record](../results/native-engine-playback-2026-09-27/README.md)
-for scope, checks, installation status and the pending live acceptance.
+for scope, checks, installation status and the accepted live sound result.
+`analyze_parameter_live.py <calls> <events> <tape> <summary.json>` checks all six
+channels, both native power consumers, tape interpolation and clean restoration.
+The first run passed with 132,496 Sound.dll overrides; the user reported accurate
+sound. Combining nozzle/flame playback and integrating recorded motion remains.
