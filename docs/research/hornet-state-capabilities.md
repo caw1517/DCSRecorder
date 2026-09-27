@@ -44,10 +44,10 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Exterior lights | Descriptor identifies formation 88; navigation 190/191/192; strobe 193; landing/taxi 210; refuel 212. | Existing adapter writes every listed channel to zero on each invocation. | Off-only behavior. Capture brightness and transitions; validate strobe phase and actual illumination independently of immediate readback. |
 | Demonstration smoke | Hornet descriptor lists selectable `INV-SMOKE-*` stores. This establishes configuration availability, not an emitter-state capture API. | No verified emitter setter found in inspected object SDK. | Unsupported in current pipeline. Determine actual source loadout, color, emitter enable and timing; do not confuse gun smoke with demonstration smoke. |
-| Engine RPM, left/right | Installed `Scripts/Export.lua` documents `LoGetEngineInfo().RPM.left/right` as percentages. `API/Sim_ControlAPI.md` also exposes it through `Export` in GUI hooks. | Object SDK has no RPM setter. Ordinary EFM callbacks expose RPM-related parameters, but their execution on this unoccupied object is not established. | Separate read-only engine diagnostic prepared and installed; live API availability and mission/Export clock/identity alignment pending. Production capture remains unchanged; playback actuator unproven. |
-| Nozzle opening | Hornet descriptor explicitly labels argument 89 nozzle; adjacent 90 is unlabeled. | Candidate animation writes. | Not recorded/replayed. Verify both engines' mappings and ranges; nozzle pose is not an afterburner-state measurement. |
-| Afterburner appearance | Descriptor supplies per-engine effect texture/configuration, not measured on/off or intensity data. No verified captured channel established here. | No verified effect-state writer on the playback object. | Unsupported in current pipeline. Establish independent per-engine capture and actuation; do not derive afterburner from trajectory or a guessed RPM threshold. |
-| Engine / afterburner sound | No sound-state capture exists. Export RPM/temperature/fuel flow may be useful measurements, not a sound recording. | No sound-state writer in inspected object SDK. EFM sound/power parameters are a separate interface with unproven ownership here. | Unsupported. Needs a separate audible comparison with matched camera/listener geometry; animation success cannot close this row. |
+| Engine RPM, left/right | Live diagnostic captures independent RPM, temperature and fuel flow with bounded mission/Export alignment. | Object SDK has no RPM setter. Ordinary EFM callbacks expose RPM-related parameters; reachability on this unoccupied object is being probed. | 979 paired samples over 48.9 seconds accepted for diagnostic capture. Production capture unchanged; playback actuator unproven. |
+| Nozzle opening | Marked live capture supports left argument 90 and right 89. | Four-channel post-animation experiment retains requested values. | Isolated playback visually accepted and numerically retained. Recorded-motion integration pending; nozzle pose is not an afterburner-state measurement. |
+| Afterburner appearance | Independent marked phases support left argument 29 and right 28. | Same four-channel post-animation experiment. | Isolated flame rendering visually accepted and numerically retained. Recorded-motion integration pending; no guessed RPM threshold. |
+| Engine / afterburner sound | Export RPM/temperature/fuel flow are measurements, not a sound recording. | No sound setter in object SDK. Separate read-only probe checks ordinary EFM parameter calls, forwarding original values. | Live sound failed: user heard idle-like audio throughout the accepted animation sequence. Sound actuation and matched-listener comparison remain open. |
 
 ## Primary evidence
 
@@ -187,6 +187,8 @@ The full marked repeat then passed with 979 paired samples over 48.9 seconds.
 Independent left/right fuel-flow responses support candidate left 90/29 and
 right 89/28 nozzle/effect pairs. A separate four-channel post-animation actuator
 and **DCSRecorder-Engine-Appearance-Playback.miz** are installed for live comparison.
-No engine-state or sound actuator has been established; visible nozzle/flame
-rendering and later retention remain to be checked. See the linked engine result
-for evidence, validation and exact run instructions.
+The subsequent [live playback result](../../experiments/efm-ownership/results/engine-playback-2026-09-27/README.md)
+accepts nozzle/flame rendering, with all four immediate readbacks exact and later
+mission errors below 5.1e-10. Sound remained idle-like. A separate read-only
+parameter-call probe is installed to measure ordinary EFM getter reachability;
+no sound actuator is established. Recorded-motion integration remains pending.

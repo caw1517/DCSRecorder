@@ -1,4 +1,7 @@
 // Compile the locally installed ED sample; no SDK source is redistributed.
+#ifdef ENGINE_SOUND_TRACE
+#define ed_fm_get_param engine_sample_get_param
+#endif
 #define ed_fm_simulate sample_simulate
 #define ed_fm_set_current_state sample_set_current_state
 #define ed_fm_hot_start_in_air sample_hot_start_in_air
@@ -7,6 +10,9 @@
 #define ed_fm_add_global_force sample_add_global_force
 #define ed_fm_add_global_moment sample_add_global_moment
 #include "ED_FM_Template.cpp"
+#ifdef ENGINE_SOUND_TRACE
+#undef ed_fm_get_param
+#endif
 #undef ed_fm_simulate
 #undef ed_fm_set_current_state
 #undef ed_fm_hot_start_in_air

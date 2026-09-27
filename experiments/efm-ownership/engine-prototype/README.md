@@ -136,8 +136,9 @@ with independent engine flow and argument changes. See the retained result above
 The separate module `DCSRecorder-Hornet-Engine-Appearance` now replays captured
 arguments 28/29/89/90 after the guarded native animation update. This is a test of
 nozzle/flame appearance. RPM and sound are not actuated; do not accept sound
-fidelity merely because a nozzle moves. Native overwrite/retention is still a
-live measurement. A normal AI route is used instead of replaying captured motion.
+fidelity merely because a nozzle moves. The subsequent live run accepted nozzle
+and flame rendering and confirmed retention numerically; sound remained idle-like.
+A normal AI route is used instead of replaying captured motion.
 
 Restart DCS, load **DCSRecorder-Engine-Appearance-Playback.miz**, and use F10 >
 **Engine appearance playback** > **Start captured engine sequence**. F2 selects
@@ -157,3 +158,21 @@ the tape offline; the installed variant adds the pinned-build post-animation
 boundary. Existing exterior channels/header/timing selection retain their own
 variant. Logs live under the new module's `bin/state-logs`; mission reads use
 `DCSENGINE_PLAYBACK`. `check_playback_mission.lua` checks the mission lifecycle.
+
+## Read-only sound callback probe
+
+The [live appearance result](../results/engine-playback-2026-09-27/README.md)
+accepts nozzle/flame animations but leaves sound unresolved. Prepare with
+`prepare_playback.py <capture.log> <new-output-folder> --sound-probe` and install
+with the same installer. It selects the separate module
+`DCSRecorder-Hornet-Engine-Sound-Probe` and **DCSRecorder-Engine-Sound-Probe.miz**.
+Use the same F10 menu above; let the lead disappear after about 57 seconds.
+
+`HornetEngineSoundProbe` adds an observation wrapper around `ed_fm_get_param`.
+It forwards every original value unchanged. The module's `bin/sound-logs` holds
+first calls by index and counts at SDK/object lifecycle boundaries, including a
+ready marker even when no parameter calls arrive. A missing file is inconclusive.
+Counts are module scoped and do not identify the caller as an audio consumer.
+This gate asks whether ordinary engine parameters are queried for this setup;
+it neither replays RPM nor fixes sound. `engine_sound_check <DLL>` verifies exact
+forwarding for 66 calls over 22 indices. Fixture traces are not installed.

@@ -60,17 +60,13 @@ through 0..1, and the user reports successful playback. The app identifies
 motion-only takes and generates clearly named exterior-capable practice missions.
 Engine-state work can resume; integrated endpoint/restart evidence remains open.
 
-The next live step is the installed
-[engine observation diagnostic](../experiments/efm-ownership/engine-prototype/README.md):
-independent left/right throttle phases, nozzle candidates, RPM/temperature/fuel
-flow and measured mission/Export clock alignment. Capture results must precede
-playback-actuator selection; nozzle motion, afterburner effects and sound retain
-separate evidence requirements.
-
-The full engine diagnostic capture is now retained and passes alignment checks.
-The next live step is **DCSRecorder-Engine-Appearance-Playback.miz**, a separate
-four-argument nozzle/flame experiment. Its normal AI route isolates appearance;
-it does not yet integrate engine state or sound into recorded-motion playback.
+The full engine diagnostic capture passes alignment checks. The user accepted
+the isolated nozzle/flame playback, corroborated by numerical retention, but
+heard idle-like sound throughout. See the [live result](../experiments/efm-ownership/results/engine-playback-2026-09-27/README.md).
+The next live step is **DCSRecorder-Engine-Sound-Probe.miz**, which logs whether
+DCS requests ordinary EFM engine parameters while forwarding values unchanged.
+Its normal AI route isolates appearance; sound actuation and integration with
+recorded motion remain open. No new throttle capture is needed for this probe.
 
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
 completed first app workflow. They remain required for the broader single-aircraft

@@ -15,6 +15,9 @@
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
+#ifdef ENGINE_SOUND_TRACE
+#include "../engine-prototype/sound_probe.h"
+#endif
 #if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
 #include "../native_body.h"
 #include "../native_step_hook.h"
@@ -207,6 +210,9 @@ void restore_after(ED_OBJECT_HANDLE handle,Object& object) {
 }
 extern "C" __declspec(dllexport) void ed_setup_object_api(const ed_object_api_entry* entry) {
     std::lock_guard<std::mutex> held(guard);api=entry;initialize();
+#ifdef ENGINE_SOUND_TRACE
+    engine_sound_probe::lifecycle("sdk_setup",0);
+#endif
 }
 extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handle,uint64_t& cookie) {
     std::lock_guard<std::mutex> held(guard);initialize();
@@ -215,6 +221,9 @@ extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handl
     object.valid=handle && loaded && available(handle);
     if(object.valid) {object.id=api->ed_get_object_id(handle);object.valid=object.id!=0;}
     objects[handle]=object;event(object.valid?"create":"create_rejected",object,0,loaded?"sdk":"tape");
+#ifdef ENGINE_SOUND_TRACE
+    engine_sound_probe::lifecycle(object.valid?"object_create":"object_rejected",object.id);
+#endif
 }
 extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE handle,uint64_t& cookie,double time) {
     std::lock_guard<std::mutex> held(guard);
@@ -281,7 +290,11 @@ extern "C" __declspec(dllexport) void ed_on_object_destroy(ED_OBJECT_HANDLE hand
 #if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
         restore_after(handle,found->second);
 #endif
-        event("destroy",found->second,found->second.last,"finished");objects.erase(found);
+        event("destroy",found->second,found->second.last,"finished");
+#ifdef ENGINE_SOUND_TRACE
+        engine_sound_probe::lifecycle("object_destroy",found->second.id);
+#endif
+        objects.erase(found);
     }
 }
 static_assert(std::is_same_v<decltype(&ed_setup_object_api),PFN_ED_SETUP_OBJECT_API>);
