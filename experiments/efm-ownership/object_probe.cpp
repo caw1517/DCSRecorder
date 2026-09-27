@@ -41,6 +41,9 @@ std::ofstream log_file;
 std::ofstream identity_file;
 std::ofstream body_file;
 std::ofstream motion_file;
+#ifdef HORNET_STAGED_PROTOTYPE
+std::ofstream exterior_file;
+#endif
 struct Observation {
     uint64_t calls = 0; double next_log = 0; bool motion_attempted=false, motion_active=false;
     double start_time=0, last_time=0, last_x=0, last_z=0, measured_speed=145; playback_path::Path path;
@@ -49,6 +52,10 @@ struct Observation {
 #ifdef HORNET_STAGED_PROTOTYPE
     uint64_t runtime_id=0,token=0;
     bool terminal=false;
+    bool exterior_pending=false,exterior_finished=false;
+    double exterior_elapsed=0;
+    uint64_t exterior_applied=0;
+    hornet_exterior::Values exterior{};
 #endif
     uint64_t step_calls=0,step_applied=0;
     const char* step_status="step_hook_inactive";
@@ -61,6 +68,41 @@ struct Observation {
 std::unordered_map<ED_OBJECT_HANDLE, Observation> observed;
 
 #ifdef HORNET_RECORDED_PROTOTYPE
+#ifdef HORNET_STAGED_PROTOTYPE
+void after_native_animation(const void* handle) {
+    std::lock_guard<std::mutex> guard(lock);
+    const auto sdk_handle=reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle));
+    const auto found=observed.find(sdk_handle);if(found==observed.end())return;
+    auto& state=found->second;
+    if(!state.motion_active || !state.exterior_pending || !state.path.has_exterior ||
+       !api || !api->ed_get_object_id || api->ed_get_object_id(sdk_handle)!=state.runtime_id)return;
+    const auto view=api->ed_get_object_args(sdk_handle);
+    if(!view.data || view.size<=18) {state.motion_active=false;return;}
+    std::array<float,13> before{};
+    for(size_t i=0;i<before.size();++i)before[i]=view.data[hornet_exterior::channels[i]];
+    const bool applied=hornet_appearance::apply_exterior(api,sdk_handle,state.runtime_id,state.exterior);
+    const auto after=api->ed_get_object_args(sdk_handle);
+    if(applied) {
+        ++state.exterior_applied;
+        for(size_t i=0;i<before.size();++i)exterior_file << state.runtime_id << ',' << state.calls << ','
+            << state.exterior_elapsed << ',' << hornet_exterior::channels[i] << ',' << state.exterior[i]
+            << ',' << before[i] << ',' << after.data[hornet_exterior::channels[i]] << '\n';
+        exterior_file.flush();
+    }
+    if(!applied || !exterior_file) {
+        state.motion_active=false;state.exterior_pending=false;
+        staged_playback::publish(api,sdk_handle,state.token,staged_playback::failed);
+    } else if(state.exterior_finished) {
+        // Completion is visible to Lua only after the final surface sample too.
+        if(staged_playback::publish(api,sdk_handle,state.token,staged_playback::complete)) {
+            state.terminal=true;
+            log_file << "staged_exterior_complete," << state.runtime_id << ",0," << state.start_time+state.exterior_elapsed << ',' << state.calls << ",1\n";
+            log_file.flush();
+        }
+        else state.motion_active=false;
+    }
+}
+#endif
 void before_native_step(const void* handle) {
     std::lock_guard<std::mutex> guard(lock);
     const auto sdk_handle=reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle));
@@ -96,7 +138,7 @@ void before_native_step(const void* handle) {
     if(std::strcmp(state.step_status,"called")==0) ++state.step_applied;
     else state.motion_active=false;
 }
-const char* install_native_step(const void* handle) {
+const char* install_native_step(const void* handle,bool exterior=false) {
     const auto image=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
     uintptr_t locator=0,next_locator=0;
     // RTTI boundaries establish the complete primary table's exact length.
@@ -111,12 +153,26 @@ const char* install_native_step(const void* handle) {
     if(!native_identity::read(image+0x675279,callsite) ||
        callsite!=std::array<unsigned char,10>{0xff,0x90,0x70,0x0c,0,0,0x48,0x8b,0x4b,0x58})
         return "step_callsite_mismatch";
+#ifdef HORNET_STAGED_PROTOTYPE
+    if(exterior) {
+        std::array<unsigned char,18> entry{};
+        std::array<unsigned char,15> dispatch{};
+        std::array<unsigned char,5> writer{};
+        if(!native_identity::read(image+0x6b6070,entry) || entry!=std::array<unsigned char,18>{0x48,0x8b,0xc4,0x48,0x89,0x58,0x10,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57} ||
+           !native_identity::read(image+0x67529c,dispatch) || dispatch!=std::array<unsigned char,15>{0x41,0xb0,1,0x0f,0x28,0xce,0x48,0x8b,1,0xff,0x90,0x10,0x0c,0,0} ||
+           !native_identity::read(image+0x6b73a7,writer) || writer!=std::array<unsigned char,5>{0xe8,0x44,0x1f,0xfb,0xff})return "animation_layout_mismatch";
+        return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+0x1146200,
+            reinterpret_cast<native_step_hook::Step>(image+0x70fef0),&before_native_step,nullptr,
+            reinterpret_cast<native_step_hook::Animation>(image+0x6b6070),&after_native_animation);
+    }
+#endif
     return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+0x1146200,
         reinterpret_cast<native_step_hook::Step>(image+0x70fef0),&before_native_step);
 }
 void stop_native_step(const void* handle,Observation& state) {
     state.step_pending=false;
 #ifdef HORNET_STAGED_PROTOTYPE
+    state.exterior_pending=false;
     const auto presentation_status=native_presentation_pitch::restore(handle,state.presentation);
     if(state.presentation.active) {
         state.step_status=presentation_status;state.motion_active=false;
@@ -157,6 +213,10 @@ void open_log() {
     for(const char* prefix:{"velocity_before","velocity_after","velocity_command","angular_command"})
         for(int i=0;i<3;++i) motion_file << ',' << prefix << i;
     motion_file << ",step_hook_calls,step_hook_applied,step_hook_status\n" << std::setprecision(12);
+#ifdef HORNET_STAGED_PROTOTYPE
+    exterior_file.open(folder/("exterior-"+std::to_string(GetCurrentProcessId())+".csv"));
+    exterior_file << "id,call,elapsed,arg,requested,before,after\n" << std::setprecision(12);
+#endif
 }
 void record(const char* event, ED_OBJECT_HANDLE handle, uint64_t cookie,
             double time, uint64_t calls) {
@@ -275,6 +335,11 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         record("staged_status_arguments_unavailable",handle,cookie,time,state.calls);
         return;
     }
+    if(state.path.has_exterior && state.motion_active && time-state.start_time>1 && state.exterior_applied==0) {
+        state.motion_active=false;stop_native_step(handle,state);
+        staged_playback::publish(api,handle,state.token,staged_playback::failed);
+        record("exterior_callback_missing",handle,cookie,time,state.calls);return;
+    }
 #endif
 #ifdef HORNET_RECORDED_PROTOTYPE
     if(!state.motion_active && state.step_hook) stop_native_step(handle,state);
@@ -288,6 +353,17 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #endif
 #ifdef HORNET_STAGED_PROTOTYPE
     if(!state.motion_attempted && !state.path.samples.empty())speedbrake=state.path.brake_at(0);
+    if(state.path.has_exterior) {
+        state.exterior_elapsed=state.motion_active?time-state.start_time:0;
+        state.exterior=state.path.at_sample(state.exterior_elapsed).exterior;
+        api->ed_set_single_arg(handle,996,static_cast<float>(state.exterior_elapsed/1000));
+        state.exterior_pending=hornet_appearance::apply_exterior(api,handle,state.runtime_id,state.exterior);
+        if(!state.exterior_pending) {
+            state.motion_attempted=true;state.motion_active=false;stop_native_step(handle,state);
+            staged_playback::publish(api,handle,state.token,staged_playback::failed);
+            record("exterior_write_failed",handle,cookie,time,state.calls);return;
+        }
+    }
     const auto appearance_status=hornet_appearance::apply(api,handle,speedbrake,state.runtime_id);
     if(std::strcmp(appearance_status,"off_verified") && std::strcmp(appearance_status,"recorded_brake_verified")) {
         state.motion_attempted=true;state.motion_active=false;stop_native_step(handle,state);
@@ -376,7 +452,11 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #ifdef HORNET_RECORDED_PROTOTYPE
         if(!release && std::strcmp(status,"called")==0) {
             if(!state.step_hook) {
+#ifdef HORNET_STAGED_PROTOTYPE
+                state.step_status=install_native_step(handle,state.path.has_exterior);
+#else
                 state.step_status=install_native_step(handle);
+#endif
                 state.step_hook=std::strcmp(state.step_status,"step_hook_installed")==0;
                 record(state.step_status,handle,cookie,time,state.calls);
             }
@@ -412,11 +492,12 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         if(release || std::string(status)!="called") state.motion_active=false;
 #ifdef HORNET_STAGED_PROTOTYPE
         if(state.motion_active) {
-            const auto phase=finished?staged_playback::complete:staged_playback::running;
+            state.exterior_finished=finished && state.path.has_exterior;
+            const auto phase=finished && !state.path.has_exterior?staged_playback::complete:staged_playback::running;
             if(!staged_playback::publish(api,handle,state.token,phase)) {
                 record("staged_status_readback_failed",handle,cookie,time,state.calls);
                 state.motion_active=false;
-            } else if(finished) {
+            } else if(finished && !state.path.has_exterior) {
                 state.terminal=true;state.motion_active=false;
                 record("staged_complete",handle,cookie,time,state.calls);
             } else if(elapsed==0)record("staged_started",handle,cookie,time,state.calls);

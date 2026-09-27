@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstddef>
 #include "ed_object_access.h"
+#include "hornet_exterior.h"
 
 namespace hornet_appearance {
 // Prototype defaults, not recorded-flight animation playback. SDK callbacks
@@ -20,5 +21,17 @@ inline const char* apply(const ed_object_api_entry* api,ED_OBJECT_HANDLE handle,
     if(!after.data || after.size<=212) return "readback_unavailable";
     for(int index:off_arguments) if(after.data[index]!=(index==21?speedbrake:0.0f)) return "readback_mismatch";
     return speedbrake==0?"off_verified":"recorded_brake_verified";
+}
+inline bool apply_exterior(const ed_object_api_entry* api,ED_OBJECT_HANDLE handle,uint64_t id,const hornet_exterior::Values& values) {
+    if(!handle || !id || !api || !api->ed_get_object_id || !api->ed_get_object_args || !api->ed_set_single_arg ||
+       api->ed_get_object_id(handle)!=id || !hornet_exterior::valid(values))return false;
+    auto view=api->ed_get_object_args(handle);
+    if(!view.data || view.size<=18)return false;
+    for(size_t i=0;i<values.size();++i)api->ed_set_single_arg(handle,hornet_exterior::channels[i],static_cast<float>(values[i]));
+    view=api->ed_get_object_args(handle);
+    if(!view.data || view.size<=18)return false;
+    for(size_t i=0;i<values.size();++i)
+        if(view.data[hornet_exterior::channels[i]]!=static_cast<float>(values[i]))return false;
+    return true;
 }
 }

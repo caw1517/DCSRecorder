@@ -47,9 +47,11 @@ local function write(text,mode)
  pump()
 end
 local meta='DCSREC,1\naircraft,FA-18C_hornet\nlivery,Blue Angels Jet Team\ntheatre,Caucasus\nsource,Observer\n'
+if arg[4]=='v2' then meta=meta:gsub('DCSREC,1','DCSREC,2')..'state_profile,hornet-exterior-v1\n' end
 local hex=meta:gsub('.',function(c)return string.format('%02x',string.byte(c))end)
 local function emit(text)write('INFO SCRIPTING: DCSREC_LOG,1,'..text..'\n')end
 local row='10,0,2000,0,1,0,0,0,1,0,0,0,1,220,0,0,0,,'
+if arg[4]=='v2' then row=row..',0.1,0.2,0.3,-0.4,-0.5,0.6,-0.7,0.8,-0.9,0.4,-0.3,0.2,-0.1' end
 write('', 'wb')
 emit('BEGIN,1,'..hex);emit('DATA,1,1,'..row)
 -- Partial final line must not be consumed until completed.

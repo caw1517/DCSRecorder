@@ -5,11 +5,14 @@
 
 // Experimental, single-object shadow table. The shared DCS table and executable
 // pages are never modified. All slots and the RTTI locator are preserved except
-// the verified void physics_step(this) slot. Storage lasts for the DLL lifetime.
+// the verified physics_step(this) and optional animation(this,dt,update) slots.
+// One owner restores both slots together. Storage lasts for the DLL lifetime.
 namespace native_step_hook {
 inline constexpr size_t slots=0xdf0/sizeof(uintptr_t);
 inline constexpr size_t step_slot=0xc70/sizeof(uintptr_t);
+inline constexpr size_t animation_slot=0xc10/sizeof(uintptr_t);
 using Step=void(*)(void*);
+using Animation=void(*)(void*,double,bool);
 using Before=void(*)(const void*);
 inline std::mutex mutex;
 inline std::array<uintptr_t,slots+1> shadow{};
@@ -17,6 +20,8 @@ inline uintptr_t owner=0,original_table=0;
 inline Step original_step=nullptr;
 inline Before before_step=nullptr;
 inline Before after_step=nullptr;
+inline Animation original_animation=nullptr;
+inline Before after_animation=nullptr;
 inline DWORD owner_thread=0;
 inline uintptr_t table() { return reinterpret_cast<uintptr_t>(shadow.data()+1); }
 
@@ -44,6 +49,17 @@ inline void dispatch(void* object) {
     }
     if(after) after(reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(object)+8));
 }
+inline void dispatch_animation(void* object,double dt,bool update) {
+    Animation next=nullptr;
+    { std::lock_guard<std::mutex> guard(mutex);next=original_animation; }
+    if(next)next(object,dt,update);
+    Before after=nullptr;
+    {
+        std::lock_guard<std::mutex> guard(mutex);
+        if(owner==reinterpret_cast<uintptr_t>(object) && owner_thread==GetCurrentThreadId())after=after_animation;
+    }
+    if(after)after(reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(object)+8));
+}
 inline bool writable_pointer(uintptr_t address) {
     MEMORY_BASIC_INFORMATION region{};
     return address%alignof(uintptr_t)==0 && VirtualQuery(reinterpret_cast<void*>(address),&region,sizeof(region)) &&
@@ -53,7 +69,8 @@ inline bool writable_pointer(uintptr_t address) {
 }
 // Caller first verifies aircraft identity, runtime ID, null FM, altitude, motion
 // bounds, and this DCS build's table boundary, integrator, and callsite bytes.
-inline const char* install(uintptr_t object,uintptr_t expected_table,Step expected_step,Before before,Before after=nullptr) {
+inline const char* install(uintptr_t object,uintptr_t expected_table,Step expected_step,Before before,Before after=nullptr,
+                           Animation animation=nullptr,Before animation_after=nullptr) {
     std::lock_guard<std::mutex> guard(mutex);
     if(owner) return "step_hook_busy";
     uintptr_t current=0;
@@ -63,14 +80,18 @@ inline const char* install(uintptr_t object,uintptr_t expected_table,Step expect
     std::array<uintptr_t,slots+1> copy{};
     if(!native_identity::read(expected_table-sizeof(uintptr_t),copy) ||
        copy[step_slot+1]!=reinterpret_cast<uintptr_t>(expected_step)) return "step_hook_table_rejected";
+    if(bool(animation)!=bool(animation_after) ||
+       (animation && copy[animation_slot+1]!=reinterpret_cast<uintptr_t>(animation)))return "animation_hook_table_rejected";
     shadow=copy;
     shadow[step_slot+1]=reinterpret_cast<uintptr_t>(&dispatch);
+    if(animation)shadow[animation_slot+1]=reinterpret_cast<uintptr_t>(&dispatch_animation);
+    original_animation=animation;after_animation=animation_after;
     original_step=expected_step; before_step=before; after_step=after; original_table=expected_table;
     owner_thread=GetCurrentThreadId(); owner=object;
     const auto prior=InterlockedCompareExchangePointer(reinterpret_cast<void* volatile*>(object),
         reinterpret_cast<void*>(table()),reinterpret_cast<void*>(expected_table));
     if(reinterpret_cast<uintptr_t>(prior)!=expected_table) {
-        owner=0; before_step=nullptr; after_step=nullptr; return "step_hook_install_raced";
+        owner=0; before_step=nullptr; after_step=nullptr; after_animation=nullptr;return "step_hook_install_raced";
     }
     return "step_hook_installed";
 }
@@ -80,6 +101,7 @@ inline const char* restore(uintptr_t object) {
     if(owner!=object || owner_thread!=GetCurrentThreadId()) return "step_hook_restore_owner_rejected";
     before_step=nullptr;
     after_step=nullptr;
+    after_animation=nullptr;
     if(!writable_pointer(object)) return "step_hook_restore_unwritable";
     const auto prior=InterlockedCompareExchangePointer(reinterpret_cast<void* volatile*>(object),
         reinterpret_cast<void*>(original_table),reinterpret_cast<void*>(table()));

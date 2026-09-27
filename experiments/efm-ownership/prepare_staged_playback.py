@@ -20,24 +20,27 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     if abs(math.asin(max(-1,min(1,float(r['fy'])))))>math.radians(10) or float(r['uy'])<math.cos(math.radians(10)):
         raise ValueError('Current staged airborne test requires a near-level first sample')
     if output.exists():raise ValueError('Use a fresh output directory; prior packages are preserved')
-    dll=ROOT/'build/Release/HornetStagedProbe.dll'
+    module='DCSRecorder-Hornet-State-Staged' if metadata['exterior_available'] else 'DCSRecorder-Hornet-Staged'
+    binary='HornetStateStagedProbe' if metadata['exterior_available'] else 'HornetStagedProbe'
+    dll=ROOT/'build/Release'/f'{binary}.dll'
     for file in (baseline,dll,donor_mod/'entry.lua',donor_mod/'aircraft.lua'):
         if not file.is_file():raise ValueError(f'Missing preparation dependency: {file}')
     output.mkdir(parents=True)
-    mod=output/'DCSRecorder-Hornet-Staged';(mod/'bin').mkdir(parents=True)
+    mod=output/module;(mod/'bin').mkdir(parents=True)
     convert(recording,mod/'bin/recorded-flight.txt')
     token=fingerprint((mod/'bin/recorded-flight.txt').read_bytes())
     config=dict(x=first[1],y=first[2],z=first[3],heading=math.atan2(float(r['fz']),float(r['fx'])),
                 speed=math.sqrt(sum(v*v for v in first[8:11])),duration=metadata['duration'],
-                token_high=((token>>40)&0xffffff)/16777216,token_low=(token&0xffffff)/16777216)
-    (output/'config.lua').write_text('return {\n'+''.join(f'[{json.dumps(k)}]={v!r},\n' for k,v in config.items())+'}\n')
+                token_high=((token>>40)&0xffffff)/16777216,token_low=(token&0xffffff)/16777216,
+                aircraft=module,exterior=1 if metadata['exterior_available'] else 0)
+    (output/'config.lua').write_text('return {\n'+''.join(f'[{json.dumps(k)}]={json.dumps(v)},\n' for k,v in config.items())+'}\n')
     for name in ('entry.lua','aircraft.lua'):
-        text=(donor_mod/name).read_text(encoding='utf-8-sig').replace('DCSRecorder-Hornet-Probe','DCSRecorder-Hornet-Staged')
-        if name=='entry.lua':text=text.replace('HornetProbe','HornetStagedProbe')
+        text=(donor_mod/name).read_text(encoding='utf-8-sig').replace('DCSRecorder-Hornet-Probe',module)
+        if name=='entry.lua':text=text.replace('HornetProbe',binary)
         (mod/name).write_text(text,encoding='utf-8')
     for name in ('Cockpit','Datalinks','Liveries'):shutil.copytree(donor_mod/name,mod/name)
-    (mod/'Liveries/DCSRecorder-Hornet-Probe').rename(mod/'Liveries/DCSRecorder-Hornet-Staged')
-    shutil.copy2(dll,mod/'bin/HornetStagedProbe.dll')
+    (mod/'Liveries/DCSRecorder-Hornet-Probe').rename(mod/'Liveries'/module)
+    shutil.copy2(dll,mod/'bin'/f'{binary}.dll')
     shutil.copy2(recording,output/'source-recording.csv')
     with zipfile.ZipFile(baseline) as source:(output/'baseline.lua').write_bytes(source.read('mission'))
     def lua(script,*args):
@@ -50,7 +53,8 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     with zipfile.ZipFile(baseline) as source,zipfile.ZipFile(mission,'w',zipfile.ZIP_DEFLATED) as target:
         for entry in source.infolist():target.writestr(entry,(output/'mission').read_bytes() if entry.filename=='mission' else source.read(entry.filename))
     manifest={'status':'Prepared; native/mission handshake and live exact-start validation pending',
-              'dcs_build':actual,'profile':'staged-v1','recording':metadata,'initial':config,
+              'dcs_build':actual,'profile':'staged-exterior-v1' if metadata['exterior_available'] else 'staged-v1',
+              'module':module,'binary':binary,'recording':metadata,'initial':config,
               'files':{p.relative_to(output).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in output.rglob('*') if p.is_file()}}
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     return manifest

@@ -15,6 +15,14 @@ local function sample(name)
     local p,v=u:getPosition(),u:getVelocity()
     env.info(string.format('DCS_PLAYBACK_SAMPLE,%s,%s,%.6f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.6f',
         s.phase,name,timer.getTime(),p.p.x,p.p.y,p.p.z,p.x.x,p.x.y,p.x.z,p.y.x,p.y.y,p.y.z,v.x,v.y,v.z,u:getDrawArgumentValue(21)))
+    if c.exterior==1 and name=='StagedPlayback' then
+        local values={}
+        for _,channel in ipairs({0,3,5,9,10,11,12,13,14,15,16,17,18,21}) do
+            values[#values+1]=string.format('%.9g',u:getDrawArgumentValue(channel))
+        end
+        env.info(string.format('DCS_PLAYBACK_EXTERIOR,%s,%.9f,%.9f,%s',s.phase,timer.getTime(),
+            1000*u:getDrawArgumentValue(996),table.concat(values,',')))
+    end
 end
 local function tick()
     if s.phase=='starting' or s.phase=='playing' then

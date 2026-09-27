@@ -49,6 +49,31 @@ int main() {
         require(args[0]==0 && args[21]==0,"status transport leaves aircraft animation arguments alone");
         require(std::string(hornet_appearance::apply(&api,handle,0.4f,id))=="recorded_brake_verified","late-activation runtime ID accepted explicitly");
         const int before=writes;require(std::string(hornet_appearance::apply(&api,handle,0.4f,id+1))=="wrong_object" && writes==before,"different runtime ID rejected");
+        {std::ofstream out(file);out<<std::setprecision(16)<<"DCSREC_PLAYBACK_V2\n301\nhornet-exterior-v1\n";
+         for(int i=0;i<=300;++i) {const double t=i*.02;
+             out<<t<<' '<<1000+220*t<<" 2000 500 ";for(double v:q)out<<v<<' ';
+             out<<"220 0 0 0.4";
+             for(size_t k=0;k<hornet_exterior::channels.size();++k)out<<' '<<(k<3?.2+t/100:-.6+t/10+k/100.0);
+             out<<'\n';}}
+        require(std::string(path.load(file))=="recording_loaded" && path.has_exterior,"v2 profile load");
+        require(path.initialize_exact(spawn),"v2 exact initial state");
+        for(double t:{0.,.01,2.375,6.,8.}) {
+            const auto sample=path.at_sample(t);const double bounded=std::min(t,6.);
+            for(size_t k=0;k<sample.exterior.size();++k)
+                require(std::abs(sample.exterior[k]-(k<3?.2+bounded/100:-.6+bounded/10+k/100.0))<1e-12,"signed channel initial/interpolated/endpoint value");
+            require(hornet_appearance::apply_exterior(&api,handle,id,sample.exterior),"exterior apply/readback");
+            require(args[21]==0.4f && args[50]==0,"exterior adapter altered unrelated state");
+        }
+        auto values=path.at_sample(0).exterior;values[0]=-0.1;
+        const int unchanged=writes;
+        require(!hornet_appearance::apply_exterior(&api,handle,id,values) && writes==unchanged,"invalid gear wrote partial state");
+        values=path.at_sample(0).exterior;
+        require(!hornet_appearance::apply_exterior(&api,handle,id+1,values) && writes==unchanged,"wrong identity wrote exterior");
+        view_size=18;require(!hornet_appearance::apply_exterior(&api,handle,id,values) && writes==unchanged,"short exterior view wrote partial state");view_size=1000;
+        {std::ofstream out(file);out<<"DCSREC_PLAYBACK_V2\n301\nunknown\n";}
+        require(std::string(path.load(file))=="recording_profile_rejected" && !path.has_exterior && path.samples.empty(),"unknown profile retained stale state");
+        {std::ofstream out(file);out<<"DCSREC_PLAYBACK_V2\n301\nhornet-exterior-v1\n0 0 2000 0 1 0 0 0 220 0 0 .4 -1";}
+        require(std::string(path.load(file))=="recording_exterior_rejected" && path.samples.empty(),"truncated state accepted");
         std::filesystem::remove(file);
         std::cout<<"PASS: exact pose/velocity/brake, original world path, bounded correction, legacy regression, tape fingerprint, status bounds/readback and explicit runtime identity. Not a live DCS handshake test.\n";
     }catch(const std::exception& e){std::filesystem::remove(file);std::cerr<<e.what()<<'\n';return 1;}

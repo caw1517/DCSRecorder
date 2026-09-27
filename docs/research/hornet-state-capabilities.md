@@ -8,14 +8,16 @@ The matrix began as an interface inspection. A subsequent
 confirmed readable responses for the selected exterior channels. The subsequent
 [isolated stabilator replay](../../experiments/efm-ownership/results/stabilator-animation-2026-09-27/README.md)
 passed visual review and retained-trace checks. The matrix below describes the
-main recording/playback pipeline; the isolated actuator is not yet integrated.
+recording/playback implementation and its validation status. The integrated
+exterior controller is now installed for a fresh synchronized live comparison.
 
 ## Result
 
-The present recording/playback pipeline carries motion and speed brake only.
-The two RPM columns in the CSV are empty placeholders; conversion does not read
-them into the native tape. Gear, flaps, surfaces, lights, smoke and engine state
-cannot be recovered from those recordings. Preserve the originals.
+Legacy version-one recordings carry motion and speed brake only and remain
+unchanged. Version-two recordings add the thirteen gear/flap/control-surface
+channels under `hornet-exterior-v1`, on the same sample clock. The integrated
+controller and companion path pass offline tests; fresh live validation is
+pending. RPM fields remain empty, and lights/smoke/engine state are not captured.
 
 The installed object SDK exposes bounded animation-array reads and individual
 animation writes. This is a credible route for exterior animation. It exposes
@@ -32,12 +34,12 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | --- | --- | --- | --- |
 | Type and livery | Mission recorder stores `getTypeName()` and mission livery. | Staged packager rejects types other than `FA-18C_hornet` and liveries other than `Blue Angels Jet Team`. | Supported bounded identity; no silent substitution. F-16/F-15 registrations remain unsupported. |
 | Speed brake | Mission recorder reads argument 21 each sample. | Tape includes brake; `hornet_appearance::apply` writes 21 and checks immediate readback. | Existing implemented channel. Retain it as the control in new comparisons. |
-| Gear | Hornet FM configuration identifies strut deployment arguments 0 (nose), 5 (left), 3 (right). Mission argument reads are the candidate capture route. | SDK can write individual arguments; these arguments are not currently written by the appearance adapter. | Not recorded/replayed. Verify extension direction, doors and transition timing; animated deployment does not prove ground contact. |
+| Gear | Live capture confirmed arguments 0 (nose), 5 (left), 3 (right). | Isolated SDK replay visually accepted. | Version-two capture/replay implemented; combined motion/state validation pending. Animated deployment does not prove ground contact. |
 | Gear compression / wheels | FM configuration identifies compression 1/6/4 and rotation 101/103/102 in nose/left/right order. | Same candidate argument route. | Not recorded/replayed. Rotation wrap and contact behavior need separate handling; do not interpolate wrapped rotations naively. |
 | Canopy opening / closing | Explicitly requested by the user; no validated Hornet exterior mapping established in this inspection. | Candidate argument route, pending mapping and live test. | Not captured/replayed. Include the initial canopy position and transitions; opening animation does not establish jettison or internal cockpit-system replay. |
-| Leading-edge flaps | Hornet descriptor explicitly labels 13 right and 14 left. | Candidate argument writes. | Not recorded/replayed. Validate range and actual rendered response under stock flight-control scheduling. |
-| Trailing-edge flaps | Descriptor's `ColdStartDefaultControls` labels keys 9/10 as flaps. | Candidate argument writes. | Not recorded/replayed. Controlled stock-aircraft observation must confirm left/right meaning, ranges and motion. |
-| Ailerons / elevators / rudders | Descriptor's `ColdStartDefaultControls` identifies aileron keys 11/12, elevators 15/16, rudders 17/18. Aileron comments contain inconsistent bracketed numbers, so use keys as candidates and verify visually. | Candidate argument writes. | Not recorded/replayed. Verify sign, range, left/right meaning and coupled surface behavior; retain signed values. |
+| Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Version-two capture/replay implemented; combined motion/state validation pending. |
+| Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two capture/replay implemented; combined motion/state validation pending. |
+| Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two capture/replay implemented; combined motion/state validation pending. |
 | Exterior lights | Descriptor identifies formation 88; navigation 190/191/192; strobe 193; landing/taxi 210; refuel 212. | Existing adapter writes every listed channel to zero on each invocation. | Off-only behavior. Capture brightness and transitions; validate strobe phase and actual illumination independently of immediate readback. |
 | Demonstration smoke | Hornet descriptor lists selectable `INV-SMOKE-*` stores. This establishes configuration availability, not an emitter-state capture API. | No verified emitter setter found in inspected object SDK. | Unsupported in current pipeline. Determine actual source loadout, color, emitter enable and timing; do not confuse gun smoke with demonstration smoke. |
 | Engine RPM, left/right | Installed `Scripts/Export.lua` documents `LoGetEngineInfo().RPM.left/right` as percentages. Current mission-only capture does not use it. | Object SDK has no RPM setter. Ordinary EFM callbacks expose RPM-related parameters, but their execution on this unoccupied object is not established. | Capture candidate in Export context; not wired or tested. Need clock/aircraft identity alignment with mission samples and an independently proven playback actuator. |
@@ -49,11 +51,11 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 
 Repository files (relative links resolve at this report's revision):
 
-- [Mission sampler](../../experiments/efm-ownership/record_flight_mission.lua): `r.sample` reads pose, velocity and argument 21; emitted rows append two empty fields.
-- [Durable sink](../../companion/recording_sink.lua): fixed version-one CSV columns, including the two RPM placeholders.
-- [Converter](../../experiments/efm-ownership/recorded_flight.py): exact version/column checks; native samples contain only motion and brake.
-- [Native tape reader](../../experiments/efm-ownership/recorded_path.h): `DCSREC_PLAYBACK_V1`, `Sample` and `Path::load`.
-- [Appearance adapter](../../experiments/efm-ownership/hornet_appearance.h): identity/bounds guards, light suppression, argument write/readback.
+- [Mission sampler](../../experiments/efm-ownership/record_flight_mission.lua): one callback samples pose, velocity, brake and thirteen exterior arguments; RPM fields remain empty.
+- [Durable sink](../../companion/recording_sink.lua): version-one and version-two CSV columns, including the two RPM placeholders.
+- [Converter](../../experiments/efm-ownership/recorded_flight.py): exact version/profile/column checks; version two adds signed exterior values to native samples.
+- [Native tape reader](../../experiments/efm-ownership/recorded_path.h): `DCSREC_PLAYBACK_V1`/`V2`, `Sample` and `Path::load`.
+- [Appearance adapter](../../experiments/efm-ownership/hornet_appearance.h): identity/bounds guards, light suppression, brake and exterior argument write/readback.
 - [Staged packager](../../experiments/efm-ownership/prepare_staged_playback.py): explicit type/livery/build restrictions and source-copy preservation.
 - [AI ownership experiment](../../experiments/efm-ownership/results/ai-2026-09-23/README.md) and [object lifecycle experiment](../../experiments/efm-ownership/results/object-lifecycle-2026-09-23/README.md): historical evidence on DCS 2.9.29.27278 separates ordinary EFM execution from object callbacks. It is not fresh engine-state validation on the current build.
 

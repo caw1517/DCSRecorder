@@ -2,6 +2,7 @@
 if DCSRECORDER then return end
 DCSRECORDER={state='idle',take=0,source='Observer'}
 local r=DCSRECORDER
+local exterior_channels={0,3,5,9,10,11,12,13,14,15,16,17,18}
 local function csv(s) return '"'..tostring(s):gsub('"','""')..'"' end
 function r.metadata()
     local u=Unit.getByName(r.source)
@@ -15,8 +16,9 @@ function r.metadata()
         end end
     end
     if not livery then return nil end
-    return 'DCSREC,1\naircraft,'..csv(u:getTypeName())..'\nlivery,'..csv(livery)..
-        '\ntheatre,'..csv(env.mission.theatre)..'\nsource,'..csv(r.source)..'\n'
+    if u:getTypeName()~='FA-18C_hornet' then return nil end
+    return 'DCSREC,2\naircraft,'..csv(u:getTypeName())..'\nlivery,'..csv(livery)..
+        '\ntheatre,'..csv(env.mission.theatre)..'\nstate_profile,hornet-exterior-v1\nsource,'..csv(r.source)..'\n'
 end
 function r.sample()
     if r.state~='recording' then return 'IDLE' end
@@ -29,7 +31,14 @@ function r.sample()
         if value~=value or value==math.huge or value==-math.huge then return 'INVALID' end
         values[i]=string.format('%.12g',value)
     end
-    return 'DATA,'..r.take..','..table.concat(values,',')
+    local state={}
+    for i,c in ipairs(exterior_channels) do
+        local value=u:getDrawArgumentValue(c)
+        local minimum=i<=3 and 0 or -1
+        if type(value)~='number' or value~=value or value<minimum or value>1 then return 'INVALID' end
+        state[i]=string.format('%.12g',value)
+    end
+    return 'DATA,'..r.take..','..table.concat(values,',')..',,,'..table.concat(state,',')
 end
 local function emit(message) env.info('DCSREC_LOG,1,'..message) end
 local function stop(reason)
@@ -48,7 +57,7 @@ local function tick()
     local now=timer.getTime()
     if not r.last_time or now>r.last_time then
         r.rows=r.rows+1;r.last_time=now
-        emit('DATA,'..number..','..r.rows..','..values..',,')
+        emit('DATA,'..number..','..r.rows..','..values)
     end
     return now+0.02
 end

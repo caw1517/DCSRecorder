@@ -6,6 +6,7 @@ from prepare_recording import ROOT,DCS,BASE,lua,checks,pack
 
 def prepare(recording,output):
     metadata,samples,raw=read(recording)
+    if metadata['exterior_available']:raise ValueError('Exterior recordings require the staged playback packager')
     # The first live prototype has one available livery registered for its custom type.
     # Do not silently substitute another livery if the mission was edited.
     if metadata['livery']!='Blue Angels Jet Team':

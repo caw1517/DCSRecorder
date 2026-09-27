@@ -96,4 +96,49 @@ class LibraryTests(unittest.TestCase):
             self.assertEqual(rows[-1],['END','user_stop','2'])
         self.assertEqual(len(list((saved/'DCSRecorder/recordings').glob('*.partial'))),3)
 
+    def test_v2_sink_preserves_signed_surface_columns(self):
+        saved=self.root/'v2-hook'; (saved/'Logs').mkdir(parents=True); (saved/'DCSRecorder/recordings').mkdir(parents=True)
+        result=subprocess.run(['D:/DCS World/bin/luae.exe',str(Path(__file__).with_name('test_recording_sink.lua')),str(Path(__file__).with_name('recording_sink.lua')),str(saved),'dcs_void_io','v2'],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        files=list((saved/'DCSRecorder/recordings').glob('*.csv'))
+        self.assertEqual(len(files),2)
+        for file in files:
+            with file.open() as stream: rows=list(csv.reader(stream))
+            self.assertEqual(rows[0],['DCSREC','2'])
+            header=next(i for i,row in enumerate(rows) if row[0]=='t')
+            self.assertEqual(len(rows[header]),32)
+            self.assertEqual(dict(zip(rows[header],rows[header+1]))['arg_9'],'-0.4')
+
+    def test_exterior_activation_preserves_legacy_controller_and_tape(self):
+        module='DCSRecorder-Hornet-State-Staged';binary='HornetStateStagedProbe'
+        output=self.root/'exterior-package'; incoming=output/module/'bin';incoming.mkdir(parents=True)
+        mod=self.library.saved/'Mods/aircraft'/module/'bin';mod.mkdir(parents=True)
+        legacy=self.library.saved/'Mods/aircraft/DCSRecorder-Hornet-Staged/bin';legacy.mkdir(parents=True)
+        (legacy/'recorded-flight.txt').write_text('accepted legacy tape')
+        (legacy/'HornetStagedProbe.dll').write_text('accepted legacy controller')
+        for name in (binary+'.dll','recorded-flight.txt','recorded-flight.json'):(incoming/name).write_text('new')
+        (mod/(binary+'.dll')).write_text('new')
+        (output/'DCSRecorder-Staged-Playback.miz').write_text('mission')
+        manifest={'module':module,'binary':binary,'files':{p.relative_to(output).as_posix():digest(p) for p in output.rglob('*') if p.is_file()}}
+        self.library.activate(output,manifest,'exterior-test')
+        self.assertEqual((mod/'recorded-flight.txt').read_text(),'new')
+        self.assertEqual((legacy/'recorded-flight.txt').read_text(),'accepted legacy tape')
+        self.assertEqual((legacy/'HornetStagedProbe.dll').read_text(),'accepted legacy controller')
+
+    def test_exterior_activation_preserves_legacy_controller_and_tape(self):
+        module='DCSRecorder-Hornet-State-Staged';binary='HornetStateStagedProbe'
+        output=self.root/'exterior-package'; incoming=output/module/'bin';incoming.mkdir(parents=True)
+        mod=self.library.saved/'Mods/aircraft'/module/'bin';mod.mkdir(parents=True)
+        legacy=self.library.saved/'Mods/aircraft/DCSRecorder-Hornet-Staged/bin';legacy.mkdir(parents=True)
+        (legacy/'recorded-flight.txt').write_text('accepted legacy tape')
+        (legacy/'HornetStagedProbe.dll').write_text('accepted legacy controller')
+        for name in (binary+'.dll','recorded-flight.txt','recorded-flight.json'):(incoming/name).write_text('new')
+        (mod/(binary+'.dll')).write_text('new')
+        (output/'DCSRecorder-Staged-Playback.miz').write_text('mission')
+        manifest={'module':module,'binary':binary,'files':{p.relative_to(output).as_posix():digest(p) for p in output.rglob('*') if p.is_file()}}
+        self.library.activate(output,manifest,'exterior-test')
+        self.assertEqual((mod/'recorded-flight.txt').read_text(),'new')
+        self.assertEqual((legacy/'recorded-flight.txt').read_text(),'accepted legacy tape')
+        self.assertEqual((legacy/'HornetStagedProbe.dll').read_text(),'accepted legacy controller')
+
 if __name__=='__main__':unittest.main()

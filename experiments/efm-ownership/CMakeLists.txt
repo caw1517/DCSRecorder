@@ -101,3 +101,11 @@ add_executable(state_animation_check state-prototype/check_animation.cpp)
 target_compile_features(state_animation_check PRIVATE cxx_std_17)
 target_compile_definitions(state_animation_check PRIVATE NOMINMAX)
 add_test(NAME stabilator_animation_boundary COMMAND state_animation_check)
+
+# Integrated exterior + motion controller, deployed separately from accepted v1.
+add_library(HornetStateStagedProbe SHARED probe.cpp object_probe.cpp)
+target_include_directories(HornetStateStagedProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetStateStagedProbe PRIVATE HORNET_PROTOTYPE HORNET_RECORDED_PROTOTYPE HORNET_STAGED_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetStateStagedProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetStateStagedProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_test(NAME exterior_staged_callback_contract COMMAND probe_check $<TARGET_FILE:HornetStateStagedProbe>)

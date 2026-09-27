@@ -1,6 +1,6 @@
 -- Mission lifecycle checks with an explicit fake controller, not a DCS runtime test.
 local script=assert(arg[1])
-local function session()
+local function session(exterior)
     local test={now=0,status=0,exists=false,removed=0,jobs={},commands={},events={},high=0.123,low=0.456}
     local unit={}
     function unit:isExist()return test.exists end
@@ -16,7 +16,7 @@ local function session()
     local player={isExist=function()return true end,getDrawArgumentValue=function()return 0 end,
         getPosition=unit.getPosition,getVelocity=unit.getVelocity,
         destroy=function()error('Playback destroyed player')end}
-    local e=setmetatable({DCS_STAGED_CONFIG={duration=6,token_high=0.123,token_low=0.456},
+    local e=setmetatable({DCS_STAGED_CONFIG={duration=6,token_high=0.123,token_low=0.456,exterior=exterior},
         DCSRECORDER={state='recording'},
         Unit={getByName=function(n)if n=='Observer' then return player else return unit end end},
         env={info=function(text)test.events[#test.events+1]=text end},
@@ -58,4 +58,8 @@ assert(missing.e.DCS_STAGED_PLAYBACK.phase=='failed' and missing.removed==1,'no 
 local stale=session();stale.start();stale.status=0.25;stale.until_time(22)
 assert(stale.e.DCS_STAGED_PLAYBACK.phase=='failed' and stale.removed==1,'lost completion watchdog')
 local reset=session();assert(reset.e.DCS_STAGED_PLAYBACK.phase=='waiting','new mission state not reset')
+local surfaces=session(1);surfaces.start();surfaces.status=0.25;surfaces.until_time(13.49)
+assert(table.concat(surfaces.events,'\n'):find('DCS_PLAYBACK_EXTERIOR,playing',1,true),'missing later exterior observation')
+surfaces.until_time(19.45);surfaces.status=0.5;surfaces.until_time(19.49)
+assert(surfaces.removed==1 and surfaces.e.DCS_STAGED_PLAYBACK.phase=='complete','exterior completion failed')
 print('PASS: delayed release, duplicate F10, controller handshake, pause clock, completion without ending recording, mismatch/native-error/timeouts, mission state reset. Mock lifecycle only.')

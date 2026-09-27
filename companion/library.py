@@ -75,7 +75,7 @@ class Library:
                     pass
             try:
                 metadata = self.validate(path)
-                item.update(supported=True, duration=metadata['duration'], reason='Ready for playback')
+                item.update(supported=True, duration=metadata['duration'], reason='Ready for playback' if metadata['exterior_available'] else 'Ready for playback; exterior surfaces were not recorded')
             except (ValueError, OSError, OverflowError) as exc:
                 item['reason'] = str(exc)
             result.append(item)
@@ -104,7 +104,7 @@ class Library:
         destination = self.saved / 'Missions' / ('DCSRecorder-Practice-' + uuid.uuid4().hex[:8] + '.miz')
         script = (EXPERIMENT / 'record_flight_mission.lua').read_text(encoding='utf-8-sig')
         # Metadata and wording are specific to the app-generated practice mission.
-        script = script.replace("'\\nsource,'..csv(r.source)..'\\n'", "'\\nsource,'..csv(r.source)..'\\ncapture_build," + SUPPORTED_BUILD + "\\nwind_ground,'..tostring(env.mission.weather.wind.atGround.speed)..'\\nwind_2000,'..tostring(env.mission.weather.wind.at2000.speed)..'\\nwind_8000,'..tostring(env.mission.weather.wind.at8000.speed)..'\\n'")
+        script = script.replace("csv(r.source)..'\\n'", "csv(r.source)..'\\ncapture_build," + SUPPORTED_BUILD + "\\nwind_ground,'..tostring(env.mission.weather.wind.atGround.speed)..'\\nwind_2000,'..tostring(env.mission.weather.wind.at2000.speed)..'\\nwind_8000,'..tostring(env.mission.weather.wind.at8000.speed)..'\\n'")
         assert 'capture_build,' in script
         script = script.replace(' samples written to DCS.log. Ready for extraction. Keep this DCS session until the recording is collected.',
                                 ' samples captured. Automatic save is pending; confirm the take appears in the companion flight library before closing DCS.')
@@ -149,13 +149,17 @@ class Library:
         return {'mission': str(mission), 'message': 'Playback mission ready. Load this mission in DCS, then F10 > DCS Recorder > Start playback. Restart the mission to replay.'}
 
     def activate(self, output, manifest, generation):
-        mod = self.saved / 'Mods/aircraft/DCSRecorder-Hornet-Staged'
+        module=manifest.get('module','DCSRecorder-Hornet-Staged')
+        binary=manifest.get('binary','HornetStagedProbe')
+        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe')):
+            raise ValueError('Unsupported playback module')
+        mod = self.saved / 'Mods/aircraft' / module
         # Install once with the tested installer. Updates replace only the tape,
         # with the previous tape retained. DLL changes require explicit setup.
         if not mod.is_dir():
             raise ValueError('The staged playback module is missing. Install the tested module before generating playback.')
-        incoming = output / 'DCSRecorder-Hornet-Staged'
-        if digest(mod / 'bin/HornetStagedProbe.dll') != digest(incoming / 'bin/HornetStagedProbe.dll'):
+        incoming = output / module
+        if digest(mod / 'bin' / (binary+'.dll')) != digest(incoming / 'bin' / (binary+'.dll')):
             raise ValueError('Installed playback controller differs from this app. Close DCS and update the module through setup.')
         for relative, expected in manifest['files'].items():
             if digest(output / relative) != expected:

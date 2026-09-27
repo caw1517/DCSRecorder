@@ -10,7 +10,7 @@ for _,country in pairs(mission.coalition.blue.country) do
         assert(#group.units==1)
         local u=group.units[1];local player=u.name=='Observer'
         assert(player or u.name=='Probe')
-        u.type=player and 'FA-18C_hornet' or 'DCSRecorder-Hornet-Staged';u.name=player and 'Observer' or 'StagedPlayback'
+        u.type=player and 'FA-18C_hornet' or (c.aircraft or 'DCSRecorder-Hornet-Staged');u.name=player and 'Observer' or 'StagedPlayback'
         u.skill=player and 'Player' or 'High'
         u.x=x-(player and 45.72*math.cos(heading) or 0)
         u.y=z-(player and 45.72*math.sin(heading) or 0)

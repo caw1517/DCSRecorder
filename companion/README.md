@@ -34,6 +34,24 @@ made. Setup refuses to silently replace a different existing save hook.
 
 ## Recording and playback
 
+New practice missions record gear, flaps and control surfaces with motion and
+speed brake in version-two CSVs (`hornet-exterior-v1`). The native tape preserves
+each signed channel and interpolates it on the motion clock. This integrated
+path is installed for live comparison; its isolated stabilator timing already
+passed visual and numeric review. Suspension/wheels, canopy, smoke, lights and
+engine/nozzle/effects/sound remain outside this captured group.
+
+Older version-one takes remain readable and unchanged. Their library detail says
+that exterior surfaces were not recorded. They use `DCSRecorder-Hornet-Staged`;
+version-two takes use the separate `DCSRecorder-Hornet-State-Staged` controller.
+Install that module and the updated autosave hook before recording version two,
+then restart DCS. Old practice missions still generate valid version-one takes.
+The companion must run from this updated checkout, not an older worktree.
+
+The packager verifies the installed controller against its corresponding build
+artifact. Build `HornetStateStagedProbe` for the new integration; replacing the
+accepted `HornetStagedProbe` artifact would require its own controller deployment.
+
 1. With DCS closed, choose Create practice mission in the app.
 2. Start DCS and load the generated DCSRecorder-Practice mission. Begin nearly
    level, then F10 > DCS Recorder > Start recording. Fly the maneuver being tested.

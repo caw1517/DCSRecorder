@@ -13,7 +13,11 @@ function unit:getPlayerName() return 'Pilot' end
 function unit:getTypeName() return 'FA-18C_hornet' end
 function unit:getPosition() return {p={x=220*now,y=2000,z=0},x={x=1,y=0,z=0},y={x=0,y=1,z=0},z={x=0,y=0,z=1}} end
 function unit:getVelocity() return {x=220,y=0,z=0} end
-function unit:getDrawArgumentValue(i) assert(i==21);return now>12 and 0.5 or 0 end
+function unit:getDrawArgumentValue(i)
+ if i==21 then return now>12 and 0.5 or 0 end
+ if i==0 or i==3 or i==5 then return (now-10)/20 end
+ assert(i>=9 and i<=18);return -0.8+(now-10)/30+i/100
+end
 local env={assert=assert,pairs=pairs,ipairs=ipairs,type=type,tostring=tostring,tonumber=tonumber,string=string,math=math,table=table,
     Unit={getByName=function(n)assert(n=='Observer');return unit end},
     timer={getTime=function()return now end,scheduleFunction=function(fn,arg,time)scheduled[#scheduled+1]={fn=fn,arg=arg,time=time} end},

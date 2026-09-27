@@ -4,7 +4,8 @@ local root = lfs.writedir() .. 'DCSRecorder/'
 assert(lfs.mkdir(root) or lfs.attributes(root, 'mode') == 'directory')
 local directory = root .. 'recordings/'
 assert(lfs.mkdir(directory) or lfs.attributes(directory, 'mode') == 'directory')
-local columns = 't,x,y,z,fx,fy,fz,ux,uy,uz,rx,ry,rz,vx,vy,vz,speedbrake,rpm_left,rpm_right\n'
+local columns = 't,x,y,z,fx,fy,fz,ux,uy,uz,rx,ry,rz,vx,vy,vz,speedbrake,rpm_left,rpm_right'
+local exterior = ',arg_0,arg_3,arg_5,arg_9,arg_10,arg_11,arg_12,arg_13,arg_14,arg_15,arg_16,arg_17,arg_18'
 local history_index, active, serial = 0, nil, 0
 local function announce(text) log.write('DCS_RECORDER_SAVE', log.INFO, text) end
 -- DCS file methods may succeed with no return values, unlike stock Lua.
@@ -47,15 +48,18 @@ local function open_take(id, hex)
     abandon('new take')
     assert(#hex <= 8192 and #hex % 2 == 0 and not hex:find('[^%x]'), 'Invalid recorder metadata')
     local metadata = hex:gsub('..', function(pair) return string.char(tonumber(pair,16)) end)
-    assert(metadata:sub(1,9) == 'DCSREC,1\n', 'Invalid recorder version')
+    local version=metadata:match('^DCSREC,([12])\n')
+    assert(version, 'Invalid recorder version')
+    if version=='2' then assert(metadata:find('\nstate_profile,hornet-exterior-v1\n',1,true),'Invalid exterior state profile') end
+    local header=columns..(version=='2' and exterior or '')..'\n'
     local filename
     repeat
         serial = serial + 1
         filename = directory .. os.date('!%Y%m%dT%H%M%SZ') .. '-' .. string.format('%04d',serial)
     until not lfs.attributes(filename .. '.partial') and not lfs.attributes(filename .. '.csv')
     local file = assert(io.open(filename .. '.partial', 'wb'))
-    active = {id=id, rows=0, file=file, name=filename, parts={metadata,columns}}
-    checked(file.write,file,metadata,columns); checked(file.flush,file)
+    active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, commas=version=='2' and 31 or 18}
+    checked(file.write,file,metadata,header); checked(file.flush,file)
     write_status('RECORDING\nRecording in progress; use F10 Stop to save.')
 end
 local function consume(line)
@@ -69,7 +73,7 @@ local function consume(line)
     if id and active and id == active.id then
         assert(tonumber(count) == active.rows + 1, 'Missing or duplicate sample')
         local _,commas = data:gsub(',','')
-        assert(commas == 18 and #data < 4096 and active.rows < 20000, 'Malformed or oversized recording')
+        assert(commas == active.commas and #data < 4096 and active.rows < 20000, 'Malformed or oversized recording')
         checked(active.file.write,active.file,data,'\n');active.parts[#active.parts+1]=data..'\n';active.rows = active.rows + 1
         if active.rows % 50 == 0 then checked(active.file.flush,active.file) end
         return

@@ -11,6 +11,7 @@ struct Aircraft {
     bool pending=false;
     int native_calls=0,restores=0;
     double stabilator=0;
+    double animation_dt=0;bool animation_update=false;
 };
 void integrate(void* object) {
     auto& aircraft=*static_cast<Aircraft*>(object);
@@ -21,6 +22,13 @@ void integrate(void* object) {
 void restore_stabilator(const void* handle) {
     auto& aircraft=*reinterpret_cast<Aircraft*>(reinterpret_cast<uintptr_t>(handle)-8);
     aircraft.stabilator=0.6;
+}
+void animate(void* object,double dt,bool update) {
+    auto& a=*static_cast<Aircraft*>(object);a.stabilator=0.01;
+    a.animation_dt=dt;a.animation_update=update;
+}
+void animation(Aircraft& a,double dt,bool update) {
+    reinterpret_cast<native_step_hook::Animation*>(a.vptr)[native_step_hook::animation_slot](&a,dt,update);
 }
 void restore_command(const void* handle) {
     auto& aircraft=*reinterpret_cast<Aircraft*>(reinterpret_cast<uintptr_t>(handle)-8);
@@ -81,6 +89,22 @@ int main() {
         step(controlled);require(controlled.stabilator==0.6,"post-step override stopped unexpectedly");
         native_step_hook::restore(reinterpret_cast<uintptr_t>(&controlled));
         step(controlled);require(controlled.stabilator==0.01,"post-step override survived restoration");
+        original[native_step_hook::animation_slot+1]=reinterpret_cast<uintptr_t>(&animate);
+        require(std::string(native_step_hook::install(reinterpret_cast<uintptr_t>(&controlled),table,&integrate,&restore_command,nullptr,&animate,&restore_stabilator))=="step_hook_installed","combined install failed");
+        controlled.velocity=0;controlled.pending=true;const auto prior=controlled.position;
+        step(controlled);animation(controlled,0.037,false);
+        require(std::abs(controlled.position-prior+.24)<1e-12 && controlled.stabilator==0.6,"motion and surfaces did not coexist");
+        require(controlled.animation_dt==0.037 && !controlled.animation_update,"animation ABI changed");
+        animation(controlled,0.011,true);require(controlled.stabilator==0.6 && controlled.animation_update,"repeat animation lost surfaces");
+        const auto combined=reinterpret_cast<uintptr_t*>(controlled.vptr);
+        for(size_t i=0;i<native_step_hook::slots;++i)
+            if(i!=native_step_hook::step_slot && i!=native_step_hook::animation_slot)require(combined[i]==original[i+1],"combined table changed another slot");
+        animation(other,0.02,true);require(other.stabilator==0.01,"combined repair changed other aircraft");
+        std::thread foreign_animation([&]{animation(controlled,0.02,true);});foreign_animation.join();
+        require(controlled.stabilator==0.01,"combined repair ran on foreign thread");
+        native_step_hook::restore(reinterpret_cast<uintptr_t>(&controlled));
+        require(controlled.vptr==table,"combined table did not restore");
+        animation(controlled,0.02,true);require(controlled.stabilator==0.01,"combined repair survived release");
         std::cout<<"PASS: native-step motion and animation phase boundaries preserve ownership and restoration. Mock boundary test; DCS validation pending.\n";
     } catch(const std::exception& e) { std::cerr<<e.what()<<'\n';return 1; }
 }
