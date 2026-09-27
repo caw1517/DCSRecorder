@@ -238,3 +238,56 @@ unchanged. Generated package and installation report are local under
 `package/sound-audibility-ready/`. Use F10 > **Sound audibility test** > **Start
 sound test**, then F2 to the lead. Report whether the control beeps and either
 afterburner phase were audible. No general playback sound fix is claimed yet.
+
+## Audibility result and return to native engine parameters
+
+The comparison completed at model time 3.78–18.78. Local `audibility-live-run/`
+contains the logs, native boundary observations and a range summary. All four
+source handles were created. The selected source reported playing during each
+phase, and all four reported stopped during the terminal phase. The user heard
+no control beeps and was uncertain about a possible later sound. This is **not**
+an accepted audio result and does not identify a specific attenuation failure.
+
+The sounder's live input values provide a separate finding (15 observations):
+
+| Input | Left range | Right range |
+| --- | --- | --- |
+| coreRPM | 0.730943–0.900000 | 0.730943–0.900000 |
+| fanRPM | 0–0.370941 | 0–0.370941 |
+| thrust | 0.288012–0.735376 | 0.288012–0.735376 |
+| flame | 1 throughout | 1 throughout |
+
+These are the playback aircraft's independently evolving sound inputs, not the
+recorded flight's engine sequence. In particular, constant `flame=1` must not be
+assumed to mean full afterburner; its precise semantics are unvalidated. No claim
+is made that source-playing state establishes an audible signal.
+
+The user clarified the intended architecture: **record engine parameters, replay
+those parameters, and let DCS derive aircraft sound**. Fixed samples and beeps
+were diagnostic controls; they are not a proposed recording format or production
+sound mixer. Further sample-routing tests are set aside. No new diagnostic was
+installed in response to this clarification.
+
+The earlier full capture already contains 979 time-associated samples of left/
+right RPM, temperature and fuel flow, alongside the measured appearance channels.
+It does not yet establish recorded thrust or fan-RPM inputs. The appearance
+actuator only replays four draw arguments; the recorded RPM has **not** been
+successfully replayed through the native engine interface. The ordinary EFM
+getter probe recorded no calls on this aircraft, so changing those return values
+would not have demonstrated parameter replay.
+
+RPM alone cannot identify afterburner in this take: the military and afterburner
+segments overlap near 99–100% RPM. These are observed segment ranges including
+transients, not a calibration curve. Use an independently validated afterburner
+state input rather than synthesizing thrust/afterburner from RPM alone.
+
+The next implementation question is a guarded per-aircraft override at the
+native engine-parameter interface, retaining DCS's normal aircraft sound renderer.
+The observed RPM getter is the primary aircraft vtable slot 0xd8 (core/fan branch),
+with thrust at 0xe0; the earlier read-only inspection connects these to the
+internal engine objects. Additional read-only Sound.dll callsite inspection found
+several engine/plane update routines consuming that slot. This is a candidate
+integration point, not a validated actuator: verify the actual consumers, units,
+per-engine selection and lifetime before installing a recorded-parameter test.
+Do not write guessed thrust values, treat nozzle/flame draw arguments as native
+engine state, or claim restored engine dynamics from sound-input substitution.

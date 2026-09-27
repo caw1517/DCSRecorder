@@ -254,3 +254,12 @@ Run `check_sounder_runtime.lua <local-loader> <audibility_probe.lua> --audibilit
 and `check_sounder_mission.lua <audibility_mission.lua> --audibility` for the
 offline dispatch/lifecycle checks. See the [live diagnosis](../results/sound-routing-2026-09-27/README.md)
 for interpretation, limitations and installed status. Listening remains required.
+
+The comparison subsequently reported sources playing in their intended phases,
+but the user heard no beeps and was uncertain about a later sound. Audibility is
+not accepted. Live sound inputs did expose independently evolving core RPM and
+thrust for both engines. The user reaffirmed **parameter recording/replay with
+DCS-derived audio**; further sample-routing diagnostics are set aside. Recorded
+RPM exists in the original capture, but has not been driven through the native
+engine interface. Investigate that interface while retaining DCS's normal sound
+renderer; do not build a production sample mixer from these diagnostic scripts.

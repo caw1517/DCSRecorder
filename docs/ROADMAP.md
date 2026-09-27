@@ -81,8 +81,12 @@ with a startup self-check. The next live run logged source creation and all five
 audio phases at their expected times, but the user still heard idle throughout.
 A separate **DCSRecorder-Sound-Audibility-Test.miz** now compares a generated
 control tone, stock samples and an explicitly defined afterburner source, with
-playing-state and engine-input logs. Live audibility remains pending; no sound
-correction is claimed. See the
+playing-state and engine-input logs. Its sources reported playing, but the user
+heard no beeps and was uncertain about other changes; audibility is not accepted.
+The user reaffirmed recording/replaying engine parameters with DCS deriving the
+sound. Sample-routing tests are set aside; investigate the native engine-parameter
+interface using the existing RPM capture and independently validated afterburner
+state. Recorded RPM has not yet been replayed through that interface. See the
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
 
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
