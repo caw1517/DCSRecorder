@@ -44,10 +44,10 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Exterior lights | Descriptor identifies formation 88; navigation 190/191/192; strobe 193; landing/taxi 210; refuel 212. | Existing adapter writes every listed channel to zero on each invocation. | Off-only behavior. Capture brightness and transitions; validate strobe phase and actual illumination independently of immediate readback. |
 | Demonstration smoke | Hornet descriptor lists selectable `INV-SMOKE-*` stores. This establishes configuration availability, not an emitter-state capture API. | No verified emitter setter found in inspected object SDK. | Unsupported in current pipeline. Determine actual source loadout, color, emitter enable and timing; do not confuse gun smoke with demonstration smoke. |
-| Engine RPM, left/right | Live diagnostic captures independent RPM, temperature and fuel flow with bounded mission/Export alignment. | Object SDK has no RPM setter. Ordinary EFM callbacks expose RPM-related parameters; reachability on this unoccupied object is being probed. | 979 paired samples over 48.9 seconds accepted for diagnostic capture. Production capture unchanged; playback actuator unproven. |
+| Engine RPM, left/right | Live diagnostic captures independent RPM, temperature and fuel flow with bounded mission/Export alignment. | Object SDK has no RPM setter. Live probe found zero ordinary EFM getter calls during 41.8 seconds on this unoccupied object. | 979 paired samples over 48.9 seconds accepted for diagnostic capture. Production capture unchanged; playback actuator unproven. |
 | Nozzle opening | Marked live capture supports left argument 90 and right 89. | Four-channel post-animation experiment retains requested values. | Isolated playback visually accepted and numerically retained. Recorded-motion integration pending; nozzle pose is not an afterburner-state measurement. |
 | Afterburner appearance | Independent marked phases support left argument 29 and right 28. | Same four-channel post-animation experiment. | Isolated flame rendering visually accepted and numerically retained. Recorded-motion integration pending; no guessed RPM threshold. |
-| Engine / afterburner sound | Export RPM/temperature/fuel flow are measurements, not a sound recording. | No sound setter in object SDK. Separate read-only probe checks ordinary EFM parameter calls, forwarding original values. | Live sound failed: user heard idle-like audio throughout the accepted animation sequence. Sound actuation and matched-listener comparison remain open. |
+| Engine / afterburner sound | Export RPM/temperature/fuel flow are measurements, not a sound recording. | No sound setter in object SDK; ordinary EFM getter was never queried during the observed live interval. Separate spatial sounder routing test prepared. | Live sound failed: user heard idle-like audio throughout the accepted animation sequence. Direct audio control, recording fidelity and matched-listener comparison remain open. |
 
 ## Primary evidence
 
@@ -192,3 +192,10 @@ accepts nozzle/flame rendering, with all four immediate readbacks exact and late
 mission errors below 5.1e-10. Sound remained idle-like. A separate read-only
 parameter-call probe is installed to measure ordinary EFM getter reachability;
 no sound actuator is established. Recorded-motion integration remains pending.
+
+The [live callback result](../../experiments/efm-ownership/results/engine-sound-2026-09-27/README.md)
+subsequently found zero getter queries during 41.8 seconds despite verified load,
+creation and destruction. The next experiment explicitly registers a separate
+spatial sounder and alternates installed engine/afterburner samples for 12 seconds,
+then silence/removal. This tests a different control interface and deliberately
+does not claim synchronization with the appearance tape or faithful engine mixing.

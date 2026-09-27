@@ -176,3 +176,24 @@ Counts are module scoped and do not identify the caller as an audio consumer.
 This gate asks whether ordinary engine parameters are queried for this setup;
 it neither replays RPM nor fixes sound. `engine_sound_check <DLL>` verifies exact
 forwarding for 66 calls over 22 indices. Fixture traces are not installed.
+
+The [live getter probe](../results/engine-sound-2026-09-27/README.md) returned
+zero calls despite confirmed object lifecycle and 41.8 seconds of playback.
+Do not attempt sound actuation through that unused callback in this setup.
+
+## Sounder routing experiment
+
+`prepare_playback.py <capture.log> <new-output-folder> --sounder-probe` selects a
+new `DCSRecorder-Hornet-Sounder-Test` module and **DCSRecorder-Sound-Routing-Test.miz**.
+Set `--saved-games` if the target installation differs from the default; it
+determines this module's sounder log path. Install with `install_playback.py`.
+
+F10 > **Sound routing test** > **Start sound test**, then F2. This deliberately
+synthetic pattern plays a stock engine sample for three seconds, an afterburner
+sample for three seconds, repeats once, then goes silent. The lead disappears
+after 15 seconds. It tests direct world-audio control, not recording fidelity.
+It does not follow the concurrent nozzle/flame sequence. The unique sounder
+references installed samples without copying them and logs load/source/phase
+events. `check_sounder.lua` and `check_sounder_mission.lua`, each with the matching
+script path as its argument, validate dispatch and lifecycle offline. Audible
+rendering/source lookup still require the live test.

@@ -63,10 +63,12 @@ Engine-state work can resume; integrated endpoint/restart evidence remains open.
 The full engine diagnostic capture passes alignment checks. The user accepted
 the isolated nozzle/flame playback, corroborated by numerical retention, but
 heard idle-like sound throughout. See the [live result](../experiments/efm-ownership/results/engine-playback-2026-09-27/README.md).
-The next live step is **DCSRecorder-Engine-Sound-Probe.miz**, which logs whether
-DCS requests ordinary EFM engine parameters while forwarding values unchanged.
-Its normal AI route isolates appearance; sound actuation and integration with
-recorded motion remain open. No new throttle capture is needed for this probe.
+The follow-up callback probe recorded zero ordinary EFM engine-parameter calls
+during 41.8 seconds of playback. The next experiment is
+**DCSRecorder-Sound-Routing-Test.miz**, a 15-second alternating engine/afterburner
+sample test through a separate spatial sound script. It tests audio control;
+sound fidelity and integration with recorded motion remain open. No new throttle
+capture is needed. See the [sound-path finding](../experiments/efm-ownership/results/engine-sound-2026-09-27/README.md).
 
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
 completed first app workflow. They remain required for the broader single-aircraft
