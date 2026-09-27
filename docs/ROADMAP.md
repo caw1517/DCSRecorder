@@ -53,12 +53,12 @@ milestone, not the full one-aircraft product milestone.
 | [Layered playback](https://github.com/caw1517/DCSRecorder/issues/9) | After one-aircraft gates: independently identified takes sharing a playback clock while another is recorded. Preserve originals and verify timing/performance. |
 | [Recorded lead calls](https://github.com/caw1517/DCSRecorder/issues/10) | Research audio capture/delivery, onset/latency, drift, pause alignment and synchronization. Ordering relative to layers remains open. |
 
-Before expanding engine work, verify a fresh application take after the
+The fresh application workflow is accepted after the
 [missing-gear diagnosis](../experiments/efm-ownership/results/application-gear-2026-09-27/README.md).
-The affected take used the legacy format without gear channels; the installed
-old practice mission reproduces that omission. The app now identifies motion-only
-takes and generates clearly named exterior-capable practice missions. Fresh live
-capture/playback acceptance remains pending.
+The old take lacked gear channels; a fresh version-two take captures all three
+through 0..1, and the user reports successful playback. The app identifies
+motion-only takes and generates clearly named exterior-capable practice missions.
+Engine-state work can resume; integrated endpoint/restart evidence remains open.
 
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
 completed first app workflow. They remain required for the broader single-aircraft

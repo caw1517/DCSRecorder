@@ -2,7 +2,7 @@
 
 The available application take did not capture gear. This is a legacy-capture
 workflow failure, not evidence of a new exterior-controller rendering failure.
-Fresh live capture and replay remain to be checked by the user.
+Fresh live capture and replay were subsequently accepted by the user; see below.
 
 ## Evidence
 
@@ -60,8 +60,25 @@ matches. Separately exercising the installed mission's embedded recorder passes
 the gear checker with all three simulated ranges approximately 0.006667..1.
 Source bytes still match the original hash. No DLL or active playback tape changed.
 
-Next: fly that exact new practice mission, record gear deployment/retraction
-while airborne, and F10 Stop. Confirm **Motion + surfaces** in the library.
-Close DCS, generate playback, compare gear visually and retain runtime logs.
-That fresh live result is pending. The broader visual/engine-state ticket stays
-open; engine-state expansion waits until this workflow is accepted.
+## Fresh live workflow accepted
+
+The user reports: "All worked well!" This accepts the fresh capture/application
+playback check for the missing-gear workflow.
+
+The new take `20260927T185539Z-0001.csv` has 2,272 version-two samples over
+45.42 seconds with `hornet-exterior-v1`. All three gear channels span 0..1.
+Package `02d1df4d5c7a4f4aa30d5b3beb30d26e` selects the exterior controller and
+preserves source bytes (SHA256
+`a7941c02c33c9a3a116db332e0c0cc9198267b2aef2aa049f41eab06b7b4246e`).
+
+The retained native exterior trace contains 27,404 post-animation writes through
+42.14 seconds. Each gear channel reaches both 0 and 1. Across all captured
+surfaces, maximum requested-versus-immediate-post-write difference is about
+1e-14 in the serialized trace. This corroborates actuation; visual acceptance
+comes from the user. This snapshot has no later mission exterior observations
+and ends before the 45.42-second endpoint, so it does not establish automatic
+completion/removal or restart. Raw evidence remains local.
+
+The missing-gear workflow is accepted. The broader ticket stays open for the
+remaining lifecycle evidence and suspension/wheels, canopy, smoke, lights,
+separate nozzles, afterburner effects and sound. Engine-state work can resume.
