@@ -306,7 +306,7 @@ and power/AB capture, rather than deriving those from RPM or draw arguments.
 `analyze_rpm_live.py <calls> <events> <tape> <output-json>` checks the retained run
 independently of its listening verdict.
 
-## Native player capture (first live check pending)
+## Native player capture (steady capture passed)
 
 `NativeEngineCapture.dll` and `native_capture_hook.lua` add a read-only companion
 to the existing stock-Hornet diagnostic. They use the installed cockpit's current
@@ -323,3 +323,10 @@ controls and independent Export/appearance data. Start with a five-second steady
 capture before requesting another full throttle sweep. See the
 [capture access record](../results/native-engine-capture-2026-09-27/README.md)
 for the native evidence, field schema, installed status and acceptance checks.
+
+The first steady capture passed: 235 native samples over 11.707 s, stable
+`wHumanAircraft`/IwoLA identity and getter addresses, native core RPM matching
+Export within 3.82e-8, and time-associated position checks. `analyze_native_capture.py
+<log> <summary.json>` reproduces those checks and reports per-phase channel ranges.
+Proceed with the full labeled throttle sweep using the same installed diagnostic;
+fan/power mappings and afterburner fidelity are still unvalidated.

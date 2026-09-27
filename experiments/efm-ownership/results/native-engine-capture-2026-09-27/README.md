@@ -1,4 +1,4 @@
-# Native player engine capture — first live check pending
+# Native player engine capture — steady capture passed
 
 Follow-up to [Complete single-aircraft visual and engine-state fidelity](https://github.com/caw1517/DCSRecorder/issues/6).
 Recorded core RPM reached DCS's sound renderer but produced only a slight change;
@@ -78,3 +78,32 @@ times. If access is rejected, inspect the observed identity/error rather than
 asking for a full sweep. A later successful sweep must include independent left
 and right afterburner phases to establish per-engine separation. Native capture
 does not establish playback mapping or audible afterburner fidelity.
+
+## Steady capture result
+
+The first live check passed: **235 native samples over 11.707 seconds**, with
+matching native/Export/mission counts and clean user-stop footers. No native
+unavailable/error lines occurred. The retained file is `preflight-live/dcs.log`;
+`analyze_native_capture.py <log> <summary.json>` reproduces the checks.
+
+The current-aircraft accessor returned `wHumanAircraft`, with IwoLA at offset 8.
+Player Export ID 16777472, thread 14784 and all three native getter addresses
+remained stable. Native core RPM agrees with same-sample Export percentage / 100
+within **3.82e-8**. Native sample start/end model clocks were identical at logged
+precision. The independent Export hook differed by at most 7 ms, which accounts
+for raw position differences up to 1.532 m. At matching mission timestamps,
+234 native positions have a maximum interpolation residual of **0.000423 m**.
+The ordinary Export/mission association check also passes. These are capture
+association checks for this diagnostic, not a general playback accuracy claim.
+
+Both engines show core RPM about 0.7124–0.7355, fan RPM 0.3611–0.4612 and both
+power scalars about 0.1383–0.1965. Slots 0xe0 and 0xf0 agree within each sample in
+this baseline run. They are measured finite values, but this steady capture does
+not establish power normalization, AB gating or independent left/right response.
+
+No installed files changed after this successful readout. Proceed in the same
+diagnostic with a new capture. Mark each phase before moving the throttles, then
+hold about eight seconds: both idle; both military/max dry; left AB with right
+dry; right AB with left dry; both AB; both dry. Stop capture and preserve the
+session. The next analysis must compare native fan/power response with the
+independent appearance and Export data before selecting playback mappings.
