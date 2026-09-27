@@ -305,3 +305,21 @@ unchanged fan RPM and reads thrust-related inputs. Next establish measured fan
 and power/AB capture, rather than deriving those from RPM or draw arguments.
 `analyze_rpm_live.py <calls> <events> <tape> <output-json>` checks the retained run
 independently of its listening verdict.
+
+## Native player capture (first live check pending)
+
+`NativeEngineCapture.dll` and `native_capture_hook.lua` add a read-only companion
+to the existing stock-Hornet diagnostic. They use the installed cockpit's current
+IwoLA accessor and guarded native getter calls to capture core/fan RPM and two
+power-related scalars for each engine. No aircraft pointer is retained, no
+aircraft state is changed, and the helper stays dormant outside a diagnostic
+capture. Channel units and afterburner correlation remain live questions.
+
+Build target `NativeEngineCapture`, then run CTest `native_engine_capture_lua`.
+`install_native_capture.py <Saved-Games-DCS> <local-report.json>` adds the helper
+and its separate GUI hook with DCS closed, refusing to replace differing files.
+The existing **DCSRecorder-Engine-State-Diagnostic.miz** supplies the capture
+controls and independent Export/appearance data. Start with a five-second steady
+capture before requesting another full throttle sweep. See the
+[capture access record](../results/native-engine-capture-2026-09-27/README.md)
+for the native evidence, field schema, installed status and acceptance checks.

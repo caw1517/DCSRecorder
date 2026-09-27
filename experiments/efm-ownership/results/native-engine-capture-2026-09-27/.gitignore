@@ -1,0 +1,4 @@
+# Local installation reports, raw logs and diagnostic artifacts.
+*
+!.gitignore
+!README.md

@@ -96,6 +96,11 @@ but no afterburner and less intensity than the real aircraft. Core RPM delivery
 is established; sound fidelity is not accepted. Native sound also consumes fan
 RPM and thrust-related inputs. Establish capture of the real aircraft's missing
 fan and power/AB inputs before replaying them; do not infer thrust from RPM alone.
+An additive read-only player capture helper is now installed using the cockpit's
+current-aircraft interface. Its offline Lua/loading/lifecycle checks pass. First
+run a five-second steady capture in the existing engine diagnostic to verify
+native access and RPM association before requesting another throttle sweep.
+See the [native capture record](../experiments/efm-ownership/results/native-engine-capture-2026-09-27/README.md).
 See the [native RPM test](../experiments/efm-ownership/results/native-rpm-2026-09-27/README.md) and
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
 
