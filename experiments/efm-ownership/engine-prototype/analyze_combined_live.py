@@ -8,8 +8,8 @@ from pathlib import Path
 from analyze_parameter_live import inspect
 
 
-def analyze(calls, events, tape_path, appearance):
-    result = inspect(calls, events, tape_path)
+def analyze(calls, events, tape_path, appearance, allow_teardown=False):
+    result = inspect(calls, events, tape_path, allow_teardown=allow_teardown)
     lines = tape_path.read_text().splitlines()
     assert lines[0] == 'DCS_ENGINE_COMBINED_V1'
     tape = [list(map(float, line.split())) for line in lines[2:]]
@@ -37,7 +37,8 @@ def analyze(calls, events, tape_path, appearance):
     assert set(groups) == {(stage, c) for stage in ('sdk', 'post_animation') for c in channels}
     for (stage, channel), group in groups.items():
         stamps = sorted({float(r['recorded_time']) for r in group})
-        assert stamps[0] <= .021 and times[-1] - stamps[-1] <= .041
+        coverage_end = min(times[-1], result['last_observed_recorded_time']) if allow_teardown else times[-1]
+        assert stamps[0] <= .021 and coverage_end - stamps[-1] <= .041
         assert max(b - a for a, b in zip(stamps, stamps[1:])) <= .041
     result['appearance'] = {
         'delivery': 'passed', 'visual_rendering': 'requires separate human verdict',
@@ -52,7 +53,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     for name in ('calls', 'events', 'tape', 'appearance', 'output'):
         parser.add_argument(name, type=Path)
+    parser.add_argument('--allow-teardown', action='store_true',
+                        help='Analyze delivery through destruction; does not pass normal completion')
     args = parser.parse_args()
-    result = analyze(args.calls, args.events, args.tape, args.appearance)
+    result = analyze(args.calls, args.events, args.tape, args.appearance, args.allow_teardown)
     args.output.write_text(json.dumps(result, indent=2), encoding='utf-8')
-    print('PASS: native sound consumption and all four SDK/post-animation channels match one tape and clock; clean restoration')
+    print('PASS: observed sound and appearance delivery match one tape and clock; ' + result['completion'])

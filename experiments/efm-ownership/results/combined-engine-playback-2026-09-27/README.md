@@ -1,4 +1,4 @@
-# Combined engine sound and appearance — installed, live result pending
+# Combined engine sound and appearance — live appearance and sound accepted
 
 Continues [Complete single-aircraft visual and engine-state fidelity](https://github.com/caw1517/DCSRecorder/issues/6).
 The user accepted the measured native core/fan/power sound test. Earlier, the
@@ -76,4 +76,45 @@ local package's `installation.json`.
 Load the mission, use **F10 > Combined engine playback > Start combined engine
 test**, then F2 to the lead. Watch both nozzles/flames and listen through the
 recorded changes. Let the lead disappear after approximately 108 seconds.
-Combined rendering/audio and subsequent recorded-motion integration remain open.
+The first combined rendering/audio result is accepted below; recorded-motion
+integration and normal completion of the combined controller remain open.
+
+## First live result
+
+The user reported: “That seemed to have worked great, both visually and audibly.”
+This accepts combined engine sound, nozzle movement and flame appearance for the
+observed test on the pinned Hornet/DCS build.
+
+The source session and native/appearance traces are copied into local `live/`.
+Delivery checks pass through 101.820 seconds of the 101.905-second tape:
+
+- 132,366 Sound.dll overrides consumed all six engine channels and both power
+  callsites. Across all callers, 225,094 overrides matched the tape within
+  1.20e-7, subject to the final-drain timing qualification below.
+- 40,736 appearance records cover SDK and post-animation writes. Every stage and
+  channel has 5,092 observations, matching the shared clock and interpolated tape
+  within 5.81e-8. No missing-channel or delivery-gap check failed.
+- Native baseline values forwarded unchanged; no trace-overflow, guard-failure
+  or appearance-write-failure event appeared.
+
+The session stopped at model time 109.794, 85 ms before the recorded interval's
+end and before its three-second original-state tail. DCS logged `Dispatcher Stop`
+and application shutdown; the mission did not log `END,complete`. The destroy
+callback reported `parameter_hook_already_replaced`: DCS had already replaced
+the object's table, so the controller left it untouched. This demonstrates that
+teardown path, **not** normal in-place restoration or automatic lead removal.
+Normal completion remains to be observed in a later combined/integrated run.
+
+The strict analyzer correctly rejects this as a completed run. Explicit
+`--allow-teardown` validates observed delivery and marks normal completion
+unverified. Destruction drains remaining getter calls at the last SDK timestamp:
+113 final override rows have ambiguous timing between the last two published
+samples. They match one of those two values within the stated tolerance; they do
+not establish an exact per-call timestamp. Earlier drains retain the verified
+20 ms publication-to-drain relationship. The previous complete sound-only run
+still passes the strict analyzer after this reporting extension.
+
+Decision: carry forward the combined measured-parameter sound and captured
+nozzle/flame path. Next integrate these channels with recorded motion and the
+normal recorder/library workflow, preserving the current take and accepted test.
+The broader fidelity ticket stays open for those integration checks.

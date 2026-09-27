@@ -354,4 +354,7 @@ The `ENGINE_COMBINED` target shares one owned table for getters and post-animati
 repair, restoring both together. `check_parameter_package.py` also checks this
 variant. `analyze_combined_live.py <calls> <events> <tape> <appearance> <summary>`
 checks delivery and timing after a run. The [combined engine record](../results/combined-engine-playback-2026-09-27/README.md)
-documents offline checks, installation and the pending live result.
+documents offline checks, installation and the accepted live visuals/sound.
+The first combined run ended during session shutdown just before tape completion;
+use explicit `--allow-teardown` to analyze its observed delivery without claiming
+normal completion. The strict default still requires restoration and completion.

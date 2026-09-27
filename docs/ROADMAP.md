@@ -115,8 +115,12 @@ See the [accepted native sound test](../experiments/efm-ownership/results/native
 A separate **DCSRecorder-Engine-Combined-Playback.miz** now combines the six native
 engine parameters and four captured nozzle/flame arguments on one clock. The
 shared getter/animation boundary, source alignment and mission checks pass;
-installation verified 10 hashes and 99 protected files unchanged. Combined live
-sound/appearance acceptance remains pending. See the
+installation verified 10 hashes and 99 protected files unchanged. The user
+accepted combined visuals and sound. Live traces confirm 132,366 sound overrides
+and 40,736 appearance records matched the shared tape. The session stopped 85 ms
+before tape end, so automatic completion/restoration remains unverified for this
+combined variant. Next integrate recorded motion and the recorder/library flow.
+See the
 [combined engine test](../experiments/efm-ownership/results/combined-engine-playback-2026-09-27/README.md).
 See the [native capture record](../experiments/efm-ownership/results/native-engine-capture-2026-09-27/README.md).
 See the [native RPM test](../experiments/efm-ownership/results/native-rpm-2026-09-27/README.md) and

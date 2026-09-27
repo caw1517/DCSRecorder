@@ -7,15 +7,20 @@ import json
 from pathlib import Path
 
 
-def inspect(calls, events, tape_path):
+def inspect(calls, events, tape_path, allow_teardown=False):
     with calls.open() as stream:
         rows = list(csv.DictReader(stream))
     with events.open() as stream:
         lifecycle = list(csv.DictReader(stream))
-    assert [r['event'] for r in lifecycle] == [
+    names = [r['event'] for r in lifecycle]
+    complete = names == [
         'tape_loaded', 'create', 'parameter_hook_installed', 'baseline_begin',
         'recorded_parameters_begin', 'parameter_hook_restored',
-        'original_getter_restored', 'destroy'], lifecycle
+        'original_getter_restored', 'destroy']
+    teardown = names == [
+        'tape_loaded', 'create', 'parameter_hook_installed', 'baseline_begin',
+        'recorded_parameters_begin', 'parameter_hook_already_replaced', 'destroy']
+    assert complete or (allow_teardown and teardown), lifecycle
     assert len({r['id'] for r in rows}) == 1
     phase = float(next(r['time'] for r in lifecycle
                        if r['event'] == 'baseline_begin')) + 3
@@ -44,9 +49,21 @@ def inspect(calls, events, tape_path):
             assert row['original'] == row['returned']
     # Logged drain time is not call time. Verify the same one-step delay observed
     # in the original RPM run against every overridden channel and caller.
-    error = max(abs(float(r['returned']) - at(
-        float(r['drain_time']) - phase - .02,
-        (int(r['engine']) - 1) * 3 + int(r['channel']) + 1)) for r in overrides)
+    errors = []
+    teardown_clock_rows = 0
+    for r in overrides:
+        t = float(r['drain_time']) - phase
+        channel = (int(r['engine']) - 1) * 3 + int(r['channel']) + 1
+        difference = abs(float(r['returned']) - at(t - .02, channel))
+        if teardown and float(r['drain_time']) == float(lifecycle[-1]['time']):
+            # destroy() drains at the last SDK timestamp, with no next step.
+            # Its final calls share that timestamp with the previous normal
+            # drain. Either of the final two published values is possible;
+            # the trace cannot assign those calls an exact sample time.
+            difference = min(difference, abs(float(r['returned']) - at(t, channel)))
+            teardown_clock_rows += 1
+        errors.append(difference)
+    error = max(errors)
     assert error < 1e-6, error
     sound = [r for r in rows if r['caller_module'] == 'Sound.dll']
     changed = [r for r in sound if r['overridden'] == '1']
@@ -65,6 +82,10 @@ def inspect(calls, events, tape_path):
         groups[(row['caller_rva'], row['engine'], row['channel'], row['overridden'])].append(row)
     return {
         'native_consumption': 'passed',
+        'completion': 'normal_restore_and_destroy' if complete else 'destroy_after_table_replacement; normal_completion_unverified',
+        'recorded_duration': times[-1],
+        'last_observed_recorded_time': clocks[-1] - phase,
+        'teardown_clock_ambiguous_override_rows': teardown_clock_rows,
         'audio_fidelity': 'separate human verdict required',
         'total_calls': len(rows), 'overridden_calls': len(overrides),
         'sound_calls': len(sound), 'sound_overridden_calls': len(changed),
