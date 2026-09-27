@@ -24,7 +24,13 @@
 #endif
 
 namespace {
+#ifdef ENGINE_APPEARANCE_PROTOTYPE
+constexpr std::array<int,4> channels{28,29,89,90};
+constexpr const char* tape_header="DCS_ENGINE_PROTOTYPE_V1";
+#else
 constexpr std::array<int,14> channels{0,3,5,9,10,11,12,13,14,15,16,17,18,21};
+constexpr const char* tape_header="DCS_EXTERIOR_PROTOTYPE_V1";
+#endif
 constexpr int elapsed_arg=998,status_arg=999;
 using Values=std::array<float,channels.size()>;
 struct Sample { double t; Values values; };
@@ -81,7 +87,7 @@ void initialize() {
     trace << "id,call,time,elapsed,previous_dt,arg,previous_requested,before,requested,after\n";
     std::ifstream file(folder/"exterior-state.txt");
     std::string header;size_t count=0;
-    if(!(file>>header>>count) || header!="DCS_EXTERIOR_PROTOTYPE_V1" || count<2 || count>10000) {
+    if(!(file>>header>>count) || header!=tape_header || count<2 || count>10000) {
         events << "tape_rejected,0,0,header\n";events.flush();return;
     }
     for(int expected:channels) {int actual=-1;if(!(file>>actual) || actual!=expected)return;}
@@ -91,7 +97,13 @@ void initialize() {
         if(i && (!(row.t>tape.back().t) || row.t-tape.back().t>0.15))return;
         for(size_t c=0;c<channels.size();++c) {
             if(!(file>>row.values[c]) || !std::isfinite(row.values[c]) ||
-               row.values[c] < ((c<3 || c==13)?0.0f:-1.0f) || row.values[c]>1.0f)return;
+               row.values[c] <
+#ifdef ENGINE_APPEARANCE_PROTOTYPE
+               0.0f
+#else
+               ((c<3 || c==13)?0.0f:-1.0f)
+#endif
+               || row.values[c]>1.0f)return;
         }
         tape.push_back(row);
     }
@@ -129,9 +141,14 @@ void after_native_step(const void* pointer) {
 #ifndef STATE_POSTANIMATION
     object.pending=false;
 #endif
-    // Only repair the two failing stabilators; preserve the baseline on all others.
+    // Engine experiment repairs its four observed channels; exterior variant
+    // retains the original two-stabilator comparison.
     bool ok=true;
+#ifdef ENGINE_APPEARANCE_PROTOTYPE
+    for(size_t i=0;i<channels.size();++i) {
+#else
     for(size_t i: {size_t(9),size_t(10)}) {
+#endif
         const int c=channels[i];
         const float before=api->ed_get_object_args(handle).data[c];
         api->ed_set_single_arg(handle,c,object.requested[i]);

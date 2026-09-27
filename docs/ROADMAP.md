@@ -67,6 +67,11 @@ flow and measured mission/Export clock alignment. Capture results must precede
 playback-actuator selection; nozzle motion, afterburner effects and sound retain
 separate evidence requirements.
 
+The full engine diagnostic capture is now retained and passes alignment checks.
+The next live step is **DCSRecorder-Engine-Appearance-Playback.miz**, a separate
+four-argument nozzle/flame experiment. Its normal AI route isolates appearance;
+it does not yet integrate engine state or sound into recorded-motion playback.
+
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
 completed first app workflow. They remain required for the broader single-aircraft
 milestone; their existing tickets stay open.

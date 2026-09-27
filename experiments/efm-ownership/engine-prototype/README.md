@@ -128,3 +128,32 @@ and less than 1 mm time-matched position error. Actual Export identity is
 Both engines return RPM, temperature and fuel flow. See the linked result for
 ranges and limits. The next live action is the full marked throttle sequence;
 the installed hook needs no further change or DCS restart for that capture.
+
+## Isolated engine appearance playback
+
+The full marked capture subsequently passed: 979 paired samples over 48.9 seconds,
+with independent engine flow and argument changes. See the retained result above.
+The separate module `DCSRecorder-Hornet-Engine-Appearance` now replays captured
+arguments 28/29/89/90 after the guarded native animation update. This is a test of
+nozzle/flame appearance. RPM and sound are not actuated; do not accept sound
+fidelity merely because a nozzle moves. Native overwrite/retention is still a
+live measurement. A normal AI route is used instead of replaying captured motion.
+
+Restart DCS, load **DCSRecorder-Engine-Appearance-Playback.miz**, and use F10 >
+**Engine appearance playback** > **Start captured engine sequence**. F2 selects
+the test lead. Follow the phase messages; note each nozzle, flame and sound.
+Allow approximately 57 seconds for playback and the hold, until the lead is
+removed. Retain the DCS session for log collection.
+
+`prepare_playback.py <capture.log> <new-output-folder>` validates and selects the
+last complete marked take by its BEGIN occurrence. It never joins reused take
+IDs. `install_playback.py <package> <Saved-Games-DCS>` installs only the separate
+module and mission after hash checks, requires DCS closed and preserves existing
+different files. Source captures stay immutable. Generated packages remain local.
+
+The two engine DLL targets share the existing bounded exterior actuator source
+with an explicit four-channel compile-time variant. The SDK-only target exercises
+the tape offline; the installed variant adds the pinned-build post-animation
+boundary. Existing exterior channels/header/timing selection retain their own
+variant. Logs live under the new module's `bin/state-logs`; mission reads use
+`DCSENGINE_PLAYBACK`. `check_playback_mission.lua` checks the mission lifecycle.

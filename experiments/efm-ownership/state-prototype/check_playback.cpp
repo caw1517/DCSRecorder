@@ -12,6 +12,13 @@
 #include <string>
 #include <vector>
 namespace {
+#ifdef ENGINE_APPEARANCE_PROTOTYPE
+constexpr size_t channel_count=4;
+constexpr const char* tape_header="DCS_ENGINE_PROTOTYPE_V1";
+#else
+constexpr size_t channel_count=14;
+constexpr const char* tape_header="DCS_EXTERIOR_PROTOTYPE_V1";
+#endif
 std::array<float,1000> args{};
 size_t view_size=args.size();
 uint64_t id=42;
@@ -26,9 +33,9 @@ int main(int argc,char** argv) {
         const auto dll=std::filesystem::absolute(argv[1]);
         std::ifstream file(dll.parent_path()/"exterior-state.txt");
         std::string header;size_t count=0;file>>header>>count;
-        require(header=="DCS_EXTERIOR_PROTOTYPE_V1" && count>1,"missing tape");
-        std::array<int,14> channels{};for(auto& c:channels)file>>c;
-        struct Row {double t;std::array<float,14> values;};std::vector<Row> rows(count);
+        require(header==tape_header && count>1,"missing tape");
+        std::array<int,channel_count> channels{};for(auto& c:channels)file>>c;
+        struct Row {double t;std::array<float,channel_count> values;};std::vector<Row> rows(count);
         for(auto& row:rows) {file>>row.t;for(auto& v:row.values)file>>v;}
         require(bool(file),"invalid tape");
         const auto module=LoadLibraryW(dll.c_str());require(module!=nullptr,"DLL load failed");
@@ -42,7 +49,12 @@ int main(int argc,char** argv) {
         api.ed_get_object_args=[](ED_OBJECT_HANDLE)->ed_object_args{return {args.data(),view_size};};
         api.ed_set_single_arg=[](ED_OBJECT_HANDLE h,int c,float value){
             if(h!=object || c<0 || size_t(c)>=view_size) {invalid_write=true;return;}
-            const bool allowed=c==0 || c==3 || c==5 || (c>=9 && c<=18) || c==21 || c==998 || c==999;
+            const bool allowed=
+#ifdef ENGINE_APPEARANCE_PROTOTYPE
+                c==28 || c==29 || c==89 || c==90 || c==998 || c==999;
+#else
+                c==0 || c==3 || c==5 || (c>=9 && c<=18) || c==21 || c==998 || c==999;
+#endif
             if(!allowed)invalid_write=true;
             args[c]=value;++writes;
         };

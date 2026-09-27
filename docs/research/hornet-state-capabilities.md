@@ -182,3 +182,11 @@ now uses actual type, stable Export identity and time-matched trajectory instead
 of name/ID equality. Independent throttle transitions still need a full combined
 capture before playback-actuator work; this verifies the engine feed, not engine
 effects or sound reproduction.
+
+The full marked repeat then passed with 979 paired samples over 48.9 seconds.
+Independent left/right fuel-flow responses support candidate left 90/29 and
+right 89/28 nozzle/effect pairs. A separate four-channel post-animation actuator
+and **DCSRecorder-Engine-Appearance-Playback.miz** are installed for live comparison.
+No engine-state or sound actuator has been established; visible nozzle/flame
+rendering and later retention remain to be checked. See the linked engine result
+for evidence, validation and exact run instructions.

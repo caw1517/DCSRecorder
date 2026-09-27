@@ -109,3 +109,17 @@ target_compile_definitions(HornetStateStagedProbe PRIVATE HORNET_PROTOTYPE HORNE
 target_compile_features(HornetStateStagedProbe PRIVATE cxx_std_17)
 set_property(TARGET HornetStateStagedProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_test(NAME exterior_staged_callback_contract COMMAND probe_check $<TARGET_FILE:HornetStateStagedProbe>)
+
+# Separate four-channel engine appearance experiment: SDK fixture + live timing variant.
+foreach(engine_target HornetEngineSDKProbe HornetEngineAppearanceProbe)
+  add_library(${engine_target} SHARED probe.cpp state-prototype/playback.cpp)
+  target_include_directories(${engine_target} PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+  target_compile_definitions(${engine_target} PRIVATE ENGINE_APPEARANCE_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+  target_compile_features(${engine_target} PRIVATE cxx_std_17)
+  set_property(TARGET ${engine_target} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endforeach()
+target_compile_definitions(HornetEngineAppearanceProbe PRIVATE STATE_POSTANIMATION HORNET_RECORDED_PROTOTYPE)
+add_executable(engine_playback_check state-prototype/check_playback.cpp)
+target_include_directories(engine_playback_check PRIVATE "${DCS_ROOT}/API/include")
+target_compile_definitions(engine_playback_check PRIVATE ENGINE_APPEARANCE_PROTOTYPE NOMINMAX)
+target_compile_features(engine_playback_check PRIVATE cxx_std_17)

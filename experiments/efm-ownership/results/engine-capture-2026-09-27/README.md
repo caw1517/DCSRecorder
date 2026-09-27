@@ -100,3 +100,55 @@ already correct. Next repeat the marked throttle phases in the same mission
 without reinstalling or restarting DCS. Independent left/right engine transitions
 and effects/nozzle correlation remain to be measured together. No playback engine
 actuator, afterburner-state semantics or sound fidelity is claimed yet.
+
+## Full engine sequence captured; isolated playback prepared
+
+The next user run passes with 979 paired samples over 48.9 seconds, all seven
+phase markers, matching user-stop counts and no unavailable readings. The retained
+log also contains the earlier short take; the analyzer keeps them separate even
+though a mission restart reused take ID 1. The playback package explicitly uses
+the last BEGIN occurrence, never merges equal take IDs.
+
+Export follows mission sampling by 1..23 ms. All 978 in-range time-matched
+position comparisons agree within 0.000961 m. The same observed identity pair
+persists. Per-phase observations independently distinguish engines:
+
+| Marked phase | Left fuel flow kg/s | Right fuel flow kg/s | Argument 29 | Argument 28 |
+| --- | --- | --- | --- | --- |
+| Both military | 0.530..1.256 | 0.530..1.256 | 0 | 0 |
+| Left afterburner | 1.129..2.464 | 1.103..1.260 | 0..0.505 | 0 |
+| Right afterburner | 1.171..1.247 | 1.123..3.514 | 0 | 0..0.834 |
+| Both afterburner | 1.178..2.696 | 3.525..4.083 | 0..0.498 | 0.839..1 |
+
+In left-only operation nozzle candidate 90 reaches 0.614 while 89 remains
+0.150..0.280. In right-only operation 89 reaches 0.907 while 90 remains
+0.176..0.196. This supports left 90/29 and right 89/28 as the next actuator
+candidates. It does not prove effects or sound routing. RPM stays near 98–100%
+in these phases despite different fuel flow and arguments, reinforcing why an
+RPM threshold must not invent afterburner state. Marked ranges include transitions;
+the captured left candidate does not reach 1 in this take, and replay preserves it.
+
+Prepared and installed a separate `DCSRecorder-Hornet-Engine-Appearance` module
+and **DCSRecorder-Engine-Appearance-Playback.miz** directly in Missions. Its tape
+contains only recorded arguments 28/29/89/90, with a separate engine-prototype
+header. No engine/RPM or sound setter is added. A normal AI route isolates the
+appearance question from recorded motion. The existing pinned-build guarded
+post-animation callback reapplies all four arguments; immediate, next-callback,
+post-animation and mission-context traces distinguish writes from retention.
+Rendering and the correct delivery phase remain live questions.
+
+Validation: all 15 existing CTests pass. The built SDK-only engine variant passes
+all 979 samples, interpolation, endpoint and identity/cookie/bounds/lifecycle/
+clock guards. The actual native variant rejects a fake non-DCS object before
+surface/native writes. Mission dependency, route and configuration validators
+pass. The Lua playback smoke test passes F10 activation/release, telemetry,
+completion plus eight-second hold/removal, explicit stop, timeout and failure.
+These checks do not establish live appearance or sound. All ten installed files
+match the manifest; eleven protected files, including accepted DLLs/tapes,
+existing hooks and both source recordings, remain unchanged.
+
+Next: restart DCS to discover the separate module, load the new playback mission,
+F10 > Engine appearance playback > Start captured engine sequence, then F2 to
+inspect the lead. Watch each nozzle and flame independently through phase
+messages and note sound separately. Let the 48.9-second sequence plus eight-second
+hold finish until the lead disappears. Preserve the session for telemetry.
