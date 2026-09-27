@@ -54,10 +54,13 @@ Log delivery is not simultaneous sampling. Analyze actual mission-versus-Export
 delay, read duration, ID pairs and position separation before integration. The
 analyzer rejects incomplete, missing, duplicate and unavailable samples. Its
 preliminary timing screen is -20..100 ms delivery offset and 0..20 ms Export read
-span, with matching numeric IDs and ownship type/name. These are diagnostic
-screening bounds, not agreed product accuracy tolerances. Position separation is
-reported without pretending a moving aircraft should occupy an identical point
-at two different timestamps. Restarted takes remain separate in the summary.
+span, with correct aircraft type and stable observed Export identity. The live
+recheck established different names/IDs across APIs; equality is not required.
+The single-player diagnostic instead requires near-full time-interpolated
+trajectory overlap with at most 1 m residual. These are diagnostic screening
+bounds, not general object-identity proof or product accuracy tolerances.
+Both raw and time-matched position differences are reported; no extrapolation
+beyond the mission trace is used. Restarted takes remain separate in the summary.
 
 ```powershell
 python experiments/efm-ownership/engine-prototype/analyze.py <dcs.log> <summary.json>
@@ -118,3 +121,10 @@ It also summarizes mission channels when Export readings are absent.
 
 Next run only a ten-second baseline capture after restarting DCS. Check identity
 and engine-feed availability before repeating the full throttle sequence.
+
+That recheck subsequently passed: 441 paired samples, 1..12 ms delivery offset,
+and less than 1 mm time-matched position error. Actual Export identity is
+`FA-18C_hornet` / `New callsign` / `16777472`, versus mission `Observer` / `2`.
+Both engines return RPM, temperature and fuel flow. See the linked result for
+ranges and limits. The next live action is the full marked throttle sequence;
+the installed hook needs no further change or DCS restart for that capture.

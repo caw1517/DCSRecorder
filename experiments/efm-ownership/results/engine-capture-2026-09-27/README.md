@@ -61,3 +61,42 @@ remain local.
 Next is only a short baseline capture (about ten seconds) in the same mission
 after restarting DCS. Inspect the actual identity and engine feed before asking
 for another full throttle sequence. The broader fidelity ticket remains open.
+
+## Short live recheck: engine feed and timing verified
+
+The subsequent `identity-check-live.log` contains 441 paired samples over 22.0
+seconds with matching user-stop footers and no unavailable Export readings.
+The original name comparison was invalid for this setup: Export reports aircraft
+type `FA-18C_hornet`, unit name `New callsign`, and ID `16777472`; mission capture
+identifies `Observer` with ID `2`. The corrected hook retained these actual values.
+
+Export timestamps are 1..12 ms after their triggering mission sample. Comparing
+positions at those unequal instants gives up to 2.916 m separation, as expected
+for a moving aircraft. Interpolating the mission trajectory to each actual Export
+time yields 440 in-range comparisons with maximum error 0.000947 m. The final
+Export sample is beyond the last mission timestamp and is not extrapolated.
+The Export read clock has no measurable advance at its reported precision.
+
+Both engine feeds are finite and nonzero:
+
+| Measurement | Left observed range | Right observed range |
+| --- | --- | --- |
+| RPM (%) | 84.953..100.029 | 84.953..100.029 |
+| Temperature (C) | 510.010..860.270 | 514.524..862.270 |
+| Fuel flow (kg/s) | 0.3994..1.2631 | 0.3994..1.2631 |
+
+The analyzer now uses stable observed Export identity, correct aircraft type,
+timely readings and a matching time-interpolated trajectory for the bounded
+single-player diagnostic. It retains both sets of names/IDs without assuming
+numeric equality. Its screening requires near-full trajectory overlap and at
+most 1 m residual; this is not a general multiplayer/object-identity solution or
+an agreed product tolerance. The live recheck passes. Wrong aircraft type,
+100 m trajectory mismatch, stale readings and missing samples still fail, as
+does the first capture with no engine data. Missing unit-name text alone does
+not discard otherwise verified diagnostic observations.
+
+Only analysis code changed for this result; the installed observation hook is
+already correct. Next repeat the marked throttle phases in the same mission
+without reinstalling or restarting DCS. Independent left/right engine transitions
+and effects/nozzle correlation remain to be measured together. No playback engine
+actuator, afterburner-state semantics or sound fidelity is claimed yet.

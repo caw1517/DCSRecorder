@@ -4,6 +4,7 @@ Log delivery pairs observations, not sample instants. Report the actual clocks,
 IDs and positional separation before deciding whether streams can be integrated.
 """
 import argparse
+import bisect
 import csv
 import json
 import math
@@ -62,7 +63,7 @@ def analyze(path):
         issues=take['issues'][:]
         if not complete: issues.append('Missing/non-user-stop/count-mismatched footer')
         if set(exports)!=set(range(1,len(rows)+1)): issues.append('Missing or extra Export samples')
-        delays=[];spans=[];separations=[];ids=set();groups={}
+        delays=[];spans=[];separations=[];ids=set();groups={};identities=set()
         previous=None
         for row in rows:
             if previous is not None and row['t']<=previous: raise ValueError('Non-monotonic mission clock')
@@ -73,14 +74,29 @@ def analyze(path):
                 bounds=group.setdefault(name,[value,value]);bounds[0]=min(bounds[0],value);bounds[1]=max(bounds[1],value)
             obs=exports.get(row['seq'])
             if obs is None: continue
-            if obs['type']!='FA-18C_hornet' or obs['name']!='Observer': issues.append('Ownship identity mismatch')
+            if obs['type']!='FA-18C_hornet': issues.append('Ownship aircraft type mismatch')
             values=[obs['t'],obs['end'],*obs['engine'],*obs['position']]
             if not all(math.isfinite(v) for v in values): raise ValueError('Nonfinite Export sample')
             ids.add(obs['id']);delays.append(obs['t']-row['t']);spans.append(obs['end']-obs['t'])
+            identities.add((obs['id'],obs['type'],obs['name']))
             separations.append(math.dist(row['position'],obs['position']))
             for name,value in zip(ENGINE,obs['engine']):
                 bounds=group.setdefault(name,[value,value]);bounds[0]=min(bounds[0],value);bounds[1]=max(bounds[1],value)
-        # These are screening bounds for this diagnostic, not product guarantees.
+        # Mission and Export IDs/names differ in the live diagnostic. Compare the
+        # observed ownship trajectory at actual Export times, not unequal clocks.
+        times=[row['t'] for row in rows];residuals=[]
+        for obs in exports.values():
+            index=bisect.bisect_right(times,obs['t'])-1
+            if not 0<=index<len(rows)-1: continue
+            a,b=rows[index],rows[index+1]
+            weight=(obs['t']-a['t'])/(b['t']-a['t'])
+            position=[x+weight*(y-x) for x,y in zip(a['position'],b['position'])]
+            residuals.append(math.dist(obs['position'],position))
+        # Screening only for this single-player, one-stock-Hornet diagnostic.
+        # One metre and near-full overlap are not general object-identity proof
+        # or product accuracy guarantees; never extrapolate beyond captured time.
+        associated=(len(identities)==1 and len(residuals)>=max(2,len(rows)-2)
+                    and max(residuals,default=math.inf)<=1.0)
         timely=bool(delays) and min(delays)>=-0.02 and max(delays)<=0.1 and min(spans)>=0 and max(spans)<=0.02
         identity=ids=={take['mission_id']}
         results.append({'take':take['take'],'rows':len(rows),'export_rows':len(exports),
@@ -89,7 +105,10 @@ def analyze(path):
             'export_minus_mission_seconds':[min(delays),max(delays)] if delays else None,
             'export_read_span_seconds':[min(spans),max(spans)] if spans else None,
             'max_position_separation_m':max(separations) if separations else None,
-            'alignment_screen_passes':complete and not issues and timely and identity,
+            'time_matched_position_samples':len(residuals),
+            'max_time_matched_position_error_m':max(residuals) if residuals else None,
+            'trajectory_association_passes':associated,
+            'alignment_screen_passes':complete and not issues and timely and associated,
             'markers':take['marks'],'segments':groups,'observed_identities':take['identities']})
     return results
 

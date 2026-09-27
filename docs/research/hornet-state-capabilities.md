@@ -173,3 +173,12 @@ assertion before engine measurement. The corrected observation hook is installed
 it records actual identity fields and available engine values, while the analyzer
 continues to flag unverified identity. A short baseline recheck is next; RPM,
 temperature, fuel-flow availability and clock alignment are not yet live-verified.
+
+The subsequent short recheck verified all six engine readings in 441 paired
+samples. Export names/IDs differ from mission identity in this setup, but the
+time-matched trajectories agree within 0.947 mm across 440 in-range comparisons;
+Export timestamps follow by 1..12 ms. The bounded diagnostic association screen
+now uses actual type, stable Export identity and time-matched trajectory instead
+of name/ID equality. Independent throttle transitions still need a full combined
+capture before playback-actuator work; this verifies the engine feed, not engine
+effects or sound reproduction.

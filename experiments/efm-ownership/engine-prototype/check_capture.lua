@@ -19,6 +19,7 @@ local gui={assert=assert,type=type,tostring=tostring,tonumber=tonumber,pcall=pca
         LoGetSelfData=function()
             if mode=='missing_self' then return nil end
             local result={Name='FA-18C_hornet',UnitName=mode=='identity' and 'Other' or 'Observer',Position={x=now*200,y=2000,z=0}}
+            if mode=='identity' then result.Position.x=result.Position.x+100 end
             if mode=='missing_name' then result.UnitName=nil end
             return result
         end,
