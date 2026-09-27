@@ -70,6 +70,12 @@ sample test through a separate spatial sound script. It tests audio control;
 sound fidelity and integration with recorded motion remain open. No new throttle
 capture is needed. See the [sound-path finding](../experiments/efm-ownership/results/engine-sound-2026-09-27/README.md).
 
+That 15-second test completed but sounded idle throughout. Offline execution of
+the retained DCS sounder loader exposed a logging assumption: sounders lack file
+I/O, so missing sounder.log did not establish non-execution. A temporary scoped
+logging hook is installed for a repeat of the same mission; the audio experiment
+is unchanged. See the [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
+
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
 completed first app workflow. They remain required for the broader single-aircraft
 milestone; their existing tickets stay open.

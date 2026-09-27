@@ -197,3 +197,16 @@ references installed samples without copying them and logs load/source/phase
 events. `check_sounder.lua` and `check_sounder_mission.lua`, each with the matching
 script path as its argument, validate dispatch and lifecycle offline. Audible
 rendering/source lookup still require the live test.
+
+The [15-second live test](../results/sound-routing-2026-09-27/README.md) completed
+but remained idle-like. DCS discovered the script; execution was not observable.
+The actual retained DCS loader, exercised offline by `check_sounder_runtime.lua`,
+reveals that sounders have no `io` or `log` globals. Missing sounder.log therefore
+does not prove missing execution. It accepts our source and dispatches all four
+phases through captured audio calls, which is not a live audio acceptance result.
+
+`install_sounder_logging.py <Saved-Games-DCS> <report.json>` installs a separate
+temporary hook enabling dedicated SOUNDER/SOUND/ED_SOUND log outputs. It requires
+DCS closed and preserves existing test files. Repeat the same 15-second mission
+after launch; no audio code changed. Collect dedicated outputs and dcs.log.
+Remove only `Scripts/Hooks/dcs-recorder-sounder-logging.lua` once diagnosis ends.
