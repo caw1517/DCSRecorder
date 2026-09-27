@@ -18,11 +18,12 @@ def inspect(calls, events, tape_path):
         'original_getter_restored', 'destroy'], lifecycle
     assert len({r['id'] for r in rows}) == 1
     phase = float(next(r['time'] for r in lifecycle
-                       if r['event'] == 'recorded_parameters_begin'))
+                       if r['event'] == 'baseline_begin')) + 3
     lines = tape_path.read_text().splitlines()
-    assert lines[0] == 'DCS_NATIVE_ENGINE_PROBE_V1'
+    assert lines[0] in ('DCS_NATIVE_ENGINE_PROBE_V1', 'DCS_ENGINE_COMBINED_V1')
     tape = [list(map(float, line.split())) for line in lines[2:]]
-    assert len(tape) == int(lines[1]) and all(len(r) == 7 for r in tape)
+    width = 11 if lines[0] == 'DCS_ENGINE_COMBINED_V1' else 7
+    assert len(tape) == int(lines[1]) and all(len(r) == width for r in tape)
     times = [r[0] for r in tape]
 
     def at(t, channel):

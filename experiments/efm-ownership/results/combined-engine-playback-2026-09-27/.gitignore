@@ -1,0 +1,4 @@
+# Generated packages, captures, traces and installation reports remain local.
+*
+!.gitignore
+!README.md

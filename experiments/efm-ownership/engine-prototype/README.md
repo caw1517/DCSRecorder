@@ -346,3 +346,12 @@ for scope, checks, installation status and the accepted live sound result.
 channels, both native power consumers, tape interpolation and clean restoration.
 The first run passed with 132,496 Sound.dll overrides; the user reported accurate
 sound. Combining nozzle/flame playback and integrating recorded motion remains.
+
+`prepare_playback.py <capture> <new-package> --combined-probe` now prepares a
+separate **DCSRecorder-Engine-Combined-Playback.miz**. `combined_tape.py` aligns
+appearance to native absolute sample times and writes a ten-channel tape.
+The `ENGINE_COMBINED` target shares one owned table for getters and post-animation
+repair, restoring both together. `check_parameter_package.py` also checks this
+variant. `analyze_combined_live.py <calls> <events> <tape> <appearance> <summary>`
+checks delivery and timing after a run. The [combined engine record](../results/combined-engine-playback-2026-09-27/README.md)
+documents offline checks, installation and the pending live result.

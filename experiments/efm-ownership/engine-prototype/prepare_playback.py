@@ -20,16 +20,18 @@ VARIANTS={MODULE:(BINARY,'DCSRecorder-Engine-Appearance-Playback.miz'),
     'DCSRecorder-Hornet-Sounder-Test':('HornetEngineSounderProbe','DCSRecorder-Sound-Routing-Test.miz'),
     'DCSRecorder-Hornet-Audibility-Test':('HornetEngineAudibilityProbe','DCSRecorder-Sound-Audibility-Test.miz'),
     'DCSRecorder-Hornet-Native-RPM':('HornetNativeRPMProbe','DCSRecorder-Native-RPM-Playback.miz'),
-    'DCSRecorder-Hornet-Native-Engine':('HornetNativeEngineProbe','DCSRecorder-Native-Engine-Playback.miz')}
+    'DCSRecorder-Hornet-Native-Engine':('HornetNativeEngineProbe','DCSRecorder-Native-Engine-Playback.miz'),
+    'DCSRecorder-Hornet-Engine-Combined':('HornetEngineCombinedProbe','DCSRecorder-Engine-Combined-Playback.miz')}
 
 
-def prepare(logfile,output,dcs,donor,baseline,sound_probe=False,sounder_probe=False,saved=None,audibility_probe=False,rpm_probe=False,parameter_probe=False):
-    assert sum(map(bool,(sound_probe,sounder_probe,audibility_probe,rpm_probe,parameter_probe)))<=1
+def prepare(logfile,output,dcs,donor,baseline,sound_probe=False,sounder_probe=False,saved=None,audibility_probe=False,rpm_probe=False,parameter_probe=False,combined_probe=False):
+    assert sum(map(bool,(sound_probe,sounder_probe,audibility_probe,rpm_probe,parameter_probe,combined_probe)))<=1
     module='DCSRecorder-Hornet-Engine-Sound-Probe' if sound_probe else MODULE
     if sounder_probe: module='DCSRecorder-Hornet-Sounder-Test'
     if audibility_probe: module='DCSRecorder-Hornet-Audibility-Test'
     if rpm_probe: module='DCSRecorder-Hornet-Native-RPM'
     if parameter_probe: module='DCSRecorder-Hornet-Native-Engine'
+    if combined_probe: module='DCSRecorder-Hornet-Engine-Combined'
     binary,mission_name=VARIANTS[module]
     if json.loads((dcs/'autoupdate.cfg').read_text(encoding='utf-8-sig'))['version']!='2.9.29.27468':
         raise ValueError('Engine actuator targets DCS 2.9.29.27468')
@@ -59,12 +61,14 @@ def prepare(logfile,output,dcs,donor,baseline,sound_probe=False,sounder_probe=Fa
     tape=['DCS_ENGINE_PROTOTYPE_V1',str(len(rows)),' '.join(map(str,CHANNELS))]
     tape+=[' '.join(format(v,'.12g') for v in row) for row in rows]
     rpm_metadata=None
-    if rpm_probe or parameter_probe:
-        if parameter_probe:
+    if rpm_probe or parameter_probe or combined_probe:
+        if combined_probe:
+            from combined_tape import prepare as prepare_native
+        elif parameter_probe:
             from parameter_tape import prepare as prepare_native
         else:
             from rpm_tape import prepare as prepare_native
-        rpm_metadata=prepare_native(logfile,mod/('bin/recorded-engine.txt' if parameter_probe else 'bin/recorded-rpm.txt'))
+        rpm_metadata=prepare_native(logfile,mod/('bin/recorded-engine.txt' if (parameter_probe or combined_probe) else 'bin/recorded-rpm.txt'))
         first=rpm_metadata['origin']
         summary['duration']=rpm_metadata['duration']
     else:
@@ -75,6 +79,7 @@ def prepare(logfile,output,dcs,donor,baseline,sound_probe=False,sounder_probe=Fa
         text=text.replace('DCSRecorder-Hornet-Probe',module)
         if name=='entry.lua':
             text=text.replace('HornetProbe',binary).replace('DCS Recorder Hornet Prototype',
+                'DCS Recorder Combined Engine Test' if combined_probe else
                 'DCS Recorder Native Engine Test' if parameter_probe else
                 'DCS Recorder Native RPM Test' if rpm_probe else
                 'DCS Recorder Sound Audibility Test' if audibility_probe else
@@ -149,21 +154,27 @@ def prepare(logfile,output,dcs,donor,baseline,sound_probe=False,sounder_probe=Fa
             'Only outward-facing native getters change. Physical engine simulation, recorded appearance and '
             'recorded trajectory are not restored; the lead follows an AI route. '
             'Retain the session for log collection. Do not manually toggle Active Pause.')
+    if combined_probe:
+        description=('COMBINED ENGINE PLAYBACK TEST. F10 > Combined engine playback > Start combined engine test; F2 to the lead. '
+            f'Original engine state for 3 seconds, recorded sound/nozzles/flames for {summary["duration"]:.2f} seconds, '
+            'then original state for 3 seconds before lead removal. Watch both nozzles and flames while listening. '
+            'Engine parameters and appearance come from the same capture on one clock. Uses stock DCS sound. '
+            'The lead follows an ordinary AI route. Retain the session for log collection. Do not manually toggle Active Pause.')
     config='return {aircraft='+json.dumps(module)+',duration='+str(summary['duration'])+',description='+json.dumps(description)+',markers={\n'
     config+=''.join('{time='+str(m['time']-first)+',segment='+json.dumps(m['segment'])+'},\n' for m in summary['markers'])+'}}\n'
     (output/'config.lua').write_text(config,encoding='utf-8')
     def lua(script,*args):subprocess.run([str(dcs/'bin/luae.exe'),str(ROOT/script),*map(str,args)],check=True)
-    lua('state-prototype/make_playback.lua',output/'baseline.lua',HERE/('parameter_mission.lua' if parameter_probe else ('rpm_mission.lua' if rpm_probe else ('audibility_mission.lua' if audibility_probe else ('sounder_mission.lua' if sounder_probe else 'playback_mission.lua')))),output/'config.lua',output/'mission')
+    lua('state-prototype/make_playback.lua',output/'baseline.lua',HERE/('combined_mission.lua' if combined_probe else 'parameter_mission.lua' if parameter_probe else ('rpm_mission.lua' if rpm_probe else ('audibility_mission.lua' if audibility_probe else ('sounder_mission.lua' if sounder_probe else 'playback_mission.lua')))),output/'config.lua',output/'mission')
     lua('verify_hornet_requirements.lua',output/'mission',dcs/'Mods/aircraft/FA-18C/entry.lua',dcs/'MissionEditor/modules/me_mission.lua')
     lua('verify_hornet_routes.lua',output/'mission',dcs/'MissionEditor/modules/me_route.lua',2)
     lua('verify_hornet_configuration.lua',output/'mission',dcs,2)
     mission=output/mission_name
     with zipfile.ZipFile(baseline) as source,zipfile.ZipFile(mission,'x',zipfile.ZIP_DEFLATED) as target:
         for entry in source.infolist():target.writestr(entry,(output/'mission').read_bytes() if entry.filename=='mission' else source.read(entry.filename))
-    manifest={'status':'Prepared; native engine parameter consumption and sound pending' if parameter_probe else ('Prepared; native RPM consumption and sound pending' if rpm_probe else ('Prepared; live audibility pending' if audibility_probe else ('Prepared; live sound routing pending' if sounder_probe else ('Prepared; live sound callback observation pending' if sound_probe else 'Prepared; live appearance retention/rendering pending')))),
-        'module':module,'binary':binary,'sound_probe':sound_probe,'sounder_probe':sounder_probe,'audibility_probe':audibility_probe,'rpm_probe':rpm_probe,'parameter_probe':parameter_probe,
-        'rpm_metadata':None if parameter_probe else rpm_metadata,'parameter_metadata':rpm_metadata if parameter_probe else None,
-        'samples':len(rows),'duration':summary['duration'],'channels':(rpm_metadata['channels'] if parameter_probe else (['rpm_left','rpm_right'] if rpm_probe else CHANNELS)),'run_index':len(summaries)-1,
+    manifest={'status':'Prepared; combined appearance and sound pending' if combined_probe else 'Prepared; native engine parameter consumption and sound pending' if parameter_probe else ('Prepared; native RPM consumption and sound pending' if rpm_probe else ('Prepared; live audibility pending' if audibility_probe else ('Prepared; live sound routing pending' if sounder_probe else ('Prepared; live sound callback observation pending' if sound_probe else 'Prepared; live appearance retention/rendering pending')))),
+        'module':module,'binary':binary,'sound_probe':sound_probe,'sounder_probe':sounder_probe,'audibility_probe':audibility_probe,'rpm_probe':rpm_probe,'parameter_probe':parameter_probe or combined_probe,'combined_probe':combined_probe,
+        'rpm_metadata':None if (parameter_probe or combined_probe) else rpm_metadata,'parameter_metadata':rpm_metadata if (parameter_probe or combined_probe) else None,
+        'samples':rpm_metadata['samples'] if rpm_metadata else len(rows),'duration':summary['duration'],'channels':(rpm_metadata['channels']+([28,29,89,90] if combined_probe else []) if (parameter_probe or combined_probe) else (['rpm_left','rpm_right'] if rpm_probe else CHANNELS)),'run_index':len(summaries)-1,
         'source_sha256':hashlib.sha256(logfile.read_bytes()).hexdigest(),
         'files':{p.relative_to(output).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in [mission,*mod.rglob('*')] if p.is_file()}}
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2))
@@ -181,5 +192,6 @@ if __name__=='__main__':
     mode.add_argument('--audibility-probe',action='store_true')
     mode.add_argument('--rpm-probe',action='store_true')
     mode.add_argument('--parameter-probe',action='store_true')
+    mode.add_argument('--combined-probe',action='store_true')
     parser.add_argument('--saved-games',type=Path,default=Path.home()/'Saved Games/DCS')
-    args=parser.parse_args();print(prepare(args.log,args.output,args.dcs,args.donor,args.baseline,args.sound_probe,args.sounder_probe,args.saved_games,args.audibility_probe,args.rpm_probe,args.parameter_probe))
+    args=parser.parse_args();print(prepare(args.log,args.output,args.dcs,args.donor,args.baseline,args.sound_probe,args.sounder_probe,args.saved_games,args.audibility_probe,args.rpm_probe,args.parameter_probe,args.combined_probe))

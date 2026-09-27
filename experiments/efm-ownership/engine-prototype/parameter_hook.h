@@ -21,6 +21,10 @@ inline bool active=false;
 inline Values requested{};
 inline std::vector<Call> calls;
 inline uint64_t dropped=0;
+using Animation=native_animation_hook::Step;
+using AfterAnimation=native_animation_hook::Before;
+inline Animation original_animation=nullptr;
+inline AfterAnimation after_animation=nullptr;
 inline uintptr_t table(){return reinterpret_cast<uintptr_t>(shadow.data()+1);}
 inline bool valid(const Values& values) {
     for(size_t i=0;i<values.size();++i)
@@ -54,19 +58,36 @@ __declspec(noinline) inline float dispatch(void* object,int engine,bool core) {
 __declspec(noinline) inline float dispatch_thrust(void* object,int engine) {
     return run(object,engine,2,false,reinterpret_cast<uintptr_t>(_ReturnAddress()));
 }
-inline const char* install(uintptr_t object,uintptr_t expected_table,Getter getter,Thrust thrust,Thrust power) {
+inline void dispatch_animation(void* object,double dt,bool update) {
+    Animation next=nullptr;
+    {std::lock_guard<std::mutex> held(mutex);next=original_animation;}
+    if(next)next(object,dt,update);
+    AfterAnimation after=nullptr;
+    {
+        std::lock_guard<std::mutex> held(mutex);
+        uintptr_t current=0;
+        if(active && owner==reinterpret_cast<uintptr_t>(object) && owner_thread==GetCurrentThreadId() &&
+           native_identity::read(owner,current) && current==table())after=after_animation;
+    }
+    if(after)after(reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(object)+8));
+}
+inline const char* install(uintptr_t object,uintptr_t expected_table,Getter getter,Thrust thrust,Thrust power,
+                          Animation animation=nullptr,AfterAnimation after=nullptr) {
     std::lock_guard<std::mutex> held(mutex);
     if(owner)return "parameter_hook_busy";
     uintptr_t current=0;
-    if(!object || !getter || !thrust || !power || !native_animation_hook::writable_pointer(object) ||
+    if(!object || !getter || !thrust || !power || bool(animation)!=bool(after) || !native_animation_hook::writable_pointer(object) ||
        !native_identity::read(object,current) || current!=expected_table)return "parameter_object_rejected";
     std::array<uintptr_t,slots+1> copy{};
     if(!native_identity::read(expected_table-sizeof(uintptr_t),copy) ||
        copy[slot+1]!=reinterpret_cast<uintptr_t>(getter) ||
        copy[thrust_slot+1]!=reinterpret_cast<uintptr_t>(thrust) ||
-       copy[power_slot+1]!=reinterpret_cast<uintptr_t>(power))return "parameter_table_rejected";
+       copy[power_slot+1]!=reinterpret_cast<uintptr_t>(power) ||
+       (animation && copy[native_animation_hook::step_slot+1]!=reinterpret_cast<uintptr_t>(animation)))return "parameter_table_rejected";
     shadow=copy;shadow[slot+1]=reinterpret_cast<uintptr_t>(&dispatch);
     shadow[thrust_slot+1]=reinterpret_cast<uintptr_t>(&dispatch_thrust);
+    original_animation=animation;after_animation=after;
+    if(animation)shadow[native_animation_hook::step_slot+1]=reinterpret_cast<uintptr_t>(&dispatch_animation);
     original=getter;original_thrust=thrust;original_table=expected_table;owner_thread=GetCurrentThreadId();
     active=false;owner=object;calls.clear();dropped=0;
     const auto previous=InterlockedCompareExchangePointer(reinterpret_cast<void* volatile*>(object),

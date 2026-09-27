@@ -112,6 +112,12 @@ No afterburner visual appeared; this isolated test omitted nozzle/flame writes.
 Combine the accepted engine-parameter sound path and captured appearance on one
 clock before integrating with recorded motion and the normal recording workflow.
 See the [accepted native sound test](../experiments/efm-ownership/results/native-engine-playback-2026-09-27/README.md).
+A separate **DCSRecorder-Engine-Combined-Playback.miz** now combines the six native
+engine parameters and four captured nozzle/flame arguments on one clock. The
+shared getter/animation boundary, source alignment and mission checks pass;
+installation verified 10 hashes and 99 protected files unchanged. Combined live
+sound/appearance acceptance remains pending. See the
+[combined engine test](../experiments/efm-ownership/results/combined-engine-playback-2026-09-27/README.md).
 See the [native capture record](../experiments/efm-ownership/results/native-engine-capture-2026-09-27/README.md).
 See the [native RPM test](../experiments/efm-ownership/results/native-rpm-2026-09-27/README.md) and
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).

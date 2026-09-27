@@ -10,9 +10,16 @@
 #include <iomanip>
 #include <algorithm>
 #include <type_traits>
+#ifdef ENGINE_COMBINED
+#include "../native_body.h"
+#endif
 
 namespace {
-struct Row {double t;parameter_hook::Values values;};
+struct Row {double t;parameter_hook::Values values;
+#ifdef ENGINE_COMBINED
+    std::array<float,4> appearance{};
+#endif
+};
 std::vector<Row> tape;
 std::ofstream events,trace;
 const ed_object_api_entry* api=nullptr;
@@ -21,6 +28,13 @@ uint64_t id=0,cookie_value=0,serial=0;
 double start=-1,last=-1;
 bool initialized=false,loaded=false,hooked=false,failed=false;
 std::mutex guard;
+#ifdef ENGINE_COMBINED
+constexpr std::array<int,4> appearance_channels{28,29,89,90};
+std::ofstream appearance_trace;
+std::array<float,4> appearance_values{};
+double appearance_time=-1;
+uint64_t animation_calls=0;
+#endif
 void event(const char* value,double t) {events << std::setprecision(12) << value << ',' << id << ',' << t << '\n';events.flush();}
 void initialize() {
     if(initialized)return;initialized=true;
@@ -32,14 +46,29 @@ void initialize() {
     const auto run=std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64());
     events.open(folder/"parameter-logs"/("events-"+run+".csv"));
     trace.open(folder/"parameter-logs"/("calls-"+run+".csv"));
+#ifdef ENGINE_COMBINED
+    appearance_trace.open(folder/"parameter-logs"/("appearance-"+run+".csv"));
+    appearance_trace << std::setprecision(12) << "id,time,recorded_time,stage,arg,requested,before,after\n";
+    if(!appearance_trace)return;
+#endif
     events << "event,id,time\n";
     trace << std::setprecision(12) << "id,drain_time,caller_module,caller_rva,engine,channel,overridden,original,returned\n";
     std::ifstream file(folder/"recorded-engine.txt");std::string header;size_t count=0;
-    if(!(file>>header>>count) || header!="DCS_NATIVE_ENGINE_PROBE_V1" || count<2 || count>10000)return;
+    if(!(file>>header>>count) || header!=
+#ifdef ENGINE_COMBINED
+       "DCS_ENGINE_COMBINED_V1"
+#else
+       "DCS_NATIVE_ENGINE_PROBE_V1"
+#endif
+       || count<2 || count>10000)return;
     for(size_t i=0;i<count;++i) {
         Row row{};
         if(!(file>>row.t))return;
         for(auto& value:row.values)if(!(file>>value))return;
+#ifdef ENGINE_COMBINED
+        for(auto& value:row.appearance)
+            if(!(file>>value) || !std::isfinite(value) || value<0 || value>1)return;
+#endif
         if(!std::isfinite(row.t) || !parameter_hook::valid(row.values) ||
            (i==0 && row.t!=0) || (i && (row.t<=tape.back().t || row.t-tape.back().t>0.15)))return;
         tape.push_back(row);
@@ -54,6 +83,9 @@ Row at(double t) {
     const auto&a=tape[i];const auto&b=tape[i+1];const double u=(t-a.t)/(b.t-a.t);
     Row result{t,{}};
     for(size_t c=0;c<6;++c)result.values[c]=float(a.values[c]+u*(b.values[c]-a.values[c]));
+#ifdef ENGINE_COMBINED
+    for(size_t c=0;c<4;++c)result.appearance[c]=float(a.appearance[c]+u*(b.appearance[c]-a.appearance[c]));
+#endif
     return result;
 }
 void drain(double t) {
@@ -74,6 +106,33 @@ bool available(ED_OBJECT_HANDLE h) {
     if(!api || !api->ed_get_object_id || !api->ed_get_object_args || !api->ed_set_single_arg)return false;
     auto view=api->ed_get_object_args(h);return view.data && view.size>999;
 }
+#ifdef ENGINE_COMBINED
+bool restore(double t);
+bool write_appearance(const char* stage) {
+    bool ok=true;
+    for(size_t c=0;c<appearance_channels.size();++c) {
+        const int arg=appearance_channels[c];
+        const float before=api->ed_get_object_args(owned).data[arg];
+        api->ed_set_single_arg(owned,arg,appearance_values[c]);
+        const auto view=api->ed_get_object_args(owned);
+        if(!view.data || view.size<=999)return false;
+        const float after=view.data[arg];
+        ok=ok && std::isfinite(after) && std::abs(after-appearance_values[c])<.00001f;
+        appearance_trace << id << ',' << appearance_time << ',' << appearance_time-start-3 << ','
+            << stage << ',' << arg << ',' << appearance_values[c] << ',' << before << ',' << after << '\n';
+    }
+    appearance_trace.flush();return ok && bool(appearance_trace);
+}
+void after_animation(const void* pointer) {
+    std::lock_guard<std::mutex> held(guard);
+    if(pointer!=owned || failed || !hooked || !available(owned) || api->ed_get_object_id(owned)!=id)return;
+    ++animation_calls;
+    if(!write_appearance("post_animation")) {
+        failed=true;event("appearance_write_failed",appearance_time);restore(appearance_time);
+        if(available(owned))api->ed_set_single_arg(owned,999,.75f);
+    }
+}
+#endif
 const char* install(ED_OBJECT_HANDLE h) {
     const auto identity=native_identity::inspect(h);
     if(identity.status!="ok" || identity.module!="DCS.exe" || identity.name!=".?AVwoAIPlane@@" || identity.subobject_offset!=8)return "identity_rejected";
@@ -91,8 +150,19 @@ const char* install(ED_OBJECT_HANDLE h) {
        !sound_boundary::matches(image+0x66d1c0,std::array<unsigned char,14>{0x85,0xd2,0x7e,0x21,0x0f,0xb6,0x81,0x11,8,0,0,0x3b,0xd0,0x7f}) ||
        !sound_boundary::matches(sound+0x134cbb,std::array<unsigned char,6>{0xff,0x90,0xe0,0,0,0}) ||
        !sound_boundary::matches(sound+0x134ca5,std::array<unsigned char,6>{0xff,0x90,0xf0,0,0,0}))return "power_guard_rejected";
+#ifdef ENGINE_COMBINED
+    native_body::Sample body{};
+    if(std::string(native_body::sample(h,body))!="object_position_candidate")return "animation_identity_or_null_fm_rejected";
+    if(!sound_boundary::matches(image+0x6b6070,std::array<unsigned char,18>{0x48,0x8b,0xc4,0x48,0x89,0x58,0x10,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57}) ||
+       !sound_boundary::matches(image+0x67529c,std::array<unsigned char,15>{0x41,0xb0,1,0x0f,0x28,0xce,0x48,0x8b,1,0xff,0x90,0x10,0x0c,0,0}) ||
+       !sound_boundary::matches(image+0x6b73a7,std::array<unsigned char,5>{0xe8,0x44,0x1f,0xfb,0xff}))return "animation_guard_rejected";
+#endif
     return parameter_hook::install(object,image+0x1146200,reinterpret_cast<parameter_hook::Getter>(image+0x66d160),
-        reinterpret_cast<parameter_hook::Thrust>(image+0x66d1c0),reinterpret_cast<parameter_hook::Thrust>(image+0x60f110));
+        reinterpret_cast<parameter_hook::Thrust>(image+0x66d1c0),reinterpret_cast<parameter_hook::Thrust>(image+0x60f110)
+#ifdef ENGINE_COMBINED
+        ,reinterpret_cast<parameter_hook::Animation>(image+0x6b6070),&after_animation
+#endif
+        );
 }
 bool restore(double t) {
     if(hooked){
@@ -111,6 +181,9 @@ extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE h,uin
     std::lock_guard<std::mutex> held(guard);initialize();cookie=++serial;
     if(owned || !h || !loaded || !available(h) || !api->ed_get_object_id(h)){event("create_rejected",0);return;}
     owned=h;id=api->ed_get_object_id(h);cookie_value=cookie;start=last=-1;failed=false;event("create",0);
+#ifdef ENGINE_COMBINED
+    animation_calls=0;appearance_time=-1;
+#endif
 }
 extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE h,uint64_t& cookie,double time) {
     std::lock_guard<std::mutex> held(guard);
@@ -130,6 +203,13 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE h,u
     const double elapsed=time-start;const bool replay=elapsed>=3 && elapsed<3+tape.back().t;
     if(hooked) {
         const auto row=at(elapsed-3);
+#ifdef ENGINE_COMBINED
+        appearance_values=row.appearance;appearance_time=time;
+        if(replay && ((!animation_calls && elapsed>4) || !write_appearance("sdk"))) {
+            failed=true;event("appearance_or_animation_failed",time);restore(time);
+            api->ed_set_single_arg(h,999,.75f);return;
+        }
+#endif
         if(!parameter_hook::publish(reinterpret_cast<uintptr_t>(h)-8,replay,row.values)) {
             failed=true;restore(time);api->ed_set_single_arg(h,999,0.75f);return;
         }

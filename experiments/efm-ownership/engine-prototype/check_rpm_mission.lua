@@ -1,9 +1,10 @@
 -- Drive the actual mission script through completion and failure/stop paths.
 local script=assert(arg[1])
+local combined=arg[2]=='--combined'
 local parameters=arg[2]=='--parameters'
-local start_command=parameters and 'Start recorded engine test' or 'Start recorded RPM test'
-local stop_command=parameters and 'Stop engine test' or 'Stop RPM test'
-local prefix=parameters and 'DCS_PARAMETER_MISSION' or 'DCS_RPM_MISSION'
+local start_command=combined and 'Start combined engine test' or parameters and 'Start recorded engine test' or 'Start recorded RPM test'
+local stop_command=combined and 'Stop combined engine test' or parameters and 'Stop engine test' or 'Stop RPM test'
+local prefix=combined and 'DCS_COMBINED_MISSION' or parameters and 'DCS_PARAMETER_MISSION' or 'DCS_RPM_MISSION'
 local function scenario(mode,reason)
     local now,elapsed,status=0,0,0
     local exists,removed,scheduled=false,0,nil
