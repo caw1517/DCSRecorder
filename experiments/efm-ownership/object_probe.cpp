@@ -14,9 +14,15 @@
 #include "static_image_snapshot.h"
 #include "native_body.h"
 #include "native_motion.h"
+#ifdef HORNET_STAGED_PROTOTYPE
+#include "native_presentation_pitch.h"
+#endif
 #include "turn_path.h"
 #ifdef HORNET_RECORDED_PROTOTYPE
 #include "recorded_path.h"
+#ifdef HORNET_STAGED_PROTOTYPE
+#include "staged_playback.h"
+#endif
 namespace playback_path=recorded_path;
 #elif defined(HORNET_ROLL_PROTOTYPE)
 #include "hornet_roll_path.h"
@@ -40,9 +46,16 @@ struct Observation {
     double start_time=0, last_time=0, last_x=0, last_z=0, measured_speed=145; playback_path::Path path;
 #ifdef HORNET_RECORDED_PROTOTYPE
     bool step_hook=false, step_pending=false;
+#ifdef HORNET_STAGED_PROTOTYPE
+    uint64_t runtime_id=0,token=0;
+    bool terminal=false;
+#endif
     uint64_t step_calls=0,step_applied=0;
     const char* step_status="step_hook_inactive";
     turn_path::Motion step_motion{};
+#ifdef HORNET_STAGED_PROTOTYPE
+    native_presentation_pitch::State presentation;
+#endif
 #endif
 };
 std::unordered_map<ED_OBJECT_HANDLE, Observation> observed;
@@ -59,13 +72,27 @@ void before_native_step(const void* handle) {
     state.step_pending=false; // A missing SDK callback cannot leave a stale override running.
     native_body::Sample sample{};
     const auto id=api && api->ed_get_object_id ? api->ed_get_object_id(sdk_handle) : 0;
-    if(id!=16777472 || std::strcmp(native_body::sample(handle,sample),"object_position_candidate") ||
-       sample.position[1]<1000 || sample.position[1]>5000) state.step_status="step_state_rejected";
+#ifdef HORNET_STAGED_PROTOTYPE
+    const uint64_t expected_id=state.runtime_id;
+#else
+    const uint64_t expected_id=16777472;
+#endif
+    if(!expected_id || id!=expected_id || std::strcmp(native_body::sample(handle,sample),"object_position_candidate")
+#ifndef HORNET_STAGED_PROTOTYPE
+       || sample.position[1]<1000 || sample.position[1]>5000
+#endif
+       ) state.step_status="step_state_rejected";
     else {
         state.step_status=native_velocity::validate(handle,state.step_motion);
         if(std::strcmp(state.step_status,"valid")==0)
             state.step_status=native_velocity::write_validated(handle,state.step_motion);
     }
+#ifdef HORNET_STAGED_PROTOTYPE
+    if(std::strcmp(state.step_status,"called")==0) {
+        state.step_status=native_presentation_pitch::layout_valid() ?
+            native_presentation_pitch::clear_validated(handle,state.presentation) : "presentation_layout_mismatch";
+    }
+#endif
     if(std::strcmp(state.step_status,"called")==0) ++state.step_applied;
     else state.motion_active=false;
 }
@@ -89,6 +116,13 @@ const char* install_native_step(const void* handle) {
 }
 void stop_native_step(const void* handle,Observation& state) {
     state.step_pending=false;
+#ifdef HORNET_STAGED_PROTOTYPE
+    const auto presentation_status=native_presentation_pitch::restore(handle,state.presentation);
+    if(state.presentation.active) {
+        state.step_status=presentation_status;state.motion_active=false;
+        if(log_file.is_open())log_file << "presentation_restore_error," << presentation_status << '\n';
+    }
+#endif
     if(!state.step_hook) return;
     state.step_status=native_step_hook::restore(reinterpret_cast<uintptr_t>(handle)-8);
     state.step_hook=native_step_hook::recognizes(reinterpret_cast<uintptr_t>(handle)-8,
@@ -170,6 +204,7 @@ extern "C" __declspec(dllexport) void ed_setup_object_api(const ed_object_api_en
     std::lock_guard<std::mutex> guard(lock);
     api = value;
     record("setup", nullptr, 0, 0, 0);
+#ifndef HORNET_STAGED_PROTOTYPE
     // Only run in DCS itself; standalone contract tests never capture their host.
     static bool captured=false;
     wchar_t host_path[32768]{};
@@ -185,10 +220,20 @@ extern "C" __declspec(dllexport) void ed_setup_object_api(const ed_object_api_en
             snapshot_static_image(std::filesystem::path(path).parent_path()/"probe-logs",L"WorldGeneral.dll");
         }
     }
+#endif
 }
 extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handle, uint64_t& cookie) {
     std::lock_guard<std::mutex> guard(lock);
+#ifdef HORNET_STAGED_PROTOTYPE
+    // Only one registered playback object can own the per-object native hook.
+    const bool another_object=!observed.empty();
+#endif
     observed[handle] = {};
+#ifdef HORNET_STAGED_PROTOTYPE
+    auto& created=observed[handle];
+    created.runtime_id=api && api->ed_get_object_id ? api->ed_get_object_id(handle) : 0;
+    if(another_object || !created.runtime_id)created.motion_attempted=true;
+#endif
     record("create", handle, cookie, 0, 0);
 #ifdef HORNET_RECORDED_PROTOTYPE
     HMODULE module=nullptr;wchar_t path[32768]{};
@@ -196,16 +241,41 @@ extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handl
         reinterpret_cast<LPCWSTR>(&open_log),&module) && GetModuleFileNameW(module,path,32768)) {
         const char* status=observed[handle].path.load(std::filesystem::path(path).parent_path()/"recorded-flight.txt");
         record(status,handle,cookie,0,0);
+#ifdef HORNET_STAGED_PROTOTYPE
+        observed[handle].token=staged_playback::fingerprint(std::filesystem::path(path).parent_path()/"recorded-flight.txt");
+        if(!observed[handle].token)observed[handle].motion_attempted=true;
+#endif
         if(std::string(status)!="recording_loaded")observed[handle].motion_attempted=true;
     } else observed[handle].motion_attempted=true;
 #endif
 }
 extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE handle, uint64_t& cookie, double time) {
     std::lock_guard<std::mutex> guard(lock);
-    auto& state = observed[handle];
+    const auto found=observed.find(handle);
+    if(found==observed.end())return;
+    auto& state = found->second;
     ++state.calls;
     if (state.calls == 1) record_identity(handle);
     const auto motion_id=handle && api && api->ed_get_object_id ? api->ed_get_object_id(handle) : 0;
+#ifdef HORNET_STAGED_PROTOTYPE
+    native_body::Sample identity_sample{};
+    const bool owned=motion_id && motion_id==state.runtime_id &&
+        std::strcmp(native_body::sample(handle,identity_sample),"object_position_candidate")==0;
+    if(!owned || state.terminal || (state.motion_attempted && !state.motion_active)) {
+        stop_native_step(handle,state);
+        if(!state.terminal) {
+            if(!owned && (state.calls==1 || state.motion_active))record("staged_identity_rejected",handle,cookie,time,state.calls);
+            state.motion_active=false;state.motion_attempted=true;
+            if(motion_id && motion_id==state.runtime_id)staged_playback::publish(api,handle,state.token,staged_playback::failed);
+        }
+        return;
+    }
+    if(!staged_playback::available(api,handle)) {
+        state.motion_attempted=true;
+        record("staged_status_arguments_unavailable",handle,cookie,time,state.calls);
+        return;
+    }
+#endif
 #ifdef HORNET_RECORDED_PROTOTYPE
     if(!state.motion_active && state.step_hook) stop_native_step(handle,state);
 #endif
@@ -216,10 +286,21 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #ifdef HORNET_RECORDED_PROTOTYPE
     if(state.motion_active)speedbrake=state.path.brake_at(time-state.start_time);
 #endif
+#ifdef HORNET_STAGED_PROTOTYPE
+    if(!state.motion_attempted && !state.path.samples.empty())speedbrake=state.path.brake_at(0);
+    const auto appearance_status=hornet_appearance::apply(api,handle,speedbrake,state.runtime_id);
+    if(std::strcmp(appearance_status,"off_verified") && std::strcmp(appearance_status,"recorded_brake_verified")) {
+        state.motion_attempted=true;state.motion_active=false;stop_native_step(handle,state);
+        staged_playback::publish(api,handle,state.token,staged_playback::failed);
+        record(appearance_status,handle,cookie,time,state.calls);return;
+    }
+#else
     const auto appearance_status=hornet_appearance::apply(api,handle,speedbrake);
+#endif
     if(state.calls==1 || time>=state.next_log)
         record(appearance_status,handle,cookie,time,state.calls);
 #endif
+#ifndef HORNET_STAGED_PROTOTYPE
     if(time<5) {
         native_body::Sample reading{};
         if(std::string(native_body::sample(handle,reading))=="object_position_candidate") {
@@ -228,14 +309,27 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
             state.last_time=time; state.last_x=reading.position[0]; state.last_z=reading.position[2];
         }
     }
+#endif
+#ifdef HORNET_STAGED_PROTOTYPE
+    if(!state.motion_attempted) {
+#else
     if(!state.motion_attempted && time>=5.0) {
+#endif
         state.motion_attempted=true;
         native_body::Sample before{},after{}; turn_path::Pose initial{};
+#ifdef HORNET_STAGED_PROTOTYPE
+        const auto status=native_motion::apply(handle,motion_id,before,after,nullptr,&initial,false,nullptr,state.runtime_id);
+#else
         const auto status=time<=5.2 ? native_motion::apply(handle,motion_id,before,after,nullptr,&initial) : "missed_window";
+#endif
         state.motion_active=std::string(status)=="captured";
         if(state.motion_active) {
 #ifdef HORNET_RECORDED_PROTOTYPE
+#ifdef HORNET_STAGED_PROTOTYPE
+            state.motion_active=state.path.initialize_exact(initial);
+#else
             state.motion_active=state.path.initialize(initial,state.measured_speed);
+#endif
             if(!state.motion_active)record("recording_alignment_rejected",handle,cookie,time,state.calls);
 #else
             state.path.initialize(initial,state.measured_speed);
@@ -249,7 +343,12 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     if(state.motion_active) {
         const double elapsed=time-state.start_time;
 #ifdef HORNET_RECORDED_PROTOTYPE
+#ifdef HORNET_STAGED_PROTOTYPE
+        const bool release=false; // Apply the endpoint before reporting completion.
+        const bool finished=elapsed>=state.path.duration();
+#else
         const bool release=elapsed>state.path.duration();
+#endif
 #else
         const bool release=elapsed>playback_path::duration;
 #endif
@@ -269,7 +368,11 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         QueryPerformanceFrequency(&clock_frequency);
         QueryPerformanceCounter(&apply_start);
         native_body::Sample before{},after{};
+#ifdef HORNET_STAGED_PROTOTYPE
+        const auto status=elapsed<0 ? "staged_clock_reversed" : native_motion::apply(handle,motion_id,before,after,&target,nullptr,false,&target_motion,state.runtime_id);
+#else
         const auto status=release ? "released" : native_motion::apply(handle,motion_id,before,after,&target,nullptr,false,match_motion ? &target_motion : nullptr);
+#endif
 #ifdef HORNET_RECORDED_PROTOTYPE
         if(!release && std::strcmp(status,"called")==0) {
             if(!state.step_hook) {
@@ -307,6 +410,22 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #endif
         motion_file << '\n'; motion_file.flush();
         if(release || std::string(status)!="called") state.motion_active=false;
+#ifdef HORNET_STAGED_PROTOTYPE
+        if(state.motion_active) {
+            const auto phase=finished?staged_playback::complete:staged_playback::running;
+            if(!staged_playback::publish(api,handle,state.token,phase)) {
+                record("staged_status_readback_failed",handle,cookie,time,state.calls);
+                state.motion_active=false;
+            } else if(finished) {
+                state.terminal=true;state.motion_active=false;
+                record("staged_complete",handle,cookie,time,state.calls);
+            } else if(elapsed==0)record("staged_started",handle,cookie,time,state.calls);
+        }
+        if(!state.motion_active) {
+            stop_native_step(handle,state);
+            if(!state.terminal)staged_playback::publish(api,handle,state.token,staged_playback::failed);
+        }
+#endif
     }
     if (state.calls == 1 || time >= state.next_log) {
         record("simulate", handle, cookie, time, state.calls);

@@ -40,15 +40,14 @@ def read(path):
                 if abs(sum(x*y for x,y in zip(axis,other))-(1 if a==b else 0))>0.001: raise ValueError('Invalid orientation basis')
         cross=[f[1]*u[2]-f[2]*u[1],f[2]*u[0]-f[0]*u[2],f[0]*u[1]-f[1]*u[0]]
         if sum(x*y for x,y in zip(cross,r))<0.999: raise ValueError('Reflected orientation basis')
-        if not 1000<=p[1]<=5000 or not 70<=math.sqrt(sum(x*x for x in v))<=260 or not 0<=brake<=1:
-            raise ValueError('Take exceeds the current prototype altitude/speed/animation limits')
+        if not 70<=math.sqrt(sum(x*x for x in v))<=260 or not 0<=brake<=1:
+            raise ValueError('Take exceeds current airborne speed/animation support; ground transitions require ground playback support')
         q=quaternion(f,u,r)
         if samples:
             prev=samples[-1];dt=t-prev[0]
             if not 0<dt<=0.15: raise ValueError('Non-monotonic time or recording gap over 150 ms')
             dot=sum(a*b for a,b in zip(q,prev[4:8]))
             if dot<0:q=[-x for x in q];dot=-dot
-            if 2*math.acos(min(1,dot))/dt>0.9: raise ValueError('Take rotation exceeds conservative playback rate limit')
             if math.dist(p,[prev[k]+dt*(prev[k+7]+v[k-1])/2 for k in range(1,4)])>max(0.5,dt*8):
                 raise ValueError('Position/velocity discontinuity in recorded flight')
         samples.append([t,*p,*q,*v,brake])

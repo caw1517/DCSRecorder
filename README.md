@@ -1,123 +1,107 @@
 # DCS Recorder
 
 Record a flight, then fly alongside an aircraft playing it back in DCS World.
-The project is for one player using one DCS account. Multiplayer is out of scope.
+One player, one DCS account. Multiplayer is out of scope.
 
-**Current milestone (26 September 2026):** a real, short F/A-18C flight has been
-recorded and played back while the user flies another aircraft. The user reports
-the latest jitter correction is “SO much better.” This is a working experimental
-airborne prototype, not a finished recorder or a guarantee of complete physics.
+**Current milestone — 26 September 2026:** the first local single-aircraft
+record-to-replay workflow is implemented and accepted. The companion provides a
+flight library, validation, renaming, and generated practice/playback missions.
+F10 Stop saves completed recordings automatically. Fast-roll playback and the
+repeatable nose-jump correction have passed live user checks.
 
-**Priority:** finish reliable, faithful playback of **one aircraft** before
-building layered playback. Synchronized microphone/lead calls are a future
-feature, not part of the current implementation.
+This is a build-specific local prototype, not a portable end-user release or
+complete ground-to-ground aircraft-state replay. Finish one-aircraft fidelity
+before adding layers. [Current roadmap](docs/ROADMAP.md).
 
-## How it works, in ordinary language
+## Use the local workflow
 
-Think of the recording as a very detailed flight diary. About 50 times a second,
-we write down where the aircraft is, which way it points, how it is moving, and
-the simulation time. We also save aircraft/livery information and speed-brake
-position. These are measurements of the flight actually flown, so real speed
-bleed and recovery are already in the recording.
+See [companion setup and use](companion/README.md). After the development setup:
 
-For playback, a custom mod supplies another aircraft. Our controller places it
-on the recorded path and gives it the matching movement and rotation. DCS keeps
-moving it between our updates. Smooth transitions between saved samples let the
-aircraft follow a continuous path. The human pilot still flies their own normal
-aircraft independently.
+1. Generate a practice mission with DCS closed, then load it in DCS.
+2. Begin airborne and nearly level. Use F10 Start recording, fly, then F10 Stop.
+3. Confirm the timestamped take appears in the companion flight library.
+4. Select the take, optionally rename it, close DCS and generate playback.
+5. Load the generated mission. Active Pause holds the player until F10 starts a
+   three-second countdown. Playback starts at the original recorded pose with
+   the player nominally 150 feet behind.
+6. Playback completion removes the lead; the mission continues. Restart to replay.
 
-The first control experiments used paths we invented: straight flight, turns,
-right/level/left combinations and a loaded roll. They helped us solve control
-before adding recording. We then replaced that invented path with a real take.
-Playback does not need to guess the original throttle or aerodynamic forces to
-reproduce the measured movement. Engine appearance and sound are separate work.
+Original recordings remain unchanged. Incomplete recordings stay separate. Only
+the most recently selected tape is active; old missions reject a mismatched tape.
+The automatic-save hook reads DCS log history and retains completed files outside
+DCS logs, so routine log rotation does not erase saved flights.
 
-The mod registers a separate playback aircraft using a locally prepared aircraft
-definition and references to the installed Hornet model/textures/livery. Your
-stock flyable Hornet and its normal flight model remain separate. Although the
-early experiment used the external-flight-model (EFM) SDK, ordinary player EFM
-callbacks did not run for the unoccupied playback object. Its demonstrated motion
-comes from our recorded-path controller and native integration, not a newly
-written Hornet aerodynamic model. Other aircraft require their own validated
-registration, appearance/state mappings and compatibility checks.
+## How playback works
 
-A companion app to select takes and generate missions is a proposed workflow;
-today's local preparation tools are its starting point. DCS still needs the mod
-to execute playback. Exact original starting position plus matching aircraft
-state, including a ground start after engines are running, is a requirement still
-to implement. See the roadmap for the current acquisition/placement limitations.
+About 50 times per simulation second, the recorder samples position, orientation,
+velocity, time, aircraft/livery identity and speed brake. These are measurements
+of the flight actually flown, including its speed changes. Playback follows the
+measured path; it does not guess pilot controls or recreate Hornet aerodynamics.
 
-The main obstacle was that DCS was also changing the playback aircraft's motion.
-Stopping all native movement caused jumps. Letting it move with the recorded
-speed and rotation worked better, but DCS still redirected velocity along the
-nose. A real aircraft can point slightly above its actual direction of travel.
-We now restore the recorded movement just before DCS advances this one aircraft.
-That preserves both its attitude and its flight path.
+A separate custom aircraft references locally installed Hornet assets. Documented
+object callbacks and guarded, build-specific native access command its pose and
+motion. A per-object physics-step override restores recorded velocity and rotation
+before native integration. The stock player aircraft remains independent.
+Ordinary player EFM callbacks were not the viable control route for the unoccupied
+playback object. Other aircraft need validated registration and state mappings.
 
-## What is demonstrated
+The staged controller applies the first recorded sample without the old attitude
+acquisition blend or translation. It also suppresses an extra native presentation
+pitch contribution that caused the repeatable nose jump. Interpolation preserves
+attitude through inverted flight; fast rolls use spherical interpolation.
 
-- Independent player and playback aircraft in a single DCS process/account.
-- TF-51D synthetic-path experiments and subsequent F/A-18C testing.
-- Calm-air turns, right/level/left paths, and a synthetic loaded left roll.
-- A completed 38.78-second real Hornet take containing 1,940 samples.
-- Smooth real-flight playback reported by the user after the latest correction.
-- In the comparison window, average position correction fell from 18.84 cm to
-  1.88 cm; the 95th percentile fell from 27.50 cm to 3.23 cm. This measures the
-  adjustment needed each update, not absolute world-position or rendered accuracy.
-- All 1,940 pre-physics restorations succeeded in the follow-up run, and the
-  original update route was restored when playback finished.
-- Clean Hornet configuration, exterior lights off, and speed-brake capture/playback.
+## What has been verified
 
-## Current boundaries
+- Automatic save, library selection/renaming, mission generation and full playback.
+- F10 staging/countdown, original first-sample pose/velocity, completion and restart.
+- Accepted 38.78-second baseline retained in local evidence; later 39.48-second
+  app capture saved successfully and its nose-jump correction passed live review.
+- The latest 80.92-second hard-turn take completed all 4,047 native motion writes;
+  the hook restored at completion. The user reported it worked great.
+- The user reports the remaining requested repeated/longer-take, live pause/resume
+  and frame-rate checks passed. Exact settings were not supplied; this is manual
+  acceptance, not separately reconstructed telemetry for every condition.
+- 13 native CTests and 10 companion tests pass. Offline tests include 180-degree/s
+  rolls and a modeled 7.5-G, 350-knot turn. Synthetic numerical precision does not
+  establish real simulator loads, terrain contact or rendered accuracy.
 
-The usable recording/playback path is one custom F/A-18C representation, Blue
-Angels Jet Team livery, Caucasus, calm air, and a specific installed DCS build.
-This does not yet support arbitrary aircraft or liveries. Flight import currently
-accepts 5–300 seconds, altitude 1,000–5,000 m and speed 70–260 m/s, with conservative
-rotation limits and a near-level beginning. Those are prototype guards, not the
-planned final flight envelope. Playback starts after five mission seconds, blends
-initial attitude for two seconds, and translates the take to the capture position.
-Exact geographic placement is therefore not established.
+See the [validation record](docs/validation/workflow-2026-09-26.md) for evidence
+and limits. Smooth motion is not a claim of complete collision, wake or ground physics.
 
-Recording uses F10 Start/Stop and writes to DCS's normal log; local tools extract
-and validate a completed take and prepare a playback mission. Explicit Stop and
-collection before log rotation are necessary today. This workflow needs to become
-simple and robust. Pause handling uses simulation time and has offline coverage,
-but the user's real take did not include a pause; live validation is outstanding.
+## Current support and follow-up work
 
-The control method combines documented object callbacks with build-specific
-native interfaces and a per-object override. It is **not** a general supported
-playback API. Compatibility across DCS updates is a significant product risk.
-Collision/damage, wake generation/reception and ground contact remain independent
-requirements. Good airborne motion does not prove them. Engine effects/sound,
-smoke, gear, flaps and other animation fidelity also need work.
+DCS **2.9.29.27468**, F/A-18C, Blue Angels Jet Team livery, Caucasus and zero wind.
+Recordings currently span 5–300 seconds and 70–260 m/s, starting within ten degrees
+of level. The staged playback path has no altitude floor/ceiling or angular-rate
+cap. Build, ownership, finite-data, orientation and continuity checks remain.
+There is no G-load rejection. Low-altitude numeric acceptance is not terrain-contact
+validation; the latest real hard-turn take reached roughly 572 m MSL.
 
-See [the roadmap](docs/ROADMAP.md) and [GitHub project map](https://github.com/caw1517/DCSRecorder/issues/1).
+Stationary ground starts, taxi, takeoff, landing/rollout, custom aircraft placement,
+gear/flaps, smoke, engine/afterburner appearance and sound remain required follow-up
+work. A full demonstration must eventually work from ground start to landing,
+including low passes and hard maneuvers. Current speed/duration bounds are prototype
+limitations, not the final product requirement. Layers and synchronized lead-call
+voice remain deferred. No complete cockpit-system reconstruction is claimed.
 
-## Source and validation
+## Build and checks
 
-Implementation and tests live in [experiments/efm-ownership](experiments/efm-ownership).
-The name reflects the original experiment; the current unoccupied-aircraft route
-does not run a normal player EFM to reproduce the recorded flight.
-
-On the development Windows machine, with Visual Studio 2022, CMake and the
-locally installed DCS SDK:
+Windows development setup: Visual Studio 2022, CMake, Python 3 and the installed
+DCS SDK/tools. The companion uses Python's standard library.
 
 ```powershell
 cmake -S experiments/efm-ownership -B experiments/efm-ownership/build -G "Visual Studio 17 2022" -A x64 -DDCS_ROOT="D:/DCS World"
 cmake --build experiments/efm-ownership/build --config Release
 ctest --test-dir experiments/efm-ownership/build -C Release --output-on-failure
-python experiments/efm-ownership/check_recorded_flight.py
+python -m unittest discover -s companion -v
 ```
 
-Eight CTests cover callback contracts, paths, recorded interpolation and the
-native-step boundary. Python/Lua integration checks additionally require the
-locally generated donor mission package and installed DCS tools. A fresh clone
-does not include those assets; portable setup is remaining roadmap work.
-Do not install an arbitrary DLL with a mismatched mission/profile.
+The companion library tests require the local accepted recording fixture; set
+`DCSREC_TEST_BASELINE` to its path on another development machine. Mission packaging
+also requires the locally generated donor mission/mod and DCS tools. A fresh clone
+contains no game assets or sample user recordings. Portable setup is follow-up work.
 
-Only authored source, documentation and compact evidence summaries are tracked.
-SDK code, game models, generated missions/packages, executable snapshots,
-disassembly, raw logs and media stay on the development machine. No distributable
-end-user release has been published. Older research notes describe their dated
-experiments; this README and the roadmap describe current status.
+Only authored source, documentation and compact evidence summaries are published.
+Generated missions, binaries, game assets, raw logs, recordings, native image dumps
+and user media remain local. Historical experiment notes describe their dated
+results; this README and the roadmap describe current status.

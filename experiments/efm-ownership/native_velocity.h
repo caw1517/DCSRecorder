@@ -34,9 +34,12 @@ inline const char* validate(const void* handle,const turn_path::Motion& motion) 
     double speed2=0;
     for(int i=0;i<3;++i) {
         if(!std::isfinite(current[i]) || std::abs(current[i])>400 ||
-           !std::isfinite(rates[i]) || std::abs(rates[i])>10 ||
-           !std::isfinite(motion.velocity[i]) || !std::isfinite(motion.angular[i]) ||
-           std::abs(motion.angular[i])>1) return "motion_state_guard_rejected";
+           !std::isfinite(rates[i]) ||
+           !std::isfinite(motion.velocity[i]) || !std::isfinite(motion.angular[i])
+#ifndef HORNET_STAGED_PROTOTYPE
+           || std::abs(rates[i])>10 || std::abs(motion.angular[i])>1
+#endif
+           ) return "motion_state_guard_rejected";
         speed2+=motion.velocity[i]*motion.velocity[i];
     }
     if(speed2<70*70 || speed2>turn_path::max_speed*turn_path::max_speed) return "velocity_speed_rejected";

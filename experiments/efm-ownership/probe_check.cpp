@@ -61,7 +61,7 @@ int main(int argc,char** argv) {
         if(argument_writes!=0) throw std::runtime_error("appearance wrote to incomplete argument view");
         draw_size=draw_args.size();
         simulate_object(object,cookie,1.3);
-        const bool hornet=std::string(argv[1]).find("Hornet")!=std::string::npos;
+        const bool hornet=std::string(argv[1]).find("Hornet")!=std::string::npos && std::string(argv[1]).find("Staged")==std::string::npos;
         if(hornet) {
             if(draw_args[21]!=0 || draw_args[88]!=0 || draw_args[190]!=0 || draw_args[193]!=0 || draw_args[210]!=0 || draw_args[212]!=0)
                 throw std::runtime_error("Hornet speed brake or lights remain deployed/on");

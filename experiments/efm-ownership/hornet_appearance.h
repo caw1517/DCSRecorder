@@ -8,10 +8,10 @@ namespace hornet_appearance {
 // are scoped to our declared aircraft; retain the single-object experiment ID.
 // Hornet lights: installed FA-18C descriptor. Speed brake: exterior argument 21.
 constexpr int off_arguments[]={21,88,190,191,192,193,210,212};
-inline const char* apply(const ed_object_api_entry* api,ED_OBJECT_HANDLE handle,float speedbrake=0) {
+inline const char* apply(const ed_object_api_entry* api,ED_OBJECT_HANDLE handle,float speedbrake=0,uint64_t expected_id=16777472) {
     if(!handle || !api || !api->ed_get_object_id || !api->ed_get_object_args || !api->ed_set_single_arg)
         return "api_unavailable";
-    if(api->ed_get_object_id(handle)!=16777472) return "wrong_object";
+    if(!expected_id || api->ed_get_object_id(handle)!=expected_id) return "wrong_object";
     const auto args=api->ed_get_object_args(handle);
     if(!args.data || args.size<=212) return "arguments_unavailable";
     if(!(speedbrake>=0 && speedbrake<=1)) return "animation_rejected";

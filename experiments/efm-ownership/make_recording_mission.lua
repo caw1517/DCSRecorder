@@ -19,6 +19,7 @@ assert(loadstring(script))
 mission.trigrules[1].actions={{predicate='a_do_script',text=script}}
 mission.trig.actions[1]='a_do_script('..string.format('%q',script)..');'
 mission.descriptionText='Actual-flight recording test. Fly the stock clean Hornet in calm air. F10 > DCS Recorder > Start recording. Begin with 5 seconds straight and level, then fly a gentle turn. Stay between 5000 and 9500 feet MSL and 300-400 KIAS. Keep roll rates gentle. F10 > DCS Recorder > Stop recording before leaving the mission; wait for the sample-count confirmation. This prototype writes the take into DCS.log for extraction afterward. Leave DCS open until the take is collected.'
+if arg[4] then local description=assert(io.open(arg[4],'rb'));mission.descriptionText=description:read('*a');description:close() end
 local function serialize(v)
     if type(v)=='string' then return string.format('%q',v) end
     if type(v)=='number' or type(v)=='boolean' then return tostring(v) end

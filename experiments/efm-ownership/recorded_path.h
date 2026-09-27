@@ -16,7 +16,9 @@ inline double dot(const Quaternion& a,const Quaternion& b) {
 inline Quaternion slerp(Quaternion a,Quaternion b,double u) {
     double d=dot(a,b);if(d<0) {for(auto& v:b)v=-v;d=-d;}
     double x=1-u,y=u;
-    if(d<0.9995) {const double angle=std::acos(std::clamp(d,-1.0,1.0));
+    // Use spherical interpolation except for nearly identical samples; a wider
+    // linear fallback introduces angular-rate ripple in fast recorded rolls.
+    if(d<0.9999995) {const double angle=std::acos(std::clamp(d,-1.0,1.0));
         x=std::sin((1-u)*angle)/std::sin(angle);y=std::sin(u*angle)/std::sin(angle);}
     Quaternion q{};for(int i=0;i<4;++i)q[i]=a[i]*x+b[i]*y;
     const double n=std::sqrt(dot(q,q));for(auto& v:q)v/=n;return q;
@@ -41,9 +43,10 @@ struct Path {
     std::vector<Sample> samples;
     std::array<double,3> translation{};
     Quaternion initial_q{1,0,0,0};
+    bool exact_start=false;
     double duration() const { return samples.empty()?0:samples.back().t; }
     const char* load(const std::filesystem::path& filename) {
-        samples.clear();std::ifstream f(filename);std::string header;size_t n=0;
+        samples.clear();exact_start=false;translation={};std::ifstream f(filename);std::string header;size_t n=0;
         if(!(f>>header>>n) || header!="DCSREC_PLAYBACK_V1" || n<2 || n>100000) return "recording_header_rejected";
         std::vector<Sample> loaded;loaded.reserve(n);
         for(size_t i=0;i<n;++i) {
@@ -52,14 +55,13 @@ struct Path {
             for(double v:s.p)if(!std::isfinite(v))return "recording_sample_rejected";
             for(double v:s.q)if(!std::isfinite(v))return "recording_sample_rejected";
             double speed2=0;for(double v:s.v) {if(!std::isfinite(v))return "recording_sample_rejected";speed2+=v*v;}
-            if(s.p[1]<1000 || s.p[1]>5000 || speed2<70*70 || speed2>260*260 ||
+            if(speed2<70*70 || speed2>260*260 ||
                std::abs(dot(s.q,s.q)-1)>0.001 || s.brake<0 || s.brake>1)return "recording_limits_rejected";
             if(i==0 && s.t!=0)return "recording_clock_rejected";
             if(i) {
                 const auto& prev=loaded.back();const double dt=s.t-prev.t;
                 if(!(dt>0 && dt<=0.15))return "recording_clock_rejected";
                 double d=dot(prev.q,s.q);if(d<0) {for(auto& v:s.q)v=-v;d=-d;}
-                if(2*std::acos(std::clamp(d,-1.0,1.0))/dt>0.9)return "recording_rotation_rejected";
                 double error2=0;for(int k=0;k<3;++k)error2+=std::pow(s.p[k]-prev.p[k]-dt*(s.v[k]+prev.v[k])/2,2);
                 if(error2>std::pow(std::max(0.5,dt*8),2))return "recording_discontinuity_rejected";
             }
@@ -69,12 +71,22 @@ struct Path {
         if(loaded.back().t<5 || loaded.back().t>300)return "recording_duration_rejected";
         samples=std::move(loaded);initial_q=samples.front().q;return "recording_loaded";
     }
+    bool initialize_exact(const Pose& initial) {
+        if(samples.empty())return false;
+        double distance2=0;
+        for(int k=0;k<3;++k)distance2+=std::pow(initial[12+k]-samples.front().p[k],2);
+        if(!std::isfinite(distance2) || distance2>100)return false;
+        const auto captured_q=quaternion(initial);
+        const double angle=2*std::acos(std::clamp(std::abs(dot(captured_q,samples.front().q)),0.0,1.0));
+        if(!std::isfinite(angle) || angle>0.35)return false;
+        translation={};initial_q=samples.front().q;exact_start=true;return true;
+    }
     bool initialize(const Pose& initial,double /*measured_speed*/) {
+        exact_start=false;
         if(samples.empty())return false;
         initial_q=quaternion(initial);
         if(2*std::acos(std::clamp(std::abs(dot(initial_q,samples.front().q)),0.0,1.0))>0.35)return false;
         for(int k=0;k<3;++k)translation[k]=initial[12+k]-samples.front().p[k];
-        for(const auto& s:samples)if(s.p[1]+translation[1]<1000 || s.p[1]+translation[1]>5000)return false;
         return true;
     }
     Sample at_sample(double t) const {
@@ -90,12 +102,14 @@ struct Path {
     Pose at(double t) const {
         auto s=at_sample(t);
         // Two-second attitude acquisition; afterward the recorded attitude is exact.
-        if(t<2)s.q=slerp(initial_q,s.q,turn_path::smooth(t/2));
+        if(!exact_start && t<2)s.q=slerp(initial_q,s.q,turn_path::smooth(t/2));
         auto p=basis(s.q);for(int k=0;k<3;++k)p[12+k]=s.p[k]+translation[k];return p;
     }
     Motion motion_at(double t) const {
         t=std::clamp(t,0.0,duration());const double lo=std::max(0.0,t-0.001),hi=std::min(duration(),t+0.001);
-        return turn_path::motion_between(at(lo),at(hi),at(t),hi-lo);
+        auto motion=turn_path::motion_between(at(lo),at(hi),at(t),hi-lo);
+        if(exact_start && t==0)for(int k=0;k<3;++k)motion.velocity[k]=static_cast<float>(samples.front().v[k]);
+        return motion;
     }
     float brake_at(double t) const {return static_cast<float>(at_sample(t).brake);}
 };

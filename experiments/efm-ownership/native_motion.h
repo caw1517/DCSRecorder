@@ -15,11 +15,13 @@ inline bool read_rates(const void* handle, std::array<float,3>& rates) {
 inline const char* apply(const void* handle, uint32_t object_id,
                          native_body::Sample& before, native_body::Sample& after,
                          const std::array<double,16>* commanded, std::array<double,16>* captured=nullptr,
-                         bool neutralize_roll=false,const turn_path::Motion* motion=nullptr) {
-    if(object_id!=16777472) return "wrong_object_id";
+                         bool neutralize_roll=false,const turn_path::Motion* motion=nullptr, uint64_t expected_id=16777472) {
+    if(!expected_id || object_id!=expected_id) return "wrong_object_id";
     if(std::strcmp(native_body::sample(handle,before),"object_position_candidate")!=0)
         return "state_guard_rejected";
+#ifndef HORNET_STAGED_PROTOTYPE
     if(before.position[1]<1000 || before.position[1]>5000) return "altitude_guard_rejected";
+#endif
     const auto module=GetModuleHandleW(L"WorldGeneral.dll");
     const auto entry=GetProcAddress(module,"?ForcePosition@MovingObject@@UEAAXAEBV?$wPosition3@N@@@Z");
     if(!module || reinterpret_cast<uintptr_t>(entry)!=reinterpret_cast<uintptr_t>(module)+0x68d50)

@@ -13,3 +13,9 @@ _Avoid_: AI pilot (which implies independent flying decisions).
 
 **Layered playback**:
 Playing previously recorded flights together while flying and recording another aircraft, allowing a formation to be built one flight at a time.
+
+**Flight library**:
+The user's collection of saved recorded flights, available to name and select for playback.
+
+**Playback mission**:
+A ready-to-fly mission prepared for a selected recorded flight, containing its playback aircraft and an aircraft for the user to fly alongside it.
