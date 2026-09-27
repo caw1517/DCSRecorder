@@ -57,11 +57,13 @@ The source installer refuses different existing hook contents and a running DCS.
 After diagnosis, remove only this named temporary hook with DCS closed; the
 extra outputs are session logging, not permanent changes to DCS audio settings.
 
-Repeat the **same DCSRecorder-Sound-Routing-Test.miz** after launching DCS:
-F10 > Sound routing test > Start sound test, F2 to the lead, allow removal at
-15 seconds. No audible correction was made. Collect the dedicated logs and
-dcs.log before another launch. The goal is to expose script errors/source lookup
-or confirm that a different renderer supplies the observed idle audio.
+The repeat also sounded idle. The hook reported success at 20:33:43 UTC;
+mission BEGIN/END are 7.244/22.244 (the complete 15 seconds). SOUNDER and SOUND
+outputs contain only open/close markers; ED_SOUND adds only its peak-calculation
+startup message. There are still no script diagnostics. These logs and the
+native actuator traces are preserved locally in `scoped-logging-run/`.
+This rules out the hook failing to load, but still does not prove script
+non-execution. Repeating this logging setup alone is not a useful next test.
 
 ## Built-in engine audio path
 
@@ -76,3 +78,45 @@ afterburner observation, but it does not establish that run's actual engine stat
 or prove which renderer is active now. No native engine getter was invoked and
 no private engine-state offset was written. Any later live inspection needs
 current-build identity/signature validation before using these candidate layouts.
+
+## Installed read-only aircraft boundary diagnostic
+
+The isolated sound-test DLL now writes `bin/state-logs/sound-boundary-*.jsonl`
+once per model second. It observes the aircraft descriptor's sounder name,
+whether its Lua sounder reference exists, whether its wrapper points back to the
+aircraft, the native sounder's RTTI identity, the FM-member presence, engine count,
+aggregate RPM field, and each engine's core/fan getter identity. Only complete
+trivial float getters are interpreted as direct field reads; complex getters
+remain uninterpreted. No private function is invoked, and no engine field is
+written. Pointer addresses are omitted from the trace.
+
+The primary vtable (or this DLL's owned animation clone), secondary RTTI and
+twelve instruction signatures must match before reading the candidate layout.
+All reads use ReadProcessMemory on the current process. This adds observation
+to the existing appearance test; its four animation writes remain as before.
+
+Validation: the new DLL builds; `sound_read_boundary` passes its bounded-string,
+getter-decoder and invalid-handle checks; `check_sound_layout.py` matches all
+twelve guards against the retained analysis images. The engine playback fixture
+with `--expect-native-rejection` confirms the actual new DLL writes an
+`identity_rejected` observation and rejects the fake object before appearance
+writes. An initial invocation of the general motion `probe_check` was inapplicable:
+that fixture requires lights/speed-brake behavior this isolated module does not
+implement. The appropriate engine fixture above passed. None of these offline
+checks demonstrates live sound or current-run script execution.
+
+With DCS closed, `install_sound_boundary.py` replaced only
+`HornetEngineSounderProbe.dll`, after checking its previous installation hash and
+backing it up under local `boundary-installation/`. All 57 protected hashes are
+unchanged, including the mission, Lua sound script, captured tape, recording hooks,
+recordings, and accepted playback modules. The extra logging hook remains
+temporary and should be removed when the investigation ends.
+
+Next live step: launch **DCSRecorder-Sound-Routing-Test.miz**, F10 > Sound routing
+test > Start sound test, F2 to the lead, and allow its removal after 15 seconds.
+No sound correction is claimed. An empty/different descriptor name identifies a
+registration/selection problem; a matching name with no Lua reference identifies
+an initialization gap; a reference establishes an instance, but does not prove
+onUpdate dispatch or audible rendering. The native identity and engine reads
+also provide evidence for the separate internal-engine route. Inspect that
+trace before deciding the next intervention.

@@ -73,8 +73,11 @@ capture is needed. See the [sound-path finding](../experiments/efm-ownership/res
 That 15-second test completed but sounded idle throughout. Offline execution of
 the retained DCS sounder loader exposed a logging assumption: sounders lack file
 I/O, so missing sounder.log did not establish non-execution. A temporary scoped
-logging hook is installed for a repeat of the same mission; the audio experiment
-is unchanged. See the [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
+logging repeat also sounded idle and produced no script diagnostics. The separate
+test DLL now has a guarded, read-only observer of sounder selection, instance
+presence and internal engine getter paths, pending a live run. The mission and
+audio script are unchanged; no sound correction is claimed. See the
+[routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
 
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
 completed first app workflow. They remain required for the broader single-aircraft

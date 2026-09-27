@@ -18,6 +18,9 @@
 #ifdef ENGINE_SOUND_TRACE
 #include "../engine-prototype/sound_probe.h"
 #endif
+#ifdef ENGINE_SOUND_BOUNDARY
+#include "../engine-prototype/sound_boundary.h"
+#endif
 #if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
 #include "../native_body.h"
 #include "../native_step_hook.h"
@@ -41,6 +44,9 @@ struct Object {
     uint64_t id=0,cookie=0,calls=0;
     double start=-1,last=-1;
     bool valid=false,previous=false;
+#ifdef ENGINE_SOUND_BOUNDARY
+    double next_sound_trace=-1;
+#endif
     Values requested{};
 #if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
     bool hooked=false,pending=false;
@@ -52,6 +58,9 @@ std::mutex guard;
 std::unordered_map<ED_OBJECT_HANDLE,Object> objects;
 std::vector<Sample> tape;
 std::ofstream trace,events;
+#ifdef ENGINE_SOUND_BOUNDARY
+std::ofstream sound_trace;
+#endif
 #if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
 std::ofstream post_trace;
 #endif
@@ -71,6 +80,10 @@ void initialize() {
     std::filesystem::create_directories(folder/"state-logs",error);
     if(error)return;
     const auto run=std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64());
+#ifdef ENGINE_SOUND_BOUNDARY
+    sound_trace.open(folder/"state-logs"/("sound-boundary-"+run+".jsonl"));
+    sound_trace << std::setprecision(10);
+#endif
     trace.open(folder/"state-logs"/("state-"+run+".csv"));
     events.open(folder/"state-logs"/("events-"+run+".csv"));
     if(!trace || !events)return;
@@ -237,6 +250,12 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         object.valid=false;api->ed_set_single_arg(handle,status_arg,0.75f);event("clock_rejected",object,time,"stopped");return;
     }
     if(object.start<0) {object.start=time;event("start",object,time,"sdk_only");}
+#ifdef ENGINE_SOUND_BOUNDARY
+    if(sound_trace && time>=object.next_sound_trace) {
+        sound_boundary::sample(sound_trace,handle,object.id,time);
+        object.next_sound_trace=time+1;
+    }
+#endif
 #if defined(STATE_POSTSTEP) || defined(STATE_POSTANIMATION)
     if(!object.hooked) {
         const auto status=install_after(handle);

@@ -207,6 +207,21 @@ phases through captured audio calls, which is not a live audio acceptance result
 
 `install_sounder_logging.py <Saved-Games-DCS> <report.json>` installs a separate
 temporary hook enabling dedicated SOUNDER/SOUND/ED_SOUND log outputs. It requires
-DCS closed and preserves existing test files. Repeat the same 15-second mission
-after launch; no audio code changed. Collect dedicated outputs and dcs.log.
+DCS closed and preserves existing test files. The repeat completed but the
+dedicated logs still contain no script messages, and audio remained idle.
 Remove only `Scripts/Hooks/dcs-recorder-sounder-logging.lua` once diagnosis ends.
+
+The isolated sound-test DLL now includes `sound_boundary.h`, a read-only observer
+of sounder selection/instance presence and the internal engine getter path. It
+writes `state-logs/sound-boundary-*.jsonl` once per second, with RTTI/vtable and
+instruction guards. It never invokes private getters or writes engine fields.
+An instance reference alone does not prove script updates or audible output.
+`check_sound_layout.py <DCS-analysis-image> <WorldGeneral-analysis-image>` verifies
+the guarded instructions against retained local snapshots; `sound_read_boundary`
+checks bounded reads/decoding. Current-build validation still happens live.
+
+`install_sound_boundary.py <new-DLL> <original-package> <Saved-Games-DCS> <new-backup-folder>`
+checks the installed DLL against its original manifest, backs it up, then replaces
+only that diagnostic DLL with DCS closed. It was installed successfully; 57
+protected hashes were unchanged. The next run uses the same 15-second mission
+and collects boundary evidence; it is not an audio fix or a new throttle capture.
