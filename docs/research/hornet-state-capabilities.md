@@ -31,6 +31,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Speed brake | Mission recorder reads argument 21 each sample. | Tape includes brake; `hornet_appearance::apply` writes 21 and checks immediate readback. | Existing implemented channel. Retain it as the control in new comparisons. |
 | Gear | Hornet FM configuration identifies strut deployment arguments 0 (nose), 5 (left), 3 (right). Mission argument reads are the candidate capture route. | SDK can write individual arguments; these arguments are not currently written by the appearance adapter. | Not recorded/replayed. Verify extension direction, doors and transition timing; animated deployment does not prove ground contact. |
 | Gear compression / wheels | FM configuration identifies compression 1/6/4 and rotation 101/103/102 in nose/left/right order. | Same candidate argument route. | Not recorded/replayed. Rotation wrap and contact behavior need separate handling; do not interpolate wrapped rotations naively. |
+| Canopy opening / closing | Explicitly requested by the user; no validated Hornet exterior mapping established in this inspection. | Candidate argument route, pending mapping and live test. | Not captured/replayed. Include the initial canopy position and transitions; opening animation does not establish jettison or internal cockpit-system replay. |
 | Leading-edge flaps | Hornet descriptor explicitly labels 13 right and 14 left. | Candidate argument writes. | Not recorded/replayed. Validate range and actual rendered response under stock flight-control scheduling. |
 | Trailing-edge flaps | Descriptor's `ColdStartDefaultControls` labels keys 9/10 as flaps. | Candidate argument writes. | Not recorded/replayed. Controlled stock-aircraft observation must confirm left/right meaning, ranges and motion. |
 | Ailerons / elevators / rudders | Descriptor's `ColdStartDefaultControls` identifies aileron keys 11/12, elevators 15/16, rudders 17/18. Aileron comments contain inconsistent bracketed numbers, so use keys as candidates and verify visually. | Candidate argument writes. | Not recorded/replayed. Verify sign, range, left/right meaning and coupled surface behavior; retain signed values. |
@@ -105,8 +106,26 @@ The [result](../../experiments/efm-ownership/results/exterior-state-2026-09-27/R
 supports readable gear/flap/surface/brake channels. Coupled motion and negative
 flap values require per-channel recorded values, not reconstructed pilot inputs
 or blanket 0..1 clamping. The matrix's playback-status columns remain unchanged.
-No channel replay implementation or effect/sound proof is claimed.
+An isolated SDK actuator has since been tested. The user found the other tested
+exterior channels visually satisfactory, but stabilators flickered with almost
+no travel. [Live evidence and the timing experiment](../../experiments/efm-ownership/results/exterior-playback-2026-09-27/README.md)
+show exact immediate writes followed by overwritten stabilator values. Smaller
+overwrites occur on some visually accepted channels too. These prototype results
+do not change the production capability claims or establish effects/sound support.
 The parent visual/engine-state ticket remains open. The user selected exterior
 animation first; the proposed recording contract remains a proposal. The
 [read-only diagnostic prototype](../../experiments/efm-ownership/state-prototype/README.md)
 collects the stock-aircraft observations needed before playback implementation.
+
+## Confirmed remaining exterior scope
+
+Fix stabilator retention first, then integrate the verified surface group with
+the recording clock. Preserve these user-requested requirements for subsequent
+groups: suspension compression and wheel spin (ground/touchdown tests), separate
+left/right nozzle motion with engine/afterburner appearance and sound, canopy
+state, demonstration-smoke emitter/color/timing, and exterior-light state and
+brightness. Suspension visuals must agree with contact physics; wheel rotation
+needs wrap-aware treatment. Lights have argument-driven state/brightness in the
+installed descriptor, while smoke also requires an emitter/effect path. These
+are in-scope work, not all proven animation writes and not removed by doing the
+stabilator repair first.

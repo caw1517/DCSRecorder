@@ -137,3 +137,28 @@ The current installation has been verified against the package manifest.
 Live write retention and visible rendering remain unverified. If DCS overwrites
 the channels between callbacks, investigate the ownership/timing evidence before
 adding these channels to the main recorder or declaring the exterior group done.
+
+## Stabilator timing comparison
+
+The [first actuator result](../results/exterior-playback-2026-09-27/README.md)
+reproduced a severe overwrite of stabilators 15/16. Other tested channels were
+visually accepted, with smaller measured later differences. The result is not a
+completed exterior-fidelity milestone.
+
+`prepare_playback.py ... --post-step` packages the separate
+`HornetStatePostStepProbe.dll` / `DCSRecorder-Hornet-State-PostStep` module. Unlike
+the baseline SDK-only experiment, it uses the existing build-guarded per-object
+native-step interception, with an optional after-step callback. Only stabilators
+15/16 receive this additional write; the tape, clock, AI route and other channels
+are unchanged. Post-step telemetry goes to `post-step-*.csv`, and hook restoration
+is recorded in `events-*.csv`. A missing callback, mismatched identity/build,
+failed write or reversed clock fails the experiment. Live success remains pending.
+
+Run **DCSRecorder-Exterior-State-Stabilator** after restarting DCS. Use the same
+F10 start and F2 view; watch the **pitch** segment roughly 36-51 seconds after start.
+Let the lead disappear at completion, then leave DCS open for collection.
+
+`check_retention.py <native-trace> <DCS.log> --assert-stabilators` compares the
+later reads against actual requested values. Its red baseline is preserved in
+the result folder. Passing this numeric diagnostic must be accompanied by visual
+review and a successful hook-restoration event before calling the repair complete.

@@ -83,3 +83,10 @@ add_executable(state_playback_check state-prototype/check_playback.cpp)
 target_include_directories(state_playback_check PRIVATE "${DCS_ROOT}/API/include")
 target_compile_definitions(state_playback_check PRIVATE NOMINMAX)
 target_compile_features(state_playback_check PRIVATE cxx_std_17)
+
+# Controlled A/B: same tape and SDK writes; only stabilators get a post-step repair.
+add_library(HornetStatePostStepProbe SHARED probe.cpp state-prototype/playback.cpp)
+target_include_directories(HornetStatePostStepProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetStatePostStepProbe PRIVATE STATE_POSTSTEP HORNET_RECORDED_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetStatePostStepProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetStatePostStepProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

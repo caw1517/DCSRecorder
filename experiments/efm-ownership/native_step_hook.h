@@ -16,6 +16,7 @@ inline std::array<uintptr_t,slots+1> shadow{};
 inline uintptr_t owner=0,original_table=0;
 inline Step original_step=nullptr;
 inline Before before_step=nullptr;
+inline Before after_step=nullptr;
 inline DWORD owner_thread=0;
 inline uintptr_t table() { return reinterpret_cast<uintptr_t>(shadow.data()+1); }
 
@@ -34,6 +35,14 @@ inline void dispatch(void* object) {
     // Do not hold the hook lock across DCS or SDK callbacks.
     if(before) before(reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(object)+8));
     if(next) next(object);
+    // Native work can destroy/replace ownership; reacquire before post-step work.
+    Before after=nullptr;
+    {
+        std::lock_guard<std::mutex> guard(mutex);
+        if(owner==reinterpret_cast<uintptr_t>(object) && owner_thread==GetCurrentThreadId())
+            after=after_step;
+    }
+    if(after) after(reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(object)+8));
 }
 inline bool writable_pointer(uintptr_t address) {
     MEMORY_BASIC_INFORMATION region{};
@@ -44,11 +53,11 @@ inline bool writable_pointer(uintptr_t address) {
 }
 // Caller first verifies aircraft identity, runtime ID, null FM, altitude, motion
 // bounds, and this DCS build's table boundary, integrator, and callsite bytes.
-inline const char* install(uintptr_t object,uintptr_t expected_table,Step expected_step,Before before) {
+inline const char* install(uintptr_t object,uintptr_t expected_table,Step expected_step,Before before,Before after=nullptr) {
     std::lock_guard<std::mutex> guard(mutex);
     if(owner) return "step_hook_busy";
     uintptr_t current=0;
-    if(!object || !before || !expected_step || !writable_pointer(object) ||
+    if(!object || (!before && !after) || !expected_step || !writable_pointer(object) ||
        !native_identity::read(object,current) || current!=expected_table)
         return "step_hook_object_rejected";
     std::array<uintptr_t,slots+1> copy{};
@@ -56,12 +65,12 @@ inline const char* install(uintptr_t object,uintptr_t expected_table,Step expect
        copy[step_slot+1]!=reinterpret_cast<uintptr_t>(expected_step)) return "step_hook_table_rejected";
     shadow=copy;
     shadow[step_slot+1]=reinterpret_cast<uintptr_t>(&dispatch);
-    original_step=expected_step; before_step=before; original_table=expected_table;
+    original_step=expected_step; before_step=before; after_step=after; original_table=expected_table;
     owner_thread=GetCurrentThreadId(); owner=object;
     const auto prior=InterlockedCompareExchangePointer(reinterpret_cast<void* volatile*>(object),
         reinterpret_cast<void*>(table()),reinterpret_cast<void*>(expected_table));
     if(reinterpret_cast<uintptr_t>(prior)!=expected_table) {
-        owner=0; before_step=nullptr; return "step_hook_install_raced";
+        owner=0; before_step=nullptr; after_step=nullptr; return "step_hook_install_raced";
     }
     return "step_hook_installed";
 }
@@ -70,6 +79,7 @@ inline const char* restore(uintptr_t object) {
     if(!owner) return "step_hook_inactive";
     if(owner!=object || owner_thread!=GetCurrentThreadId()) return "step_hook_restore_owner_rejected";
     before_step=nullptr;
+    after_step=nullptr;
     if(!writable_pointer(object)) return "step_hook_restore_unwritable";
     const auto prior=InterlockedCompareExchangePointer(reinterpret_cast<void* volatile*>(object),
         reinterpret_cast<void*>(original_table),reinterpret_cast<void*>(table()));

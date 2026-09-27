@@ -22,7 +22,7 @@ void require(bool condition,const char* message) {if(!condition)throw std::runti
 }
 int main(int argc,char** argv) {
     try {
-        require(argc==2,"provide isolated DLL path with exterior-state.txt beside it");
+        require(argc==2 || (argc==3 && std::string(argv[2])=="--expect-native-rejection"),"provide isolated DLL path with exterior-state.txt beside it");
         const auto dll=std::filesystem::absolute(argv[1]);
         std::ifstream file(dll.parent_path()/"exterior-state.txt");
         std::string header;size_t count=0;file>>header>>count;
@@ -48,6 +48,16 @@ int main(int argc,char** argv) {
         };
         setup(&api);uint64_t cookie=0;create(object,cookie);
         require(cookie!=0,"creation failed");
+        if(argc==3) {
+            args.fill(0.333f);simulate(object,cookie,10);
+            require(args[999]==0.75f,"native variant did not reject fake DCS object");
+            for(int c:channels)require(args[c]==0.333f,"native guard failed after writing surfaces");
+            const auto before=writes;simulate(object,cookie,11);
+            require(writes==before,"rejected native variant kept writing");
+            destroy(object,cookie);FreeLibrary(module);
+            std::cout << "PASS: post-step DLL rejects non-DCS identity before surface/native writes\n";
+            return 0;
+        }
         // Every real sample survives, including signed flap/surface values.
         for(const auto& row:rows) {
             args.fill(0.333f); // Simulate native animation overwriting the previous values.

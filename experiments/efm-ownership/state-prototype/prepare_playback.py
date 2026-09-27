@@ -14,13 +14,15 @@ ROOT = HERE.parent
 CHANNELS = [0, 3, 5, *range(9, 19), 21]
 TYPE = 'DCSRecorder-Hornet-State'
 
-def prepare(logfile, output, dcs, donor, baseline):
+def prepare(logfile, output, dcs, donor, baseline, post_step=False):
     assert json.loads((dcs / 'autoupdate.cfg').read_text(encoding='utf-8-sig'))['version'] == '2.9.29.27468'
     output.mkdir(parents=True, exist_ok=False)
     summary = analyze(logfile, output / 'capture')
     with (output / 'capture/arguments.csv').open(newline='') as stream:
         rows = list(csv.DictReader(stream))
-    mod = output / TYPE
+    module_type = TYPE + ('-PostStep' if post_step else '')
+    binary = 'HornetStatePostStepProbe' if post_step else 'HornetStateProbe'
+    mod = output / module_type
     (mod / 'bin').mkdir(parents=True)
     tape = ['DCS_EXTERIOR_PROTOTYPE_V1', str(len(rows)), ' '.join(map(str, CHANNELS))]
     for row in rows:
@@ -31,18 +33,18 @@ def prepare(logfile, output, dcs, donor, baseline):
     for name in ('entry.lua', 'aircraft.lua'):
         text = (donor / name).read_text(encoding='utf-8-sig')
         assert 'DCSRecorder-Hornet-Probe' in text
-        text = text.replace('DCSRecorder-Hornet-Probe', TYPE)
+        text = text.replace('DCSRecorder-Hornet-Probe', module_type)
         if name == 'entry.lua':
-            text = text.replace('HornetProbe', 'HornetStateProbe').replace('DCS Recorder Hornet Prototype', 'DCS Recorder Exterior State Test')
+            text = text.replace('HornetProbe', binary).replace('DCS Recorder Hornet Prototype', 'DCS Recorder Exterior State Test')
         (mod / name).write_text(text, encoding='utf-8')
     for folder in ('Cockpit', 'Datalinks', 'Liveries'):
         shutil.copytree(donor / folder, mod / folder)
-    (mod / 'Liveries/DCSRecorder-Hornet-Probe').rename(mod / 'Liveries' / TYPE)
-    shutil.copy2(ROOT / 'build/Release/HornetStateProbe.dll', mod / 'bin/HornetStateProbe.dll')
+    (mod / 'Liveries/DCSRecorder-Hornet-Probe').rename(mod / 'Liveries' / module_type)
+    shutil.copy2(ROOT / ('build/Release/' + binary + '.dll'), mod / ('bin/' + binary + '.dll'))
     with zipfile.ZipFile(baseline) as source:
         (output / 'baseline.lua').write_bytes(source.read('mission'))
     markers = [{'time': m['time'] - summary['first_time'], 'segment': m['segment']} for m in summary['markers']]
-    config = 'return {duration=' + str(summary['duration']) + ',markers={\n'
+    config = 'return {aircraft=' + json.dumps(module_type) + ',post_step=' + str(post_step).lower() + ',duration=' + str(summary['duration']) + ',markers={\n'
     config += ''.join('{time=' + str(m['time']) + ',segment=' + json.dumps(m['segment']) + '},\n' for m in markers) + '}}\n'
     (output / 'config.lua').write_text(config, encoding='utf-8')
     def lua(script, *args):
@@ -51,13 +53,14 @@ def prepare(logfile, output, dcs, donor, baseline):
     lua('verify_hornet_requirements.lua', output / 'mission', dcs / 'Mods/aircraft/FA-18C/entry.lua', dcs / 'MissionEditor/modules/me_mission.lua')
     lua('verify_hornet_routes.lua', output / 'mission', dcs / 'MissionEditor/modules/me_route.lua', 2)
     lua('verify_hornet_configuration.lua', output / 'mission', dcs, 2)
-    mission = output / 'DCSRecorder-Exterior-State-Playback.miz'
+    mission = output / ('DCSRecorder-Exterior-State-Stabilator.miz' if post_step else 'DCSRecorder-Exterior-State-Playback.miz')
     with zipfile.ZipFile(baseline) as source, zipfile.ZipFile(mission, 'x', zipfile.ZIP_DEFLATED) as target:
         for entry in source.infolist():
             target.writestr(entry, (output / 'mission').read_bytes() if entry.filename == 'mission' else source.read(entry.filename))
     manifest = {'status': 'Prepared; live SDK retention and rendering pending',
                 'dcs_build': '2.9.29.27468', 'source_log_sha256': summary['source_sha256'],
                 'samples': len(rows), 'duration': summary['duration'], 'channels': CHANNELS,
+                'post_step_stabilators': post_step,
                 'files': {p.relative_to(output).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                           for p in [mission, *mod.rglob('*')] if p.is_file()}}
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
@@ -70,5 +73,6 @@ if __name__ == '__main__':
     parser.add_argument('--dcs', type=Path, default=Path('D:/DCS World'))
     parser.add_argument('--donor', type=Path, default=Path.home() / 'Saved Games/DCS/Mods/aircraft/DCSRecorder-Hornet-Probe')
     parser.add_argument('--baseline', type=Path, default=ROOT / 'package/hornet-prototype/EFM-Probe-Hornet-left-roll-400KIAS.miz')
+    parser.add_argument('--post-step', action='store_true')
     args = parser.parse_args()
-    prepare(args.logfile, args.output, args.dcs, args.donor, args.baseline)
+    prepare(args.logfile, args.output, args.dcs, args.donor, args.baseline, args.post_step)

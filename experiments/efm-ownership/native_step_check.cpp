@@ -10,11 +10,17 @@ struct Aircraft {
     double position=0,velocity=0;
     bool pending=false;
     int native_calls=0,restores=0;
+    double stabilator=0;
 };
 void integrate(void* object) {
     auto& aircraft=*static_cast<Aircraft*>(object);
     aircraft.position+=aircraft.velocity*.02;
     ++aircraft.native_calls;
+    aircraft.stabilator=0.01; // Observed pattern: native step replaces SDK animation.
+}
+void restore_stabilator(const void* handle) {
+    auto& aircraft=*reinterpret_cast<Aircraft*>(reinterpret_cast<uintptr_t>(handle)-8);
+    aircraft.stabilator=0.6;
 }
 void restore_command(const void* handle) {
     auto& aircraft=*reinterpret_cast<Aircraft*>(reinterpret_cast<uintptr_t>(handle)-8);
@@ -66,6 +72,15 @@ int main() {
         require(std::string(native_step_hook::install(reinterpret_cast<uintptr_t>(&controlled),table,&integrate,&restore_command))=="step_hook_installed","reinstall failed");
         controlled.vptr=table+8; // DCS destruction/replacement owns this now.
         require(std::string(native_step_hook::restore(reinterpret_cast<uintptr_t>(&controlled)))=="step_hook_already_replaced" && controlled.vptr==table+8,"replacement table overwritten");
-        std::cout<<"PASS: per-object dispatch restores lost velocity before integration, preserves native calls/RTTI/other slots, consumes commands once, rejects foreign threads, restores ownership. Mock boundary test; DCS validation pending.\n";
+        controlled.vptr=table;
+        require(std::string(native_step_hook::install(reinterpret_cast<uintptr_t>(&controlled),table,&integrate,nullptr,&restore_stabilator))=="step_hook_installed","stabilator install failed");
+        step(controlled);
+        require(controlled.stabilator==0.6,"native animation erased recorded stabilator");
+        std::thread foreign_after([&]{step(controlled);}); foreign_after.join();
+        require(controlled.stabilator==0.01,"post-step override ran on foreign thread");
+        step(controlled);require(controlled.stabilator==0.6,"post-step override stopped unexpectedly");
+        native_step_hook::restore(reinterpret_cast<uintptr_t>(&controlled));
+        step(controlled);require(controlled.stabilator==0.01,"post-step override survived restoration");
+        std::cout<<"PASS: native-step motion and animation phase boundaries preserve ownership and restoration. Mock boundary test; DCS validation pending.\n";
     } catch(const std::exception& e) { std::cerr<<e.what()<<'\n';return 1; }
 }
