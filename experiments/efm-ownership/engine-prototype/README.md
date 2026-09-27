@@ -236,3 +236,21 @@ the previous mask and passes against the correction using native constants.
 The installer can replace the exact prior hook with `--previous-report` and keeps
 a backup. Installed with 50 protected hashes unchanged. Repeat the same mission
 to collect script diagnostics; no audible fix or new throttle capture is claimed.
+
+The TRACE-visible live run subsequently confirmed both source handles and all
+five intended phase timestamps, while the user still heard idle throughout.
+Script registration/update dispatch is no longer the unverified boundary.
+
+`prepare_playback.py <capture.log> <new-package> --audibility-probe` prepares
+**DCSRecorder-Sound-Audibility-Test.miz**, a separate module/DLL/sounder. Its phases
+are stock engine, generated quiet control beeps, stock afterburner, an explicitly
+defined afterburner source, and test sources off (three seconds each). The
+generated assets follow installed `Doc/Sounds/example.sdef`; no stock wave data
+is copied. Logs include source-playing state and the engine parameters delivered
+to the sounder. The mission displays phase labels and removes the lead at 15 s.
+The existing installer installs this additive variant with DCS closed.
+
+Run `check_sounder_runtime.lua <local-loader> <audibility_probe.lua> --audibility`
+and `check_sounder_mission.lua <audibility_mission.lua> --audibility` for the
+offline dispatch/lifecycle checks. See the [live diagnosis](../results/sound-routing-2026-09-27/README.md)
+for interpretation, limitations and installed status. Listening remains required.

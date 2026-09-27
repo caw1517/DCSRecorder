@@ -161,3 +161,80 @@ Collect the dedicated logs. Require the TRACE startup marker before interpreting
 missing script messages. Inspect script load/source/phase/error messages to
 distinguish an update/parameter failure from an audio-source/rendering failure.
 No sound correction is claimed and no new throttle capture is needed.
+
+## TRACE-visible live result
+
+The following run completed at model time 4.494–19.494. Logs and native traces
+are preserved locally in `trace-visible-run/`, with a machine-checked summary.
+The dedicated SOUNDER output now records actual script execution:
+
+- `[DCS-SOUNDER-PROBE] loaded` and host creation for `MAIN_16777472`.
+- Source handles 492 (engine) and 493 (afterburner).
+- Engine at elapsed 0, afterburner at 3, engine at 6, afterburner at 9, silence
+  at 12 seconds. All five timestamps match their intended boundaries.
+- No invalid-host-parameter, backward-clock, or unavailable-source diagnostic.
+
+This confirms script loading and phase dispatch in the live run. Source handles
+and play requests still do not establish audible rendering. The user reported
+completion and subsequently confirmed **still idle throughout**. This is now a
+confirmed live discrepancy between successful script phase dispatch and the
+audible result. No installed files were changed during collection.
+
+The hook's startup self-check marker is absent from the retained dedicated log;
+its open time is later than the hook's success message. The reason for losing
+that marker is not established. Actual script TRACE messages provide direct
+positive evidence that the corrected filter works during this mission. Do not
+treat a missing startup marker alone as failure when later TRACE messages exist.
+
+With sound still idle, investigate sample definitions/attenuation,
+listener routing, and actual source playback state. Installed
+`Doc/Sounds/example.sdef` documents silent/peak/inner/outer radii and direction
+cones; the stock sample definitions themselves are inside the installed sound
+archive and were not inspected. The installed sound list confirms the referenced
+wave names, which is not the same as confirming their rendered output.
+
+## Separate audibility comparison installed
+
+`DCSRecorder-Sound-Audibility-Test.miz` and its separately registered
+`DCSRecorder-Hornet-Audibility-Test` module use a unique `HornetEngineAudibilityProbe`
+DLL and `DCSRecorderAudibilityTest` sounder. This preserves the previous sound
+test for comparison. The same spatial-host update and phase-only playback calls
+are retained. Four three-second source phases are followed by three seconds with
+all test sources stopped; the lead is removed at 15 seconds:
+
+1. Stock engine source from the earlier test.
+2. An original, generated control tone: two gently faded 660 Hz beeps per second,
+   mono 48 kHz/16-bit, peak 0.15 before the same 0.4 runtime gain.
+3. Stock afterburner definition from the earlier test.
+4. The documented stock afterburner **wave name**, referenced by a new, uniquely
+   named definition with explicit gain, no directional attenuation or silent
+   radius, 100 m inner radius and 4 km outer radius. No stock audio was copied.
+
+The mission labels each phase on screen. The script logs `isSourcePlaying` for
+each source once per model second, host position, and the supplied per-engine
+core/fan RPM, thrust and flame parameters. Backend playing state alone will still
+not establish audibility. These are DCS's sound-input parameters, not a new
+recording or engine-state actuator.
+
+Predictions, in priority order:
+
+- Stock source definition/attenuation problem: the tone and explicitly defined
+  afterburner are audible while the stock afterburner is not.
+- Stock wave unavailable/unsuitable: the generated tone is audible but both
+  afterburner variants fail. This still needs source/error evidence to distinguish
+  availability from a quiet sample.
+- General spatial routing or source-lifecycle problem: the tone is also inaudible.
+  Playing-state and host-position logs then guide the next distinction.
+
+Validation: the separately built DLL rejects the fake DCS object before native
+writes; the actual retained sounder loader dispatches all four sources and
+terminal stops in the offline harness; mission single-start, manual-stop and
+completion checks pass. Generated tone format and amplitude bounds were checked.
+The package passed installed DCS mission dependency, route-timing and aircraft
+configuration checks. These do not establish live audibility.
+
+Installed with DCS closed: 14 manifest hashes verified, 60 protected hashes
+unchanged. Generated package and installation report are local under
+`package/sound-audibility-ready/`. Use F10 > **Sound audibility test** > **Start
+sound test**, then F2 to the lead. Report whether the control beeps and either
+afterburner phase were audible. No general playback sound fix is claimed yet.

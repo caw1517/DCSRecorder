@@ -24,6 +24,11 @@ def install(package,saved):
         binary=saved/'Mods/aircraft'/module/'bin'
         protected+=list(binary.glob('*.dll'))+list(binary.glob('recorded-flight.*'))
     protected+=list((saved/'Mods/aircraft/DCSRecorder-Hornet-Engine-Appearance').rglob('*'))
+    protected+=list((saved/'Scripts/Hooks').glob('*.lua'))
+    for name in ('DCSRecorder-Hornet-Engine-Sound-Probe','DCSRecorder-Hornet-Sounder-Test'):
+        protected += [p for p in (saved/'Mods/aircraft'/name).rglob('*')
+                      if p.is_file() and p.suffix in ('.lua','.dll','.txt')]
+    protected+=list((saved/'Missions').glob('DCSRecorder-*Sound*.miz'))
     protected=[p for p in protected if not p.is_dir()]
     module=manifest['module']
     before={str(p):digest(p) if p.exists() else None for p in protected}

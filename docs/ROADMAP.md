@@ -77,8 +77,12 @@ logging repeat also sounded idle and produced no script diagnostics. The separat
 test DLL's guarded observer confirmed the custom sounder selection and instance
 presence throughout the next live run. The logging filter then proved incomplete:
 DCS's ALL mask excludes TRACE. The temporary hook now explicitly includes TRACE,
-with a startup self-check; live script diagnostics remain pending. The mission and
-audio script are unchanged; no sound correction is claimed. See the
+with a startup self-check. The next live run logged source creation and all five
+audio phases at their expected times, but the user still heard idle throughout.
+A separate **DCSRecorder-Sound-Audibility-Test.miz** now compares a generated
+control tone, stock samples and an explicitly defined afterburner source, with
+playing-state and engine-input logs. Live audibility remains pending; no sound
+correction is claimed. See the
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
 
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
