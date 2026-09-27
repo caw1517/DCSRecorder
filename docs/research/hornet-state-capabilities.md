@@ -44,7 +44,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Exterior lights | Descriptor identifies formation 88; navigation 190/191/192; strobe 193; landing/taxi 210; refuel 212. | Existing adapter writes every listed channel to zero on each invocation. | Off-only behavior. Capture brightness and transitions; validate strobe phase and actual illumination independently of immediate readback. |
 | Demonstration smoke | Hornet descriptor lists selectable `INV-SMOKE-*` stores. This establishes configuration availability, not an emitter-state capture API. | No verified emitter setter found in inspected object SDK. | Unsupported in current pipeline. Determine actual source loadout, color, emitter enable and timing; do not confuse gun smoke with demonstration smoke. |
-| Engine RPM, left/right | Installed `Scripts/Export.lua` documents `LoGetEngineInfo().RPM.left/right` as percentages. Current mission-only capture does not use it. | Object SDK has no RPM setter. Ordinary EFM callbacks expose RPM-related parameters, but their execution on this unoccupied object is not established. | Capture candidate in Export context; not wired or tested. Need clock/aircraft identity alignment with mission samples and an independently proven playback actuator. |
+| Engine RPM, left/right | Installed `Scripts/Export.lua` documents `LoGetEngineInfo().RPM.left/right` as percentages. `API/Sim_ControlAPI.md` also exposes it through `Export` in GUI hooks. | Object SDK has no RPM setter. Ordinary EFM callbacks expose RPM-related parameters, but their execution on this unoccupied object is not established. | Separate read-only engine diagnostic prepared and installed; live API availability and mission/Export clock/identity alignment pending. Production capture remains unchanged; playback actuator unproven. |
 | Nozzle opening | Hornet descriptor explicitly labels argument 89 nozzle; adjacent 90 is unlabeled. | Candidate animation writes. | Not recorded/replayed. Verify both engines' mappings and ranges; nozzle pose is not an afterburner-state measurement. |
 | Afterburner appearance | Descriptor supplies per-engine effect texture/configuration, not measured on/off or intensity data. No verified captured channel established here. | No verified effect-state writer on the playback object. | Unsupported in current pipeline. Establish independent per-engine capture and actuation; do not derive afterburner from trajectory or a guessed RPM threshold. |
 | Engine / afterburner sound | No sound-state capture exists. Export RPM/temperature/fuel flow may be useful measurements, not a sound recording. | No sound-state writer in inspected object SDK. EFM sound/power parameters are a separate interface with unproven ownership here. | Unsupported. Needs a separate audible comparison with matched camera/listener geometry; animation success cannot close this row. |
@@ -67,6 +67,7 @@ Installed primary sources, retained locally rather than copied into the reposito
 - `D:/DCS World/CoreMods/aircraft/FA-18C/FA-18C_hornet.lua`: `net_animation` (around line 797), `ColdStartDefaultControls` (around 1173), `lights_data` (around 1120), `engines_nozzles` (around 583), smoke-store declarations (around 420).
 - `D:/DCS World/Mods/aircraft/FA-18C/FM/config.lua`: gear argument mappings around lines 89, 140 and 191.
 - `D:/DCS World/Scripts/Export.lua`: `LoGetEngineInfo` documentation around line 462; RPM, temperature and fuel consumption fields. This runs in a different context from mission scripting.
+- `D:/DCS World/API/Sim_ControlAPI.md`: LuaExport API in GUI hooks, including engine info, model time and ownship identity/position. This permits a separate read-only diagnostic without changing Export.lua.
 - `D:/DCS World/API/include/FM/wHumanCustomPhysicsAPI.h`: engine parameter documentation around line 392. Availability in this header is not evidence that this playback object's engine consumes these values.
 
 ## Proposed first experiment
@@ -144,3 +145,22 @@ needs wrap-aware treatment. Lights have argument-driven state/brightness in the
 installed descriptor, while smoke also requires an emitter/effect path. These
 are in-scope work, not all proven animation writes and not removed by doing the
 stabilator repair first.
+
+## Engine observation checkpoint
+
+After acceptance of the fresh application gear workflow, prepared the separate
+[engine diagnostic](../../experiments/efm-ownership/engine-prototype/README.md).
+It samples candidate nozzle/control arguments and mission identity/time/position,
+then measures left/right RPM, temperature and fuel flow through a GUI hook with
+its own Export timestamps and identity. Log delivery does not imply simultaneous
+sampling; the analyzer reports actual delays and positional separation and flags
+unavailable data. No channel is declared an afterburner measurement based on RPM
+or nozzle position alone.
+
+The installed mission and hook pass offline capture/alignment checks with
+synthetic data, including independent engines, pause/stop, unavailable API,
+wrong ownship, delayed samples and missing/duplicate rows. Installed DCS mission
+validators pass; eight protected existing files match their pre-install hashes.
+Live capture, left/right nozzle mapping, effects and audible comparison remain
+pending. The production recording schema and accepted playback actuator are
+unchanged.

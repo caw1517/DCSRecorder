@@ -60,6 +60,13 @@ through 0..1, and the user reports successful playback. The app identifies
 motion-only takes and generates clearly named exterior-capable practice missions.
 Engine-state work can resume; integrated endpoint/restart evidence remains open.
 
+The next live step is the installed
+[engine observation diagnostic](../experiments/efm-ownership/engine-prototype/README.md):
+independent left/right throttle phases, nozzle candidates, RPM/temperature/fuel
+flow and measured mission/Export clock alignment. Capture results must precede
+playback-actuator selection; nozzle motion, afterburner effects and sound retain
+separate evidence requirements.
+
 Afterburners, takeoff/landing and ground staging are explicitly deferred from the
 completed first app workflow. They remain required for the broader single-aircraft
 milestone; their existing tickets stay open.
