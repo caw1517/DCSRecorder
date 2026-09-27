@@ -223,5 +223,16 @@ checks bounded reads/decoding. Current-build validation still happens live.
 `install_sound_boundary.py <new-DLL> <original-package> <Saved-Games-DCS> <new-backup-folder>`
 checks the installed DLL against its original manifest, backs it up, then replaces
 only that diagnostic DLL with DCS closed. It was installed successfully; 57
-protected hashes were unchanged. The next run uses the same 15-second mission
-and collects boundary evidence; it is not an audio fix or a new throttle capture.
+protected hashes were unchanged. The live run confirmed the custom sounder name,
+Lua instance presence and wrapper binding throughout all 15 samples; its native
+sounder is PlaneSounder_V2 with two AustereEngine_TurboFan objects. Instance
+presence does not by itself establish script updates or audible rendering.
+
+The logging gap was traced to a filter error: installed edCore's `log.ALL=255`
+excludes `log.TRACE=256`, the level used by a retained SOUNDER Lua logging bridge.
+The corrected hook includes TRACE explicitly and writes a TRACE self-check marker
+in each output. `check_sounder_logging.lua <edCore.dll> <hook.lua>` failed against
+the previous mask and passes against the correction using native constants.
+The installer can replace the exact prior hook with `--previous-report` and keeps
+a backup. Installed with 50 protected hashes unchanged. Repeat the same mission
+to collect script diagnostics; no audible fix or new throttle capture is claimed.

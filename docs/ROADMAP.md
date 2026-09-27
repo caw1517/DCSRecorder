@@ -74,8 +74,10 @@ That 15-second test completed but sounded idle throughout. Offline execution of
 the retained DCS sounder loader exposed a logging assumption: sounders lack file
 I/O, so missing sounder.log did not establish non-execution. A temporary scoped
 logging repeat also sounded idle and produced no script diagnostics. The separate
-test DLL now has a guarded, read-only observer of sounder selection, instance
-presence and internal engine getter paths, pending a live run. The mission and
+test DLL's guarded observer confirmed the custom sounder selection and instance
+presence throughout the next live run. The logging filter then proved incomplete:
+DCS's ALL mask excludes TRACE. The temporary hook now explicitly includes TRACE,
+with a startup self-check; live script diagnostics remain pending. The mission and
 audio script are unchanged; no sound correction is claimed. See the
 [routing diagnosis](../experiments/efm-ownership/results/sound-routing-2026-09-27/README.md).
 

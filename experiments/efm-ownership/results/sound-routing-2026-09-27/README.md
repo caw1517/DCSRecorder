@@ -112,11 +112,52 @@ unchanged, including the mission, Lua sound script, captured tape, recording hoo
 recordings, and accepted playback modules. The extra logging hook remains
 temporary and should be removed when the investigation ends.
 
-Next live step: launch **DCSRecorder-Sound-Routing-Test.miz**, F10 > Sound routing
-test > Start sound test, F2 to the lead, and allow its removal after 15 seconds.
-No sound correction is claimed. An empty/different descriptor name identifies a
-registration/selection problem; a matching name with no Lua reference identifies
-an initialization gap; a reference establishes an instance, but does not prove
-onUpdate dispatch or audible rendering. The native identity and engine reads
-also provide evidence for the separate internal-engine route. Inspect that
-trace before deciding the next intervention.
+## Live boundary result and TRACE-filter correction
+
+The next run completed at model time 4.298–19.298; local evidence is in
+`boundary-live-run/`. All 15 boundary samples passed the live identity and layout
+guards. Every sample reports:
+
+- Selected name: `Aircraft/Planes/DCSRecorderSounderTest`.
+- Lua instance reference present, wrapper bound to this aircraft.
+- Native sounder: `Sound::PlaneSounder_V2` in Sound.dll.
+- No AIFM member; two `EagleFM::AustereFM::Propulsion::AustereEngine_TurboFan`
+  objects in FMBase.dll.
+
+This rules out an absent descriptor name or missing Lua instance in this run.
+It does not yet establish script updates or source playback. The user reported
+completion, without a new audible verdict on this diagnostic run.
+
+The aggregate RPM field was zero, but it is **not** either per-engine getter.
+Captured getter instructions show core RPM is a ratio of float fields at +0x7c
+and +0x48; fan RPM is a ratio at +0x80 and +0x50. The diagnostic deliberately left
+those nontrivial getters uninterpreted, so it captured neither actual ratio.
+Do not label both engines stopped from the aggregate value or infer their thrust.
+
+Further read-only inspection found a SOUNDER logging bridge in the retained
+WorldGeneral snapshot (RVA 0x37180) forwarding a Lua string at level 0x100.
+Loading the **installed** edCore.dll's `ED_luaopen_log` into installed luae.exe
+reveals `ALL=255`, `TRACE=256`: the previous hook's ALL filter excluded TRACE.
+The earlier logging probe was therefore incomplete, despite successfully loading.
+
+`check_sounder_logging.lua <edCore.dll> <sounder_logging_hook.lua>` loads those
+native constants, captures the hook's output configuration and checks INFO/TRACE
+coverage. Before the correction it failed with
+`SOUNDER: TRACE excluded by output mask 255`; after the correction it passes.
+The hook now uses mask 511 and emits `[DCSRECORDER-TRACE-CHECK]` at TRACE into
+each dedicated output. This test checks the filter contract, not live audio or
+the native bridge's execution. An attempted standalone native logging session
+did not create output files; it is not counted as end-to-end logging validation.
+
+With DCS closed, the installer replaced only the temporary logging hook after
+verifying its old hash against its prior installation report and saving a backup.
+All 50 protected hashes are unchanged; the diagnostic DLL, sound script and test
+mission remain identical to the boundary run. The installer now accepts
+`--previous-report <prior-installation.json>` for this explicitly verified update.
+
+Next live step: run **DCSRecorder-Sound-Routing-Test.miz**, F10 > Sound routing
+test > Start sound test, F2 to the lead, and allow removal after 15 seconds.
+Collect the dedicated logs. Require the TRACE startup marker before interpreting
+missing script messages. Inspect script load/source/phase/error messages to
+distinguish an update/parameter failure from an audio-source/rendering failure.
+No sound correction is claimed and no new throttle capture is needed.
