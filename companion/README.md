@@ -48,6 +48,12 @@ Install that module and the updated autosave hook before recording version two,
 then restart DCS. Old practice missions still generate valid version-one takes.
 The companion must run from this updated checkout, not an older worktree.
 
+The library labels older takes **Motion only**: gear, flaps and control surfaces
+were not captured and cannot be recovered by regenerating playback. Choose
+Create practice mission and load that exact new `DCSRecorder-Practice-Exterior-*`
+mission to record them. New takes should show **Motion + surfaces**. Updating the
+app does not update scripts embedded in existing practice missions.
+
 The packager verifies the installed controller against its corresponding build
 artifact. Build `HornetStateStagedProbe` for the new integration; replacing the
 accepted `HornetStagedProbe` artifact would require its own controller deployment.

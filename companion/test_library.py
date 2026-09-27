@@ -24,6 +24,67 @@ class LibraryTests(unittest.TestCase):
         self.assertEqual(self.library.entries()[0]['name'], 'My first flight')
         self.assertEqual(self.source.read_bytes(), original)
 
+    def test_legacy_take_explains_missing_gear_before_and_after_generation(self):
+        original = self.source.read_bytes()
+        entry = self.library.entries()[0]
+        self.assertTrue(entry['supported'])
+        self.assertEqual(entry['status_label'], 'Motion only')
+        self.assertIn('Gear, flaps and control surfaces were not recorded', entry['reason'])
+        self.assertIn('Create a new practice mission', entry['reason'])
+        self.library.settings.update(baseline_mission='unused', donor_mod='unused')
+        with patch('library.prepare', return_value={}), patch.object(self.library, 'activate'):
+            result = self.library.playback('baseline.csv')
+        self.assertIn('Gear, flaps and control surfaces were not recorded', result['message'])
+        self.assertEqual(self.source.read_bytes(), original)
+
+    def test_app_practice_captures_gear_and_selects_exterior_playback(self):
+        import zipfile
+        from extract_recording_log import extract
+        from recorded_flight import read
+        dcs = Path('D:/DCS World')
+        self.library.settings.update(
+            dcs=str(dcs),
+            baseline_mission=str(EXPERIMENT/'package/hornet-prototype/EFM-Probe-Hornet-left-roll-400KIAS.miz'),
+            donor_mod=str(EXPERIMENT/'package/hornet-prototype/DCSRecorder-Hornet-Probe'))
+        practice = self.library.practice()
+        self.assertIn('gear', practice['message'])
+        mission = self.root/'mission.lua'
+        with zipfile.ZipFile(practice['mission']) as archive:
+            mission.write_bytes(archive.read('mission'))
+        # Exercise the exact app-generated capture with a simulated deploying gear.
+        harness = self.root/'capture.lua'
+        harness.write_text((EXPERIMENT/'check_recording.lua').read_text().replace(
+            'return (now-10)/20', 'return math.min(1,(now-10)/3)'))
+        result = subprocess.run([str(dcs/'bin/luae.exe'), str(harness), str(EXPERIMENT),
+                                 str(self.root), str(mission)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        recording = extract(self.root/'dcs.log', self.library.recordings)[0]
+        original = recording.read_bytes()
+        metadata, samples, rows = read(recording)
+        self.assertTrue(metadata['exterior_available'])
+        for key in ('arg_0', 'arg_3', 'arg_5'):
+            values = [float(row[key]) for row in rows]
+            self.assertLess(min(values), 0.01)
+            self.assertEqual(max(values), 1)
+        entry = next(item for item in self.library.entries() if item['id'] == recording.name)
+        self.assertEqual(entry['status_label'], 'Motion + surfaces')
+        with patch.object(self.library, 'activate') as activate:
+            self.library.playback(recording.name)
+        output, manifest, _ = activate.call_args.args
+        self.assertEqual(manifest['module'], 'DCSRecorder-Hornet-State-Staged')
+        tape = output/manifest['module']/'bin/recorded-flight.txt'
+        lines = tape.read_text().splitlines()
+        self.assertEqual(lines[0], 'DCSREC_PLAYBACK_V2')
+        # Native tape: t, pose, velocity, brake, then three gear values.
+        native = [list(map(float, line.split())) for line in lines[3:]]
+        for index in (12, 13, 14):
+            self.assertEqual([row[index] for row in native],
+                             [row[index] for row in samples])
+        check = subprocess.run([str(EXPERIMENT/'build/Release/recorded_path_check.exe'), str(tape)],
+                               capture_output=True, text=True)
+        self.assertEqual(check.returncode, 0, check.stdout+check.stderr)
+        self.assertEqual(recording.read_bytes(), original)
+
     def test_incomplete_and_error_takes_are_not_playable(self):
         text = self.source.read_text()
         self.source.write_text(text[:text.rfind('END,')])

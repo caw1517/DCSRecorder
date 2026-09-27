@@ -8,6 +8,9 @@ sys.path.insert(0, str(EXPERIMENT))
 from recorded_flight import read
 from prepare_staged_playback import prepare, SUPPORTED_BUILD
 
+LEGACY_STATE_NOTICE = ('Gear, flaps and control surfaces were not recorded and cannot replay. '
+                       'Create a new practice mission and record again to capture them.')
+
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -66,7 +69,7 @@ class Library:
             if path.is_symlink():
                 continue
             item = {'id': path.name, 'name': path.stem, 'created': path.stat().st_mtime,
-                    'supported': False, 'duration': None}
+                    'supported': False, 'duration': None, 'status_label': 'Unsupported'}
             namefile = path.with_suffix('.name.json')
             if namefile.exists():
                 try:
@@ -75,7 +78,11 @@ class Library:
                     pass
             try:
                 metadata = self.validate(path)
-                item.update(supported=True, duration=metadata['duration'], reason='Ready for playback' if metadata['exterior_available'] else 'Ready for playback; exterior surfaces were not recorded')
+                exterior = metadata['exterior_available']
+                item.update(supported=True, duration=metadata['duration'],
+                            status_label='Motion + surfaces' if exterior else 'Motion only',
+                            reason='Ready for playback with recorded gear, flaps and control surfaces.'
+                            if exterior else 'Motion playback available. ' + LEGACY_STATE_NOTICE)
             except (ValueError, OSError, OverflowError) as exc:
                 item['reason'] = str(exc)
             result.append(item)
@@ -101,7 +108,7 @@ class Library:
 
     def practice(self):
         dcs = self.check_environment()
-        destination = self.saved / 'Missions' / ('DCSRecorder-Practice-' + uuid.uuid4().hex[:8] + '.miz')
+        destination = self.saved / 'Missions' / ('DCSRecorder-Practice-Exterior-' + uuid.uuid4().hex[:8] + '.miz')
         script = (EXPERIMENT / 'record_flight_mission.lua').read_text(encoding='utf-8-sig')
         # Metadata and wording are specific to the app-generated practice mission.
         script = script.replace("csv(r.source)..'\\n'", "csv(r.source)..'\\ncapture_build," + SUPPORTED_BUILD + "\\nwind_ground,'..tostring(env.mission.weather.wind.atGround.speed)..'\\nwind_2000,'..tostring(env.mission.weather.wind.at2000.speed)..'\\nwind_8000,'..tostring(env.mission.weather.wind.at8000.speed)..'\\n'")
@@ -114,14 +121,14 @@ class Library:
             with zipfile.ZipFile(self.settings['baseline_mission']) as source:
                 (folder / 'baseline.lua').write_bytes(source.read('mission'))
             (folder / 'recorder.lua').write_text(script, encoding='utf-8')
-            (folder / 'description.txt').write_text('DCS Recorder practice. Fly the stock Hornet in calm air. F10 > DCS Recorder > Start recording. Begin nearly level and airborne. Fast rolls and low-altitude airborne playback are under live validation. Ground starts and takeoff/landing playback are still being implemented. Record 5 to 300 seconds. F10 > Stop recording saves the take automatically. Confirm the take appears in the companion flight library before closing DCS.', encoding='utf-8')
+            (folder / 'description.txt').write_text('DCS Recorder practice with gear, flaps and control-surface capture. Fly the stock Hornet in calm air. F10 > DCS Recorder > Start recording. Begin nearly level and airborne. Fast rolls and low-altitude airborne playback are under live validation. Ground starts and takeoff/landing playback are still being implemented. Record 5 to 300 seconds. F10 > Stop recording saves the take automatically. Confirm the take appears in the companion flight library before closing DCS.', encoding='utf-8')
             self.lua(dcs, 'make_recording_mission.lua', folder / 'baseline.lua', folder / 'recorder.lua', folder / 'mission', folder / 'description.txt')
             self.verify_mission(dcs, folder / 'mission', 1)
             destination.parent.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(self.settings['baseline_mission']) as source, zipfile.ZipFile(destination, 'x', zipfile.ZIP_DEFLATED) as target:
                 for entry in source.infolist():
                     target.writestr(entry, (folder / 'mission').read_bytes() if entry.filename == 'mission' else source.read(entry.filename))
-        return {'mission': str(destination), 'message': 'Practice mission created. Start DCS, fly it, and use F10 Start/Stop recording. Confirm the saved take appears here.'}
+        return {'mission': str(destination), 'message': 'Practice mission created with gear, flaps and control-surface capture. Load this exact mission in DCS; older practice missions do not gain the new capture features. Use F10 Start/Stop recording, then confirm the saved take says Motion + surfaces here.'}
 
     def lua(self, dcs, script, *args):
         result = subprocess.run([str(dcs / 'bin/luae.exe'), str(EXPERIMENT / script), *map(str, args)],
@@ -136,7 +143,7 @@ class Library:
 
     def playback(self, key):
         source = self.source(key)
-        self.validate(source)
+        metadata = self.validate(source)
         dcs = self.check_environment()
         generation = uuid.uuid4().hex
         output = self.home / 'packages' / generation
@@ -146,7 +153,10 @@ class Library:
         self.check_environment()
         self.activate(output, manifest, generation)
         mission = self.saved / 'Missions' / ('DCSRecorder-Playback-' + generation[:8] + '.miz')
-        return {'mission': str(mission), 'message': 'Playback mission ready. Load this mission in DCS, then F10 > DCS Recorder > Start playback. Restart the mission to replay.'}
+        message = 'Playback mission ready. Load this mission in DCS, then F10 > DCS Recorder > Start playback. Restart the mission to replay.'
+        if not metadata['exterior_available']:
+            message += '\n\nMotion only: ' + LEGACY_STATE_NOTICE
+        return {'mission': str(mission), 'message': message}
 
     def activate(self, output, manifest, generation):
         module=manifest.get('module','DCSRecorder-Hornet-Staged')
