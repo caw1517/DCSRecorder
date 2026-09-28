@@ -1,7 +1,7 @@
 # Canopy diagnostic checkpoint — 28 September 2026
 
 Status: stock-aircraft capture and visual review accepted; separate playback
-package passes offline checks and awaits installation/live review.
+package passes offline checks and is installed, awaiting live review.
 
 The [separate canopy prototype](../../canopy-prototype/README.md) investigates
 installed exterior argument 38 with a parked stock Hornet OPEN/HOLD/CLOSE
@@ -59,6 +59,9 @@ route; it does not reproduce the diagnostic's parked motion or test ground
 physics. No native hook is added. Later mission reads are logged independently
 from immediate SDK readback to detect possible animation overwrites.
 
-Package: ignored `package/canopy-playback`. Installation waits for the user to
-close DCS so it can load the new module on restart. Live retention and rendering,
-then normal recording/playback integration, remain pending.
+Package: ignored `package/canopy-playback`. After the user confirmed DCS was
+closed, installation verified all ten installed file hashes and 1,639 protected
+files unchanged. The new module is `DCSRecorder-Hornet-Canopy`, with
+`DCSRecorder-Canopy-Playback.miz` in Saved Games/DCS/Missions. The installation
+manifest remains local in the package. Live retention and rendering, then normal
+recording/playback integration, remain pending.
