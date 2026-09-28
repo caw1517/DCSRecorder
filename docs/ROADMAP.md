@@ -3,6 +3,18 @@
 Updated 26 September 2026. The [GitHub map](https://github.com/caw1517/DCSRecorder/issues/1)
 is the issue-tracking entry point.
 
+## V1 scope and V2 backlog
+
+The user selected **white smoke only for V1**. Normal capture and recorded white
+smoke playback are accepted. The remaining V1 state groups are exterior lights,
+canopy, wheel rotation/suspension compression and combined validation, with ground
+state and contact coordinated through their existing tickets.
+
+These features are explicitly deferred to V2 and do not block V1:
+
+- [Improve playback engine sound depth (V2)](https://github.com/caw1517/DCSRecorder/issues/12): investigate and refine the small perceived bass/impact difference while preserving accepted recorded power response.
+- [Add multicolor demonstration smoke (V2)](https://github.com/caw1517/DCSRecorder/issues/13): validate and retain selected smoke-generator colors beyond white.
+
 ## Current milestone
 
 The [single-aircraft record-to-replay workflow](https://github.com/caw1517/DCSRecorder/issues/5)

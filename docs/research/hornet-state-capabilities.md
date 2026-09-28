@@ -37,17 +37,22 @@ remains an observation to investigate, not a diagnosed parameter or mixer fault.
 - Wheel rotation and suspension compression: capture/replay with rotation wrap
   handling, and coordinate visible ground-state validation with ground-start,
   flight-envelope and physics work. Gear deployment alone is already accepted.
-- Other smoke colors: preserve and validate the selected generator beyond the
-  accepted white-smoke path. Depletion/damage behavior remains unverified.
 - Close the remaining numerical evidence review and run a combined regression
   as the new channels are added; preserve accepted motion, engines, surfaces,
   smoke, initial state, lifecycle behavior and legacy recording compatibility.
 
-The user's minor sound-quality observation is tracked as a lower-priority
-refinement. The next useful comparison uses matching external listener position,
-distance, orientation and engine settings before attributing the difference or
-changing sound. Ground dynamics, broader aircraft registrations, and layered
-playback retain their separate roadmap gates.
+The user explicitly chose **white smoke only for V1** and deferred both
+[sound depth refinement](https://github.com/caw1517/DCSRecorder/issues/12) and
+[multicolor smoke](https://github.com/caw1517/DCSRecorder/issues/13) to **V2**.
+Neither blocks this V1 issue. Depletion/damage behavior remains unverified and
+must not be inferred from the accepted ordinary smoke cycle. Ground dynamics,
+broader aircraft registrations and layered playback retain their separate gates.
+
+Exterior lights are the current investigation. The separate
+[nighttime light diagnostic](../../experiments/efm-ownership/lights-prototype/README.md)
+is installed: eleven automatic cockpit-control phases, actual callback timing,
+50 Hz exterior reads and visual observation. Offline checks pass; live mapping,
+light playback and illumination are not yet verified.
 
 The installed object SDK exposes bounded animation-array reads and individual
 animation writes. This is a credible route for exterior animation. It exposes
