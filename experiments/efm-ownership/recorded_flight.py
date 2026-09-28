@@ -61,8 +61,16 @@ def read(path):
                 if abs(sum(x*y for x,y in zip(axis,other))-(1 if a==b else 0))>0.001: raise ValueError('Invalid orientation basis')
         cross=[f[1]*u[2]-f[2]*u[1],f[2]*u[0]-f[0]*u[2],f[0]*u[1]-f[1]*u[0]]
         if sum(x*y for x,y in zip(cross,r))<0.999: raise ValueError('Reflected orientation basis')
-        if not 70<=math.sqrt(sum(x*x for x in v))<=260 or not 0<=brake<=1:
-            raise ValueError('Take exceeds current airborne speed/animation support; ground transitions require ground playback support')
+        speed=math.sqrt(sum(x*x for x in v))
+        elapsed=t-samples[0][0] if samples else 0
+        if speed>260:
+            raise ValueError(f'Recorded speed {speed:.2f} m/s exceeds the current playback maximum of 260 m/s at {elapsed:.2f} s. '
+                             'This limit uses ground speed (about 505 knots), not cockpit indicated airspeed. The recording is saved.')
+        if speed<70:
+            raise ValueError(f'Recorded speed {speed:.2f} m/s is below the current airborne playback minimum of 70 m/s at {elapsed:.2f} s. '
+                             'Ground starts and transitions are not yet supported. The recording is saved.')
+        if not 0<=brake<=1:
+            raise ValueError(f'Invalid speed-brake value {brake:g} at {elapsed:.2f} s; expected 0 to 1.')
         q=quaternion(f,u,r)
         if samples:
             prev=samples[-1];dt=t-prev[0]

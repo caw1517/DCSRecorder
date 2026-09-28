@@ -53,3 +53,37 @@ reports all five existing recordings supported. The user has been asked to make
 a short normal take in the new mission, retaining usual canopy/light settings,
 and confirm the library adds `+ canopy`. This verifies the ordinary integration;
 changing-canopy rendering is already covered by the accepted isolated replay.
+
+## First normal take: saved, outside current speed support
+
+The user's “unsupported” report was reproduced through both the live library API
+and direct library validation. `20260928T164034Z-0001.csv` is a completed
+version-six recording: 354 samples, 7.06 seconds, explicit user stop, canopy
+closed throughout. SHA-256 remains
+`15a8f3cf07e4bd36c9de9f047727a4abef050064e4acc0ac2bf3cb2e11432ca3`.
+The capture and log are preserved in ignored `unsupported-capture/`.
+
+Measured world speed rises from 243.48 to 267.67 m/s (maximum about 520.3 knots).
+It first exceeds the existing 260 m/s playback cap at 4.72 seconds. Saved motion
+fields match the raw mission rows exactly; position derivatives and velocity
+agree within 0.01082 m/s. This is a real envelope crossing, not shifted canopy
+columns or a units conversion error. Capture succeeded; playback remains outside
+the current supported range. No cap was raised and no source data was edited.
+
+The converter previously combined speed and speed-brake errors into a generic
+message mentioning ground transitions. It now reports the precise value,
+elapsed time and applicable limit separately, and distinguishes ground speed
+from indicated airspeed. A regression through the actual save/library path
+failed for overspeed, underspeed and invalid speed brake before this change;
+all 32 companion tests pass afterward. The restarted app was checked against
+the original take and now serves the precise limit reason. DCS was left running.
+
+A second take (`20260928T164051Z-0002.partial`) separately stopped saving when
+the engine sampler exceeded its 50 ms timing guard. It was retained and copied
+for diagnosis, not promoted or filled with invented engine samples. That later
+failure explains the current save-status message; it did not invalidate the
+completed first take. Its scheduling cause is not established.
+
+The user has been asked to record a short level cruise at moderate speed in the
+same mission. Successful normal playback remains pending. Broader speed support
+belongs with [Validate the single-aircraft flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7).
