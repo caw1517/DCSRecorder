@@ -156,8 +156,10 @@ missions save version-five flights containing measured exterior brightness and
 strobe state, with optional measured white smoke. The library adds `+ lights`
 and selects a separate lights-capable playback module. Older recordings remain
 unchanged and retain their original playback module. The integrated light path
-passes offline checks and is installed; its first normal capture/playback
-comparison and the formation-light startup correction still need live validation.
+passes offline checks and the user accepted normal lights-off capture/playback.
+Two completed runs confirm the formation-light startup overwrite is corrected
+in native post-animation traces. Independent later mission telemetry is enabled
+for future generated missions; it was absent from those accepted runs.
 See the [integration checkpoint](../experiments/efm-ownership/results/lights-integration-2026-09-28/README.md).
 
 Run python -m unittest discover -s companion -v. Tests cover unchanged source

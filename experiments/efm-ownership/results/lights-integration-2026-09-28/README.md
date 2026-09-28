@@ -1,4 +1,4 @@
-# Normal lights workflow: installed, live validation pending
+# Normal lights workflow: usual configuration accepted
 
 Carries the accepted isolated light capture/replay through normal recording,
 automatic save, library validation and generated staged playback. Version-five
@@ -75,3 +75,40 @@ The user has been asked to run the full flight through completion and watch
 particularly for unwanted startup lights. This take is useful numerical coverage
 for the prior formation OFF-state overwrite. Live playback/retention is pending;
 no visual or numerical pass is claimed yet.
+
+## Normal playback accepted
+
+The user reports **"Approved and working"** after the requested lights-off
+comparison. Preserve that acceptance; no repeat of this take is required.
+The log contains **two complete runs**, each starting at mission time 7.82 and
+completing at 115.12, reproducing the full 107.30 seconds. Native completion,
+safe hook ownership release and aircraft destruction are logged twice.
+
+Across both runs, all **75,124 post-animation light rows** match their recorded
+OFF values exactly. Formation 88 is overwritten by native animation 50 times
+(25 per run); every one is corrected to zero at the shared animation boundary.
+This corroborates the user's successful visual result and directly exercises
+the earlier startup defect. Recorded white-smoke OFF/ON/OFF executes on both
+runs, with maximum command delay **15.999299 ms**. Source recording bytes remain
+unchanged. This establishes the requested normal workflow with the user's usual
+lights-off configuration; changing lights retain their prior isolated acceptance.
+
+An evidence limitation was found and fixed: the generated runtime mission config
+did not forward the exterior/light telemetry flags, so this accepted mission has
+native post-animation readings but no independent later mission light readings.
+The packager now forwards both flags. A regression executes the actual packaged
+config, fails before that correction, and passes afterward; all 27 companion
+tests pass. Future generated missions gain these diagnostic measurements. The
+accepted mission and installed native controller were not changed for this fix.
+Do not claim independent later-read retention for these two runs.
+
+Raw evidence remains ignored under `playback-accepted/`, including the copied
+native logs, `light-native-summary.json` and `verification.json`:
+
+- `dcs.log`: SHA-256 `32c519e596274b95f45d1744dbd46575159ba73182a15b1aee557f57888b823c`.
+- `exterior-16216.csv`: SHA-256 `9c8ebb2800653720067b7bfe019bc67b33d9f5d8fd2b603715a5c5e85a2e6966`.
+- `objects-16216-4022343.csv`: SHA-256 `e54dd935fecd13f7cca5f727e70df0a8f4be9abd44e2e9fd2b929a45eba3f301`.
+
+Next state group: canopy position/transitions, then wheel rotation and suspension.
+Refuel activation, landing-light ground illumination and broader combined evidence
+remain unverified; they do not reopen this accepted usual-configuration test.

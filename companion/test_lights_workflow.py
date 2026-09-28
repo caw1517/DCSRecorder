@@ -41,10 +41,17 @@ class LightsWorkflowTests(unittest.TestCase):
         run=subprocess.run([str(EXPERIMENT/'build/Release/recorded_path_check.exe'),str(tape)],capture_output=True,text=True)
         self.assertEqual(run.returncode,0,run.stdout+run.stderr)
         with patch.object(self.library,'activate')as activate:self.library.playback(source.name)
-        _,manifest,_=activate.call_args.args
+        output,manifest,_=activate.call_args.args
         self.assertEqual(manifest['module'],'DCSRecorder-Hornet-Lights-Staged')
         self.assertTrue(manifest['initial']['lights'])
         self.assertEqual(manifest['initial']['smoke_events'],metadata['smoke_events'])
+        harness=self.root/'check_telemetry.lua'
+        harness.write_text("dofile(arg[1]); local text=mission.trigrules[1].actions[2].text; "
+            "local prefix=assert(text:match('^(.-)\\n%-%- Staged recorded playback')); "
+            "assert(loadstring(prefix))(); assert(DCS_STAGED_CONFIG.exterior==1,'Missing exterior telemetry flag'); "
+            "assert(DCS_STAGED_CONFIG.lights==true,'Missing light telemetry flag')")
+        run=subprocess.run(['D:/DCS World/bin/luae.exe',str(harness),str(output/'mission')],capture_output=True,text=True)
+        self.assertEqual(run.returncode,0,run.stdout+run.stderr)
         self.assertEqual(source.read_bytes(),original)
 
     def test_lights_without_smoke(self):

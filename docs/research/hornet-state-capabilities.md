@@ -31,9 +31,9 @@ remains an observation to investigate, not a diagnosed parameter or mixer fault.
 
 ### Remaining before closing this issue
 
-- Exterior lights: validate the installed normal capture/playback integration,
-  including the proposed formation-light startup correction, and verify refuel
-  activation and ground illumination. Older recordings retain off-only behavior.
+- Exterior lights: refuel activation and ground illumination remain unverified.
+  The user's normal lights-off workflow is accepted, with the formation startup
+  overwrite corrected in post-animation traces. Older recordings retain off-only behavior.
 - Canopy position and transitions: establish mapping, capture and replay.
 - Wheel rotation and suspension compression: capture/replay with rotation wrap
   handling, and coordinate visible ground-state validation with ground-start,
@@ -61,8 +61,12 @@ and landing-light ground illumination are not yet established. See the
 The [normal version-five integration](../../experiments/efm-ownership/results/lights-integration-2026-09-28/README.md)
 is now installed after 27 companion tests and seven native/lifecycle checks.
 It records lights with optional white smoke, uses the common native playback
-clock, and reapplies lights at the existing shared animation boundary. Live
-normal-workflow and startup-retention validation are pending.
+clock, and reapplies lights at the existing shared animation boundary. The user
+accepted normal lights-off playback; two full runs show all 75,124 post-animation
+light values matching, including correction of 50 native formation overwrites.
+Independent later mission light telemetry was absent due to omitted config
+flags; that packaging omission is corrected and regression-tested for future
+missions. Canopy is the next state group.
 
 The installed object SDK exposes bounded animation-array reads and individual
 animation writes. This is a credible route for exterior animation. It exposes
@@ -85,7 +89,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
-| Exterior lights | Live marked capture and user observation confirm formation 88; navigation 190/191/192; pulsing strobe 193; landing/taxi 210. Refuel 212 remains unexercised. | Isolated captured replay visually accepted with normal completion; navigation/strobe/landing retained. Formation has 25 startup samples overwritten after the SDK write. New normal playback reapplies lights at the shared animation boundary. | Version-five normal integration installed/offline checked; live capture, playback and formation startup correction pending. Refuel activation and ground illumination remain unverified. |
+| Exterior lights | Live marked capture and user observation confirm formation 88; navigation 190/191/192; pulsing strobe 193; landing/taxi 210. Refuel 212 remains unexercised. | Isolated changing-light replay accepted. Normal lights-off replay accepted across two full runs; all post-animation light values match, including repaired formation startup overwrites. | Normal version-five workflow accepted for the user's usual configuration. Independent later mission reads were absent; forwarding is now fixed for future missions. Refuel activation and ground illumination remain unverified. |
 | Demonstration smoke | Dedicated SMK station 10 carries `INV-SMOKE-*`. Native flag capture passed in a version-four app flight: 2,647 samples / 52.92 seconds, 0..12 ms capture delay, OFF/ON/OFF and white-generator metadata preserved. | User accepted recorded white-smoke playback. Requests followed recorded ON/OFF by at most 14 ms and the mission completed normally. | Normal capture/library/playback accepted for white smoke. Other colors are unverified. See the [accepted actuator and capture investigation](../../experiments/efm-ownership/results/smoke-control-2026-09-27/README.md). |
 | Engine RPM, left/right | Read-only native helper captures core/fan RPM and both power getters with player/timing checks. Core RPM agrees with Export. | Guarded per-object native getters deliver the measured values to DCS consumers. | Combined sound/appearance and normal version-three capture/playback accepted. Full integrated trace audit remains distinct from visual/audio acceptance. |
 | Nozzle opening | Marked live capture supports left argument 90 and right 89. | Post-animation writes share the native sound playback clock. | Combined sound/visual test and normal recorded-motion integration accepted. |
