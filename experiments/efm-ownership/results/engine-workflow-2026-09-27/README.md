@@ -77,7 +77,21 @@ Missions. This is a new ordinary recording mission, not a prerecorded engine dem
 No synthetic fixture recording was installed into the user's flight library and
 the new controller starts without an active tape until the app generates one.
 
-## Next live check
+## Integrated live validation
+
+After installing the ID correction, the user recorded
+`20260928T002655Z-0001.csv`, named it **Test**, generated playback through the app,
+and reported "Worked great!" The take contains 1,600 samples over 31.98 seconds
+with both exterior and engine data. Reading and converting the saved CSV passes
+the production validator; the regenerated tape matches the activated tape byte
+for byte. The second playback run in the retained log reached mission `COMPLETE`
+at model time 38.820, following native `staged_exterior_complete` at 38.801.
+Engine, appearance and motion traces were generated and preserved, along with
+the source CSV, activated tape and DCS log, under local `accepted-live/`.
+
+This establishes the first successful integrated capture/library/playback run.
+It does not establish broader aircraft support, remaining lights/smoke state,
+ground operations, or a numerical fidelity audit of every channel in this run.
 
 ### First integrated capture: ID namespace rejection
 
@@ -99,11 +113,8 @@ The failed log, partial file and status are preserved locally in `first-capture/
 No engine values were sampled, so the log cannot reconstruct a complete v3 take.
 The one-file repair is prepared with the previous installed hash as a precondition,
 a backup and post-copy hash verification. Installation requires DCS to be closed.
-Live acceptance remains pending a fresh recording.
+That repair was installed and the fresh recording passed as described above.
 
-Record a fresh short airborne take in the new mission, starting nearly level,
-with a turn and brief idle/military/afterburner changes. Use F10 Stop, confirm
-**Motion + surfaces + engines** in the library, close DCS, then generate playback
-through the companion. Replay with the normal F10 start and compare trajectory,
-surfaces, nozzle/flame and sound together. Save the capture and playback traces.
-Actual integrated in-DCS capture/replay remains unverified at this checkpoint.
+The successful run exercised the fresh-recording, library and generated-playback
+workflow that was pending at installation. The broader state-fidelity issue stays
+open for remaining state groups and validation outside this airborne run.

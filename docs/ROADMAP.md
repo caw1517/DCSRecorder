@@ -126,8 +126,11 @@ arguments and native engine parameters share one playback clock. New practice
 missions save native timestamps and all eight raw getter values; conversion
 aligns the six playback parameters to motion. The companion labels new takes
 **Motion + surfaces + engines** and uses a separate engine-capable staged module.
-Nineteen companion tests and five relevant native/mission checks pass. A fresh
-in-DCS capture and integrated recorded-motion replay remain to be observed.
+Nineteen companion tests and five relevant native/mission checks pass. Following
+the mission/Export ID correction, the user successfully recorded and replayed
+the 31.98-second, 1,600-sample version-three flight named **Test** through the app
+and reported "Worked great!" The saved data passes conversion, the regenerated
+tape matches the activated tape, and the live mission reached `COMPLETE`.
 See the [workflow integration record](../experiments/efm-ownership/results/engine-workflow-2026-09-27/README.md).
 See the
 [combined engine test](../experiments/efm-ownership/results/combined-engine-playback-2026-09-27/README.md).
