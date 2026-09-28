@@ -85,6 +85,9 @@ class Library:
                             status_label='Motion + surfaces + engines + smoke' if smoke else 'Motion + surfaces + engines' if engine else ('Motion + surfaces' if exterior else 'Motion only'),
                             reason='Ready for playback with recorded surfaces, engines and white-smoke timing.' if smoke else 'Ready for playback with recorded surfaces, engine sound, nozzles and afterburner flames. Smoke was not captured.' if engine else 'Ready for playback with recorded gear, flaps and control surfaces. Engine sound and flames were not captured.'
                             if exterior else 'Motion playback available. ' + LEGACY_STATE_NOTICE)
+                if metadata['lights_available']:
+                    item['status_label'] += ' + lights'
+                    item['reason'] += ' Exterior light brightness and strobe timing are recorded.'
             except (ValueError, OSError, OverflowError) as exc:
                 item['reason'] = str(exc)
             result.append(item)
@@ -112,9 +115,13 @@ class Library:
         dcs = self.check_environment()
         engine = self.settings.get('engine_capture', False)
         smoke = self.settings.get('smoke_capture', False)
+        lights = self.settings.get('lights_capture', False)
+        if lights and not engine:
+            raise ValueError('Light capture requires the installed engine capture workflow.')
         if smoke and not engine:
             raise ValueError('Smoke capture requires the installed engine capture workflow.')
         prefix = 'DCSRecorder-Practice-Smoke-' if smoke else 'DCSRecorder-Practice-Engine-' if engine else 'DCSRecorder-Practice-Exterior-'
+        if lights: prefix = 'DCSRecorder-Practice-Lights-'
         destination = self.saved / 'Missions' / (prefix + uuid.uuid4().hex[:8] + '.miz')
         script = (EXPERIMENT / ('record_flight_engine_mission.lua' if engine else 'record_flight_mission.lua')).read_text(encoding='utf-8-sig')
         # Metadata and wording are specific to the app-generated practice mission.
@@ -122,6 +129,8 @@ class Library:
         assert 'capture_build,' in script
         if smoke:
             script = 'DCSRECORDER_SMOKE=true\n' + script
+        if lights:
+            script = 'DCSRECORDER_LIGHTS=true\n' + script
         script = script.replace(' samples written to DCS.log. Ready for extraction. Keep this DCS session until the recording is collected.',
                                 ' samples captured. Automatic save is pending; confirm the take appears in the companion flight library before closing DCS.')
         script = script.replace(' into DCS.log.', '. Use the companion flight library to confirm automatic saving after Stop.')
@@ -140,6 +149,8 @@ class Library:
             with zipfile.ZipFile(self.settings['baseline_mission']) as source, zipfile.ZipFile(destination, 'x', zipfile.ZIP_DEFLATED) as target:
                 for entry in source.infolist():
                     target.writestr(entry, (folder / 'mission').read_bytes() if entry.filename == 'mission' else source.read(entry.filename))
+        if lights:
+            return {'mission': str(destination), 'message': 'Practice mission created with recorded lights, surfaces and engines.' + (' White smoke is fitted and captured.' if smoke else '') + ' Record with F10 Start/Stop, then confirm the saved take includes lights in the flight library.'}
         if smoke:
             return {'mission': str(destination), 'message': 'Practice mission created with white smoke fitted on station 10. Record with F10 Start/Stop and use Smoke Device - ON/OFF to switch smoke. The saved take will say Motion + surfaces + engines + smoke.'}
         if engine:
@@ -177,7 +188,7 @@ class Library:
     def activate(self, output, manifest, generation):
         module=manifest.get('module','DCSRecorder-Hornet-Staged')
         binary=manifest.get('binary','HornetStagedProbe')
-        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe'),('DCSRecorder-Hornet-Engine-Staged','HornetEngineStagedProbe')):
+        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe'),('DCSRecorder-Hornet-Engine-Staged','HornetEngineStagedProbe'),('DCSRecorder-Hornet-Lights-Staged','HornetLightsStagedProbe')):
             raise ValueError('Unsupported playback module')
         mod = self.saved / 'Mods/aircraft' / module
         # Install once with the tested installer. Updates replace only the tape,

@@ -151,6 +151,15 @@ visible with a reason; incomplete .partial files are counted separately.
 
 ## Verification and acceptance
 
+Light capture is available with the installed lights workflow. New practice
+missions save version-five flights containing measured exterior brightness and
+strobe state, with optional measured white smoke. The library adds `+ lights`
+and selects a separate lights-capable playback module. Older recordings remain
+unchanged and retain their original playback module. The integrated light path
+passes offline checks and is installed; its first normal capture/playback
+comparison and the formation-light startup correction still need live validation.
+See the [integration checkpoint](../experiments/efm-ownership/results/lights-integration-2026-09-28/README.md).
+
 Run python -m unittest discover -s companion -v. Tests cover unchanged source
 bytes on rename, incomplete/error takes, build/weather validation, path rejection,
 running-DCS and unsupported-build guards, rollback after partial activation, and

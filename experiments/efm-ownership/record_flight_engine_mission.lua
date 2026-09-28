@@ -3,6 +3,7 @@ if DCSRECORDER then return end
 DCSRECORDER={state='idle',take=0,source='Observer'}
 local r=DCSRECORDER
 local exterior_channels={0,3,5,9,10,11,12,13,14,15,16,17,18,28,29,89,90}
+if DCSRECORDER_LIGHTS then for _,c in ipairs({88,190,191,192,193,210,212})do exterior_channels[#exterior_channels+1]=c end end
 local function csv(s) return '"'..tostring(s):gsub('"','""')..'"' end
 function r.metadata()
     local u=Unit.getByName(r.source)
@@ -25,8 +26,9 @@ function r.metadata()
         if smoke_clsid~='{INV-SMOKE-WHITE}' then return nil end
         smoke='\nsmoke_profile,hornet-native-smoke-v1\nsmoke_station,10\nsmoke_clsid,'..smoke_clsid
     end
-    return 'DCSREC,'..(DCSRECORDER_SMOKE and '4' or '3')..'\naircraft,'..csv(u:getTypeName())..'\nlivery,'..csv(livery)..
-        '\ntheatre,'..csv(env.mission.theatre)..'\nstate_profile,hornet-exterior-v1\nengine_profile,hornet-native-engine-v1'..smoke..'\nsource_unit_id,'..tostring(u:getID())..'\nsource,'..csv(r.source)..'\n'
+    local lights=DCSRECORDER_LIGHTS and '\nlight_profile,hornet-lights-v1' or ''
+    return 'DCSREC,'..(DCSRECORDER_LIGHTS and '5' or DCSRECORDER_SMOKE and '4' or '3')..'\naircraft,'..csv(u:getTypeName())..'\nlivery,'..csv(livery)..
+        '\ntheatre,'..csv(env.mission.theatre)..'\nstate_profile,hornet-exterior-v1\nengine_profile,hornet-native-engine-v1'..smoke..lights..'\nsource_unit_id,'..tostring(u:getID())..'\nsource,'..csv(r.source)..'\n'
 end
 function r.sample()
     if r.state~='recording' then return 'IDLE' end

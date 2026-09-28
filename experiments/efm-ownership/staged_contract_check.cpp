@@ -70,8 +70,30 @@ int main() {
         values=path.at_sample(0).exterior;
         require(!hornet_appearance::apply_exterior(&api,handle,id+1,values) && writes==unchanged,"wrong identity wrote exterior");
         view_size=18;require(!hornet_appearance::apply_exterior(&api,handle,id,values) && writes==unchanged,"short exterior view wrote partial state");view_size=1000;
+        {std::ofstream out(file);out<<std::setprecision(16)<<"DCSREC_PLAYBACK_V4\n301\nhornet-exterior-v1\nhornet-native-engine-v1\nhornet-lights-v1\n";
+         for(int i=0;i<=300;++i) {
+             out<<i*.02<<' '<<1000+220*i*.02<<" 2000 500 ";for(double v:q)out<<v<<' ';
+             out<<"220 0 0 .4";
+             for(int k=0;k<23;++k)out<<" 0";
+             for(int k=0;k<7;++k)out<<' '<<(k==4?(i%2?.9:0):i/600.0);
+             out<<'\n';}}
+        require(std::string(path.load(file))=="recording_loaded" && path.has_lights,"v4 light profile load");
+        for(double t:{0.,.01,.03,6.,8.}) {
+            auto light=path.at_sample(t).lights;
+            require(std::abs(light[0]-std::min(t,6.)/12)<1e-12,"light initial/interpolated/endpoint value");
+            require(light[4]==(t==.03?.9:0),"sample-held strobe and final endpoint");
+            args[88]=1; // Captured startup overwrite: reapply through the shared adapter.
+            require(hornet_appearance::apply_lights(&api,handle,id,light),"light reapply/readback");
+            require(std::string(hornet_appearance::apply(&api,handle,.4f,id,true))=="recorded_brake_verified","light-preserving defaults");
+            require(args[88]==static_cast<float>(light[0]) && args[193]==static_cast<float>(light[4]),"defaults erased recorded lights");
+        }
+        auto light=path.at_sample(0).lights;const int before_lights=writes;light[0]=1.1;
+        require(!hornet_appearance::apply_lights(&api,handle,id,light) && writes==before_lights,"invalid light partial write");
+        light[0]=0;view_size=212;
+        require(!hornet_appearance::apply_lights(&api,handle,id,light) && writes==before_lights,"short light view partial write");view_size=1000;
+        require(!hornet_appearance::apply_lights(&api,handle,id+1,light) && writes==before_lights,"wrong light identity");
         {std::ofstream out(file);out<<"DCSREC_PLAYBACK_V2\n301\nunknown\n";}
-        require(std::string(path.load(file))=="recording_profile_rejected" && !path.has_exterior && path.samples.empty(),"unknown profile retained stale state");
+        require(std::string(path.load(file))=="recording_profile_rejected" && !path.has_exterior && !path.has_lights && path.samples.empty(),"unknown profile retained stale state");
         {std::ofstream out(file);out<<"DCSREC_PLAYBACK_V2\n301\nhornet-exterior-v1\n0 0 2000 0 1 0 0 0 220 0 0 .4 -1";}
         require(std::string(path.load(file))=="recording_exterior_rejected" && path.samples.empty(),"truncated state accepted");
         std::filesystem::remove(file);

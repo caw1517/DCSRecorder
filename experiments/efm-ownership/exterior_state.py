@@ -4,9 +4,10 @@ CHANNELS = (0, 3, 5, *range(9, 19))
 BASE_COLUMNS = 't,x,y,z,fx,fy,fz,ux,uy,uz,rx,ry,rz,vx,vy,vz,speedbrake,rpm_left,rpm_right'.split(',')
 STATE_COLUMNS = [f'arg_{c}' for c in CHANNELS]
 
-def columns(version):
-    if version not in (1, 2, 3, 4):
+def columns(version, smoke_available=True):
+    if version not in (1, 2, 3, 4, 5):
         raise ValueError('Unsupported recording version')
     from engine_state import COLUMNS
     from smoke_state import COLUMNS as SMOKE_COLUMNS
-    return BASE_COLUMNS + (STATE_COLUMNS if version >= 2 else []) + (COLUMNS if version >= 3 else []) + (SMOKE_COLUMNS if version == 4 else [])
+    from light_state import COLUMNS as LIGHT_COLUMNS
+    return BASE_COLUMNS + (STATE_COLUMNS if version >= 2 else []) + (COLUMNS if version >= 3 else []) + (SMOKE_COLUMNS if version == 4 or (version == 5 and smoke_available) else []) + (LIGHT_COLUMNS if version == 5 else [])
