@@ -3,6 +3,7 @@
 #include <cstddef>
 #include "ed_object_access.h"
 #include "hornet_exterior.h"
+#include "hornet_engine.h"
 
 namespace hornet_appearance {
 // Prototype defaults, not recorded-flight animation playback. SDK callbacks
@@ -32,6 +33,15 @@ inline bool apply_exterior(const ed_object_api_entry* api,ED_OBJECT_HANDLE handl
     if(!view.data || view.size<=18)return false;
     for(size_t i=0;i<values.size();++i)
         if(view.data[hornet_exterior::channels[i]]!=static_cast<float>(values[i]))return false;
+    return true;
+}
+inline bool apply_engine(const ed_object_api_entry* api,ED_OBJECT_HANDLE handle,uint64_t id,const hornet_engine::Values& values) {
+    if(!handle || !id || !api || !api->ed_get_object_id || !api->ed_get_object_args || !api->ed_set_single_arg ||
+       api->ed_get_object_id(handle)!=id || !hornet_engine::valid(values))return false;
+    auto view=api->ed_get_object_args(handle);if(!view.data || view.size<=90)return false;
+    for(size_t i=0;i<4;++i)api->ed_set_single_arg(handle,hornet_engine::channels[i],static_cast<float>(values[i]));
+    view=api->ed_get_object_args(handle);if(!view.data || view.size<=90)return false;
+    for(size_t i=0;i<4;++i)if(view.data[hornet_engine::channels[i]]!=static_cast<float>(values[i]))return false;
     return true;
 }
 }

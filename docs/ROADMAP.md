@@ -118,8 +118,17 @@ shared getter/animation boundary, source alignment and mission checks pass;
 installation verified 10 hashes and 99 protected files unchanged. The user
 accepted combined visuals and sound. Live traces confirm 132,366 sound overrides
 and 40,736 appearance records matched the shared tape. The session stopped 85 ms
-before tape end, so automatic completion/restoration remains unverified for this
-combined variant. Next integrate recorded motion and the recorder/library flow.
+before tape end in the retained trace; the user subsequently confirmed automatic
+completion as verified. That manual confirmation closes the combined completion
+gate without changing the earlier trace's scope.
+The version-three workflow is now installed: motion, surfaces, nozzle/flame
+arguments and native engine parameters share one playback clock. New practice
+missions save native timestamps and all eight raw getter values; conversion
+aligns the six playback parameters to motion. The companion labels new takes
+**Motion + surfaces + engines** and uses a separate engine-capable staged module.
+Nineteen companion tests and five relevant native/mission checks pass. A fresh
+in-DCS capture and integrated recorded-motion replay remain to be observed.
+See the [workflow integration record](../experiments/efm-ownership/results/engine-workflow-2026-09-27/README.md).
 See the
 [combined engine test](../experiments/efm-ownership/results/combined-engine-playback-2026-09-27/README.md).
 See the [native capture record](../experiments/efm-ownership/results/native-engine-capture-2026-09-27/README.md).

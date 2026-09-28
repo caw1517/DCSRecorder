@@ -13,8 +13,10 @@ be within 10 degrees of level. Staged playback no longer imposes an altitude
 floor/ceiling or angular-rate cap; the final hard-turn take passed live review.
 Finite-data, continuity, orientation, ownership and build checks remain.
 
-Ground starts, taxi, takeoff, landing, full-demo duration, full exterior/engine
-state and afterburner effects/sound remain required follow-up work. The remaining
+Ground starts, taxi, takeoff, landing, full-demo duration and remaining exterior
+state remain required follow-up work. Engine sound and nozzle/flame playback are
+accepted in the combined isolated test; their app integration awaits a fresh live
+record/replay. The remaining
 airborne speed restriction still excludes stationary/taxi portions. The accepted
 hard-turn replay does not establish terrain contact or 250-500 ft AGL flight.
 
@@ -34,12 +36,21 @@ made. Setup refuses to silently replace a different existing save hook.
 
 ## Recording and playback
 
-New practice missions record gear, flaps and control surfaces with motion and
-speed brake in version-two CSVs (`hornet-exterior-v1`). The native tape preserves
-each signed channel and interpolates it on the motion clock. This integrated
-path is installed for live comparison; its isolated stabilator timing already
-passed visual and numeric review. Suspension/wheels, canopy, smoke, lights and
-engine/nozzle/effects/sound remain outside this captured group.
+With the engine workflow installed (`engine_capture` enabled in local settings),
+new `DCSRecorder-Practice-Engine-*` missions save version-three CSVs: motion,
+brake, thirteen signed surface/gear channels, four nozzle/flame arguments, and
+the native core/fan/thrust/power readings for both engines with their sample time.
+The read-only helper is pinned to the current DCS build. Capture verifies player
+identity, timing, position association, Export RPM agreement and equal E0/F0
+power getters. Failed native capture retains an incomplete file with a save error.
+No Export.lua or DCS core file changes are required.
+
+Conversion preserves the raw source and aligns native values to the motion clock;
+the separate **DCSRecorder-Hornet-Engine-Staged** controller drives recorded motion,
+surface/nozzle/flame appearance and the stock native sound inputs together. Values
+above one survive unchanged. Lights, smoke, canopy and suspension/wheels remain
+outside this group. The combined isolated test passed the user's visual/audio
+review; the normal workflow's first live capture/replay is pending.
 
 Older version-one takes remain readable and unchanged. Their library detail says
 that exterior surfaces were not recorded. They use `DCSRecorder-Hornet-Staged`;
@@ -48,15 +59,26 @@ Install that module and the updated autosave hook before recording version two,
 then restart DCS. Old practice missions still generate valid version-one takes.
 The companion must run from this updated checkout, not an older worktree.
 
-The library labels older takes **Motion only**: gear, flaps and control surfaces
+The library labels version-three takes **Motion + surfaces + engines**. Version-two
+takes remain **Motion + surfaces** and do not gain engine state by regeneration.
+Version-one takes remain **Motion only**: gear, flaps and control surfaces
 were not captured and cannot be recovered by regenerating playback. Choose
 Create practice mission and load that exact new `DCSRecorder-Practice-Exterior-*`
-mission to record them. New takes should show **Motion + surfaces**. Updating the
+mission to record surfaces, or the new **DCSRecorder-Practice-Engine-*** mission
+to include engines. Updating the
 app does not update scripts embedded in existing practice missions.
 
 The packager verifies the installed controller against its corresponding build
 artifact. Build `HornetStateStagedProbe` for the new integration; replacing the
 accepted `HornetStagedProbe` artifact would require its own controller deployment.
+For engines, build `HornetEngineStagedProbe`; preserve the existing installed
+controllers. `install_engine_workflow.py prepare <new-output> --settings <settings>`
+prepares the migration from the known version-two hook. After checks pass,
+`install_engine_workflow.py install <output>` requires DCS closed, verifies source
+and destination hashes, backs up the hook/settings, installs the separate module
+and capture Lua, and enables new practice missions. The previously validated
+`NativeEngineCapture.dll` must already be installed and match the build artifact.
+Restart the companion after migration to load its new code and settings.
 
 1. With DCS closed, choose Create practice mission in the app.
 2. Start DCS and load the generated DCSRecorder-Practice mission. Begin nearly

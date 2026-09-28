@@ -79,9 +79,10 @@ class Library:
             try:
                 metadata = self.validate(path)
                 exterior = metadata['exterior_available']
+                engine = metadata['engine_available']
                 item.update(supported=True, duration=metadata['duration'],
-                            status_label='Motion + surfaces' if exterior else 'Motion only',
-                            reason='Ready for playback with recorded gear, flaps and control surfaces.'
+                            status_label='Motion + surfaces + engines' if engine else ('Motion + surfaces' if exterior else 'Motion only'),
+                            reason='Ready for playback with recorded surfaces, engine sound, nozzles and afterburner flames.' if engine else 'Ready for playback with recorded gear, flaps and control surfaces. Engine sound and flames were not captured.'
                             if exterior else 'Motion playback available. ' + LEGACY_STATE_NOTICE)
             except (ValueError, OSError, OverflowError) as exc:
                 item['reason'] = str(exc)
@@ -108,8 +109,10 @@ class Library:
 
     def practice(self):
         dcs = self.check_environment()
-        destination = self.saved / 'Missions' / ('DCSRecorder-Practice-Exterior-' + uuid.uuid4().hex[:8] + '.miz')
-        script = (EXPERIMENT / 'record_flight_mission.lua').read_text(encoding='utf-8-sig')
+        engine = self.settings.get('engine_capture', False)
+        prefix = 'DCSRecorder-Practice-Engine-' if engine else 'DCSRecorder-Practice-Exterior-'
+        destination = self.saved / 'Missions' / (prefix + uuid.uuid4().hex[:8] + '.miz')
+        script = (EXPERIMENT / ('record_flight_engine_mission.lua' if engine else 'record_flight_mission.lua')).read_text(encoding='utf-8-sig')
         # Metadata and wording are specific to the app-generated practice mission.
         script = script.replace("csv(r.source)..'\\n'", "csv(r.source)..'\\ncapture_build," + SUPPORTED_BUILD + "\\nwind_ground,'..tostring(env.mission.weather.wind.atGround.speed)..'\\nwind_2000,'..tostring(env.mission.weather.wind.at2000.speed)..'\\nwind_8000,'..tostring(env.mission.weather.wind.at8000.speed)..'\\n'")
         assert 'capture_build,' in script
@@ -121,13 +124,15 @@ class Library:
             with zipfile.ZipFile(self.settings['baseline_mission']) as source:
                 (folder / 'baseline.lua').write_bytes(source.read('mission'))
             (folder / 'recorder.lua').write_text(script, encoding='utf-8')
-            (folder / 'description.txt').write_text('DCS Recorder practice with gear, flaps and control-surface capture. Fly the stock Hornet in calm air. F10 > DCS Recorder > Start recording. Begin nearly level and airborne. Fast rolls and low-altitude airborne playback are under live validation. Ground starts and takeoff/landing playback are still being implemented. Record 5 to 300 seconds. F10 > Stop recording saves the take automatically. Confirm the take appears in the companion flight library before closing DCS.', encoding='utf-8')
+            (folder / 'description.txt').write_text(('DCS Recorder practice with recorded engine sound, nozzles, flames and surfaces. ' if engine else '') + 'DCS Recorder practice with gear, flaps and control-surface capture. Fly the stock Hornet in calm air. F10 > DCS Recorder > Start recording. Begin nearly level and airborne. Fast rolls and low-altitude airborne playback are under live validation. Ground starts and takeoff/landing playback are still being implemented. Record 5 to 300 seconds. F10 > Stop recording saves the take automatically. Confirm the take appears in the companion flight library before closing DCS.', encoding='utf-8')
             self.lua(dcs, 'make_recording_mission.lua', folder / 'baseline.lua', folder / 'recorder.lua', folder / 'mission', folder / 'description.txt')
             self.verify_mission(dcs, folder / 'mission', 1)
             destination.parent.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(self.settings['baseline_mission']) as source, zipfile.ZipFile(destination, 'x', zipfile.ZIP_DEFLATED) as target:
                 for entry in source.infolist():
                     target.writestr(entry, (folder / 'mission').read_bytes() if entry.filename == 'mission' else source.read(entry.filename))
+        if engine:
+            return {'mission': str(destination), 'message': 'Practice mission created with motion, surfaces and engine capture. Load this exact new mission. Record with F10 Start/Stop, then confirm the take says Motion + surfaces + engines in the flight library.'}
         return {'mission': str(destination), 'message': 'Practice mission created with gear, flaps and control-surface capture. Load this exact mission in DCS; older practice missions do not gain the new capture features. Use F10 Start/Stop recording, then confirm the saved take says Motion + surfaces here.'}
 
     def lua(self, dcs, script, *args):
@@ -161,7 +166,7 @@ class Library:
     def activate(self, output, manifest, generation):
         module=manifest.get('module','DCSRecorder-Hornet-Staged')
         binary=manifest.get('binary','HornetStagedProbe')
-        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe')):
+        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe'),('DCSRecorder-Hornet-Engine-Staged','HornetEngineStagedProbe')):
             raise ValueError('Unsupported playback module')
         mod = self.saved / 'Mods/aircraft' / module
         # Install once with the tested installer. Updates replace only the tape,

@@ -22,6 +22,7 @@
 #include "recorded_path.h"
 #ifdef HORNET_STAGED_PROTOTYPE
 #include "staged_playback.h"
+#include "engine_native_layout.h"
 #endif
 namespace playback_path=recorded_path;
 #elif defined(HORNET_ROLL_PROTOTYPE)
@@ -42,7 +43,7 @@ std::ofstream identity_file;
 std::ofstream body_file;
 std::ofstream motion_file;
 #ifdef HORNET_STAGED_PROTOTYPE
-std::ofstream exterior_file;
+std::ofstream exterior_file,engine_file;
 #endif
 struct Observation {
     uint64_t calls = 0; double next_log = 0; bool motion_attempted=false, motion_active=false;
@@ -56,6 +57,7 @@ struct Observation {
     double exterior_elapsed=0;
     uint64_t exterior_applied=0;
     hornet_exterior::Values exterior{};
+    hornet_engine::Values engine{};
 #endif
     uint64_t step_calls=0,step_applied=0;
     const char* step_status="step_hook_inactive";
@@ -69,6 +71,21 @@ std::unordered_map<ED_OBJECT_HANDLE, Observation> observed;
 
 #ifdef HORNET_RECORDED_PROTOTYPE
 #ifdef HORNET_STAGED_PROTOTYPE
+void drain_engine(Observation& state,double time) {
+    if(!state.path.has_engine)return;
+    uint64_t lost=0;
+    for(const auto& call:native_step_hook::drain_engine(lost)) {
+        MEMORY_BASIC_INFORMATION region{};std::string module="unknown";uintptr_t rva=0;
+        if(VirtualQuery(reinterpret_cast<void*>(call.caller),&region,sizeof(region)) && region.Type==MEM_IMAGE) {
+            char path[32768]{};GetModuleFileNameA(static_cast<HMODULE>(region.AllocationBase),path,sizeof(path));
+            module=std::filesystem::path(path).filename().string();rva=call.caller-reinterpret_cast<uintptr_t>(region.AllocationBase);
+        }
+        engine_file << state.runtime_id << ',' << time << ',' << time-state.start_time << ',' << module << ',' << rva << ','
+            << call.engine << ',' << call.channel << ',' << call.overridden << ',' << call.original << ',' << call.returned << '\n';
+    }
+    engine_file.flush();
+    if(lost || !engine_file) {state.motion_active=false;log_file << "engine_trace_failed," << state.runtime_id << ',' << time << '\n';log_file.flush();}
+}
 void after_native_animation(const void* handle) {
     std::lock_guard<std::mutex> guard(lock);
     const auto sdk_handle=reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle));
@@ -80,7 +97,21 @@ void after_native_animation(const void* handle) {
     if(!view.data || view.size<=18) {state.motion_active=false;return;}
     std::array<float,13> before{};
     for(size_t i=0;i<before.size();++i)before[i]=view.data[hornet_exterior::channels[i]];
-    const bool applied=hornet_appearance::apply_exterior(api,sdk_handle,state.runtime_id,state.exterior);
+    bool applied=hornet_appearance::apply_exterior(api,sdk_handle,state.runtime_id,state.exterior);
+    if(state.path.has_engine) {
+        const auto engine_before=api->ed_get_object_args(sdk_handle);
+        std::array<float,4> before_engine{};
+        if(!engine_before.data || engine_before.size<=90)applied=false;
+        else {
+            for(size_t i=0;i<4;++i)before_engine[i]=engine_before.data[hornet_engine::channels[i]];
+            applied=hornet_appearance::apply_engine(api,sdk_handle,state.runtime_id,state.engine) && applied;
+            const auto engine_after=api->ed_get_object_args(sdk_handle);
+            if(!engine_after.data || engine_after.size<=90)applied=false;
+            else for(size_t i=0;i<4;++i)exterior_file << state.runtime_id << ',' << state.calls << ','
+                << state.exterior_elapsed << ',' << hornet_engine::channels[i] << ',' << state.engine[i]
+                << ',' << before_engine[i] << ',' << engine_after.data[hornet_engine::channels[i]] << '\n';
+        }
+    }
     const auto after=api->ed_get_object_args(sdk_handle);
     if(applied) {
         ++state.exterior_applied;
@@ -138,7 +169,7 @@ void before_native_step(const void* handle) {
     if(std::strcmp(state.step_status,"called")==0) ++state.step_applied;
     else state.motion_active=false;
 }
-const char* install_native_step(const void* handle,bool exterior=false) {
+const char* install_native_step(const void* handle,bool exterior=false,bool engine=false) {
     const auto image=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
     uintptr_t locator=0,next_locator=0;
     // RTTI boundaries establish the complete primary table's exact length.
@@ -154,6 +185,13 @@ const char* install_native_step(const void* handle,bool exterior=false) {
        callsite!=std::array<unsigned char,10>{0xff,0x90,0x70,0x0c,0,0,0x48,0x8b,0x4b,0x58})
         return "step_callsite_mismatch";
 #ifdef HORNET_STAGED_PROTOTYPE
+    native_step_hook::Engine getters{};
+    if(engine) {
+        unsigned char count=0;
+        if(!engine_native_layout::valid() || !native_identity::read(reinterpret_cast<uintptr_t>(handle)-8+0x811,count) || count!=2)
+            return "engine_layout_rejected";
+        getters={reinterpret_cast<native_step_hook::RPM>(image+0x66d160),reinterpret_cast<native_step_hook::Scalar>(image+0x66d1c0),reinterpret_cast<native_step_hook::Scalar>(image+0x60f110)};
+    }
     if(exterior) {
         std::array<unsigned char,18> entry{};
         std::array<unsigned char,15> dispatch{};
@@ -163,7 +201,7 @@ const char* install_native_step(const void* handle,bool exterior=false) {
            !native_identity::read(image+0x6b73a7,writer) || writer!=std::array<unsigned char,5>{0xe8,0x44,0x1f,0xfb,0xff})return "animation_layout_mismatch";
         return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+0x1146200,
             reinterpret_cast<native_step_hook::Step>(image+0x70fef0),&before_native_step,nullptr,
-            reinterpret_cast<native_step_hook::Animation>(image+0x6b6070),&after_native_animation);
+            reinterpret_cast<native_step_hook::Animation>(image+0x6b6070),&after_native_animation,engine?&getters:nullptr);
     }
 #endif
     return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+0x1146200,
@@ -173,6 +211,7 @@ void stop_native_step(const void* handle,Observation& state) {
     state.step_pending=false;
 #ifdef HORNET_STAGED_PROTOTYPE
     state.exterior_pending=false;
+    drain_engine(state,state.start_time+state.exterior_elapsed);
     const auto presentation_status=native_presentation_pitch::restore(handle,state.presentation);
     if(state.presentation.active) {
         state.step_status=presentation_status;state.motion_active=false;
@@ -216,6 +255,8 @@ void open_log() {
 #ifdef HORNET_STAGED_PROTOTYPE
     exterior_file.open(folder/("exterior-"+std::to_string(GetCurrentProcessId())+".csv"));
     exterior_file << "id,call,elapsed,arg,requested,before,after\n" << std::setprecision(12);
+    engine_file.open(folder/("engine-"+std::to_string(GetCurrentProcessId())+".csv"));
+    engine_file << "id,time,elapsed,caller_module,caller_rva,engine,channel,overridden,original,returned\n" << std::setprecision(12);
 #endif
 }
 void record(const char* event, ED_OBJECT_HANDLE handle, uint64_t cookie,
@@ -301,6 +342,9 @@ extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handl
         reinterpret_cast<LPCWSTR>(&open_log),&module) && GetModuleFileNameW(module,path,32768)) {
         const char* status=observed[handle].path.load(std::filesystem::path(path).parent_path()/"recorded-flight.txt");
         record(status,handle,cookie,0,0);
+#if defined(HORNET_STAGED_PROTOTYPE) && !defined(HORNET_ENGINE_STAGED_PROTOTYPE)
+        if(observed[handle].path.has_engine)observed[handle].motion_attempted=true;
+#endif
 #ifdef HORNET_STAGED_PROTOTYPE
         observed[handle].token=staged_playback::fingerprint(std::filesystem::path(path).parent_path()/"recorded-flight.txt");
         if(!observed[handle].token)observed[handle].motion_attempted=true;
@@ -315,6 +359,9 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     if(found==observed.end())return;
     auto& state = found->second;
     ++state.calls;
+#ifdef HORNET_STAGED_PROTOTYPE
+    drain_engine(state,time);
+#endif
     if (state.calls == 1) record_identity(handle);
     const auto motion_id=handle && api && api->ed_get_object_id ? api->ed_get_object_id(handle) : 0;
 #ifdef HORNET_STAGED_PROTOTYPE
@@ -355,9 +402,11 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     if(!state.motion_attempted && !state.path.samples.empty())speedbrake=state.path.brake_at(0);
     if(state.path.has_exterior) {
         state.exterior_elapsed=state.motion_active?time-state.start_time:0;
-        state.exterior=state.path.at_sample(state.exterior_elapsed).exterior;
+        const auto sampled=state.path.at_sample(state.exterior_elapsed);
+        state.exterior=sampled.exterior;state.engine=sampled.engine;
         api->ed_set_single_arg(handle,996,static_cast<float>(state.exterior_elapsed/1000));
         state.exterior_pending=hornet_appearance::apply_exterior(api,handle,state.runtime_id,state.exterior);
+        if(state.path.has_engine)state.exterior_pending=hornet_appearance::apply_engine(api,handle,state.runtime_id,state.engine) && state.exterior_pending;
         if(!state.exterior_pending) {
             state.motion_attempted=true;state.motion_active=false;stop_native_step(handle,state);
             staged_playback::publish(api,handle,state.token,staged_playback::failed);
@@ -453,14 +502,21 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         if(!release && std::strcmp(status,"called")==0) {
             if(!state.step_hook) {
 #ifdef HORNET_STAGED_PROTOTYPE
-                state.step_status=install_native_step(handle,state.path.has_exterior);
+                state.step_status=install_native_step(handle,state.path.has_exterior,state.path.has_engine);
 #else
                 state.step_status=install_native_step(handle);
 #endif
                 state.step_hook=std::strcmp(state.step_status,"step_hook_installed")==0;
                 record(state.step_status,handle,cookie,time,state.calls);
             }
-            if(state.step_hook) { state.step_motion=target_motion; state.step_pending=true; }
+            if(state.step_hook) {
+                state.step_motion=target_motion; state.step_pending=true;
+#ifdef HORNET_STAGED_PROTOTYPE
+                if(state.path.has_engine && !native_step_hook::publish_engine(reinterpret_cast<uintptr_t>(handle)-8,state.engine)) {
+                    state.motion_active=false;record("engine_publish_failed",handle,cookie,time,state.calls);
+                }
+#endif
+            }
             else state.motion_active=false;
         } else stop_native_step(handle,state);
 #endif

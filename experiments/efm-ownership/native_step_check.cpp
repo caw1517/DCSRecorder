@@ -41,6 +41,16 @@ void step(Aircraft& a) {
     fn(&a);
 }
 void require(bool condition,const char* message) { if(!condition)throw std::runtime_error(message); }
+float rpm(void*,int,bool){return .7f;}
+float thrust(void*,int){return .2f;}
+float power(void* object,int engine) {
+    return reinterpret_cast<native_step_hook::Scalar*>(static_cast<Aircraft*>(object)->vptr)[0xe0/8](object,engine);
+}
+void engine_integrate(void* object) {
+    integrate(object);
+    // Native physics may call an overridden getter; the table lock must be free.
+    static_cast<Aircraft*>(object)->stabilator=power(object,1);
+}
 }
 int main() {
     try {
@@ -105,6 +115,30 @@ int main() {
         native_step_hook::restore(reinterpret_cast<uintptr_t>(&controlled));
         require(controlled.vptr==table,"combined table did not restore");
         animation(controlled,0.02,true);require(controlled.stabilator==0.01,"combined repair survived release");
-        std::cout<<"PASS: native-step motion and animation phase boundaries preserve ownership and restoration. Mock boundary test; DCS validation pending.\n";
+        original[native_step_hook::step_slot+1]=reinterpret_cast<uintptr_t>(&engine_integrate);
+        original[0xd8/8+1]=reinterpret_cast<uintptr_t>(&rpm);
+        original[0xe0/8+1]=reinterpret_cast<uintptr_t>(&thrust);
+        original[0xf0/8+1]=reinterpret_cast<uintptr_t>(&power);
+        native_step_hook::Engine getters{&rpm,&thrust,&power};
+        const auto object=reinterpret_cast<uintptr_t>(&controlled);
+        require(std::string(native_step_hook::install(object,table,&engine_integrate,&restore_command,nullptr,&animate,&restore_stabilator,&getters))=="step_hook_installed","engine integration install");
+        require(power(&controlled,1)==.2f,"engine baseline changed");
+        hornet_engine::Values captured{.8,.7,.5,.4,.99,1.066,2.34,.98,.95,1.15};
+        require(native_step_hook::publish_engine(object,captured),"engine publish");
+        controlled.pending=true;controlled.velocity=0;
+        const auto before_engine=controlled.position;step(controlled);
+        require(std::abs(controlled.position-before_engine+.24)<1e-12 && controlled.stabilator==2.34f,"motion/getter reentry");
+        animation(controlled,.02,true);require(controlled.stabilator==.6,"animation coexistence");
+        require(power(&controlled,2)==1.15f && power(&other,1)==.2f,"independent engine/object scope");
+        float foreign_value=0;std::thread sound([&]{foreign_value=power(&controlled,1);});sound.join();
+        require(foreign_value==2.34f,"sound-thread read");
+        const auto all=reinterpret_cast<uintptr_t*>(controlled.vptr);
+        for(size_t i=0;i<native_step_hook::slots;++i)
+            if(i!=native_step_hook::step_slot && i!=native_step_hook::animation_slot && i!=0xd8/8 && i!=0xe0/8)
+                require(all[i]==original[i+1],"engine table changed unrelated slot");
+        uint64_t lost=0;auto trace=native_step_hook::drain_engine(lost);require(!lost && !trace.empty(),"engine trace");
+        require(std::string(native_step_hook::restore(object))=="step_hook_restored" && controlled.vptr==table,"all-four-slot restore");
+        require(power(&controlled,1)==.2f,"engine override survived restore");
+        std::cout<<"PASS: motion, animation and engine getter boundaries coexist, preserve ownership and restore together. Mock boundary test; DCS validation pending.\n";
     } catch(const std::exception& e) { std::cerr<<e.what()<<'\n';return 1; }
 }

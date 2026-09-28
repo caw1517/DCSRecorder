@@ -76,8 +76,8 @@ local package's `installation.json`.
 Load the mission, use **F10 > Combined engine playback > Start combined engine
 test**, then F2 to the lead. Watch both nozzles/flames and listen through the
 recorded changes. Let the lead disappear after approximately 108 seconds.
-The first combined rendering/audio result is accepted below; recorded-motion
-integration and normal completion of the combined controller remain open.
+The first combined rendering/audio result is accepted below. The user subsequently
+confirmed automatic completion; recorded-motion integration remains separate.
 
 ## First live result
 
@@ -103,7 +103,10 @@ and application shutdown; the mission did not log `END,complete`. The destroy
 callback reported `parameter_hook_already_replaced`: DCS had already replaced
 the object's table, so the controller left it untouched. This demonstrates that
 teardown path, **not** normal in-place restoration or automatic lead removal.
-Normal completion remains to be observed in a later combined/integrated run.
+At analysis time, normal completion remained unverified by that retained trace.
+The user subsequently instructed: “Consider auto completion verified,” accepting
+the completion gate through manual confirmation. No repeat of the isolated test
+is required; the historical log still supports only the teardown path described.
 
 The strict analyzer correctly rejects this as a completed run. Explicit
 `--allow-teardown` validates observed delivery and marks normal completion

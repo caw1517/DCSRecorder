@@ -1,6 +1,7 @@
 #pragma once
 #include "turn_path.h"
 #include "hornet_exterior.h"
+#include "hornet_engine.h"
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -39,23 +40,26 @@ inline Quaternion quaternion(const Pose& p) {
         q[0]=(m[k][j]-m[j][k])/s;q[i+1]=s/4;q[j+1]=(m[i][j]+m[j][i])/s;q[k+1]=(m[i][k]+m[k][i])/s;}
     const double n=std::sqrt(dot(q,q));for(auto& v:q)v/=n;return q;
 }
-struct Sample { double t=0;std::array<double,3> p{},v{};Quaternion q{};double brake=0;hornet_exterior::Values exterior{}; };
+struct Sample { double t=0;std::array<double,3> p{},v{};Quaternion q{};double brake=0;hornet_exterior::Values exterior{};hornet_engine::Values engine{}; };
 struct Path {
     std::vector<Sample> samples;
     std::array<double,3> translation{};
     Quaternion initial_q{1,0,0,0};
     bool exact_start=false;
-    bool has_exterior=false;
+    bool has_exterior=false,has_engine=false;
     double duration() const { return samples.empty()?0:samples.back().t; }
     const char* load(const std::filesystem::path& filename) {
-        samples.clear();has_exterior=false;exact_start=false;translation={};std::ifstream f(filename);std::string header;size_t n=0;
-        if(!(f>>header>>n) || (header!="DCSREC_PLAYBACK_V1" && header!="DCSREC_PLAYBACK_V2") || n<2 || n>100000) return "recording_header_rejected";
-        const bool exterior=header=="DCSREC_PLAYBACK_V2";
+        samples.clear();has_exterior=false;has_engine=false;exact_start=false;translation={};std::ifstream f(filename);std::string header;size_t n=0;
+        if(!(f>>header>>n) || (header!="DCSREC_PLAYBACK_V1" && header!="DCSREC_PLAYBACK_V2" && header!="DCSREC_PLAYBACK_V3") || n<2 || n>100000) return "recording_header_rejected";
+        const bool engine=header=="DCSREC_PLAYBACK_V3";
+        const bool exterior=header=="DCSREC_PLAYBACK_V2" || engine;
         if(exterior) {std::string profile;if(!(f>>profile) || profile!=hornet_exterior::profile)return "recording_profile_rejected";}
+        if(engine) {std::string profile;if(!(f>>profile) || profile!=hornet_engine::profile)return "recording_engine_profile_rejected";}
         std::vector<Sample> loaded;loaded.reserve(n);
         for(size_t i=0;i<n;++i) {
             Sample s;f>>s.t;for(auto& v:s.p)f>>v;for(auto& v:s.q)f>>v;for(auto& v:s.v)f>>v;f>>s.brake;
             if(exterior) {for(auto& v:s.exterior)f>>v;if(!f || !hornet_exterior::valid(s.exterior))return "recording_exterior_rejected";}
+            if(engine) {for(auto& v:s.engine)f>>v;if(!f || !hornet_engine::valid(s.engine))return "recording_engine_rejected";}
             if(!f || !std::isfinite(s.t) || !std::isfinite(s.brake))return "recording_sample_rejected";
             for(double v:s.p)if(!std::isfinite(v))return "recording_sample_rejected";
             for(double v:s.q)if(!std::isfinite(v))return "recording_sample_rejected";
@@ -74,7 +78,7 @@ struct Path {
         }
         std::string extra;if(f>>extra)return "recording_trailing_data_rejected";
         if(loaded.back().t<5 || loaded.back().t>300)return "recording_duration_rejected";
-        samples=std::move(loaded);has_exterior=exterior;initial_q=samples.front().q;return "recording_loaded";
+        samples=std::move(loaded);has_exterior=exterior;has_engine=engine;initial_q=samples.front().q;return "recording_loaded";
     }
     bool initialize_exact(const Pose& initial) {
         if(samples.empty())return false;
@@ -101,6 +105,7 @@ struct Path {
         const auto& a=samples[i];const auto& b=samples[i+1];const double dt=b.t-a.t,u=(t-a.t)/dt;
         Sample s;s.t=t;s.q=slerp(a.q,b.q,u);s.brake=a.brake+(b.brake-a.brake)*u;
         if(has_exterior)for(size_t k=0;k<s.exterior.size();++k)s.exterior[k]=a.exterior[k]+(b.exterior[k]-a.exterior[k])*u;
+        if(has_engine)for(size_t k=0;k<s.engine.size();++k)s.engine[k]=a.engine[k]+(b.engine[k]-a.engine[k])*u;
         for(int k=0;k<3;++k)s.p[k]=(2*u*u*u-3*u*u+1)*a.p[k]+(u*u*u-2*u*u+u)*dt*a.v[k]+
             (-2*u*u*u+3*u*u)*b.p[k]+(u*u*u-u*u)*dt*b.v[k];
         return s;

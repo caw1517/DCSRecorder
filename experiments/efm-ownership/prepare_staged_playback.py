@@ -20,8 +20,8 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     if abs(math.asin(max(-1,min(1,float(r['fy'])))))>math.radians(10) or float(r['uy'])<math.cos(math.radians(10)):
         raise ValueError('Current staged airborne test requires a near-level first sample')
     if output.exists():raise ValueError('Use a fresh output directory; prior packages are preserved')
-    module='DCSRecorder-Hornet-State-Staged' if metadata['exterior_available'] else 'DCSRecorder-Hornet-Staged'
-    binary='HornetStateStagedProbe' if metadata['exterior_available'] else 'HornetStagedProbe'
+    module='DCSRecorder-Hornet-Engine-Staged' if metadata['engine_available'] else 'DCSRecorder-Hornet-State-Staged' if metadata['exterior_available'] else 'DCSRecorder-Hornet-Staged'
+    binary='HornetEngineStagedProbe' if metadata['engine_available'] else 'HornetStateStagedProbe' if metadata['exterior_available'] else 'HornetStagedProbe'
     dll=ROOT/'build/Release'/f'{binary}.dll'
     for file in (baseline,dll,donor_mod/'entry.lua',donor_mod/'aircraft.lua'):
         if not file.is_file():raise ValueError(f'Missing preparation dependency: {file}')
@@ -53,7 +53,7 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     with zipfile.ZipFile(baseline) as source,zipfile.ZipFile(mission,'w',zipfile.ZIP_DEFLATED) as target:
         for entry in source.infolist():target.writestr(entry,(output/'mission').read_bytes() if entry.filename=='mission' else source.read(entry.filename))
     manifest={'status':'Prepared; native/mission handshake and live exact-start validation pending',
-              'dcs_build':actual,'profile':'staged-exterior-v1' if metadata['exterior_available'] else 'staged-v1',
+              'dcs_build':actual,'profile':'staged-engine-v1' if metadata['engine_available'] else 'staged-exterior-v1' if metadata['exterior_available'] else 'staged-v1',
               'module':module,'binary':binary,'recording':metadata,'initial':config,
               'files':{p.relative_to(output).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in output.rglob('*') if p.is_file()}}
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
