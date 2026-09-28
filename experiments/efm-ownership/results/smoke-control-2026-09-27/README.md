@@ -100,3 +100,28 @@ hook and still lists the accepted **Test** flight as supported. The new
 **DCSRecorder-Practice-Smoke-c0f51220.miz** is installed and ready for normal F10
 recording. Integrated live capture/replay remains pending. Other colors and
 emitter depletion/damage behavior remain unverified.
+
+## First integrated capture
+
+The user completed a normal F10 recording in the new smoke practice mission.
+Automatic save published **20260928T022329Z-0001.csv**, version four, with
+**2,647 samples over 52.92 seconds**. Library validation passes and reports
+**Motion + surfaces + engines + smoke**. The raw source SHA-256 is
+`6edc235d46a0a8c62204a5ca4356c8cbb027fd6f0f1816c4161ba88e530bf2b4`.
+Smoke sample delay is 0..12 ms relative to its motion sample. The saved loadout
+is white smoke on station 10, with these measured transitions relative to the
+first motion sample:
+
+- Initial OFF.
+- ON at 13.909 seconds.
+- OFF at 28.746 seconds.
+
+The complete take converts and passes the native path evaluator at 100 Hz.
+The prepared playback mission passes installed dependency, route and loadout
+validators; its embedded smoke events match the recording. The prepared native
+controller matches the installed accepted DLL, and the packaged source recording
+matches the original hash. After the user closed DCS, the normal library
+activation installed **DCSRecorder-Playback-24ef9479.miz** and selected this take.
+The prior active tape/metadata are retained in the activation backup and the
+original recording hash remains unchanged. Live recorded-smoke playback remains
+pending; the user has the expected ON/OFF times and completion check.
