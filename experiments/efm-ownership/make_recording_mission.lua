@@ -9,6 +9,11 @@ for _,country in pairs(mission.coalition.blue.country) do
         else
             assert(#group.units==1 and group.units[1].name=='Observer')
             assert(group.units[1].type=='FA-18C_hornet' and group.units[1].skill=='Player')
+            if arg[5] then
+                assert(arg[5]=='{INV-SMOKE-WHITE}','Unsupported smoke generator')
+                assert(not group.units[1].payload.pylons[10],'Existing station 10 must not be replaced')
+                group.units[1].payload.pylons[10]={CLSID=arg[5]}
+            end
             player_count=player_count+1
         end
     end

@@ -5,6 +5,14 @@ from recorded_flight import read, convert
 ROOT=Path(__file__).resolve().parent
 SUPPORTED_BUILD='2.9.29.27468'
 
+
+def lua_literal(value):
+    if isinstance(value, dict):
+        return '{'+','.join('['+lua_literal(k)+']='+lua_literal(v) for k,v in value.items())+'}'
+    if isinstance(value, list):
+        return '{'+','.join(map(lua_literal,value))+'}'
+    return json.dumps(value,allow_nan=False)
+
 def fingerprint(data):
     value=14695981039346656037
     for byte in data:value=((value^byte)*1099511628211)&0xffffffffffffffff
@@ -33,7 +41,9 @@ def prepare(recording,output,baseline,donor_mod,dcs):
                 speed=math.sqrt(sum(v*v for v in first[8:11])),duration=metadata['duration'],
                 token_high=((token>>40)&0xffffff)/16777216,token_low=(token&0xffffff)/16777216,
                 aircraft=module,exterior=1 if metadata['exterior_available'] else 0)
-    (output/'config.lua').write_text('return {\n'+''.join(f'[{json.dumps(k)}]={json.dumps(v)},\n' for k,v in config.items())+'}\n')
+    if metadata['smoke_available']:
+        config.update(smoke_events=metadata['smoke_events'],smoke_clsid=metadata['smoke_clsid'])
+    (output/'config.lua').write_text('return '+lua_literal(config)+'\n')
     for name in ('entry.lua','aircraft.lua'):
         text=(donor_mod/name).read_text(encoding='utf-8-sig').replace('DCSRecorder-Hornet-Probe',module)
         if name=='entry.lua':text=text.replace('HornetProbe',binary)
@@ -48,7 +58,7 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     lua('make_staged_playback_mission.lua',output/'baseline.lua',ROOT/'staged_playback_mission.lua',output/'config.lua',output/'mission')
     lua('verify_hornet_requirements.lua',output/'mission',dcs/'Mods/aircraft/FA-18C/entry.lua',dcs/'MissionEditor/modules/me_mission.lua')
     lua('verify_hornet_routes.lua',output/'mission',dcs/'MissionEditor/modules/me_route.lua',2)
-    lua('verify_hornet_configuration.lua',output/'mission',dcs,2)
+    lua('verify_hornet_configuration.lua',output/'mission',dcs,2,*(['StagedPlayback'] if metadata['smoke_available'] else []))
     mission=output/'DCSRecorder-Staged-Playback.miz'
     with zipfile.ZipFile(baseline) as source,zipfile.ZipFile(mission,'w',zipfile.ZIP_DEFLATED) as target:
         for entry in source.infolist():target.writestr(entry,(output/'mission').read_bytes() if entry.filename=='mission' else source.read(entry.filename))

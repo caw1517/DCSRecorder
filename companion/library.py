@@ -80,9 +80,10 @@ class Library:
                 metadata = self.validate(path)
                 exterior = metadata['exterior_available']
                 engine = metadata['engine_available']
+                smoke = metadata['smoke_available']
                 item.update(supported=True, duration=metadata['duration'],
-                            status_label='Motion + surfaces + engines' if engine else ('Motion + surfaces' if exterior else 'Motion only'),
-                            reason='Ready for playback with recorded surfaces, engine sound, nozzles and afterburner flames.' if engine else 'Ready for playback with recorded gear, flaps and control surfaces. Engine sound and flames were not captured.'
+                            status_label='Motion + surfaces + engines + smoke' if smoke else 'Motion + surfaces + engines' if engine else ('Motion + surfaces' if exterior else 'Motion only'),
+                            reason='Ready for playback with recorded surfaces, engines and white-smoke timing.' if smoke else 'Ready for playback with recorded surfaces, engine sound, nozzles and afterburner flames. Smoke was not captured.' if engine else 'Ready for playback with recorded gear, flaps and control surfaces. Engine sound and flames were not captured.'
                             if exterior else 'Motion playback available. ' + LEGACY_STATE_NOTICE)
             except (ValueError, OSError, OverflowError) as exc:
                 item['reason'] = str(exc)
@@ -110,12 +111,17 @@ class Library:
     def practice(self):
         dcs = self.check_environment()
         engine = self.settings.get('engine_capture', False)
-        prefix = 'DCSRecorder-Practice-Engine-' if engine else 'DCSRecorder-Practice-Exterior-'
+        smoke = self.settings.get('smoke_capture', False)
+        if smoke and not engine:
+            raise ValueError('Smoke capture requires the installed engine capture workflow.')
+        prefix = 'DCSRecorder-Practice-Smoke-' if smoke else 'DCSRecorder-Practice-Engine-' if engine else 'DCSRecorder-Practice-Exterior-'
         destination = self.saved / 'Missions' / (prefix + uuid.uuid4().hex[:8] + '.miz')
         script = (EXPERIMENT / ('record_flight_engine_mission.lua' if engine else 'record_flight_mission.lua')).read_text(encoding='utf-8-sig')
         # Metadata and wording are specific to the app-generated practice mission.
         script = script.replace("csv(r.source)..'\\n'", "csv(r.source)..'\\ncapture_build," + SUPPORTED_BUILD + "\\nwind_ground,'..tostring(env.mission.weather.wind.atGround.speed)..'\\nwind_2000,'..tostring(env.mission.weather.wind.at2000.speed)..'\\nwind_8000,'..tostring(env.mission.weather.wind.at8000.speed)..'\\n'")
         assert 'capture_build,' in script
+        if smoke:
+            script = 'DCSRECORDER_SMOKE=true\n' + script
         script = script.replace(' samples written to DCS.log. Ready for extraction. Keep this DCS session until the recording is collected.',
                                 ' samples captured. Automatic save is pending; confirm the take appears in the companion flight library before closing DCS.')
         script = script.replace(' into DCS.log.', '. Use the companion flight library to confirm automatic saving after Stop.')
@@ -125,12 +131,17 @@ class Library:
                 (folder / 'baseline.lua').write_bytes(source.read('mission'))
             (folder / 'recorder.lua').write_text(script, encoding='utf-8')
             (folder / 'description.txt').write_text(('DCS Recorder practice with recorded engine sound, nozzles, flames and surfaces. ' if engine else '') + 'DCS Recorder practice with gear, flaps and control-surface capture. Fly the stock Hornet in calm air. F10 > DCS Recorder > Start recording. Begin nearly level and airborne. Fast rolls and low-altitude airborne playback are under live validation. Ground starts and takeoff/landing playback are still being implemented. Record 5 to 300 seconds. F10 > Stop recording saves the take automatically. Confirm the take appears in the companion flight library before closing DCS.', encoding='utf-8')
-            self.lua(dcs, 'make_recording_mission.lua', folder / 'baseline.lua', folder / 'recorder.lua', folder / 'mission', folder / 'description.txt')
-            self.verify_mission(dcs, folder / 'mission', 1)
+            if smoke:
+                description = folder / 'description.txt'
+                description.write_text('White smoke is fitted on station 10 and captured with the flight. Use Smoke Device - ON/OFF to switch it. ' + description.read_text(encoding='utf-8'), encoding='utf-8')
+            self.lua(dcs, 'make_recording_mission.lua', folder / 'baseline.lua', folder / 'recorder.lua', folder / 'mission', folder / 'description.txt', *(['{INV-SMOKE-WHITE}'] if smoke else []))
+            self.verify_mission(dcs, folder / 'mission', 1, 'Observer' if smoke else None)
             destination.parent.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(self.settings['baseline_mission']) as source, zipfile.ZipFile(destination, 'x', zipfile.ZIP_DEFLATED) as target:
                 for entry in source.infolist():
                     target.writestr(entry, (folder / 'mission').read_bytes() if entry.filename == 'mission' else source.read(entry.filename))
+        if smoke:
+            return {'mission': str(destination), 'message': 'Practice mission created with white smoke fitted on station 10. Record with F10 Start/Stop and use Smoke Device - ON/OFF to switch smoke. The saved take will say Motion + surfaces + engines + smoke.'}
         if engine:
             return {'mission': str(destination), 'message': 'Practice mission created with motion, surfaces and engine capture. Load this exact new mission. Record with F10 Start/Stop, then confirm the take says Motion + surfaces + engines in the flight library.'}
         return {'mission': str(destination), 'message': 'Practice mission created with gear, flaps and control-surface capture. Load this exact mission in DCS; older practice missions do not gain the new capture features. Use F10 Start/Stop recording, then confirm the saved take says Motion + surfaces here.'}
@@ -141,10 +152,10 @@ class Library:
         if result.returncode:
             raise ValueError(result.stdout + result.stderr)
 
-    def verify_mission(self, dcs, mission, count):
+    def verify_mission(self, dcs, mission, count, smoke_unit=None):
         self.lua(dcs, 'verify_hornet_requirements.lua', mission, dcs / 'Mods/aircraft/FA-18C/entry.lua', dcs / 'MissionEditor/modules/me_mission.lua')
         self.lua(dcs, 'verify_hornet_routes.lua', mission, dcs / 'MissionEditor/modules/me_route.lua', count)
-        self.lua(dcs, 'verify_hornet_configuration.lua', mission, dcs, count)
+        self.lua(dcs, 'verify_hornet_configuration.lua', mission, dcs, count, *([smoke_unit] if smoke_unit else []))
 
     def playback(self, key):
         source = self.source(key)

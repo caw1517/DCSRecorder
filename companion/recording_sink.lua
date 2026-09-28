@@ -7,7 +7,7 @@ assert(lfs.mkdir(directory) or lfs.attributes(directory, 'mode') == 'directory')
 local columns = 't,x,y,z,fx,fy,fz,ux,uy,uz,rx,ry,rz,vx,vy,vz,speedbrake,rpm_left,rpm_right'
 local exterior = ',arg_0,arg_3,arg_5,arg_9,arg_10,arg_11,arg_12,arg_13,arg_14,arg_15,arg_16,arg_17,arg_18'
 local engine = ',arg_28,arg_29,arg_89,arg_90,engine_time,engine_core_left,engine_fan_left,engine_thrust_left,engine_power_left,engine_core_right,engine_fan_right,engine_thrust_right,engine_power_right'
-local capture_engine
+local capture_engine,capture_smoke
 local history_index, active, serial = 0, nil, 0
 local function announce(text) log.write('DCS_RECORDER_SAVE', log.INFO, text) end
 -- DCS file methods may succeed with no return values, unlike stock Lua.
@@ -50,17 +50,24 @@ local function open_take(id, hex)
     abandon('new take')
     assert(#hex <= 8192 and #hex % 2 == 0 and not hex:find('[^%x]'), 'Invalid recorder metadata')
     local metadata = hex:gsub('..', function(pair) return string.char(tonumber(pair,16)) end)
-    local version=metadata:match('^DCSREC,([123])\n')
+    local version=metadata:match('^DCSREC,([1234])\n')
     assert(version, 'Invalid recorder version')
     if version~='1' then assert(metadata:find('\nstate_profile,hornet-exterior-v1\n',1,true),'Invalid exterior state profile') end
     local source_id
-    if version=='3' then
+    if version=='3' or version=='4' then
         assert(metadata:find('\nengine_profile,hornet-native-engine-v1\n',1,true),'Invalid engine profile')
         assert(metadata:find('\ncapture_build,2.9.29.27468\n',1,true),'Unsupported engine capture build')
         source_id=tonumber(metadata:match('\nsource_unit_id,(%d+)\n'));assert(source_id,'Missing source identity')
         if not capture_engine then capture_engine=assert(loadfile(lfs.writedir()..'Scripts/DCSRecorderEngineCapture/engine_capture.lua'))() end
     end
-    local header=columns..(version~='1' and exterior or '')..(version=='3' and engine or '')..'\n'
+    if version=='4' then
+        assert(metadata:find('\nsmoke_profile,hornet-native-smoke-v1\n',1,true) and
+            metadata:find('\nsmoke_station,10\n',1,true) and
+            metadata:find('\nsmoke_clsid,{INV-SMOKE-WHITE}\n',1,true),'Unsupported smoke metadata')
+        if not capture_smoke then capture_smoke=assert(loadfile(lfs.writedir()..'Scripts/DCSRecorderSmokeCapture/smoke_capture.lua'))() end
+    end
+    local has_engine=version=='3' or version=='4'
+    local header=columns..(version~='1' and exterior or '')..(has_engine and engine or '')..(version=='4' and ',smoke_time,smoke_on' or '')..'\n'
     local filename
     repeat
         serial = serial + 1
@@ -68,7 +75,7 @@ local function open_take(id, hex)
     until not lfs.attributes(filename .. '.partial') and not lfs.attributes(filename .. '.csv')
     local file = assert(io.open(filename .. '.partial', 'wb'))
     active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, version=version,source_id=source_id,
-        commas=version=='3' and 35 or (version=='2' and 31 or 18)}
+        commas=has_engine and 35 or (version=='2' and 31 or 18)}
     checked(file.write,file,metadata,header); checked(file.flush,file)
     write_status('RECORDING\nRecording in progress; use F10 Stop to save.')
 end
@@ -84,7 +91,8 @@ local function consume(line)
         assert(tonumber(count) == active.rows + 1, 'Missing or duplicate sample')
         local _,commas = data:gsub(',','')
         assert(commas == active.commas and #data < 4096 and active.rows < 20000, 'Malformed or oversized recording')
-        if active.version=='3' then data=capture_engine(data,active) end
+        if active.version=='3' or active.version=='4' then data=capture_engine(data,active) end
+        if active.version=='4' then data=capture_smoke(data,active) end
         checked(active.file.write,active.file,data,'\n');active.parts[#active.parts+1]=data..'\n';active.rows = active.rows + 1
         if active.rows % 50 == 0 then checked(active.file.flush,active.file) end
         return

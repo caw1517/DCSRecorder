@@ -3,6 +3,7 @@ import argparse,csv,json,math
 from pathlib import Path
 from exterior_state import PROFILE, CHANNELS, STATE_COLUMNS, columns
 import engine_state
+import smoke_state
 
 def quaternion(f,u,r):
     m=[[f[i],u[i],r[i]] for i in range(3)];trace=sum(m[i][i] for i in range(3))
@@ -16,7 +17,7 @@ def quaternion(f,u,r):
 
 def read(path):
     with Path(path).open(newline='',encoding='utf-8-sig') as f: rows=list(csv.reader(f))
-    if not rows or rows[0] not in (['DCSREC','1'],['DCSREC','2'],['DCSREC','3']): raise ValueError('Unsupported recording version')
+    if not rows or rows[0] not in (['DCSREC','1'],['DCSREC','2'],['DCSREC','3'],['DCSREC','4']): raise ValueError('Unsupported recording version')
     version=int(rows[0][1])
     metadata={};i=1
     while i<len(rows) and rows[i] and rows[i][0]!='t':
@@ -25,10 +26,11 @@ def read(path):
     if metadata.get('aircraft')!='FA-18C_hornet' or metadata.get('theatre')!='Caucasus' or not metadata.get('livery'):
         raise ValueError('First playback prototype supports a named-livery Hornet on Caucasus only')
     if version>=2 and metadata.get('state_profile')!=PROFILE: raise ValueError('Unsupported exterior state profile')
-    if version==3 and (metadata.get('engine_profile')!=engine_state.PROFILE or metadata.get('capture_build')!='2.9.29.27468'):
+    if version>=3 and (metadata.get('engine_profile')!=engine_state.PROFILE or metadata.get('capture_build')!='2.9.29.27468'):
         raise ValueError('Unsupported native engine profile/build')
     if version==1 and 'state_profile' in metadata: raise ValueError('Legacy recording cannot declare exterior state')
     if version<3 and 'engine_profile' in metadata: raise ValueError('Legacy recording cannot declare native engine state')
+    if version<4 and any(k.startswith('smoke_') for k in metadata): raise ValueError('Legacy recording cannot declare measured smoke')
     expected=columns(version)
     if i>=len(rows) or rows[i]!=expected: raise ValueError('Invalid recording columns')
     names=rows[i];body=rows[i+1:]
@@ -64,17 +66,21 @@ def read(path):
         samples.append([t,*p,*q,*v,brake,*exterior])
     if len(samples)<2 or not 5<=samples[-1][0]-samples[0][0]<=300: raise ValueError('Record between 5 and 300 seconds')
     start=samples[0][0]
-    if version==3:
+    if version>=3:
         for sample,engine in zip(samples,engine_state.align(raw)):sample.extend(engine)
+    if version==4: metadata['smoke_events']=smoke_state.transitions(metadata,raw)
     for sample in samples:sample[0]-=start
     metadata.update(duration=samples[-1][0],samples=len(samples),source_time=start,recording_version=version,
-                    exterior_available=version>=2,engine_available=version==3)
+                    exterior_available=version>=2,engine_available=version>=3,smoke_available=version==4)
     return metadata,samples,raw
 
 def convert(source,destination):
     metadata,samples,_=read(source)
     destination=Path(destination);destination.parent.mkdir(parents=True,exist_ok=True)
-    text=f'DCSREC_PLAYBACK_V{metadata["recording_version"]}\n'+str(len(samples))+'\n'
+    # Smoke commands are embedded in the mission. The accepted native controller
+    # continues to consume its unchanged motion/surface/engine tape contract.
+    metadata['native_tape_version']=min(metadata['recording_version'],3)
+    text=f'DCSREC_PLAYBACK_V{metadata["native_tape_version"]}\n'+str(len(samples))+'\n'
     if metadata['exterior_available']:text+=PROFILE+'\n'
     if metadata['engine_available']:text+=engine_state.PROFILE+'\n'
     text+=''.join(' '.join(f'{v:.15g}' for v in row)+'\n' for row in samples)

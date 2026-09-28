@@ -24,6 +24,31 @@ local function sample(name)
             1000*u:getDrawArgumentValue(996),table.concat(values,',')))
     end
 end
+local smoke_index,smoke_on,smoke_elapsed=0,nil,0
+if c.smoke_events then
+    assert(#c.smoke_events>0 and c.smoke_events[1].time==0,'Missing initial smoke state')
+    for i,e in ipairs(c.smoke_events)do
+        assert(type(e.time)=='number' and e.time>=0 and e.time<=c.duration and type(e.on)=='boolean','Invalid smoke event')
+        if i>1 then assert(e.time>c.smoke_events[i-1].time,'Smoke event clock reversal')end
+    end
+end
+local function update_smoke(unit)
+    if not c.smoke_events then return end
+    local elapsed=1000*unit:getDrawArgumentValue(996)
+    assert(type(elapsed)=='number' and elapsed==elapsed and elapsed>=smoke_elapsed and elapsed<=c.duration+.1,'Invalid smoke playback clock')
+    smoke_elapsed=elapsed
+    -- Advance to the last measured state due now. Do not replay stale bursts
+    -- after a delayed frame, or issue duplicate commands while paused.
+    while c.smoke_events[smoke_index+1] and c.smoke_events[smoke_index+1].time<=elapsed do
+        smoke_index=smoke_index+1
+    end
+    local desired=c.smoke_events[smoke_index]
+    if desired and desired.on~=smoke_on then
+        unit:getController():setCommand({id='SMOKE_ON_OFF',params={value=desired.on}})
+        smoke_on=desired.on
+        env.info(string.format('DCS_PLAYBACK_SMOKE,%.9f,%.9f,%d,%.9f',timer.getTime(),elapsed,smoke_on and 1 or 0,desired.time))
+    end
+end
 local function tick()
     if s.phase=='starting' or s.phase=='playing' then
         local unit=Unit.getByName('StagedPlayback')
@@ -39,6 +64,11 @@ local function tick()
                 dispose('failed','Playback controller rejected its state. Mission continues; retain the logs for diagnosis.')
             elseif matched and math.abs(status-0.25)<1e-6 then
                 if s.phase=='starting' then s.phase='playing';event('NATIVE_STARTED');notice('Playback running.',5) end
+                local ok,err=pcall(update_smoke,unit)
+                if not ok then
+                    event('SMOKE_ERROR,'..tostring(err))
+                    dispose('failed','Recorded smoke control failed. Mission continues; retain the logs.')
+                end
             elseif matched and math.abs(status-0.5)<1e-6 then
                 if s.phase=='playing' then
                     sample('StagedPlayback')

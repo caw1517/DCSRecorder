@@ -7,18 +7,26 @@ local function csv(s) return '"'..tostring(s):gsub('"','""')..'"' end
 function r.metadata()
     local u=Unit.getByName(r.source)
     if not u or not u:isExist() then return nil end
-    local livery
+    local livery,smoke_clsid
     for _,side in pairs(env.mission.coalition) do
         if type(side)=='table' then for _,country in pairs(side.country or {}) do
             for _,group in pairs((country.plane or {}).group or {}) do
-                for _,unit in pairs(group.units) do if unit.name==r.source then livery=unit.livery_id end end
+                for _,unit in pairs(group.units) do if unit.name==r.source then
+                    livery=unit.livery_id
+                    smoke_clsid=(((unit.payload or {}).pylons or {})[10] or {}).CLSID
+                end end
             end
         end end
     end
     if not livery then return nil end
     if u:getTypeName()~='FA-18C_hornet' then return nil end
-    return 'DCSREC,3\naircraft,'..csv(u:getTypeName())..'\nlivery,'..csv(livery)..
-        '\ntheatre,'..csv(env.mission.theatre)..'\nstate_profile,hornet-exterior-v1\nengine_profile,hornet-native-engine-v1\nsource_unit_id,'..tostring(u:getID())..'\nsource,'..csv(r.source)..'\n'
+    local smoke=''
+    if DCSRECORDER_SMOKE then
+        if smoke_clsid~='{INV-SMOKE-WHITE}' then return nil end
+        smoke='\nsmoke_profile,hornet-native-smoke-v1\nsmoke_station,10\nsmoke_clsid,'..smoke_clsid
+    end
+    return 'DCSREC,'..(DCSRECORDER_SMOKE and '4' or '3')..'\naircraft,'..csv(u:getTypeName())..'\nlivery,'..csv(livery)..
+        '\ntheatre,'..csv(env.mission.theatre)..'\nstate_profile,hornet-exterior-v1\nengine_profile,hornet-native-engine-v1'..smoke..'\nsource_unit_id,'..tostring(u:getID())..'\nsource,'..csv(r.source)..'\n'
 end
 function r.sample()
     if r.state~='recording' then return 'IDLE' end

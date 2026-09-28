@@ -74,4 +74,29 @@ The markers were at 8.475 and 15.724, again distinct from actual measured change
 The paired-log analyzer passes the live run and offline missing-END, native-error,
 invalid-state, delayed-clock and missing-sample checks. The next step is recording
 contract and mission integration; the production recording schema and accepted
-playback module have not yet been changed at this checkpoint.
+playback module had not yet been changed at that checkpoint.
+
+## Version-four integration installed
+
+The companion now supports measured `smoke_time,smoke_on` plus explicit station-10
+white-generator metadata. New smoke practice missions fit that generator before
+capture. Native read failures remain incomplete takes, and old recordings remain
+unchanged with no inferred smoke data. The flight library distinguishes smoke
+availability. The mission embeds measured transition events and fits the playback
+lead with the recorded generator; commands follow native elapsed time after the
+existing package handshake. The accepted engine playback DLL and its version-three
+native motion/engine tape contract are unchanged.
+
+All 23 companion tests pass, including complete Lua save-hook integration, source
+immutability, missing/invalid smoke reads, clock and identity errors, unsupported
+loadouts, actual generated mission loadouts and installed DCS mission validators.
+The staged mission checks cover initial OFF, subsequent ON/OFF, no early/duplicate
+commands, skipped stale bursts, mismatch/command/clock failure and normal completion.
+The native smoke helper ABI/lifecycle test also passes. An installer package with
+four files was installed after DCS exited; all 1,266 protected artifact hashes
+are unchanged, and the prior save hook/settings are backed up. The companion
+was restarted on its existing loopback port. Its API recognizes the installed
+hook and still lists the accepted **Test** flight as supported. The new
+**DCSRecorder-Practice-Smoke-c0f51220.miz** is installed and ready for normal F10
+recording. Integrated live capture/replay remains pending. Other colors and
+emitter depletion/damage behavior remain unverified.

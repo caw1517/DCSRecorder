@@ -6,6 +6,7 @@ dofile(dcs..'/Mods/aircraft/FA-18C/Cockpit/Scripts/command_defs.lua')
 local expected={}
 for _,name in ipairs({'Position','Formation','Strobe','LdgTaxi'}) do expected[extlights_commands[name]]=true end
 local count=0
+local smoke_count=0
 for _,country in pairs(mission.coalition.blue.country) do
     for _,group in pairs((country.plane or {}).group or {}) do
         for _,unit in pairs(group.units) do
@@ -13,11 +14,16 @@ for _,country in pairs(mission.coalition.blue.country) do
             for _,station in ipairs({2,3,5,7,8}) do
                 assert(unit.payload.pylons[station] and unit.payload.pylons[station].CLSID=='<CLEAN>',unit.name..': removable pylon still fitted')
             end
-            for _,loadout in pairs(unit.payload.pylons) do assert(loadout.CLSID=='<CLEAN>','External store remains') end
+            for station,loadout in pairs(unit.payload.pylons) do
+                if arg[4] and unit.name==arg[4] and station==10 then
+                    assert(loadout.CLSID=='{INV-SMOKE-WHITE}','Unexpected smoke generator');smoke_count=smoke_count+1
+                else assert(loadout.CLSID=='<CLEAN>','External store remains')end
+            end
         end
     end
 end
 assert(count==tonumber(arg[3] or 2))
+assert(smoke_count==(arg[4] and 1 or 0),'Missing or duplicated smoke generator')
 local time=0
 function c_time_after(t) return time>t end
 local calls={}

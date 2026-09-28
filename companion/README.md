@@ -14,9 +14,9 @@ floor/ceiling or angular-rate cap; the final hard-turn take passed live review.
 Finite-data, continuity, orientation, ownership and build checks remain.
 
 Ground starts, taxi, takeoff, landing, full-demo duration and remaining exterior
-state remain required follow-up work. Engine sound and nozzle/flame playback are
-accepted in the combined isolated test; their app integration awaits a fresh live
-record/replay. The remaining
+state remain required follow-up work. The user accepted integrated engine sound
+and nozzle/flame playback. White-smoke capture and actuation passed separately;
+the version-four app workflow awaits a fresh live record/replay. The remaining
 airborne speed restriction still excludes stationary/taxi portions. The accepted
 hard-turn replay does not establish terrain contact or 250-500 ft AGL flight.
 
@@ -48,9 +48,39 @@ No Export.lua or DCS core file changes are required.
 Conversion preserves the raw source and aligns native values to the motion clock;
 the separate **DCSRecorder-Hornet-Engine-Staged** controller drives recorded motion,
 surface/nozzle/flame appearance and the stock native sound inputs together. Values
-above one survive unchanged. Lights, smoke, canopy and suspension/wheels remain
-outside this group. The combined isolated test passed the user's visual/audio
-review; the normal workflow's first live capture/replay is pending.
+above one survive unchanged. Lights, canopy and suspension/wheels remain outside
+this group. The normal engine workflow passed the user's visual/audio review.
+
+With `smoke_capture` enabled, new **DCSRecorder-Practice-Smoke-*** missions fit the
+verified white generator on SMK station 10 and save version-four CSVs. Metadata
+retains its CLSID/station and smoke profile; each row adds `smoke_time,smoke_on`.
+The read-only native helper observes the actual emitter flag. Missing/unavailable
+state fails the take instead of inventing OFF. Other colors and aircraft are
+rejected until verified. Older recordings remain readable and gain no smoke data.
+
+Version-four takes are labeled **Motion + surfaces + engines + smoke**. Conversion
+retains measured transition times without interpolation. The initial state uses
+the first read, at most 50 ms after the initial motion sample. A transition after
+the final motion sample is outside playback duration. The mission embeds the
+validated smoke events and generator; the accepted native controller continues
+to consume an unchanged version-three motion/surface/engine tape. Thus no new
+native motion implementation or playback DLL is required. The tape fingerprint
+binds that motion/engine data; smoke events are self-contained in each generated
+mission, so missions with identical motion but different smoke retain their own
+smoke sequence. Source CSV and generated mission hashes are retained in the package.
+
+The mission applies `SMOKE_ON_OFF` after the native handshake and reads native
+elapsed time at 20 ms intervals. It initializes the recorded smoke state, sends
+only changes, does not replay obsolete bursts after a delayed frame, and removes
+the lead on command or clock failure. Completion still removes only the lead.
+The command request clock is observable in `DCS_PLAYBACK_SMOKE` logs; this does
+not establish a renderer latency bound.
+
+`install_smoke_workflow.py prepare <new-output> --settings <settings>` checks the
+known version-three hook and both installed native readers, stages a version-four
+save hook/capture Lua/settings update and a validated smoke practice mission.
+`install_smoke_workflow.py install <output>` requires DCS closed, backs up replaced
+files and verifies protected hashes. Restart DCS and the companion afterward.
 
 Older version-one takes remain readable and unchanged. Their library detail says
 that exterior surfaces were not recorded. They use `DCSRecorder-Hornet-Staged`;
