@@ -1,8 +1,8 @@
 # Normal canopy workflow — 28 September 2026
 
-Status: implemented, offline checked and installed; a new normal
-recording/playback run remains pending. The [isolated captured-canopy replay](../canopy-2026-09-28/README.md)
-is already accepted visually and numerically.
+Status: normal canopy capture/library/playback accepted by the user, with matching
+native and later mission telemetry. The [isolated captured-canopy replay](../canopy-2026-09-28/README.md)
+also established changing positions and partial holds visually and numerically.
 
 New canopy-enabled practice missions sample exterior argument 38 on the same
 50 Hz mission clock as motion, surfaces and lights. Recording version six adds
@@ -109,7 +109,33 @@ After the user confirmed DCS was closed, the real activation path installed
 `DCSRecorder-Playback-b0f5a770.miz` and the new module's checked tape. All 500
 protected file hashes remained unchanged, including the source recording.
 The activation report is saved under ignored `capture-ready/activation.json`.
-Normal live playback remains pending. The speed cap is a temporary validated-
+Normal live playback was subsequently accepted below. The speed cap is a temporary validated-
 envelope restriction, not a demonstrated DCS limit or final product requirement;
 the roadmap already calls for removing remaining speed/duration restrictions as
 the corresponding behavior is implemented and verified.
+
+## Accepted normal playback
+
+The user reports “Complete and confirmed” for
+`DCSRecorder-Playback-b0f5a770.miz`. The DCS log and native traces from process
+31408 were copied into ignored `playback-accepted/` before further work.
+
+- All 363 native post-animation canopy rows match requested closed position 0;
+  the before-update values also show no canopy overwrite.
+- All 804 independent later mission canopy reads are 0: 289 waiting, 150
+  countdown, one release-requested, 363 playing and one complete. The final read
+  reports elapsed 7.240000181 seconds.
+- The trace also reports zero immediate readback error for every recorded
+  surface, light, nozzle and flame channel in this run. This does not replace
+  the broader numerical motion/engine review or exercise unchanging states.
+- Native start is logged at 8.820 seconds and mission COMPLETE at 16.060 seconds.
+  The object reaches `staged_exterior_complete` and is destroyed. The cleanup
+  returns `step_hook_already_replaced`: the guarded restore clears callbacks,
+  engine override and ownership without overwriting the destructor's new table.
+- Source SHA-256 remains unchanged.
+
+The normal live gate is accepted for the user's ordinary closed-canopy
+configuration. The earlier isolated replay supplies transition/partial-hold
+evidence; this normal take does not add a changing-canopy flight. Wheel rotation
+and suspension compression are the next state group. Ground contact/physics,
+remaining light evidence and combined regression retain their separate gates.

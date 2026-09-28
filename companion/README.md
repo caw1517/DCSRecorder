@@ -156,8 +156,8 @@ canopy-enabled practice missions save version-six recordings and the library
 adds `+ canopy`, selecting a separate canopy-capable controller. Initial position
 and transitions preserve measured argument 38 on the common playback clock.
 Older recordings keep their existing behavior. Isolated changing-canopy replay
-is accepted visually and numerically; normal integration is installed after
-offline checks and awaits a new app recording/playback run. See the
+is accepted visually and numerically; the normal closed-canopy workflow is also
+accepted, with matching native/later telemetry and automatic completion. See the
 [canopy integration checkpoint](../experiments/efm-ownership/results/canopy-integration-2026-09-28/README.md).
 
 Light capture is available with the installed lights workflow. New practice

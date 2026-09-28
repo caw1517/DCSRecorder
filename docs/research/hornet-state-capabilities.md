@@ -34,8 +34,6 @@ remains an observation to investigate, not a diagnosed parameter or mixer fault.
 - Exterior lights: refuel activation and ground illumination remain unverified.
   The user's normal lights-off workflow is accepted, with the formation startup
   overwrite corrected in post-animation traces. Older recordings retain off-only behavior.
-- Canopy position and transitions: isolated capture/replay accepted; normal
-  integration is installed after offline checks and awaits live acceptance.
 - Wheel rotation and suspension compression: capture/replay with rotation wrap
   handling, and coordinate visible ground-state validation with ground-start,
   flight-envelope and physics work. Gear deployment alone is already accepted.
@@ -67,13 +65,15 @@ accepted normal lights-off playback; two full runs show all 75,124 post-animatio
 light values matching, including correction of 50 native formation overwrites.
 Independent later mission light telemetry was absent due to omitted config
 flags; that packaging omission is corrected and regression-tested for future
-missions. Canopy is the current state group. A separate parked
+missions. Canopy is now accepted. A separate parked
 [canopy diagnostic](../../experiments/efm-ownership/canopy-prototype/README.md)
 has passed stock-aircraft capture and visual review: 2,364 samples confirm
 exterior argument 38 from closed (0) through steady partial holds to fully open
 (about 0.9). The separate captured-canopy playback is visually accepted, with
 2,760 later mission reads matching and no between-call overwrites. Normal
-integration passes offline checks and awaits a live app run. See the
+integration also passed the user's ordinary closed-canopy app run: 363 native
+updates and 804 later mission reads match, with normal completion. Wheel rotation
+and suspension compression are next. See the
 [canopy evidence](../../experiments/efm-ownership/results/canopy-2026-09-28/README.md).
 
 The installed object SDK exposes bounded animation-array reads and individual
@@ -93,7 +93,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Speed brake | Mission recorder reads argument 21 each sample. | Tape includes brake; `hornet_appearance::apply` writes 21 and checks immediate readback. | Existing implemented channel. Retain it as the control in new comparisons. |
 | Gear | Live capture confirmed arguments 0 (nose), 5 (left), 3 (right). | Isolated SDK replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. Animated deployment does not prove ground contact. |
 | Gear compression / wheels | FM configuration identifies compression 1/6/4 and rotation 101/103/102 in nose/left/right order. | Same candidate argument route. | Not recorded/replayed. Rotation wrap and contact behavior need separate handling; do not interpolate wrapped rotations naively. |
-| Canopy opening / closing | Installed gauge connects exterior 38 to cockpit 181. Accepted parked capture measures closed 0, fully open about 0.9, transitions and stable partial holds. | Isolated recorded replay visually accepted; 2,760 later reads match and no overwrite was observed. | Version-six normal capture and tape-version-five playback are installed after offline checks; live integration pending. Preserve measured initial position and transitions; opening animation does not establish jettison or internal cockpit-system replay. |
+| Canopy opening / closing | Installed gauge connects exterior 38 to cockpit 181. Accepted parked capture measures closed 0, fully open about 0.9, transitions and stable partial holds. | Isolated changing-canopy replay accepted; 2,760 later reads match. Normal closed-canopy workflow accepted; 363 native updates and 804 later reads match with completion. | Version-six capture and tape-version-five playback accepted within the demonstrated scope. Initial position and transitions are preserved; opening animation does not establish jettison or internal cockpit-system replay. |
 | Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
