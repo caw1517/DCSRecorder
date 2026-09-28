@@ -105,7 +105,10 @@ real activation in a temporary installation, checks the copied tape/mission and
 backup, and failed with `Unsupported playback module` before the allowlist fix.
 All 32 companion tests pass with that actual activation path covered.
 
-The user has been asked to close DCS before activating this prepared tape.
+After the user confirmed DCS was closed, the real activation path installed
+`DCSRecorder-Playback-b0f5a770.miz` and the new module's checked tape. All 500
+protected file hashes remained unchanged, including the source recording.
+The activation report is saved under ignored `capture-ready/activation.json`.
 Normal live playback remains pending. The speed cap is a temporary validated-
 envelope restriction, not a demonstrated DCS limit or final product requirement;
 the roadmap already calls for removing remaining speed/duration restrictions as
