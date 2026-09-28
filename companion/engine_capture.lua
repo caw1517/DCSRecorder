@@ -11,7 +11,10 @@ return function(data,active)
     local own=Export.LoGetSelfData()
     assert(own and own.Name=='FA-18C_hornet','Native engine capture requires stock Hornet')
     local id=Export.LoGetPlayerPlaneId()
-    assert(id==active.source_id,'Engine/motion aircraft mismatch')
+    -- Mission Unit:getID() and Export use different ID namespaces. Bind the
+    -- Export ID per take; associate it with mission motion by position below.
+    assert(finite(id) and id>0 and id==math.floor(id),'Invalid Export player ID')
+    assert(not active.engine_player_id or id==active.engine_player_id,'Export player changed during recording')
     if not reader then
         local err;reader,err=package.loadlib(lfs.writedir()..'Scripts/DCSRecorderEngineCapture/NativeEngineCapture.dll','dcs_native_engine_sample')
         assert(reader,err or 'Native engine capture helper unavailable')
@@ -40,7 +43,7 @@ return function(data,active)
         error2=error2+(p[key]-expected)^2
     end
     assert(error2<=.25,'Engine/motion position association failed')
-    active.engine_time=t;active.engine_identity=identity
+    active.engine_time=t;active.engine_identity=identity;active.engine_player_id=id
     local appended={string.format('%.12g',t)}
     for _,v in ipairs(values)do appended[#appended+1]=string.format('%.12g',v)end
     return data..','..table.concat(appended,',')

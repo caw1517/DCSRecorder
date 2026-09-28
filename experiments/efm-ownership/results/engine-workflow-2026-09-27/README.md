@@ -79,6 +79,28 @@ the new controller starts without an active tape until the app generates one.
 
 ## Next live check
 
+### First integrated capture: ID namespace rejection
+
+The first take (`20260928T001818Z-0001`) never reached native sampling. The sink
+rejected its first row with `Engine/motion aircraft mismatch`, leaving a header-only
+600-byte partial file. The mission supplied `Unit:getID() == 2`; Export uses
+`16777472` for this player. The earlier identity capture already demonstrated that
+these namespaces differ. The installed Lua helper matched the source hash, so this
+was an integration defect rather than a stale installation or library refresh.
+
+The fixture now uses the actual pair of IDs. Before the fix, the capture/library
+test failed with zero completed files instead of one. The reader now binds the
+Export ID independently for each take, rejects changes during or between reads,
+and retains the stock-Hornet, native identity, RPM, timing and velocity-adjusted
+position checks. Mission identity remains in source metadata. All nineteen
+companion tests pass; rejection cases verify their specific error messages.
+
+The failed log, partial file and status are preserved locally in `first-capture/`.
+No engine values were sampled, so the log cannot reconstruct a complete v3 take.
+The one-file repair is prepared with the previous installed hash as a precondition,
+a backup and post-copy hash verification. Installation requires DCS to be closed.
+Live acceptance remains pending a fresh recording.
+
 Record a fresh short airborne take in the new mission, starting nearly level,
 with a turn and brief idle/military/afterburner changes. Use F10 Stop, confirm
 **Motion + surfaces + engines** in the library, close DCS, then generate playback

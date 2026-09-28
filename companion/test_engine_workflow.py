@@ -29,10 +29,12 @@ class EngineWorkflowTests(unittest.TestCase):
         return list(self.library.recordings.glob('*.csv'))
 
     def test_capture_library_conversion_and_native_loader(self):
-        files = self.capture();self.assertEqual(len(files), 1)
+        files = self.capture();self.assertEqual(len(files), 1,
+            (self.library.recordings.parent/'save-status.txt').read_text())
         source = files[0];original = source.read_bytes()
         metadata, samples, rows = read(source)
         self.assertTrue(metadata['engine_available'])
+        self.assertEqual(metadata['source_unit_id'], '2')
         self.assertEqual(len(samples[0]), 35)
         self.assertEqual(samples[0][25:29], [.8, .7, .5, .4])
         self.assertEqual(samples[0][29:], [.99, 1.06, 2.3, .98, .95, 1.15])
@@ -47,10 +49,17 @@ class EngineWorkflowTests(unittest.TestCase):
         self.assertEqual(source.read_bytes(), original)
 
     def test_unavailable_or_mismatched_native_data_is_never_published(self):
-        for mode in ('missing', 'late', 'wrong_player', 'unequal'):
+        failures = {'missing': 'missing helper', 'late': 'delayed over 50 ms',
+                    'changed_player': 'Export player changed during recording',
+                    'player_during_read': 'Player/clock changed during engine read',
+                    'wrong_position': 'Engine/motion position association failed',
+                    'invalid_player': 'Invalid Export player ID',
+                    'unequal': 'Native power getters disagree'}
+        for mode, reason in failures.items():
             with self.subTest(mode=mode):
                 self.assertEqual(self.capture(mode), [])
-        self.assertEqual(len(list(self.library.recordings.glob('*.partial'))), 4)
+                self.assertIn(reason, (self.library.recordings.parent/'save-status.txt').read_text())
+        self.assertEqual(len(list(self.library.recordings.glob('*.partial'))), len(failures))
 
     def test_native_timing_and_power_rejected(self):
         source = self.capture()[0]
@@ -82,7 +91,7 @@ class EngineWorkflowTests(unittest.TestCase):
         with zipfile.ZipFile(practice['mission']) as archive:
             mission = self.root/'mission.lua';mission.write_bytes(archive.read('mission'))
         harness = (EXPERIMENT/'check_recording.lua').read_text().replace(
-            'function unit:isExist()', 'function unit:getID() return 16777472 end\nfunction unit:isExist()').replace(
+            'function unit:isExist()', 'function unit:getID() return 2 end\nfunction unit:isExist()').replace(
             ' assert(i>=9', ' if i==28 or i==29 or i==89 or i==90 then return .5 end\n assert(i>=9')
         path = self.root/'capture.lua';path.write_text(harness)
         run = subprocess.run(['D:/DCS World/bin/luae.exe', str(path), str(EXPERIMENT), str(self.root), str(mission)], capture_output=True, text=True)
