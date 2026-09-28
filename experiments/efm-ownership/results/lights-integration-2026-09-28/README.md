@@ -45,3 +45,33 @@ flight, prepare its normal playback while DCS is closed, and check both visible
 behavior and later light telemetry (especially the initial formation OFF
 interval). Refuel activation and ground illumination remain unverified; canopy,
 wheel/suspension work and combined regression remain later V1 gates.
+
+## First normal capture and requested playback
+
+Saved **20260928T154136Z-0001.csv** passes library and native conversion checks:
+**5,366 samples / 107.30 seconds**, maximum 20 ms sample gap, SHA-256
+`6f99d36c5f16a27c9fa785dcab934d672dd71c66ebbf283b22fea69ad5240dc3`.
+The app labels it **Motion + surfaces + engines + smoke + lights**. Smoke is
+initially OFF, ON at 67.766 seconds, and OFF at 104.344 seconds.
+
+All seven light channels are zero throughout. A comparison of every mission
+protocol row with the saved CSV confirms the values were preserved by automatic
+save. The user clarified that they mainly exercised other controls, normally
+use this light configuration, and want to accept playback if it matches. Honor
+that requested comparison; do not require another changing-light capture merely
+because this take is intentionally lights-off. The earlier isolated changing-
+light sequence remains visually accepted. Broader untested light behavior must
+not be inferred from this take.
+
+Prepared and activated **DCSRecorder-Playback-3b3b1520.miz** with DCS closed.
+The exact source recording is unchanged, the installed controller matches the
+checked package, and the native tape hashes verify. Installed dependency, route,
+clean-loadout and native geometry evaluation checks pass. The normal library
+activation path preserves other modules/recordings and creates a new mission.
+Raw capture, summary and activation record are local under ignored
+`capture-first/`; the prepared package is ignored under `package/lights-real-first`.
+
+The user has been asked to run the full flight through completion and watch
+particularly for unwanted startup lights. This take is useful numerical coverage
+for the prior formation OFF-state overwrite. Live playback/retention is pending;
+no visual or numerical pass is claimed yet.
