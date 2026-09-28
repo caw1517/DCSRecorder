@@ -1,10 +1,11 @@
 -- Read-only taxi diagnostic. No controls, argument writes or flight-library output.
 if DCS_WHEEL_PROBE then return end
-local channels={0,5,3,1,6,4,101,103,102}
+local channels=DCS_WHEEL_CHANNELS or {0,5,3,1,6,4,101,103,102}
+local protocol=DCS_WHEEL_PROTOCOL or 1
 local r={active=false,used=false,rows=0}
 DCS_WHEEL_PROBE=r
 local function finite(v)return type(v)=='number' and v==v and math.abs(v)<math.huge end
-local function emit(s)env.info('DCSWHEEL,1,'..s)end
+local function emit(s)env.info('DCSWHEEL,'..protocol..','..s)end
 local function tell(s)trigger.action.outText('Wheel diagnostic: '..s,15)end
 local function stop(reason)
     if not r.active then return end
@@ -48,10 +49,19 @@ missionCommands.addCommand('Start taxi capture',menu,function()
     emit('BEGIN,'..string.format('%.9f',r.started)..','..unit:getID()..',FA-18C_hornet')
     emit('CHANNELS,'..table.concat(channels,','))
     timer.scheduleFunction(tick,nil,r.started+.02)
-    tell('recording. Stay stopped 5 seconds, taxi slowly, brake to a stop, then repeat. F10 Stop taxi capture when done.')
+    tell(protocol==2 and 'recording steering. Center, slow left turn, center, slow right turn, center and stop; hold each about 5 seconds.' or
+        'recording. Stay stopped 5 seconds, taxi slowly, brake to a stop, then repeat. F10 Stop taxi capture when done.')
 end)
 missionCommands.addCommand('Mark braking',menu,function()
     if r.active then emit('MARK,'..string.format('%.9f',timer.getTime())..',braking')end
 end)
+if protocol==2 then
+    for _,value in ipairs({'left','centered','right'})do
+        local label=value
+        missionCommands.addCommand('Mark steering '..label,menu,function()
+            if r.active then emit('MARK,'..string.format('%.9f',timer.getTime())..','..label)end
+        end)
+    end
+end
 missionCommands.addCommand('Stop taxi capture',menu,function()stop('user_stop')end)
 tell('ready. Stay parked and use F10 > Wheel diagnostic > Start taxi capture. No Active Pause. This mission measures only; you control the jet.')

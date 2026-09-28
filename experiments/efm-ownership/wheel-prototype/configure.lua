@@ -35,8 +35,14 @@ for i,gear in ipairs(FA18C.suspension)do
     assert(gear.arg_post==expected[i][1] and gear.arg_amortizer==expected[i][2] and gear.arg_wheel_rotation==expected[i][3])
 end
 local f=assert(io.open(script_path,'rb'));local script=f:read('*a');f:close();assert(loadstring(script))
+if arg[6]=='steering' then
+    script='DCS_WHEEL_PROTOCOL=2;DCS_WHEEL_CHANNELS={0,5,3,1,6,4,101,103,102,2,17,18}\n'..script
+end
 mission.trigrules={{comment='Read-only wheel and suspension capture',predicate='triggerStart',eventlist='',rules={},actions={{predicate='a_do_script',text=script}}}}
 mission.trig={actions={'a_do_script('..string.format('%q',script)..');'},conditions={'return(true)'},func={},flag={true},funcStartup={'if mission.trig.conditions[1]() then mission.trig.actions[1]() end'}}
 mission.descriptionText='WHEEL AND SUSPENSION DIAGNOSTIC. Parked stock Hornet, engines running. No Active Pause. F10 > Wheel diagnostic > Start taxi capture. Remain stopped for 5 seconds, release parking brake and taxi slowly (about 5-10 knots), then brake to a full stop and hold for 5 seconds. Repeat once. Optional F10 Mark braking. Stop taxi capture through F10 and leave DCS open. Observe wheel rotation/strut movement in F2 when practical. Stay on the ground; this first test is taxi only. Capture ends after 3 minutes or above 15 m/s. It does not command controls or write to the flight library.'
+if arg[6]=='steering'then
+    mission.descriptionText='NOSE-WHEEL STEERING CAPTURE. Parked stock Hornet. F10 > Wheel diagnostic > Start taxi capture. No Active Pause. Center steering for 5 seconds, taxi slowly with a left turn for about 5 seconds, center for 5 seconds, then turn right for about 5 seconds, center and stop. About 5-10 knots. If practical observe the nose wheel in F2. Optional F10 marks record visible left/center/right states. Stop taxi capture and leave DCS open. This adds unverified argument 2 plus rudder arguments 17/18 to the earlier wheel/compression channels. No control commands, native hooks or normal flight-library changes. Do not take off.'
+end
 f=assert(io.open(output,'wb'));f:write('mission = ',serialize(mission));f:close()
 print('PASS: installed wheel mappings verified; one clean parked hot-start Hornet; read-only script; no control commands')

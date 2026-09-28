@@ -2,7 +2,7 @@
 local path=assert(arg[1])
 local function run(mode)
     local now=0;local logs,jobs,commands={},{},{}
-    local channels={[0]=true,[5]=true,[3]=true,[1]=true,[6]=true,[4]=true,[101]=true,[103]=true,[102]=true}
+    local channels={[0]=true,[5]=true,[3]=true,[1]=true,[6]=true,[4]=true,[101]=true,[103]=true,[102]=true,[2]=true,[17]=true,[18]=true}
     local unit={isExist=function()return not(mode=='lost'and now>11)end,
         getPlayerName=function()return 'fixture'end,getTypeName=function()return 'FA-18C_hornet'end,getID=function()return 2 end,
         inAir=function()return mode=='airborne' and now>11 end,
@@ -13,6 +13,7 @@ local function run(mode)
         assert(channels[c])
         if mode=='invalid'and now>11 then return 0/0 end
         if c>=100 then return (now*.2)%1 end
+        if c==2 or c==17 or c==18 then return -.4 end
         return (c==0 or c==5 or c==3)and 1 or .3
     end
     local e={assert=assert,type=type,ipairs=ipairs,pcall=pcall,string=string,math=math,table=table,
@@ -57,9 +58,9 @@ local function run(mode)
     local before=#logs;commands['Start taxi capture']();assert(#jobs==1 and #logs==before)
     local reason,counted;local samples=0
     for _,line in ipairs(logs)do
-        local n=line:match('^DCSWHEEL,1,DATA,(%d+),')
+        local n=line:match('^DCSWHEEL,[12],DATA,(%d+),')
         if n then samples=samples+1;assert(tonumber(n)==samples)end
-        local why,n=line:match('^DCSWHEEL,1,END,([^,]+),(%d+),')
+        local why,n=line:match('^DCSWHEEL,[12],END,([^,]+),(%d+),')
         if why then assert(not reason);reason=why;counted=tonumber(n)end
     end
     local expected={normal='user_stop',fast='taxi_speed_limit',airborne='airborne',lost='aircraft_lost',invalid='invalid_argument',timeout='time_limit'}

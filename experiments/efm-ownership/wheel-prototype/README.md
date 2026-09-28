@@ -52,3 +52,23 @@ Live mapping and a separately tested replay are the next gates. Ground-motion
 playback, contact, tire slip/damage and takeoff/landing remain distinct work.
 
 See the [evidence checkpoint](../results/wheels-2026-09-28/README.md).
+
+## Steering follow-up
+
+The first live wheel capture completed and contains turns, but its nine channels
+do not include steering. Past steering angles cannot be recovered from that log.
+The user's request adds a separate `prepare.py --steering` variant, output
+`package/wheel-steering-ready/DCSRecorder-Wheel-Steering-Diagnostic.miz`.
+It uses protocol two and appends candidate argument 2 plus the already mapped
+rudder channels 17/18. Argument 2 remains a probe candidate: the inspected
+Hornet FM file does not explicitly identify a steering draw argument, and no
+authoritative Hornet mapping was established by documentation lookup.
+
+Start taxi capture with NWS enabled; hold center, taxi slowly through a left
+turn, center, then right, center and stop. About five seconds per state and
+5–10 knots is sufficient. Optional F10 left/center/right marks record the
+user's visible steering observations. Stop capture and leave DCS open.
+The variant has no control writes and needs no new module or hook.
+The analyzer accepts both exact protocol/channel sets and preserves signed raw
+values. Do not claim a steering direction/range until the new capture and visual
+observation agree. The original wheel diagnostic remains installed unchanged.

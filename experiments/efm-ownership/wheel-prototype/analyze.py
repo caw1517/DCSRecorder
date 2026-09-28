@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 
 CHANNELS = [0, 5, 3, 1, 6, 4, 101, 103, 102]
+STEERING_CHANNELS = CHANNELS + [2, 17, 18]
 
 
 def analyze(path):
@@ -12,16 +13,22 @@ def analyze(path):
     start = end = None
     marks = []
     declared = False
+    protocol = None
+    channels = None
     for line in path.read_text(errors='replace').splitlines():
-        if 'DCSWHEEL,1,' not in line:
+        if 'DCSWHEEL,' not in line:
             continue
-        fields = line.split('DCSWHEEL,1,', 1)[1].split(',')
+        version, data = line.split('DCSWHEEL,', 1)[1].split(',', 1)
+        assert version in ('1', '2') and protocol in (None, version), 'Separate protocol versions before analysis'
+        protocol = version
+        fields = data.split(',')
         if fields[0] == 'BEGIN':
             assert start is None, 'Separate mission runs before analysis'
             start = float(fields[1])
             assert fields[3] == 'FA-18C_hornet'
         elif fields[0] == 'CHANNELS':
-            assert list(map(int, fields[1:])) == CHANNELS
+            channels = list(map(int, fields[1:]))
+            assert channels == (STEERING_CHANNELS if protocol == '2' else CHANNELS)
             declared = True
         elif fields[0] == 'MARK':
             marks.append(dict(time=float(fields[1]), label=fields[2]))
@@ -29,7 +36,7 @@ def analyze(path):
             assert declared and start is not None and end is None
             assert int(fields[1]) == len(rows)+1, 'Missing or duplicate sample'
             row = list(map(float, fields[2:]))
-            assert len(row) == 7+len(CHANNELS) and all(map(math.isfinite, row))
+            assert len(row) == 7+len(channels) and all(map(math.isfinite, row))
             if rows:
                 assert 0 < row[0]-rows[-1][0] <= .1, 'Non-monotonic or gapped clock'
             rows.append(row)
@@ -39,10 +46,10 @@ def analyze(path):
             end = float(fields[3])
     assert start is not None and end is not None and len(rows) >= 250, 'Incomplete/short capture'
     speeds = [math.sqrt(sum(v*v for v in r[4:7])) for r in rows]
-    report = dict(samples=len(rows), duration=end-start, max_gap=max(b[0]-a[0] for a,b in zip(rows, rows[1:])),
+    report = dict(protocol=int(protocol), samples=len(rows), duration=end-start, max_gap=max(b[0]-a[0] for a,b in zip(rows, rows[1:])),
         speed_range=[min(speeds), max(speeds)], stopped_samples=sum(s<.05 for s in speeds),
         rolling_samples=sum(s>.5 for s in speeds), marks=marks, channels={})
-    for i, channel in enumerate(CHANNELS):
+    for i, channel in enumerate(channels):
         values = [r[7+i] for r in rows]
         deltas = [b-a for a,b in zip(values, values[1:])]
         report['channels'][channel] = dict(min=min(values), max=max(values), initial=values[0], final=values[-1],
