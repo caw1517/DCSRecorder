@@ -49,7 +49,7 @@ Neither blocks this V1 issue. Depletion/damage behavior remains unverified and
 must not be inferred from the accepted ordinary smoke cycle. Ground dynamics,
 broader aircraft registrations and layered playback retain their separate gates.
 
-Exterior lights are the current investigation. The separate
+Exterior lights have passed the user's normal-workflow review. The separate
 [nighttime light diagnostic](../../experiments/efm-ownership/lights-prototype/README.md)
 passed stock-aircraft observation: the user saw all four tested light groups
 respond, and 3,362 samples cover eleven phases at 50 Hz. A separate SDK-only
@@ -66,7 +66,10 @@ accepted normal lights-off playback; two full runs show all 75,124 post-animatio
 light values matching, including correction of 50 native formation overwrites.
 Independent later mission light telemetry was absent due to omitted config
 flags; that packaging omission is corrected and regression-tested for future
-missions. Canopy is the next state group.
+missions. Canopy is the current state group. A separate parked
+[canopy diagnostic](../../experiments/efm-ownership/canopy-prototype/README.md)
+is offline checked and installed. It samples exterior argument 38 through
+closed, partial-hold and fully-open phases; live observation remains pending.
 
 The installed object SDK exposes bounded animation-array reads and individual
 animation writes. This is a credible route for exterior animation. It exposes
@@ -85,7 +88,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Speed brake | Mission recorder reads argument 21 each sample. | Tape includes brake; `hornet_appearance::apply` writes 21 and checks immediate readback. | Existing implemented channel. Retain it as the control in new comparisons. |
 | Gear | Live capture confirmed arguments 0 (nose), 5 (left), 3 (right). | Isolated SDK replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. Animated deployment does not prove ground contact. |
 | Gear compression / wheels | FM configuration identifies compression 1/6/4 and rotation 101/103/102 in nose/left/right order. | Same candidate argument route. | Not recorded/replayed. Rotation wrap and contact behavior need separate handling; do not interpolate wrapped rotations naively. |
-| Canopy opening / closing | Explicitly requested by the user; no validated Hornet exterior mapping established in this inspection. | Candidate argument route, pending mapping and live test. | Not captured/replayed. Include the initial canopy position and transitions; opening animation does not establish jettison or internal cockpit-system replay. |
+| Canopy opening / closing | Installed main-panel gauge connects exterior 38 to cockpit 181. Separate parked OPEN/HOLD/CLOSE capture diagnostic is installed; live response pending. | Candidate argument route, pending measured capture and separate replay. | Not integrated into normal recording/playback. Include initial position and transitions; opening animation does not establish jettison or internal cockpit-system replay. |
 | Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
