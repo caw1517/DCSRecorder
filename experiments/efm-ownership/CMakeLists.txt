@@ -121,6 +121,17 @@ target_include_directories(lights_playback_check PRIVATE "${DCS_ROOT}/API/includ
 target_compile_definitions(lights_playback_check PRIVATE LIGHT_APPEARANCE_PROTOTYPE NOMINMAX)
 target_compile_features(lights_playback_check PRIVATE cxx_std_17)
 
+# Isolated SDK-only replay of the measured canopy position.
+add_library(HornetCanopyProbe SHARED probe.cpp state-prototype/playback.cpp)
+target_include_directories(HornetCanopyProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetCanopyProbe PRIVATE CANOPY_APPEARANCE_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetCanopyProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetCanopyProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_executable(canopy_playback_check state-prototype/check_playback.cpp)
+target_include_directories(canopy_playback_check PRIVATE "${DCS_ROOT}/API/include")
+target_compile_definitions(canopy_playback_check PRIVATE CANOPY_APPEARANCE_PROTOTYPE NOMINMAX)
+target_compile_features(canopy_playback_check PRIVATE cxx_std_17)
+
 # Separate integrated engine target; older installed controllers are preserved.
 add_library(HornetEngineStagedProbe SHARED probe.cpp object_probe.cpp)
 target_include_directories(HornetEngineStagedProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")

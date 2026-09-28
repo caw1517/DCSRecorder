@@ -30,7 +30,10 @@
 #endif
 
 namespace {
-#ifdef LIGHT_APPEARANCE_PROTOTYPE
+#ifdef CANOPY_APPEARANCE_PROTOTYPE
+constexpr std::array<int,1> channels{38};
+constexpr const char* tape_header="DCS_CANOPY_PROTOTYPE_V1";
+#elif defined(LIGHT_APPEARANCE_PROTOTYPE)
 constexpr std::array<int,10> channels{0,3,5,88,190,191,192,193,210,212};
 constexpr const char* tape_header="DCS_LIGHT_PROTOTYPE_V1";
 #elif defined(ENGINE_APPEARANCE_PROTOTYPE)
@@ -117,7 +120,7 @@ void initialize() {
         for(size_t c=0;c<channels.size();++c) {
             if(!(file>>row.values[c]) || !std::isfinite(row.values[c]) ||
                row.values[c] <
-#if defined(ENGINE_APPEARANCE_PROTOTYPE) || defined(LIGHT_APPEARANCE_PROTOTYPE)
+#if defined(ENGINE_APPEARANCE_PROTOTYPE) || defined(LIGHT_APPEARANCE_PROTOTYPE) || defined(CANOPY_APPEARANCE_PROTOTYPE)
                0.0f
 #else
                ((c<3 || c==13)?0.0f:-1.0f)
