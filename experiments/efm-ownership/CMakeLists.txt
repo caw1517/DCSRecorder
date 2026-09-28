@@ -110,6 +110,17 @@ target_compile_features(HornetStateStagedProbe PRIVATE cxx_std_17)
 set_property(TARGET HornetStateStagedProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_test(NAME exterior_staged_callback_contract COMMAND probe_check $<TARGET_FILE:HornetStateStagedProbe>)
 
+# Isolated SDK-only replay of observed gear and exterior-light arguments.
+add_library(HornetLightsProbe SHARED probe.cpp state-prototype/playback.cpp)
+target_include_directories(HornetLightsProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetLightsProbe PRIVATE LIGHT_APPEARANCE_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetLightsProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetLightsProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_executable(lights_playback_check state-prototype/check_playback.cpp)
+target_include_directories(lights_playback_check PRIVATE "${DCS_ROOT}/API/include")
+target_compile_definitions(lights_playback_check PRIVATE LIGHT_APPEARANCE_PROTOTYPE NOMINMAX)
+target_compile_features(lights_playback_check PRIVATE cxx_std_17)
+
 # Separate integrated engine target; older installed controllers are preserved.
 add_library(HornetEngineStagedProbe SHARED probe.cpp object_probe.cpp)
 target_include_directories(HornetEngineStagedProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")

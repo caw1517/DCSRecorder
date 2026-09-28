@@ -12,7 +12,10 @@
 #include <string>
 #include <vector>
 namespace {
-#ifdef ENGINE_APPEARANCE_PROTOTYPE
+#ifdef LIGHT_APPEARANCE_PROTOTYPE
+constexpr size_t channel_count=10;
+constexpr const char* tape_header="DCS_LIGHT_PROTOTYPE_V1";
+#elif defined(ENGINE_APPEARANCE_PROTOTYPE)
 constexpr size_t channel_count=4;
 constexpr const char* tape_header="DCS_ENGINE_PROTOTYPE_V1";
 #else
@@ -50,7 +53,9 @@ int main(int argc,char** argv) {
         api.ed_set_single_arg=[](ED_OBJECT_HANDLE h,int c,float value){
             if(h!=object || c<0 || size_t(c)>=view_size) {invalid_write=true;return;}
             const bool allowed=
-#ifdef ENGINE_APPEARANCE_PROTOTYPE
+#ifdef LIGHT_APPEARANCE_PROTOTYPE
+                c==0 || c==3 || c==5 || c==88 || (c>=190 && c<=193) || c==210 || c==212 || c==998 || c==999;
+#elif defined(ENGINE_APPEARANCE_PROTOTYPE)
                 c==28 || c==29 || c==89 || c==90 || c==998 || c==999;
 #else
                 c==0 || c==3 || c==5 || (c>=9 && c<=18) || c==21 || c==998 || c==999;
@@ -82,8 +87,17 @@ int main(int argc,char** argv) {
         uint64_t wrong_cookie=cookie+1;simulate(object,wrong_cookie,200);require(writes==before,"wrong cookie written");
         view_size=30;simulate(object,cookie,200);require(writes==before,"short view written");view_size=args.size();
         destroy(object,cookie);simulate(object,cookie,200);require(writes==before,"destroyed object written");
-        create(object,cookie);simulate(object,cookie,10);simulate(object,cookie,10.025);
+        create(object,cookie);simulate(object,cookie,10);simulate(object,cookie,10+(rows[1].t-rows[0].t)/2);
         for(size_t i=0;i<channels.size();++i)require(std::abs(args[channels[i]]-(rows[0].values[i]+rows[1].values[i])/2)<0.00001f,"interpolation mismatch");
+#ifdef LIGHT_APPEARANCE_PROTOTYPE
+        // Check both sides of every real strobe edge on a fresh lifecycle.
+        destroy(object,cookie);create(object,cookie);simulate(object,cookie,0);
+        for(size_t i=0;i+1<rows.size();++i) {
+            simulate(object,cookie,(rows[i].t+rows[i+1].t)/2);
+            require(std::abs(args[193]-rows[i].values[7])<0.00001f,"strobe edge interpolated");
+        }
+        destroy(object,cookie);create(object,cookie);simulate(object,cookie,10);
+#endif
         simulate(object,cookie,9);require(args[999]==0.75f,"backward clock not rejected");
         before=writes;simulate(object,cookie,11);require(writes==before,"rejected object kept writing");
         destroy(object,cookie);require(!invalid_write,"out-of-scope SDK write");

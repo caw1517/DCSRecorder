@@ -49,3 +49,22 @@ one complete sequence, checks request/application timing and sample continuity,
 and reports measured argument ranges and changes for each phase. Its offline
 fixture passes with 3,213 samples, eleven phases and a 20 ms maximum sample gap;
 fixture values do not establish a live light mapping.
+
+The first live stock-aircraft sequence is now accepted; see the
+[results](../results/lights-2026-09-28/README.md). `prepare_playback.py <log>
+<new-output-directory>` builds a separate SDK-only playback module and nighttime
+mission from a validated capture, using the built `HornetLightsProbe` and
+`lights_playback_check` targets. Ten channels include gear deployment so the
+landing light has the captured gear state. Strobe pulses use sample hold;
+other values interpolate. The bounded fake-SDK fixture checks every real sample
+and off-grid strobe values, while mission fixtures check cleanup/failure paths.
+No native hook is installed by this variant. `install_playback.py <package>
+<saved-games-directory>` checks that DCS is closed, validates the manifest and
+copies only the new experiment, with protected-file hash comparison.
+
+Load **DCSRecorder-Lights-Playback.miz**, choose F10 > Light playback > Start
+captured light sequence, and select the playback lead in F2. Allow about 80
+seconds until it is removed, then leave DCS open for log collection. Observe
+all four groups independently; SDK write/readback success does not establish
+retention or visual rendering. The accepted normal recording/playback flow
+still has lights off until this experiment establishes the replay behavior.

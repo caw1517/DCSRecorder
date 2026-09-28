@@ -50,9 +50,12 @@ broader aircraft registrations and layered playback retain their separate gates.
 
 Exterior lights are the current investigation. The separate
 [nighttime light diagnostic](../../experiments/efm-ownership/lights-prototype/README.md)
-is installed: eleven automatic cockpit-control phases, actual callback timing,
-50 Hz exterior reads and visual observation. Offline checks pass; live mapping,
-light playback and illumination are not yet verified.
+passed stock-aircraft observation: the user saw all four tested light groups
+respond, and 3,362 samples cover eleven phases at 50 Hz. A separate SDK-only
+captured-light playback mission is installed and passes offline checks; live
+playback retention/rendering remain pending. Refuel activation and landing-light
+ground illumination are not yet established. See the
+[light evidence checkpoint](../../experiments/efm-ownership/results/lights-2026-09-28/README.md).
 
 The installed object SDK exposes bounded animation-array reads and individual
 animation writes. This is a credible route for exterior animation. It exposes
@@ -75,7 +78,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
-| Exterior lights | Descriptor identifies formation 88; navigation 190/191/192; strobe 193; landing/taxi 210; refuel 212. | Existing adapter writes every listed channel to zero on each invocation. | Off-only behavior. Capture brightness and transitions; validate strobe phase and actual illumination independently of immediate readback. |
+| Exterior lights | Live marked capture and user observation confirm formation 88; navigation 190/191/192; pulsing strobe 193; landing/taxi 210. Refuel 212 remains unexercised. | Normal playback still forces lights off; an isolated SDK actuator replays captured values and holds strobe samples to preserve edges. | Stock response accepted, isolated replay installed/offline checked, live replay pending. Validate retention, strobe phase and illumination before normal integration. |
 | Demonstration smoke | Dedicated SMK station 10 carries `INV-SMOKE-*`. Native flag capture passed in a version-four app flight: 2,647 samples / 52.92 seconds, 0..12 ms capture delay, OFF/ON/OFF and white-generator metadata preserved. | User accepted recorded white-smoke playback. Requests followed recorded ON/OFF by at most 14 ms and the mission completed normally. | Normal capture/library/playback accepted for white smoke. Other colors are unverified. See the [accepted actuator and capture investigation](../../experiments/efm-ownership/results/smoke-control-2026-09-27/README.md). |
 | Engine RPM, left/right | Read-only native helper captures core/fan RPM and both power getters with player/timing checks. Core RPM agrees with Export. | Guarded per-object native getters deliver the measured values to DCS consumers. | Combined sound/appearance and normal version-three capture/playback accepted. Full integrated trace audit remains distinct from visual/audio acceptance. |
 | Nozzle opening | Marked live capture supports left argument 90 and right 89. | Post-animation writes share the native sound playback clock. | Combined sound/visual test and normal recorded-motion integration accepted. |

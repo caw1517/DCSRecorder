@@ -30,7 +30,10 @@
 #endif
 
 namespace {
-#ifdef ENGINE_APPEARANCE_PROTOTYPE
+#ifdef LIGHT_APPEARANCE_PROTOTYPE
+constexpr std::array<int,10> channels{0,3,5,88,190,191,192,193,210,212};
+constexpr const char* tape_header="DCS_LIGHT_PROTOTYPE_V1";
+#elif defined(ENGINE_APPEARANCE_PROTOTYPE)
 constexpr std::array<int,4> channels{28,29,89,90};
 constexpr const char* tape_header="DCS_ENGINE_PROTOTYPE_V1";
 #else
@@ -114,7 +117,7 @@ void initialize() {
         for(size_t c=0;c<channels.size();++c) {
             if(!(file>>row.values[c]) || !std::isfinite(row.values[c]) ||
                row.values[c] <
-#ifdef ENGINE_APPEARANCE_PROTOTYPE
+#if defined(ENGINE_APPEARANCE_PROTOTYPE) || defined(LIGHT_APPEARANCE_PROTOTYPE)
                0.0f
 #else
                ((c<3 || c==13)?0.0f:-1.0f)
@@ -135,6 +138,10 @@ Values at(double t) {
     const double u=(t-a.t)/(b.t-a.t);
     Values values{};
     for(size_t i=0;i<values.size();++i)values[i]=static_cast<float>(a.values[i]+u*(b.values[i]-a.values[i]));
+#ifdef LIGHT_APPEARANCE_PROTOTYPE
+    // Preserve sampled strobe edges instead of inventing intermediate pulses.
+    values[7]=(t>=b.t?b:a).values[7];
+#endif
     return values;
 }
 bool available(ED_OBJECT_HANDLE handle) {
