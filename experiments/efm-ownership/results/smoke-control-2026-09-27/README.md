@@ -125,3 +125,23 @@ activation installed **DCSRecorder-Playback-24ef9479.miz** and selected this tak
 The prior active tape/metadata are retained in the activation backup and the
 original recording hash remains unchanged. Live recorded-smoke playback remains
 pending; the user has the expected ON/OFF times and completion check.
+
+## Recorded-smoke playback accepted
+
+The user reports **"Worked great!"** after the recorded-flight playback. The
+retained log confirms the native handshake and exactly the expected smoke
+requests: initial OFF at native elapsed 0, ON at 13.919999823 s for recorded
+13.909 s, and OFF at 28.759999201 s for recorded 28.746 s. Maximum request delay
+is **13.999201 ms**, within the 20 ms mission polling interval. Mission `COMPLETE`
+occurred at model time 247.740 after `NATIVE_STARTED` at 194.820, a 52.92-second
+interval. These are command timings, not an optical measurement of particle onset.
+
+Normal capture, automatic save, library validation, generator preservation,
+recorded white-smoke playback and completion are accepted for this take. Other
+colors and depletion/damage behavior have not been established.
+
+The user also notes a small engine sound difference: the stock/player aircraft
+has more bass and perceived impact than the playback aircraft. They describe it
+as minor. Preserve this as an unresolved sound-quality observation; it does not
+revoke acceptance of smoke or power-dependent sound. No matched-listener A/B
+comparison, cause, corrective gain/EQ, or fix is established by this report.

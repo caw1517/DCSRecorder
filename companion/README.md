@@ -16,8 +16,9 @@ Finite-data, continuity, orientation, ownership and build checks remain.
 Ground starts, taxi, takeoff, landing, full-demo duration and remaining exterior
 state remain required follow-up work. The user accepted integrated engine sound
 and nozzle/flame playback. White-smoke capture and actuation passed separately;
-version-four automatic capture passed with a 52.92-second smoke take; its generated
-playback awaits visual review. The remaining
+version-four automatic capture and recorded white-smoke playback passed with a
+52.92-second take. A small bass/impact difference between stock and playback
+engine sound is noted for refinement. The remaining
 airborne speed restriction still excludes stationary/taxi portions. The accepted
 hard-turn replay does not establish terrain contact or 250-500 ft AGL flight.
 

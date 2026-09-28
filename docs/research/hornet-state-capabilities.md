@@ -25,7 +25,29 @@ and automatic completion are accepted by the user. The new normal recording and
 recorded-motion integration passes offline checks and the user successfully
 recorded and replayed the 31.98-second **Test** flight through the app, reaching
 automatic completion. See the [engine workflow record](../../experiments/efm-ownership/results/engine-workflow-2026-09-27/README.md).
-Lights and smoke remain outside the captured group.
+Version-four recording and white-smoke playback are now accepted through the
+normal app workflow. A minor stock-versus-playback sound bass/impact difference
+remains an observation to investigate, not a diagnosed parameter or mixer fault.
+
+### Remaining before closing this issue
+
+- Exterior lights: capture and replay states/brightness, including actual
+  illumination and strobe behavior. Current playback forces lights off.
+- Canopy position and transitions: establish mapping, capture and replay.
+- Wheel rotation and suspension compression: capture/replay with rotation wrap
+  handling, and coordinate visible ground-state validation with ground-start,
+  flight-envelope and physics work. Gear deployment alone is already accepted.
+- Other smoke colors: preserve and validate the selected generator beyond the
+  accepted white-smoke path. Depletion/damage behavior remains unverified.
+- Close the remaining numerical evidence review and run a combined regression
+  as the new channels are added; preserve accepted motion, engines, surfaces,
+  smoke, initial state, lifecycle behavior and legacy recording compatibility.
+
+The user's minor sound-quality observation is tracked as a lower-priority
+refinement. The next useful comparison uses matching external listener position,
+distance, orientation and engine settings before attributing the difference or
+changing sound. Ground dynamics, broader aircraft registrations, and layered
+playback retain their separate roadmap gates.
 
 The installed object SDK exposes bounded animation-array reads and individual
 animation writes. This is a credible route for exterior animation. It exposes
@@ -49,11 +71,11 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Exterior lights | Descriptor identifies formation 88; navigation 190/191/192; strobe 193; landing/taxi 210; refuel 212. | Existing adapter writes every listed channel to zero on each invocation. | Off-only behavior. Capture brightness and transitions; validate strobe phase and actual illumination independently of immediate readback. |
-| Demonstration smoke | Dedicated SMK station 10 carries `INV-SMOKE-*`. Native flag capture passed in a version-four app flight: 2,647 samples / 52.92 seconds, 0..12 ms capture delay, OFF/ON/OFF and white-generator metadata preserved. | User visually accepted synthetic white-smoke bursts controlled by `SMOKE_ON_OFF` on the moving lead. The recorded-flight mission is generated and installed with ON at 13.909 s and OFF at 28.746 s. | Integrated automatic capture verified; measured playback passes offline checks and awaits visual review. Other colors are unverified. See the [accepted actuator and capture investigation](../../experiments/efm-ownership/results/smoke-control-2026-09-27/README.md). |
-| Engine RPM, left/right | Read-only native helper captures core/fan RPM and both power getters with player/timing checks. Core RPM agrees with Export. | Guarded per-object native getters deliver the measured values to DCS consumers. | Combined sound/appearance accepted. Version-three normal capture and recorded-motion playback installed; integrated live check pending. |
-| Nozzle opening | Marked live capture supports left argument 90 and right 89. | Post-animation writes share the native sound playback clock. | Combined sound/visual test accepted and numerically retained. Recorded-motion integration installed, live check pending. |
-| Afterburner appearance | Independent marked phases support left argument 29 and right 28. | Recorded values are reapplied after animation on the common clock. | Combined sound/visual test accepted. Recorded-motion integration installed, live check pending; no guessed RPM threshold. |
-| Engine / afterburner sound | Native core/fan/thrust/power values are measured; values above one retained. | Stock DCS renderer consumes overridden native getters. Core RPM alone was insufficient; the combined native parameter replay sounded accurate. | User accepted sound with nozzle/flame playback. No custom audio samples. Normal version-three workflow installed; integrated live check pending. |
+| Demonstration smoke | Dedicated SMK station 10 carries `INV-SMOKE-*`. Native flag capture passed in a version-four app flight: 2,647 samples / 52.92 seconds, 0..12 ms capture delay, OFF/ON/OFF and white-generator metadata preserved. | User accepted recorded white-smoke playback. Requests followed recorded ON/OFF by at most 14 ms and the mission completed normally. | Normal capture/library/playback accepted for white smoke. Other colors are unverified. See the [accepted actuator and capture investigation](../../experiments/efm-ownership/results/smoke-control-2026-09-27/README.md). |
+| Engine RPM, left/right | Read-only native helper captures core/fan RPM and both power getters with player/timing checks. Core RPM agrees with Export. | Guarded per-object native getters deliver the measured values to DCS consumers. | Combined sound/appearance and normal version-three capture/playback accepted. Full integrated trace audit remains distinct from visual/audio acceptance. |
+| Nozzle opening | Marked live capture supports left argument 90 and right 89. | Post-animation writes share the native sound playback clock. | Combined sound/visual test and normal recorded-motion integration accepted. |
+| Afterburner appearance | Independent marked phases support left argument 29 and right 28. | Recorded values are reapplied after animation on the common clock. | Combined test and normal recorded-motion integration accepted; no guessed RPM threshold. |
+| Engine / afterburner sound | Native core/fan/thrust/power values are measured; values above one retained. | Stock DCS renderer consumes overridden native getters. Core RPM alone was insufficient. | Power-dependent sound accepted in normal playback; no custom audio samples. User notes slightly less bass/impact than stock/player aircraft. Cause unconfirmed; matched-listener comparison pending as a minor refinement. |
 
 ## Primary evidence
 
