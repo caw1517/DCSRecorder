@@ -21,7 +21,8 @@ Installed dependency/route validation, clean-station checks, and the packaged
 capture harness pass. Installation verified the mission hash and five protected
 recording/playback file hashes unchanged. Details remain in local
 `package/smoke-diagnostic/manifest.json` and `installation.json`. Only a new mission
-was installed, so no DCS restart is needed. Live smoke observation remains pending.
+was installed, so no DCS restart is needed. The first live observation is complete;
+see the [capture and next actuator test](../results/smoke-capture-2026-09-27/README.md).
 
 In the mission, start F10 **Smoke diagnostic** capture. Observe smoke externally,
 toggle the aircraft's smoke control, and mark the actual visible OFF/ON states,
@@ -36,3 +37,12 @@ This is a diagnostic, not a flight-library recording. Raw logs and generated
 missions remain local and ignored. Remaining work: analyze repeated transitions,
 find an actual emitter control for playback, validate appearance/color/timing,
 then extend the recording contract with measured state and loadout metadata.
+
+`analyze.py <dcs.log> <analysis.json>` validates and reconstructs sparse snapshots.
+The first capture did not identify a clear smoke-state argument. The separate
+`prepare_control.py` builds **DCSRecorder-Smoke-Control-Test.miz** from the accepted
+Test playback mission and checks the active tape hash. It adds white smoke only
+to the lead and requests three five-second bursts via the installed mission
+command `SMOKE_ON_OFF`. Start via the ordinary F10 playback menu. This synthetic
+sequence tests visible actuation independently from smoke-state capture; it does
+not turn the user's visible-state markers into purported recorded smoke data.
