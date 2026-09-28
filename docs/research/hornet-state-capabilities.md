@@ -22,8 +22,9 @@ combined motion/surface playback. Integrated numerical and lifecycle evidence
 remains to be reviewed. Version-three capture now adds measured native engine
 parameters and nozzle/flame state. The isolated combined sound/appearance test
 and automatic completion are accepted by the user. The new normal recording and
-recorded-motion integration is installed and passes offline checks; its first live
-record/replay remains pending. See the [engine workflow record](../../experiments/efm-ownership/results/engine-workflow-2026-09-27/README.md).
+recorded-motion integration passes offline checks and the user successfully
+recorded and replayed the 31.98-second **Test** flight through the app, reaching
+automatic completion. See the [engine workflow record](../../experiments/efm-ownership/results/engine-workflow-2026-09-27/README.md).
 Lights and smoke remain outside the captured group.
 
 The installed object SDK exposes bounded animation-array reads and individual
@@ -48,7 +49,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Exterior lights | Descriptor identifies formation 88; navigation 190/191/192; strobe 193; landing/taxi 210; refuel 212. | Existing adapter writes every listed channel to zero on each invocation. | Off-only behavior. Capture brightness and transitions; validate strobe phase and actual illumination independently of immediate readback. |
-| Demonstration smoke | Hornet descriptor lists selectable `INV-SMOKE-*` stores. This establishes configuration availability, not an emitter-state capture API. | No verified emitter setter found in inspected object SDK. | Unsupported in current pipeline. Determine actual source loadout, color, emitter enable and timing; do not confuse gun smoke with demonstration smoke. |
+| Demonstration smoke | Hornet descriptor defines dedicated SMK station 10 with selectable `INV-SMOKE-*` stores. The user confirmed the mission must carry the generator. | No verified emitter setter found in inspected object SDK. | Separate white-smoke observation mission installed; live state mapping pending. Preserve station/color as mission configuration separately from measured emitter on/off timing. Current clean-aircraft generation otherwise removes the generator. |
 | Engine RPM, left/right | Read-only native helper captures core/fan RPM and both power getters with player/timing checks. Core RPM agrees with Export. | Guarded per-object native getters deliver the measured values to DCS consumers. | Combined sound/appearance accepted. Version-three normal capture and recorded-motion playback installed; integrated live check pending. |
 | Nozzle opening | Marked live capture supports left argument 90 and right 89. | Post-animation writes share the native sound playback clock. | Combined sound/visual test accepted and numerically retained. Recorded-motion integration installed, live check pending. |
 | Afterburner appearance | Independent marked phases support left argument 29 and right 28. | Recorded values are reapplied after animation on the common clock. | Combined sound/visual test accepted. Recorded-motion integration installed, live check pending; no guessed RPM threshold. |
