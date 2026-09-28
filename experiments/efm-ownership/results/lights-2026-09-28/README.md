@@ -62,4 +62,56 @@ missing handshake and explicit stop. Installed dependency, route and clean
 configuration checks pass. Existing surface and engine SDK variants also pass
 their 2,612- and 979-sample fixtures after the shared experiment extension.
 Installation verifies ten asset hashes and **1,482 protected files unchanged**.
-Live recorded-light playback remains pending.
+Live recorded-light playback was pending at installation; the subsequent result
+is recorded below.
+
+## Accepted visual playback, with one numerical startup discrepancy
+
+On 28 September the user completed the playback mission and reported:
+**"Complete and everything looked and worked well."** This accepts the visible
+position/navigation, formation, strobe and landing/taxi sequence. No repeat of
+the same isolated test is required.
+
+The preserved PID 31184 trace contains **3,762 SDK calls** and **3,758 later
+mission samples**, all for object 16777472. The sequence starts at mission time
+3.55, completes at 70.77 (67.22 seconds of tape), holds its endpoint for eight
+seconds, then destroys the test aircraft at 78.77. Mission cleanup reports
+`END,complete`. The 20 ms difference from the capture duration is the interval
+between capture BEGIN and its first DATA sample, not a missing tape sample.
+All installed asset hashes still match the checked package.
+
+Every immediate SDK write matches its requested value. Later mission reads for
+navigation 190/191/192, strobe 193 and landing/taxi 210 match within 5e-10
+(serialization precision). Refuel 212 stays zero and is still unexercised.
+The elapsed-argument rounding is at most 3.724 microseconds.
+
+**Formation-light startup overwrite remains an integration requirement.**
+Argument 88 differs in 25 later samples, at elapsed 3.76..4.24 seconds, during
+the first all-off hold: requested zero, observed values rise from 0.222 to one.
+The next SDK callbacks independently see the same overwrite before restoring
+zero. This rules out a simple transition-clock mismatch; the exact later DCS
+writer is not yet identified. The remaining formation samples match. Gear
+deployment has a smaller native drift of about 0.00502, consistent with the
+separate SDK-only surface experiment; do not claim exact full-channel retention.
+
+The retained-trace command is deterministic and intentionally fails until the
+formation discrepancy is addressed in a new run:
+
+```text
+python experiments/efm-ownership/lights-prototype/check_retention.py <state.csv> <dcs.log> <retention.json> --assert-lights
+3762 SDK calls; 3758 later reads; light mismatches: [88]
+FAIL: light values changed after SDK write: [88]
+```
+
+Raw evidence and derived JSON remain ignored under `playback-accepted/`:
+
+- `dcs.log`: SHA-256 `ebc3a8f577277a70225fbe2a3c5884576ad20a1ad2e13899a20a0d99e00770bf`.
+- `state-31184-2221937.csv`: SHA-256 `fbc6924d899fed9a36d228451272b9fb107ebd3aaa13f904ca558dbabe71fe28`.
+- `events-31184-2221937.csv`: SHA-256 `9ad81ce5beaace9a4fc0c2400c93cebe4663fbe6a39ededfa197ecf05f742c83`.
+
+Next, carry measured lights through normal capture, storage and playback with
+legacy compatibility and the existing common playback clock. Address the
+formation startup overwrite at the shared animation boundary and validate
+retention there; that boundary is a candidate, not yet a proven light repair.
+Canopy, wheels/suspension, refuel activation, ground illumination and combined
+regression remain open V1 work. The active fidelity issue stays open.

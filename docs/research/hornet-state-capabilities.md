@@ -31,8 +31,10 @@ remains an observation to investigate, not a diagnosed parameter or mixer fault.
 
 ### Remaining before closing this issue
 
-- Exterior lights: capture and replay states/brightness, including actual
-  illumination and strobe behavior. Current playback forces lights off.
+- Exterior lights: integrate the visually accepted isolated capture/replay into
+  the normal workflow, resolve a brief formation-light startup overwrite, and
+  verify refuel activation and ground illumination. Normal playback still
+  forces lights off.
 - Canopy position and transitions: establish mapping, capture and replay.
 - Wheel rotation and suspension compression: capture/replay with rotation wrap
   handling, and coordinate visible ground-state validation with ground-start,
@@ -52,9 +54,10 @@ Exterior lights are the current investigation. The separate
 [nighttime light diagnostic](../../experiments/efm-ownership/lights-prototype/README.md)
 passed stock-aircraft observation: the user saw all four tested light groups
 respond, and 3,362 samples cover eleven phases at 50 Hz. A separate SDK-only
-captured-light playback mission is installed and passes offline checks; live
-playback retention/rendering remain pending. Refuel activation and landing-light
-ground illumination are not yet established. See the
+captured-light playback mission is visually accepted and completed normally.
+Later reads confirm navigation/strobe/landing values; formation has a measured
+half-second startup overwrite to address during integration. Refuel activation
+and landing-light ground illumination are not yet established. See the
 [light evidence checkpoint](../../experiments/efm-ownership/results/lights-2026-09-28/README.md).
 
 The installed object SDK exposes bounded animation-array reads and individual
@@ -78,7 +81,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Version-two combined motion/state playback visually accepted by the user; integrated numerical/lifecycle checks remain. |
-| Exterior lights | Live marked capture and user observation confirm formation 88; navigation 190/191/192; pulsing strobe 193; landing/taxi 210. Refuel 212 remains unexercised. | Normal playback still forces lights off; an isolated SDK actuator replays captured values and holds strobe samples to preserve edges. | Stock response accepted, isolated replay installed/offline checked, live replay pending. Validate retention, strobe phase and illumination before normal integration. |
+| Exterior lights | Live marked capture and user observation confirm formation 88; navigation 190/191/192; pulsing strobe 193; landing/taxi 210. Refuel 212 remains unexercised. | Isolated captured replay visually accepted with normal completion; navigation/strobe/landing retained. Formation has 25 startup samples overwritten after the SDK write. | Integrate normal capture/playback and resolve formation startup timing. Normal playback still forces lights off. Refuel activation and ground illumination remain unverified. |
 | Demonstration smoke | Dedicated SMK station 10 carries `INV-SMOKE-*`. Native flag capture passed in a version-four app flight: 2,647 samples / 52.92 seconds, 0..12 ms capture delay, OFF/ON/OFF and white-generator metadata preserved. | User accepted recorded white-smoke playback. Requests followed recorded ON/OFF by at most 14 ms and the mission completed normally. | Normal capture/library/playback accepted for white smoke. Other colors are unverified. See the [accepted actuator and capture investigation](../../experiments/efm-ownership/results/smoke-control-2026-09-27/README.md). |
 | Engine RPM, left/right | Read-only native helper captures core/fan RPM and both power getters with player/timing checks. Core RPM agrees with Export. | Guarded per-object native getters deliver the measured values to DCS consumers. | Combined sound/appearance and normal version-three capture/playback accepted. Full integrated trace audit remains distinct from visual/audio acceptance. |
 | Nozzle opening | Marked live capture supports left argument 90 and right 89. | Post-animation writes share the native sound playback clock. | Combined sound/visual test and normal recorded-motion integration accepted. |

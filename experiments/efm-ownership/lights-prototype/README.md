@@ -68,3 +68,10 @@ seconds until it is removed, then leave DCS open for log collection. Observe
 all four groups independently; SDK write/readback success does not establish
 retention or visual rendering. The accepted normal recording/playback flow
 still has lights off until this experiment establishes the replay behavior.
+
+The first playback run is now visually accepted with automatic completion.
+`check_retention.py <state.csv> <dcs.log> <output.json> --assert-lights` compares
+immediate SDK writes with later mission observations using the elapsed clock.
+It reports a brief formation-light startup overwrite in the accepted run;
+the other activated light channels retain their values. This numerical
+requirement remains open for normal integration; see the results above.
