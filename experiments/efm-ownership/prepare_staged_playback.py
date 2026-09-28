@@ -31,6 +31,7 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     module='DCSRecorder-Hornet-Engine-Staged' if metadata['engine_available'] else 'DCSRecorder-Hornet-State-Staged' if metadata['exterior_available'] else 'DCSRecorder-Hornet-Staged'
     binary='HornetEngineStagedProbe' if metadata['engine_available'] else 'HornetStateStagedProbe' if metadata['exterior_available'] else 'HornetStagedProbe'
     if metadata['lights_available']:module,binary='DCSRecorder-Hornet-Lights-Staged','HornetLightsStagedProbe'
+    if metadata['canopy_available']:module,binary='DCSRecorder-Hornet-Canopy-Staged','HornetCanopyStagedProbe'
     dll=ROOT/'build/Release'/f'{binary}.dll'
     for file in (baseline,dll,donor_mod/'entry.lua',donor_mod/'aircraft.lua'):
         if not file.is_file():raise ValueError(f'Missing preparation dependency: {file}')
@@ -41,7 +42,7 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     config=dict(x=first[1],y=first[2],z=first[3],heading=math.atan2(float(r['fz']),float(r['fx'])),
                 speed=math.sqrt(sum(v*v for v in first[8:11])),duration=metadata['duration'],
                 token_high=((token>>40)&0xffffff)/16777216,token_low=(token&0xffffff)/16777216,
-                aircraft=module,exterior=1 if metadata['exterior_available'] else 0,lights=metadata['lights_available'])
+                aircraft=module,exterior=1 if metadata['exterior_available'] else 0,lights=metadata['lights_available'],canopy=metadata['canopy_available'])
     if metadata['smoke_available']:
         config.update(smoke_events=metadata['smoke_events'],smoke_clsid=metadata['smoke_clsid'])
     (output/'config.lua').write_text('return '+lua_literal(config)+'\n')
@@ -64,7 +65,7 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     with zipfile.ZipFile(baseline) as source,zipfile.ZipFile(mission,'w',zipfile.ZIP_DEFLATED) as target:
         for entry in source.infolist():target.writestr(entry,(output/'mission').read_bytes() if entry.filename=='mission' else source.read(entry.filename))
     manifest={'status':'Prepared; native/mission handshake and live exact-start validation pending',
-              'dcs_build':actual,'profile':'staged-lights-v1' if metadata['lights_available'] else 'staged-engine-v1' if metadata['engine_available'] else 'staged-exterior-v1' if metadata['exterior_available'] else 'staged-v1',
+              'dcs_build':actual,'profile':'staged-canopy-v1' if metadata['canopy_available'] else 'staged-lights-v1' if metadata['lights_available'] else 'staged-engine-v1' if metadata['engine_available'] else 'staged-exterior-v1' if metadata['exterior_available'] else 'staged-v1',
               'module':module,'binary':binary,'recording':metadata,'initial':config,
               'files':{p.relative_to(output).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in output.rglob('*') if p.is_file()}}
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')

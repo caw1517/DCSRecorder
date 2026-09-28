@@ -151,6 +151,15 @@ visible with a reason; incomplete .partial files are counted separately.
 
 ## Verification and acceptance
 
+Canopy capture is implemented in the separately staged canopy workflow. New
+canopy-enabled practice missions save version-six recordings and the library
+adds `+ canopy`, selecting a separate canopy-capable controller. Initial position
+and transitions preserve measured argument 38 on the common playback clock.
+Older recordings keep their existing behavior. Isolated changing-canopy replay
+is accepted visually and numerically; normal integration is installed after
+offline checks and awaits a new app recording/playback run. See the
+[canopy integration checkpoint](../experiments/efm-ownership/results/canopy-integration-2026-09-28/README.md).
+
 Light capture is available with the installed lights workflow. New practice
 missions save version-five flights containing measured exterior brightness and
 strobe state, with optional measured white smoke. The library adds `+ lights`

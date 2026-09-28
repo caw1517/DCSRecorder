@@ -22,6 +22,10 @@ local function sample(name)
         end
         env.info(string.format('DCS_PLAYBACK_EXTERIOR,%s,%.9f,%.9f,%s',s.phase,timer.getTime(),
             1000*u:getDrawArgumentValue(996),table.concat(values,',')))
+        if c.canopy then
+            env.info(string.format('DCS_PLAYBACK_CANOPY,%s,%.9f,%.9f,%.9g',s.phase,timer.getTime(),
+                1000*u:getDrawArgumentValue(996),u:getDrawArgumentValue(38)))
+        end
         if c.lights then
             local lights={}
             for _,channel in ipairs({88,190,191,192,193,210,212})do lights[#lights+1]=string.format('%.9g',u:getDrawArgumentValue(channel))end

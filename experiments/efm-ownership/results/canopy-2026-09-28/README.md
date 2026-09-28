@@ -1,7 +1,7 @@
 # Canopy diagnostic checkpoint — 28 September 2026
 
-Status: stock-aircraft capture and visual review accepted; separate playback
-package passes offline checks and is installed, awaiting live review.
+Status: stock-aircraft capture and separate recorded-canopy playback accepted
+visually and numerically. Normal-workflow integration is prepared separately.
 
 The [separate canopy prototype](../../canopy-prototype/README.md) investigates
 installed exterior argument 38 with a parked stock Hornet OPEN/HOLD/CLOSE
@@ -63,5 +63,22 @@ Package: ignored `package/canopy-playback`. After the user confirmed DCS was
 closed, installation verified all ten installed file hashes and 1,639 protected
 files unchanged. The new module is `DCSRecorder-Hornet-Canopy`, with
 `DCSRecorder-Canopy-Playback.miz` in Saved Games/DCS/Missions. The installation
-manifest remains local in the package. Live retention and rendering, then normal
-recording/playback integration, remain pending.
+manifest remains local in the package.
+
+## Accepted live playback
+
+The user reports: “Complete and verified working well.” The accepted DCS log and
+SDK/event traces were preserved under the ignored `playback-accepted/` directory
+before further work. The single playback object (16777472, DCS process 30024)
+loaded all 2,364 source samples, completed the sequence and eight-second endpoint
+hold, then was destroyed normally. Mission END reports `complete`.
+
+- 2,764 SDK calls: immediate error 0 and between-call overwrite error 0.
+- 2,760 independent later mission reads: no canopy mismatches at 1e-5 tolerance;
+  maximum difference approximately 5e-10 from text precision.
+- The diagnostic elapsed-clock alignment differs by at most 1.862 microseconds.
+
+This supports captured canopy position and transitions on the isolated playback
+aircraft. It does not establish ground physics or internal canopy-system replay.
+See the [normal integration checkpoint](../canopy-integration-2026-09-28/README.md)
+for the next live gate.

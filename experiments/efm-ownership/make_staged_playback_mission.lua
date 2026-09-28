@@ -45,7 +45,7 @@ assert(count==2 and lead_id)
 assert(mission.weather.wind.atGround.speed==0 and mission.weather.wind.at2000.speed==0 and mission.weather.wind.at8000.speed==0)
 f=assert(io.open(script_path,'rb'));local script=f:read('*a');f:close()
 script='DCS_STAGED_CONFIG='..serialize({duration=c.duration,token_high=c.token_high,token_low=c.token_low,
-    smoke_events=c.smoke_events,exterior=c.exterior,lights=c.lights})..'\n'..script
+    smoke_events=c.smoke_events,exterior=c.exterior,lights=c.lights,canopy=c.canopy})..'\n'..script
 assert(loadstring(script))
 -- Preserve the donor's separate lights-off trigger at index 2.
 mission.trigrules[1].comment='Staging prototype: hold player and initialize diagnostics'

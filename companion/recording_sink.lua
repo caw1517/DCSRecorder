@@ -51,7 +51,7 @@ local function open_take(id, hex)
     abandon('new take')
     assert(#hex <= 8192 and #hex % 2 == 0 and not hex:find('[^%x]'), 'Invalid recorder metadata')
     local metadata = hex:gsub('..', function(pair) return string.char(tonumber(pair,16)) end)
-    local version=metadata:match('^DCSREC,([12345])\n')
+    local version=metadata:match('^DCSREC,([123456])\n')
     assert(version, 'Invalid recorder version')
     if version~='1' then assert(metadata:find('\nstate_profile,hornet-exterior-v1\n',1,true),'Invalid exterior state profile') end
     local source_id
@@ -61,7 +61,7 @@ local function open_take(id, hex)
         source_id=tonumber(metadata:match('\nsource_unit_id,(%d+)\n'));assert(source_id,'Missing source identity')
         if not capture_engine then capture_engine=assert(loadfile(lfs.writedir()..'Scripts/DCSRecorderEngineCapture/engine_capture.lua'))() end
     end
-    local has_smoke=version=='4' or (version=='5' and metadata:find('\nsmoke_profile,',1,true)~=nil)
+    local has_smoke=version=='4' or (tonumber(version)>=5 and metadata:find('\nsmoke_profile,',1,true)~=nil)
     if has_smoke then
         assert(metadata:find('\nsmoke_profile,hornet-native-smoke-v1\n',1,true) and
             metadata:find('\nsmoke_station,10\n',1,true) and
@@ -69,8 +69,9 @@ local function open_take(id, hex)
         if not capture_smoke then capture_smoke=assert(loadfile(lfs.writedir()..'Scripts/DCSRecorderSmokeCapture/smoke_capture.lua'))() end
     end
     local has_engine=tonumber(version)>=3
-    if version=='5' then assert(metadata:find('\nlight_profile,hornet-lights-v1\n',1,true),'Invalid light profile')end
-    local header=columns..(version~='1' and exterior or '')..(has_engine and engine or '')..(has_smoke and ',smoke_time,smoke_on' or '')..(version=='5' and lights or '')..'\n'
+    if tonumber(version)>=5 then assert(metadata:find('\nlight_profile,hornet-lights-v1\n',1,true),'Invalid light profile')end
+    if version=='6' then assert(metadata:find('\ncanopy_profile,hornet-canopy-v1\n',1,true),'Invalid canopy profile')end
+    local header=columns..(version~='1' and exterior or '')..(has_engine and engine or '')..(has_smoke and ',smoke_time,smoke_on' or '')..(tonumber(version)>=5 and lights or '')..(version=='6' and ',arg_38' or '')..'\n'
     local filename
     repeat
         serial = serial + 1
@@ -78,7 +79,7 @@ local function open_take(id, hex)
     until not lfs.attributes(filename .. '.partial') and not lfs.attributes(filename .. '.csv')
     local file = assert(io.open(filename .. '.partial', 'wb'))
     active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, version=version,source_id=source_id,
-        has_engine=has_engine,has_smoke=has_smoke,commas=version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
+        has_engine=has_engine,has_smoke=has_smoke,commas=version=='6' and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
     checked(file.write,file,metadata,header); checked(file.flush,file)
     write_status('RECORDING\nRecording in progress; use F10 Stop to save.')
 end
@@ -95,11 +96,12 @@ local function consume(line)
         local _,commas = data:gsub(',','')
         assert(commas == active.commas and #data < 4096 and active.rows < 20000, 'Malformed or oversized recording')
         local light_data=''
-        if active.version=='5' then
+        if tonumber(active.version)>=5 then
             local fields={};for value in (data..','):gmatch('(.-),')do fields[#fields+1]=value end
-            assert(#fields==43,'Invalid light mission row')
-            for i=37,43 do local v=tonumber(fields[i]);assert(v and v==v and v>=0 and v<=1,'Invalid light value')end
-            light_data=','..table.concat(fields,',',37,43);data=table.concat(fields,',',1,36)
+            local last=active.version=='6' and 44 or 43
+            assert(#fields==last,'Invalid appearance mission row')
+            for i=37,last do local v=tonumber(fields[i]);assert(v and v==v and v>=0 and v<=1,'Invalid light/canopy value')end
+            light_data=','..table.concat(fields,',',37,last);data=table.concat(fields,',',1,36)
         end
         if active.has_engine then data=capture_engine(data,active) end
         if active.has_smoke then data=capture_smoke(data,active) end

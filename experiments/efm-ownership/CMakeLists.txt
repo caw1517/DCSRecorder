@@ -147,6 +147,18 @@ target_compile_features(HornetLightsStagedProbe PRIVATE cxx_std_17)
 set_property(TARGET HornetLightsStagedProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_test(NAME lights_staged_callback_contract COMMAND probe_check $<TARGET_FILE:HornetLightsStagedProbe>)
 
+# Canopy-capable integrated controller, installed separately from earlier versions.
+add_library(HornetCanopyStagedProbe SHARED probe.cpp object_probe.cpp)
+target_include_directories(HornetCanopyStagedProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetCanopyStagedProbe PRIVATE HORNET_PROTOTYPE HORNET_RECORDED_PROTOTYPE HORNET_STAGED_PROTOTYPE HORNET_ENGINE_STAGED_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetCanopyStagedProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetCanopyStagedProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_test(NAME canopy_staged_callback_contract COMMAND probe_check $<TARGET_FILE:HornetCanopyStagedProbe>)
+add_executable(canopy_integrated_check canopy-prototype/check_integrated.cpp)
+target_include_directories(canopy_integrated_check PRIVATE "${DCS_ROOT}/API/include")
+target_compile_features(canopy_integrated_check PRIVATE cxx_std_17)
+target_compile_definitions(canopy_integrated_check PRIVATE NOMINMAX)
+
 # Separate four-channel engine appearance experiment: SDK fixture + live timing variant.
 foreach(engine_target HornetEngineSDKProbe HornetEngineAppearanceProbe HornetEngineSoundProbe HornetEngineSounderProbe HornetEngineAudibilityProbe)
   add_library(${engine_target} SHARED probe.cpp state-prototype/playback.cpp)

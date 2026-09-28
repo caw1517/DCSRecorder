@@ -59,6 +59,7 @@ struct Observation {
     hornet_exterior::Values exterior{};
     hornet_engine::Values engine{};
     hornet_lights::Values lights{};
+    double canopy=0;
 #endif
     uint64_t step_calls=0,step_applied=0;
     const char* step_status="step_hook_inactive";
@@ -99,6 +100,19 @@ void after_native_animation(const void* handle) {
     std::array<float,13> before{};
     for(size_t i=0;i<before.size();++i)before[i]=view.data[hornet_exterior::channels[i]];
     bool applied=hornet_appearance::apply_exterior(api,sdk_handle,state.runtime_id,state.exterior);
+    if(state.path.has_canopy) {
+        const auto canopy_before=api->ed_get_object_args(sdk_handle);
+        if(!canopy_before.data || canopy_before.size<=hornet_canopy::channel)applied=false;
+        else {
+            const float before_canopy=canopy_before.data[hornet_canopy::channel];
+            applied=hornet_appearance::apply_canopy(api,sdk_handle,state.runtime_id,state.canopy) && applied;
+            const auto canopy_after=api->ed_get_object_args(sdk_handle);
+            if(!canopy_after.data || canopy_after.size<=hornet_canopy::channel)applied=false;
+            else exterior_file << state.runtime_id << ',' << state.calls << ',' << state.exterior_elapsed
+                << ',' << hornet_canopy::channel << ',' << state.canopy << ',' << before_canopy
+                << ',' << canopy_after.data[hornet_canopy::channel] << '\n';
+        }
+    }
     if(state.path.has_lights) {
         const auto light_before=api->ed_get_object_args(sdk_handle);
         hornet_lights::Values before_lights{};
@@ -418,11 +432,12 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     if(state.path.has_exterior) {
         state.exterior_elapsed=state.motion_active?time-state.start_time:0;
         const auto sampled=state.path.at_sample(state.exterior_elapsed);
-        state.exterior=sampled.exterior;state.engine=sampled.engine;state.lights=sampled.lights;
+        state.exterior=sampled.exterior;state.engine=sampled.engine;state.lights=sampled.lights;state.canopy=sampled.canopy;
         api->ed_set_single_arg(handle,996,static_cast<float>(state.exterior_elapsed/1000));
         state.exterior_pending=hornet_appearance::apply_exterior(api,handle,state.runtime_id,state.exterior);
         if(state.path.has_engine)state.exterior_pending=hornet_appearance::apply_engine(api,handle,state.runtime_id,state.engine) && state.exterior_pending;
         if(state.path.has_lights)state.exterior_pending=hornet_appearance::apply_lights(api,handle,state.runtime_id,state.lights) && state.exterior_pending;
+        if(state.path.has_canopy)state.exterior_pending=hornet_appearance::apply_canopy(api,handle,state.runtime_id,state.canopy) && state.exterior_pending;
         if(!state.exterior_pending) {
             state.motion_attempted=true;state.motion_active=false;stop_native_step(handle,state);
             staged_playback::publish(api,handle,state.token,staged_playback::failed);
