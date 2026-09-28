@@ -132,6 +132,17 @@ target_include_directories(canopy_playback_check PRIVATE "${DCS_ROOT}/API/includ
 target_compile_definitions(canopy_playback_check PRIVATE CANOPY_APPEARANCE_PROTOTYPE NOMINMAX)
 target_compile_features(canopy_playback_check PRIVATE cxx_std_17)
 
+# Separate SDK-only wheel/strut/steering replay; no motion controller or hooks.
+add_library(HornetWheelProbe SHARED probe.cpp state-prototype/playback.cpp)
+target_include_directories(HornetWheelProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetWheelProbe PRIVATE WHEEL_APPEARANCE_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetWheelProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetWheelProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_executable(wheel_playback_check state-prototype/check_playback.cpp)
+target_include_directories(wheel_playback_check PRIVATE "${DCS_ROOT}/API/include")
+target_compile_definitions(wheel_playback_check PRIVATE WHEEL_APPEARANCE_PROTOTYPE NOMINMAX)
+target_compile_features(wheel_playback_check PRIVATE cxx_std_17)
+
 # Separate integrated engine target; older installed controllers are preserved.
 add_library(HornetEngineStagedProbe SHARED probe.cpp object_probe.cpp)
 target_include_directories(HornetEngineStagedProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")

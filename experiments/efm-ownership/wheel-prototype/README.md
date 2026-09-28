@@ -72,3 +72,32 @@ The variant has no control writes and needs no new module or hook.
 The analyzer accepts both exact protocol/channel sets and preserves signed raw
 values. Do not claim a steering direction/range until the new capture and visual
 observation agree. The original wheel diagnostic remains installed unchanged.
+
+## Separate captured playback
+
+Build CMake targets `HornetWheelProbe` and `wheel_playback_check`. Then run
+`prepare_playback.py SAVED_STEERING_LOG FRESH_OUTPUT_DIRECTORY`. The package uses
+the real protocol-two capture, validates all samples and interpolated midpoints
+through the built DLL, and checks the generated mission against installed DCS
+dependencies/routes. This experiment rejects captures at or above 5 m/s and
+phase steps outside the measured slow-taxi range; those are test bounds only.
+
+The ten replay channels omit the two rudder comparators. Rotation uses the
+short arc of the measured period-one phase, preserving raw samples and constant
+holds. Nothing synthesizes wheel phase from aircraft velocity. This method does
+not establish reverse behavior or resolve high-speed sampling aliasing.
+
+`install_playback.py PACKAGE SAVED_GAMES` installs the separate new module and
+mission only while DCS is closed, verifies package hashes and preserves existing
+files. Load **DCSRecorder-Wheel-Playback.miz**, leave Active Pause on, then choose
+F10 → Wheel playback → Start captured wheel sequence. F2 to the test lead and
+zoom into its lowered gear. Watch rotation/stops, strut movement and left/center/
+right nose-wheel steering for about one minute, until lead removal. Leave DCS
+open for log collection.
+
+This is an **airborne appearance test using a taxi capture**, not ground-motion
+playback. It uses the SDK writer without native timing hooks. DCS may overwrite
+some channels: `check_retention.py SDK_TRACE SAVED_DCS_LOG OUTPUT_JSON --assert-wheels`
+compares actual writes to later mission reads using the writer's elapsed clock.
+Immediate readback alone does not establish visual fidelity. Normal app/schema
+integration follows live validation, not the offline checks.

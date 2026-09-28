@@ -12,7 +12,10 @@
 #include <string>
 #include <vector>
 namespace {
-#ifdef CANOPY_APPEARANCE_PROTOTYPE
+#ifdef WHEEL_APPEARANCE_PROTOTYPE
+constexpr size_t channel_count=10;
+constexpr const char* tape_header="DCS_WHEEL_PROTOTYPE_V1";
+#elif defined(CANOPY_APPEARANCE_PROTOTYPE)
 constexpr size_t channel_count=1;
 constexpr const char* tape_header="DCS_CANOPY_PROTOTYPE_V1";
 #elif defined(LIGHT_APPEARANCE_PROTOTYPE)
@@ -56,7 +59,9 @@ int main(int argc,char** argv) {
         api.ed_set_single_arg=[](ED_OBJECT_HANDLE h,int c,float value){
             if(h!=object || c<0 || size_t(c)>=view_size) {invalid_write=true;return;}
             const bool allowed=
-#ifdef CANOPY_APPEARANCE_PROTOTYPE
+#ifdef WHEEL_APPEARANCE_PROTOTYPE
+                (c>=0 && c<=6) || (c>=101 && c<=103) || c==998 || c==999;
+#elif defined(CANOPY_APPEARANCE_PROTOTYPE)
                 c==38 || c==998 || c==999;
 #elif defined(LIGHT_APPEARANCE_PROTOTYPE)
                 c==0 || c==3 || c==5 || c==88 || (c>=190 && c<=193) || c==210 || c==212 || c==998 || c==999;
@@ -94,6 +99,31 @@ int main(int argc,char** argv) {
         destroy(object,cookie);simulate(object,cookie,200);require(writes==before,"destroyed object written");
         create(object,cookie);simulate(object,cookie,10);simulate(object,cookie,10+(rows[1].t-rows[0].t)/2);
         for(size_t i=0;i<channels.size();++i)require(std::abs(args[channels[i]]-(rows[0].values[i]+rows[1].values[i])/2)<0.00001f,"interpolation mismatch");
+#ifdef WHEEL_APPEARANCE_PROTOTYPE
+        destroy(object,cookie);create(object,cookie);simulate(object,cookie,0);
+        size_t wraps=0;
+        for(size_t i=0;i+1<rows.size();++i) {
+            simulate(object,cookie,(rows[i].t+rows[i+1].t)/2);
+            for(size_t c=0;c<channels.size();++c) {
+                const double a=rows[i].values[c],b=rows[i+1].values[c],actual=args[channels[c]];
+                if(c>=6 && c<=8) {
+                    // Circular distances to each endpoint must be equal and half
+                    // the short source arc. The long-way midpoint fails this.
+                    auto distance=[](double x,double y){double d=std::abs(x-y);return std::min(d,1.0-d);};
+                    require(actual>=0 && actual<=1,"wheel phase out of range");
+                    require(std::abs(distance(actual,a)-distance(a,b)/2)<0.00001 &&
+                        std::abs(distance(actual,b)-distance(a,b)/2)<0.00001,"wheel wrap midpoint mismatch");
+                    if(std::abs(a-b)>.5)++wraps;
+                } else require(std::abs(actual-(a+b)/2)<0.00001,"compression/steering midpoint mismatch");
+            }
+        }
+        require(wraps>0,"fixture must exercise rotation wraps");
+        simulate(object,cookie,rows.back().t+8);
+        for(size_t c=0;c<channels.size();++c)require(args[channels[c]]==rows.back().values[c],"wheel endpoint hold mismatch");
+        require(args[999]==.5f,"wheel final hold status");
+        std::cout<<"PASS: "<<wraps<<" captured wrap crossings; every midpoint and final hold\n";
+        destroy(object,cookie);create(object,cookie);simulate(object,cookie,10);
+#endif
 #ifdef CANOPY_APPEARANCE_PROTOTYPE
         // Exercise changing values between every pair of real canopy samples.
         destroy(object,cookie);create(object,cookie);simulate(object,cookie,0);

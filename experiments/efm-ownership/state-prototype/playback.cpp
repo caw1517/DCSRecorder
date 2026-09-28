@@ -30,7 +30,10 @@
 #endif
 
 namespace {
-#ifdef CANOPY_APPEARANCE_PROTOTYPE
+#ifdef WHEEL_APPEARANCE_PROTOTYPE
+constexpr std::array<int,10> channels{0,5,3,1,6,4,101,103,102,2};
+constexpr const char* tape_header="DCS_WHEEL_PROTOTYPE_V1";
+#elif defined(CANOPY_APPEARANCE_PROTOTYPE)
 constexpr std::array<int,1> channels{38};
 constexpr const char* tape_header="DCS_CANOPY_PROTOTYPE_V1";
 #elif defined(LIGHT_APPEARANCE_PROTOTYPE)
@@ -120,7 +123,9 @@ void initialize() {
         for(size_t c=0;c<channels.size();++c) {
             if(!(file>>row.values[c]) || !std::isfinite(row.values[c]) ||
                row.values[c] <
-#if defined(ENGINE_APPEARANCE_PROTOTYPE) || defined(LIGHT_APPEARANCE_PROTOTYPE) || defined(CANOPY_APPEARANCE_PROTOTYPE)
+#ifdef WHEEL_APPEARANCE_PROTOTYPE
+               (c==9?-1.0f:0.0f)
+#elif defined(ENGINE_APPEARANCE_PROTOTYPE) || defined(LIGHT_APPEARANCE_PROTOTYPE) || defined(CANOPY_APPEARANCE_PROTOTYPE)
                0.0f
 #else
                ((c<3 || c==13)?0.0f:-1.0f)
@@ -141,6 +146,21 @@ Values at(double t) {
     const double u=(t-a.t)/(b.t-a.t);
     Values values{};
     for(size_t i=0;i<values.size();++i)values[i]=static_cast<float>(a.values[i]+u*(b.values[i]-a.values[i]));
+#ifdef WHEEL_APPEARANCE_PROTOTYPE
+    // Measured low-speed wheel phase has period one. Preserve exact sample
+    // endpoints; interpolate the short arc across wraps, never through half a turn.
+    // This does not resolve aliasing in future high-speed or sparse captures.
+    for(size_t i=6;i<=8;++i) {
+        if(u<=1e-9 || a.values[i]==b.values[i])values[i]=a.values[i];
+        else if(u>=1-1e-9)values[i]=b.values[i];
+        else {
+            double delta=double(b.values[i])-a.values[i];
+            delta-=std::round(delta);
+            const double phase=a.values[i]+u*delta;
+            values[i]=static_cast<float>(phase-std::floor(phase));
+        }
+    }
+#endif
 #ifdef LIGHT_APPEARANCE_PROTOTYPE
     // Preserve sampled strobe edges instead of inventing intermediate pulses.
     values[7]=(t>=b.t?b:a).values[7];

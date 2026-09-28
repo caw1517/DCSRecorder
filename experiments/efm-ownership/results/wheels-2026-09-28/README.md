@@ -1,7 +1,7 @@
 # Wheel and suspension checkpoint — 28 September 2026
 
-Status: first live taxi capture saved and analyzed; steering follow-up checked
-and installed. Recorded-wheel playback remains pending. Normal canopy integration
+Status: both live taxi captures saved and analyzed; separate captured wheel,
+suspension and steering playback checked and installed. Live playback remains pending. Normal canopy integration
 is accepted in its own evidence record.
 
 The [prototype](../../wheel-prototype/README.md) samples deployment, compression
@@ -71,3 +71,56 @@ is required. Both diagnostic missions remain available.
 The user has instructions for centered/left/centered/right/centered slow taxi,
 with optional visible-state markers and F2 observation. Steering mapping and
 recorded wheel/suspension/steering playback remain pending.
+
+## Captured steering and prepared playback
+
+The user completed the steering mission. Saved `steering-capture.log` SHA-256:
+`103c3659a30a76ac37a452b8836e3f4a0f65ae392ade7ae42a94e5689418f15f`.
+Protocol two contains 2,462 ordered samples over 49.244 seconds, maximum 20 ms
+spacing, normal user stop, and speed approximately 0–4.2475 m/s. There are 508
+stopped and 1,904 rolling samples by the analyzer's thresholds. All three gear
+deployment values stay at 1; all compression and rotation channels change.
+
+The user placed left/centered/right markers at mission times
+18.722/30.618/34.746. Argument 2 is near zero at those individual instants:
+markers precede the changing steering segments, so they are not exact transition
+timestamps. Within the following left interval it reaches +0.726780, remains
+approximately zero throughout the centered interval, and reaches -0.735133 in
+the following right interval. It ends within 0.000001 of zero. Rudders 17/18 have
+distinct traces, including opposed nonzero stationary values. These measurements
+support argument 2 as the steering candidate; separate visual confirmation and
+replay retention/rendering remain pending. No degree conversion is inferred.
+
+Period-one short-arc analysis finds 194 total wheel wraps and maximum sample
+steps 0.07133/0.05507/0.04748 (nose/left/right). Estimated circumferential travel
+is 130.902/125.688/121.753 m versus a 126.110 m aircraft-center path. Turning and
+slip are not resolved here. This experiment is restricted to the measured slow
+taxi; reverse and high-speed phase aliasing remain unverified.
+
+`prepare_playback.py` packages ten captured channels: deployment 0/5/3,
+compression 1/6/4, rotation 101/103/102 and steering 2. Rudders are diagnostic
+comparators only. Every raw sample is preserved; signed steering/compression
+interpolate linearly, while rotation interpolates across the short period-one
+arc. Stationary phase-one holds and exact endpoints remain unchanged. The first
+offline run caught phase-one holds normalizing to zero between samples; the
+corrected build passes all 2,462 real samples, every midpoint, 194 wrap crossings,
+final holds and SDK identity/cookie/bounds/lifecycle/clock checks. Mission checks
+cover F10 start/release, telemetry, completion/removal, failure, timeout and stop.
+Installed dependency, route and configuration checks also pass.
+
+Installed a new `DCSRecorder-Hornet-Wheels` module with `HornetWheelProbe.dll`
+and `DCSRecorder-Wheel-Playback.miz` while DCS was already closed. Ten installed
+file hashes passed verification; all 1,817 protected existing file hashes stayed
+unchanged. Mission SHA-256:
+`a755344a281f3e80024592bea18fb832e8722b00882c22bf78d9e378abc187da`.
+Local package: `package/wheel-playback-checked`; the earlier failed package is
+preserved separately and was not installed. Source capture hash is unchanged.
+
+The new test uses SDK appearance writes on an ordinary airborne route, with
+49.22 seconds of captured animations and an eight-second final hold. It contains
+no native timing hook, trajectory controller or cockpit control commands. The
+airborne setting exposes the lowered wheels for observation; it does not validate
+taxi-path playback, ground contact or suspension physics. Native traces plus
+independent mission reads will distinguish immediate writes from retained values.
+The user has playback instructions. Normal recording/schema integration waits
+for the separate animation result.
