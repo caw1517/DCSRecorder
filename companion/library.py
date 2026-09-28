@@ -199,7 +199,7 @@ class Library:
     def activate(self, output, manifest, generation):
         module=manifest.get('module','DCSRecorder-Hornet-Staged')
         binary=manifest.get('binary','HornetStagedProbe')
-        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe'),('DCSRecorder-Hornet-Engine-Staged','HornetEngineStagedProbe'),('DCSRecorder-Hornet-Lights-Staged','HornetLightsStagedProbe')):
+        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe'),('DCSRecorder-Hornet-Engine-Staged','HornetEngineStagedProbe'),('DCSRecorder-Hornet-Lights-Staged','HornetLightsStagedProbe'),('DCSRecorder-Hornet-Canopy-Staged','HornetCanopyStagedProbe')):
             raise ValueError('Unsupported playback module')
         mod = self.saved / 'Mods/aircraft' / module
         # Install once with the tested installer. Updates replace only the tape,

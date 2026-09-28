@@ -87,3 +87,26 @@ completed first take. Its scheduling cause is not established.
 The user has been asked to record a short level cruise at moderate speed in the
 same mission. Successful normal playback remains pending. Broader speed support
 belongs with [Validate the single-aircraft flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7).
+
+## Supported normal take and activation regression
+
+The user confirmed the next take appears correctly in the app.
+`20260928T164529Z-0003.csv` passes library validation: 363 samples / 7.24 seconds,
+163.79–178.91 m/s world speed and canopy closed (0) throughout. SHA-256:
+`632c1089ce107d1075263f9ae4df5f86115f9dc85a5be10d6243834546257e90`.
+The source and log are saved under ignored `capture-ready/`.
+
+Its package in ignored `package/canopy-normal-playback` passes installed mission,
+route and configuration checks, plus native canopy samples/interpolation/holds
+and recorded-motion evaluation. Preparing activation exposed a missed module
+allowlist entry for `DCSRecorder-Hornet-Canopy-Staged`. The earlier workflow test
+mocked activation and therefore did not cover that boundary. The test now calls
+real activation in a temporary installation, checks the copied tape/mission and
+backup, and failed with `Unsupported playback module` before the allowlist fix.
+All 32 companion tests pass with that actual activation path covered.
+
+The user has been asked to close DCS before activating this prepared tape.
+Normal live playback remains pending. The speed cap is a temporary validated-
+envelope restriction, not a demonstrated DCS limit or final product requirement;
+the roadmap already calls for removing remaining speed/duration restrictions as
+the corresponding behavior is implemented and verified.

@@ -1,5 +1,6 @@
 """Exercise canopy capture through save, library, native tape and mission packaging."""
 import csv
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -60,6 +61,15 @@ class CanopyWorkflowTests(unittest.TestCase):
             "local prefix=assert(text:match('^(.-)\\n%-%- Staged recorded playback'));assert(loadstring(prefix))();"
             "assert(DCS_STAGED_CONFIG.canopy==true and DCS_STAGED_CONFIG.lights==true and DCS_STAGED_CONFIG.exterior==1)")
         self.run_checked(['D:/DCS World/bin/luae.exe', harness, output/'mission'])
+        installed = self.library.saved/'Mods/aircraft'/manifest['module']
+        shutil.copytree(output/manifest['module'], installed)
+        prior_tape = b'previous canopy tape retained for rollback'
+        (installed/'bin/recorded-flight.txt').write_bytes(prior_tape)
+        self.library.activate(output, manifest, 'canopy-activation-test')
+        self.assertEqual((installed/'bin/recorded-flight.txt').read_bytes(),
+                         (output/manifest['module']/'bin/recorded-flight.txt').read_bytes())
+        self.assertEqual((self.library.home/'backups/canopy-activation-test/recorded-flight.txt').read_bytes(), prior_tape)
+        self.assertTrue((self.library.saved/'Missions/DCSRecorder-Playback-canopy-a.miz').is_file())
         self.assertEqual(source.read_bytes(), original)
 
     def test_optional_smoke_and_nonzero_initial_state(self):
