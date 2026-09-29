@@ -5,12 +5,13 @@ is the issue-tracking entry point.
 
 ## V1 scope and V2 backlog
 
-The user selected **white smoke only for V1**. Normal capture and recorded white
-smoke playback are accepted. Canopy and wheel/suspension/NWS animations now have
-accepted isolated and normal app workflows. Remaining V1 fidelity work includes
-the final combined live pass and refueling-light evidence. Numerical review and
-combined offline regression pass. By user choice, landing/taxi ground illumination
-will be checked with ground operations.
+The user selected **white smoke only for V1**. The supported Hornet visual/engine
+fidelity milestone is accepted, including the final combined flight and refueling
+light. Numerical audit, lifecycle evidence and 44 regression checks are recorded
+in the [final acceptance record](../experiments/efm-ownership/results/fidelity-final-2026-09-29/README.md).
+A small measured speed-brake residual (up to 0.010002 on its 0–1 scale) is retained
+under exact synchronized-state work. By user choice, landing/taxi ground
+illumination will be checked with ground operations.
 
 These features are explicitly deferred to V2 and do not block V1:
 
@@ -18,6 +19,11 @@ These features are explicitly deferred to V2 and do not block V1:
 - [Add multicolor demonstration smoke (V2)](https://github.com/caw1517/DCSRecorder/issues/13): validate and retain selected smoke-generator colors beyond white.
 
 ## Current milestone
+
+[Visual and engine-state fidelity](https://github.com/caw1517/DCSRecorder/issues/6)
+is accepted for the documented Hornet V1 scope. Next: exact original starting
+position and synchronized state, followed by the ground-flight envelope.
+
 
 The [single-aircraft record-to-replay workflow](https://github.com/caw1517/DCSRecorder/issues/5)
 is implemented and accepted for the current airborne scope. The local companion
@@ -59,8 +65,7 @@ milestone, not the full one-aircraft product milestone.
 
 | Work | Remaining scope |
 | --- | --- |
-| [Visual and engine state](https://github.com/caw1517/DCSRecorder/issues/6) | Accepted motion/surfaces, native engine sound/nozzles/afterburner, white smoke, tested light states, canopy and wheel/suspension/NWS playback. The wheel-capable normal app workflow is accepted for its airborne take. Numerical audit and combined offline regression pass. Final combined live/refueling-light evidence keeps this issue open; ground starts/contact and high-speed wheel sampling remain separate gates. |
-| [Exact starting position and state](https://github.com/caw1517/DCSRecorder/issues/11) | Extend accepted exact airborne initialization to stationary hot ground starts, original parking/demo spots and synchronized aircraft state. |
+| [Exact starting position and state](https://github.com/caw1517/DCSRecorder/issues/11) | Extend accepted exact airborne initialization to stationary hot ground starts, original parking/demo spots and synchronized aircraft state. Resolve the measured speed-brake retention residual and assess complete pre-release state. |
 | [Flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7) | Validate ground transitions, landing/taxi light ground illumination, low passes, hard maneuvers and longer full-demo durations. Remove remaining speed/duration restrictions as the corresponding behavior is implemented and verified. |
 | [Essential physical interactions](https://github.com/caw1517/DCSRecorder/issues/3) | Ground contact, collision/damage and wake in both directions; decide how physical disturbances affect the recorded path. |
 | [Installation and compatibility](https://github.com/caw1517/DCSRecorder/issues/8) | Portable setup, local asset preparation, supported-build maintenance, rollback and performance. |

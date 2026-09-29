@@ -92,9 +92,25 @@ def audit(tape_path, trace_dir, pid, log_path):
     groups = collections.defaultdict(lambda: dict(rows=0, requested_error=0, readback_error=0, native_overwrites=0))
     times = sorted({float(r['elapsed']) for r in appearance})
     assert times[0] == 0 and times[-1] >= tape.times[-1]
+    strobe_edges = 0
+    delivered_strobes = {}
     for r in appearance:
         assert all(math.isfinite(float(r[k])) for k in ('elapsed','requested','before','after'))
-        arg = int(r['arg']); expected = tape.at(float(r['elapsed']))[tape.columns[arg]]
+        arg = int(r['arg']); elapsed = float(r['elapsed'])
+        expected = tape.at(elapsed)[tape.columns[arg]]
+        if arg == 193:
+            delivered_strobes[elapsed] = float(r['after'])
+            # The native elapsed log has 12 significant digits, not the original
+            # double. At an exact tape boundary its unrounded value may have
+            # been just before the edge. Only this sample-hold channel is
+            # discontinuous; permit the immediately preceding sample solely
+            # within the timestamp's rounding precision, and report it.
+            if abs(float(r['requested'])-expected) > 1e-7:
+                i = bisect.bisect_left(tape.times, elapsed)
+                k = min(range(max(0,i-1),min(i+1,len(tape.times))),key=lambda k:abs(tape.times[k]-elapsed))
+                assert k > 0 and abs(tape.times[k]-elapsed) <= 1e-10
+                expected = tape.samples[k-1][39]
+                strobe_edges += 1
         g = groups[str(arg)]; g['rows'] += 1
         g['requested_error'] = max(g['requested_error'], abs(float(r['requested'])-expected))
         g['readback_error'] = max(g['readback_error'], abs(float(r['after'])-f32(expected)))
@@ -149,6 +165,8 @@ def audit(tape_path, trace_dir, pid, log_path):
     assert position < 1e-5 and basis_error < 1e-8 and velocity_error == 0
     log = log_path.read_text(errors='replace').split('DCS_PLAYBACK_EVENT,0.000000,INITIALIZED')[-1]
     later = {}
+    brake = dict(rows=0, max_error=0, differing_rows=0,
+                 interpretation='Measured separately: legacy SDK brake writes precede native animation; visual acceptance does not establish exact later readback.')
     for name, channels in [('EXTERIOR', EXTERIOR+[21]), ('LIGHTS',LIGHTS), ('CANOPY',[38]), ('WHEELS',WHEELS)]:
         if any(c not in tape.columns for c in channels): continue
         count = 0; maximum = 0
@@ -166,7 +184,15 @@ def audit(tape_path, trace_dir, pid, log_path):
             t = min(times[max(0,ix-1):ix+1], key=lambda t: abs(t-elapsed))
             assert abs(t-elapsed) < 1e-5
             expected = tape.at(t)
-            maximum = max(maximum, max(abs(v-f32(expected[tape.columns[c]])) for c,v in zip(channels,values)))
+            for c,v in zip(channels,values):
+                error = abs(v-(delivered_strobes[t] if c == 193 else f32(expected[tape.columns[c]])))
+                if c == 21:
+                    assert 0 <= v <= 1
+                    brake['rows'] += 1
+                    brake['max_error'] = max(brake['max_error'],error)
+                    brake['differing_rows'] += error > 1e-7
+                else:
+                    maximum = max(maximum,error)
             count += 1
         later[name.lower()] = dict(rows=count, max_error=maximum)
         # Older missions did not forward light telemetry configuration.
@@ -175,6 +201,8 @@ def audit(tape_path, trace_dir, pid, log_path):
     return dict(tape_sha256=hashlib.sha256(tape_path.read_bytes()).hexdigest(),
                 duration=tape.times[-1], native_samples=len(times), object_id=identity,
                 appearance=dict(groups), engine=dict(engines), engine_callers=dict(callers), engine_passthrough_calls=passthrough, later_mission=later,
+                strobe_sample_boundaries_with_rounded_clock=strobe_edges,
+                speedbrake_later_readback=brake,
                 motion=dict(rows=len(motion), tape_position_error_m=position,
                             tape_basis_component_error=basis_error, sdk_float_position_rounding_m=quantized,
                             velocity_readback_error_mps=velocity_error),

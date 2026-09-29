@@ -1,0 +1,318 @@
+{
+  "tape_sha256": "ca297414283f7d0923be148d2a4676cf9cfeb8235aadd32f971dde49f6d61e00",
+  "duration": 95.18,
+  "native_samples": 4761,
+  "object_id": "16777472",
+  "appearance": {
+    "1": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "6": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "4": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "101": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 4761
+    },
+    "103": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 4761
+    },
+    "102": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 4761
+    },
+    "2": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "38": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "88": {
+      "rows": 4761,
+      "requested_error": 4.05925293379e-14,
+      "readback_error": 4.98434626905464e-13,
+      "native_overwrites": 25
+    },
+    "190": {
+      "rows": 4761,
+      "requested_error": 4.05925293379e-14,
+      "readback_error": 4.98434626905464e-13,
+      "native_overwrites": 0
+    },
+    "191": {
+      "rows": 4761,
+      "requested_error": 4.05925293379e-14,
+      "readback_error": 4.98434626905464e-13,
+      "native_overwrites": 0
+    },
+    "192": {
+      "rows": 4761,
+      "requested_error": 4.05925293379e-14,
+      "readback_error": 4.98434626905464e-13,
+      "native_overwrites": 0
+    },
+    "193": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.780620344035924e-13,
+      "native_overwrites": 0
+    },
+    "210": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.982680934517703e-13,
+      "native_overwrites": 0
+    },
+    "212": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.951039578315886e-13,
+      "native_overwrites": 0
+    },
+    "28": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.981570711493077e-13,
+      "native_overwrites": 680
+    },
+    "29": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.961031585537512e-13,
+      "native_overwrites": 680
+    },
+    "89": {
+      "rows": 4761,
+      "requested_error": 2.38361847621e-16,
+      "readback_error": 4.998779168374767e-13,
+      "native_overwrites": 4387
+    },
+    "90": {
+      "rows": 4761,
+      "requested_error": 2.38361847621e-16,
+      "readback_error": 4.986566715103891e-13,
+      "native_overwrites": 4388
+    },
+    "0": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.980460488468452e-13,
+      "native_overwrites": 2088
+    },
+    "3": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.966027589148325e-13,
+      "native_overwrites": 2077
+    },
+    "5": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.970468481246826e-13,
+      "native_overwrites": 2077
+    },
+    "9": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.998779168374767e-13,
+      "native_overwrites": 4761
+    },
+    "10": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.99933427988708e-13,
+      "native_overwrites": 4761
+    },
+    "11": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.993783164763954e-13,
+      "native_overwrites": 4753
+    },
+    "12": {
+      "rows": 4761,
+      "requested_error": 1.000007097528427e-16,
+      "readback_error": 4.993783164763954e-13,
+      "native_overwrites": 4755
+    },
+    "13": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.999889391399392e-13,
+      "native_overwrites": 4761
+    },
+    "14": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.999889391399392e-13,
+      "native_overwrites": 4761
+    },
+    "15": {
+      "rows": 4761,
+      "requested_error": 1.0000680839006293e-15,
+      "readback_error": 4.99933427988708e-13,
+      "native_overwrites": 4761
+    },
+    "16": {
+      "rows": 4761,
+      "requested_error": 0,
+      "readback_error": 4.985595269957344e-13,
+      "native_overwrites": 4761
+    },
+    "17": {
+      "rows": 4761,
+      "requested_error": 4.000028390113708e-16,
+      "readback_error": 4.994615832032423e-13,
+      "native_overwrites": 4761
+    },
+    "18": {
+      "rows": 4761,
+      "requested_error": 4.000028390113708e-16,
+      "readback_error": 4.996558722325517e-13,
+      "native_overwrites": 4761
+    }
+  },
+  "engine": {
+    "1:2": {
+      "rows": 52188,
+      "max_error": 4.99755792304768e-12,
+      "min_returned": 0.188307449222,
+      "max_returned": 1.40149629116
+    },
+    "1:0": {
+      "rows": 47303,
+      "max_error": 4.985345469776803e-12,
+      "min_returned": 0.771675825119,
+      "max_returned": 1.00192058086
+    },
+    "2:2": {
+      "rows": 52188,
+      "max_error": 4.99755792304768e-12,
+      "min_returned": 0.188369840384,
+      "max_returned": 1.40149629116
+    },
+    "2:0": {
+      "rows": 42543,
+      "max_error": 4.985345469776803e-12,
+      "min_returned": 0.771699368954,
+      "max_returned": 1.00192058086
+    },
+    "1:1": {
+      "rows": 9521,
+      "max_error": 5.000444502911705e-13,
+      "min_returned": 0.497265696526,
+      "max_returned": 0.986487627029
+    },
+    "2:1": {
+      "rows": 9521,
+      "max_error": 4.99711383383783e-13,
+      "min_returned": 0.497292131186,
+      "max_returned": 0.986487627029
+    }
+  },
+  "engine_callers": {
+    "DCS.exe": 89504,
+    "Sound.dll": 123760
+  },
+  "engine_passthrough_calls": 4760,
+  "later_mission": {
+    "exterior": {
+      "rows": 4762,
+      "max_error": 5.000000136146099e-10
+    },
+    "lights": {
+      "rows": 4762,
+      "max_error": 4.953918386618739e-10
+    },
+    "canopy": {
+      "rows": 4762,
+      "max_error": 0
+    },
+    "wheels": {
+      "rows": 4762,
+      "max_error": 0
+    }
+  },
+  "strobe_sample_boundaries_with_rounded_clock": 50,
+  "speedbrake_later_readback": {
+    "rows": 4762,
+    "max_error": 0.010002017517333983,
+    "differing_rows": 2016,
+    "interpretation": "Measured separately: legacy SDK brake writes precede native animation; visual acceptance does not establish exact later readback."
+  },
+  "motion": {
+    "rows": 4761,
+    "tape_position_error_m": 0,
+    "tape_basis_component_error": 5.003775171985581e-13,
+    "sdk_float_position_rounding_m": 0.03475666173521683,
+    "velocity_readback_error_mps": 0
+  },
+  "interpretation": "Numerical delivery and mission completion only; rendering/audio and unexercised channels require human evidence.",
+  "source_sha256": "9c0378dd228c7577e3c6576342d027ebd5763779c2506c180c6070838cc217b9",
+  "smoke": {
+    "events": [
+      {
+        "mission_time": 7.82,
+        "elapsed": 0.0,
+        "on": false,
+        "recorded_event": 0.0
+      },
+      {
+        "mission_time": 21.52,
+        "elapsed": 13.70000001,
+        "on": true,
+        "recorded_event": 13.684
+      },
+      {
+        "mission_time": 24.18,
+        "elapsed": 16.359999776,
+        "on": false,
+        "recorded_event": 16.342
+      },
+      {
+        "mission_time": 31.58,
+        "elapsed": 23.760000244,
+        "on": true,
+        "recorded_event": 23.743
+      },
+      {
+        "mission_time": 42.02,
+        "elapsed": 34.200001508,
+        "on": false,
+        "recorded_event": 34.184
+      }
+    ],
+    "max_command_delay_seconds": 0.017999775999999912
+  },
+  "completion": {
+    "native_time": 103.001,
+    "mission_time": 103.02,
+    "destroyed": true,
+    "cleanup": "step_hook_already_replaced"
+  }
+}

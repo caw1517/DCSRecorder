@@ -1,5 +1,9 @@
 # Consolidated fidelity acceptance — 29 September 2026
 
+**Accepted and resolved for the documented Hornet V1 scope.** The user completed
+the final combined playback and reported that everything looked good. Final
+delivery, lifecycle evidence and numerical limitations are recorded below.
+
 The user requested one combined finish for
 [Complete single-aircraft visual and engine-state fidelity](https://github.com/caw1517/DCSRecorder/issues/6).
 They explicitly chose to check landing/taxi **ground illumination with ground
@@ -116,3 +120,55 @@ The two active tape files match the checked package; all 4,104 protected existin
 module, hook and recording files retain their hashes. The original recording
 hash is unchanged. The user has the final playback instructions. Visual/audio
 acceptance, live delivery audit and issue closure remain pending.
+
+## Final combined playback accepted
+
+The user completed **DCSRecorder-Playback-591abac7.miz** and reported, “everything
+looks good,” in response to the combined visual/audio review including the
+refueling-light sequence. Process 34564 traces and the DCS log are retained under
+local `playback-accepted/`. The original recording hash remains unchanged.
+
+The [final audit](final-audit.json) establishes:
+
+- 4,761 native motion/appearance updates through the tape endpoint. Motion
+  commands match the recorded path; float32 SDK position rounding peaks at
+  0.034757 m, and velocity readback matches the command.
+- All added appearance channels retain their delivered values. There are 4,762
+  later mission observations for each surface, lights, canopy and wheel group;
+  their maximum error is about 5e-10. This includes changing refuel argument 212.
+- All six engine channels match measured tape values within float/log precision
+  on 123,760 Sound.dll and 89,504 DCS.exe consumer calls.
+- All five smoke states (initial OFF plus four transitions) are delivered in
+  order. Maximum command delay from the captured event is approximately 18 ms.
+- Native completion at 103.001 s, mission completion at 103.020 s, removal of the
+  lead and guarded destruction cleanup (`step_hook_already_replaced`).
+
+Two numerical qualifications are retained explicitly. Fifty strobe samples
+occur at tape boundaries whose native elapsed log rounds to that boundary. The
+sample-hold result is the immediately preceding sample, consistent with a native
+double just before the edge; the trace cannot determine that side exactly.
+The auditor permits that alternative only within 1e-10 s of a boundary and still
+rejects corrupted values. Later mission observations match the delivered strobe
+values. This does not claim sub-frame strobe timing.
+
+The legacy speed-brake channel is written before native animation, unlike the
+new appearance channels. In this changing-brake run, 2,016 of 4,762 later reads
+differ from the tape, with maximum absolute difference **0.010002 on the 0–1
+scale**. Earlier audit takes had a stationary brake and did not expose this.
+The auditor now reports this residual separately rather than declaring exact
+readback or silently relaxing the other checks. The user accepted its appearance;
+the numerical residual is carried into
+[exact synchronized-state work](https://github.com/caw1517/DCSRecorder/issues/11).
+No production tolerance is inferred, and no runtime code changed after the
+accepted flight.
+
+This resolves the bounded capture/playback capability question: versioned,
+immutable Hornet recordings reproduce the tested appearance groups and measured
+native engine state with user-accepted sound/visuals. Probe extension geometry is
+not a supported captured channel; the final verdict accepts the refuel-light
+comparison without establishing probe-motion fidelity. Broader aircraft types,
+full cockpit systems, arbitrary ground initialization, ground physics and
+product-wide numerical tolerances are not established here. Ground illumination
+remains explicitly assigned to ground operations; sound depth and multicolor
+smoke remain V2. The next map ticket is exact starting position and synchronized
+state.

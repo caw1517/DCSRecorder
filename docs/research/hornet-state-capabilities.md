@@ -27,14 +27,20 @@ tapes are byte-identical; motion, appearance and engine consumers match within
 float/log precision. Later reads confirm the latest surfaces/brake, lights,
 canopy and wheels. All 37 companion and seven native/lifecycle checks pass.
 
-### Remaining before closing this issue
+### Accepted V1 scope and remaining boundaries
 
-- Final combined live capture/playback and user verdict. Refuel argument 212
-  activation/rendering remains unexercised. Probe geometry is not in the current
-  profile; determine whether it is needed for this comparison before acceptance.
-- The user explicitly selected landing/taxi ground illumination for the existing
-  ground-operations work. It remains unverified but is no longer this issue's
-  closure gate.
+The final 95.18-second combined playback is user-accepted. Refuel argument 212
+now has changing capture, matching native/later delivery and an accepted visual
+comparison. Completion and lead removal are verified. See the consolidated
+record for the 4,761-update final audit and precise evidence limits.
+
+The legacy speed-brake channel has a measured later-readback residual up to
+0.010002 on its 0–1 scale after native animation, despite accepted appearance.
+That residual is tracked with exact synchronized-state work; exact numerical
+brake retention is not claimed. Strobe boundary timestamps have sub-frame
+rounding ambiguity, documented by the audit. Probe extension geometry is not
+part of the captured profile. Ground illumination moves to ground operations
+by explicit user choice and remains unverified.
 
 White smoke is V1. [Sound depth](https://github.com/caw1517/DCSRecorder/issues/12)
 and [multicolor smoke](https://github.com/caw1517/DCSRecorder/issues/13) are V2.
@@ -55,7 +61,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | State | Capture evidence | Playback evidence | Current status / missing evidence |
 | --- | --- | --- | --- |
 | Type and livery | Mission recorder stores `getTypeName()` and mission livery. | Staged packager rejects types other than `FA-18C_hornet` and liveries other than `Blue Angels Jet Team`. | Supported bounded identity; no silent substitution. F-16/F-15 registrations remain unsupported. |
-| Speed brake | Mission recorder reads argument 21 each sample. | Tape includes brake; `hornet_appearance::apply` writes 21 and checks immediate readback. | Existing implemented channel. Retain it as the control in new comparisons. |
+| Speed brake | Mission recorder reads argument 21 each sample. | Tape includes brake; `hornet_appearance::apply` writes 21 and checks immediate readback. | User-accepted appearance; final changing-brake run measures up to 0.010002 later-readback difference after native animation. Exact retention is tracked with synchronized-state work. |
 | Gear | Live capture confirmed arguments 0 (nose), 5 (left), 3 (right). | Isolated SDK replay visually accepted. | Combined motion/state playback visually accepted; the final integrated numerical audit now passes. Animated deployment does not prove ground contact. |
 | Gear compression / wheels | Compression 1/6/4 and rotation 101/103/102 respond in taxi captures; the normal airborne take records zero compression and stationary phase one. Period-one interpolation passes all real samples and 194 wraps. | Isolated changing playback and normal version-seven app workflow accepted. Normal playback has 1,612 matching native updates and 1,613 matching playing/completion reads, with user visual acceptance and normal removal. | Pre-release raw wheel phase zero differs from recorded one at the equivalent rotation endpoint. Arbitrary initial ground states, reverse/high-speed rotation and contact remain pending. See [isolated evidence](../../experiments/efm-ownership/results/wheels-2026-09-28/README.md) and [normal integration](../../experiments/efm-ownership/results/wheels-integration-2026-09-29/README.md). |
 | Nose-wheel steering | Argument 2 reaches +0.726780 after the left marker, near zero during center, and -0.735133 after right; 17/18 are rudder comparators. | Accepted visually/numerically in the isolated changing test and normal version-seven airborne app run (centered steering). | Markers precede movement; no angle is inferred from trajectory or converted to degrees. Ground-path playback remains separate. |
@@ -63,7 +69,7 @@ Argument numbers below are exterior model arguments, not cockpit controls.
 | Leading-edge flaps | Channels 13/14 respond in live capture; descriptor labels right/left. | Isolated replay visually accepted. | Combined motion/state playback visually accepted; the final integrated numerical audit now passes. |
 | Trailing-edge flaps | Channels 9/10 respond in live capture, including negative values during roll. | Isolated replay visually accepted; signed state preserved. | Combined motion/state playback visually accepted; the final integrated numerical audit now passes. |
 | Ailerons / stabilators / rudders | Live capture confirms channels 11/12, 15/16, 17/18 respond with coupled signed motion. | Isolated surfaces visually accepted; post-animation stabilator retention verified numerically. | Combined motion/state playback visually accepted; the final integrated numerical audit now passes. |
-| Exterior lights | Live marked capture and user observation confirm formation 88; navigation 190/191/192; pulsing strobe 193; landing/taxi 210. Refuel 212 remains unexercised. | Isolated changing-light replay accepted. Normal lights-off replay accepted across two full runs; all post-animation light values match, including repaired formation startup overwrites. | Normal version-five workflow accepted for the user's usual configuration. Latest normal playback has 1,613 matching later reads. Refuel activation remains pending; ground illumination moves to ground operations by user choice. |
+| Exterior lights | Live marked capture and user observation confirm formation 88; navigation 190/191/192; pulsing strobe 193; landing/taxi 210. Final capture also exercises refuel 212: OFF/ON/OFF/ON/OFF, reaching 0.322331. | Isolated changing-light replay accepted. Normal lights-off replay accepted across two full runs; all post-animation light values match, including repaired formation startup overwrites. | Final combined light playback is accepted; 4,762 later reads match delivered light values, including refuel. Strobe edge timestamps have documented rounding ambiguity. Ground illumination remains under ground operations; probe geometry is not captured. |
 | Demonstration smoke | Dedicated SMK station 10 carries `INV-SMOKE-*`. Native flag capture passed in a version-four app flight: 2,647 samples / 52.92 seconds, 0..12 ms capture delay, OFF/ON/OFF and white-generator metadata preserved. | User accepted recorded white-smoke playback. Requests followed recorded ON/OFF by at most 14 ms and the mission completed normally. | Normal capture/library/playback accepted for white smoke. Other colors are unverified. See the [accepted actuator and capture investigation](../../experiments/efm-ownership/results/smoke-control-2026-09-27/README.md). |
 | Engine RPM, left/right | Read-only native helper captures core/fan RPM and both power getters with player/timing checks. Core RPM agrees with Export. | Guarded per-object native getters deliver the measured values to DCS consumers. | Combined sound/appearance and normal version-three capture/playback accepted. Integrated audit passes for DCS and Sound.dll consumers; audio onset latency is not measured. |
 | Nozzle opening | Marked live capture supports left argument 90 and right 89. | Post-animation writes share the native sound playback clock. | Combined sound/visual test and normal recorded-motion integration accepted. |
