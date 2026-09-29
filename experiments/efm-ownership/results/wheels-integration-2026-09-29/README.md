@@ -60,3 +60,25 @@ checkpoint). Its library endpoint reports the current hook installed, seven
 existing recordings and two existing partials. The user has instructions for
 a short normal airborne take and confirmation of `+ wheels` in the app.
 Live source values and the generated normal playback still await acceptance.
+
+## First normal capture
+
+The user completed `20260929T205005Z-0001.csv`: 1,611 samples over 32.20 seconds,
+speed 178.9885–223.3675 m/s, with the expected version-seven metadata. The running
+companion reports it supported as “Motion + surfaces + engines + smoke + lights
++ canopy + wheels.” Source SHA-256:
+`3dae246d802655b782051c9628615dedeaeae2a8b2f2cd2a67bdf027b230385b`.
+The original and evidence/package copies are byte-identical.
+
+All 11,277 saved wheel-channel values and all 1,611 sample times exactly match
+the mission log. In this airborne take all three compression values are zero,
+all three wheel phases are one, and steering is centered at zero. These are
+measured states, not substituted defaults. The accepted separate taxi test
+covers changing wheel/steering/suspension behavior; this take exercises the
+normal app path and airborne initial state.
+
+Prepared `package/wheels-normal-playback` using `DCSRecorder-Hornet-Wheels-Staged`.
+The actual converted tape passes native load/evaluation, all wheel samples,
+midpoints, initial/final holds and SDK guards; generated mission dependency,
+route and configuration checks pass. Normal live playback remains pending.
+The user has been asked to close DCS before activating its tape and mission.
