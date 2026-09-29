@@ -187,10 +187,10 @@ void after_native_step(const void* pointer) {
 #ifndef STATE_POSTANIMATION
     object.pending=false;
 #endif
-    // Engine experiment repairs its four observed channels; exterior variant
-    // retains the original two-stabilator comparison.
+    // Wheel and engine experiments repair their recorded appearance channels;
+    // the original exterior variant retains its two-stabilator comparison.
     bool ok=true;
-#ifdef ENGINE_APPEARANCE_PROTOTYPE
+#if defined(ENGINE_APPEARANCE_PROTOTYPE) || defined(WHEEL_APPEARANCE_PROTOTYPE)
     for(size_t i=0;i<channels.size();++i) {
 #else
     for(size_t i: {size_t(9),size_t(10)}) {
@@ -294,7 +294,13 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #else
         object.hooked=std::string(status)=="step_hook_installed";
 #endif
-        event(status,object,time,"stabilator_timing");
+        event(status,object,time,
+#ifdef WHEEL_APPEARANCE_PROTOTYPE
+            "wheel_animation_timing"
+#else
+            "stabilator_timing"
+#endif
+        );
         if(!object.hooked) {object.valid=false;api->ed_set_single_arg(handle,status_arg,0.75f);return;}
     }
     if(time-object.start>1 && object.repaired==0) {

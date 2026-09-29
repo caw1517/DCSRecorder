@@ -9,7 +9,7 @@ from pathlib import Path
 CHANNELS=[0,5,3,1,6,4,101,103,102,2]
 
 
-def analyze(trace,log):
+def analyze(trace,log,allow_incomplete=False):
     summary={str(c):dict(native_rows=0,immediate_max_error=0,between_calls_max_error=0,
         mission_rows=0,mission_mismatches=0,mission_max_error=0,first_mismatch=None) for c in CHANNELS}
     groups={};identity=None;last_call=0;last_time=-1
@@ -51,16 +51,18 @@ def analyze(trace,log):
             if error>1e-5:
                 s['mission_mismatches']+=1
                 if s['first_mismatch'] is None:s['first_mismatch']=dict(elapsed=elapsed,phase=fields[2],requested=groups[nearest][c],observed=value)
-    assert begins==1 and complete and count>0
+    assert begins==1 and count>0
+    assert complete or allow_incomplete,'Missing completion marker; use --allow-incomplete for diagnosis only'
     assert all(s['immediate_max_error']<=1e-5 for s in summary.values()),'Immediate SDK write mismatch'
-    return dict(object_id=identity,native_calls=len(groups),mission_samples=count,elapsed_end=times[-1],
+    return dict(complete=complete,object_id=identity,native_calls=len(groups),mission_samples=count,elapsed_end=times[-1],
         max_elapsed_rounding=max_rounding,channels=summary)
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('trace',type=Path);parser.add_argument('log',type=Path)
     parser.add_argument('output',type=Path);parser.add_argument('--assert-wheels',action='store_true')
-    args=parser.parse_args();result=analyze(args.trace,args.log)
+    parser.add_argument('--allow-incomplete',action='store_true',help='diagnose saved partial run; never counts as completion acceptance')
+    args=parser.parse_args();result=analyze(args.trace,args.log,args.allow_incomplete)
     args.output.write_text(json.dumps(result,indent=2)+'\n')
     failed=[c for c in CHANNELS if result['channels'][str(c)]['mission_max_error']>1e-5]
     print(f"{result['native_calls']} SDK calls; {result['mission_samples']} later reads; wheels mismatches: {failed}")

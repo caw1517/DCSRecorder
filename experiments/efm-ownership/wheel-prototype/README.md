@@ -101,3 +101,17 @@ some channels: `check_retention.py SDK_TRACE SAVED_DCS_LOG OUTPUT_JSON --assert-
 compares actual writes to later mission reads using the writer's elapsed clock.
 Immediate readback alone does not establish visual fidelity. Normal app/schema
 integration follows live validation, not the offline checks.
+
+The first live SDK-only run retained compression but DCS reset wheel rotation
+to zero and altered steering/deployment after each write. The separate
+`--post-animation` packaging option uses targets `HornetWheelAnimationProbe`
+and `wheel_animation_check` to compare the same tape after the guarded native
+animation update. Its distinct mission is
+**DCSRecorder-Wheel-Animation-Playback.miz**, with the same F10 sequence.
+Live retention and rendering remain required before acceptance.
+
+`wheel_animation_check.exe --without-repair` reproduces the lost values; default
+execution checks the actual repair callback through the native dispatcher.
+The capture remains unchanged. For deliberately partial diagnostic logs only,
+`check_retention.py ... --allow-incomplete` records incomplete status while
+checking channel retention. Normal acceptance still requires completion.

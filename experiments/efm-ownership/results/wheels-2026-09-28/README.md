@@ -1,7 +1,8 @@
 # Wheel and suspension checkpoint — 28 September 2026
 
-Status: both live taxi captures saved and analyzed; separate captured wheel,
-suspension and steering playback checked and installed. Live playback remains pending. Normal canopy integration
+Status: both live taxi captures saved and analyzed. First wheel playback shows
+native wheel/gear/steering overwrites; suspension values survive. A separate
+post-animation timing comparison is checked and installed, awaiting live testing. Normal canopy integration
 is accepted in its own evidence record.
 
 The [prototype](../../wheel-prototype/README.md) samples deployment, compression
@@ -124,3 +125,63 @@ taxi-path playback, ground contact or suspension physics. Native traces plus
 independent mission reads will distinguish immediate writes from retained values.
 The user has playback instructions. Normal recording/schema integration waits
 for the separate animation result.
+
+## SDK-only playback diagnosis — 29 September
+
+User report: NWS seemed to work, but little strut/main-gear movement or tire spin
+was visible. Saved local evidence is under `playback-2026-09-29/`. Two attempts
+share process 18072 and reuse object ID 16777472; analysis separates them at
+mission BEGIN and SDK call-counter reset, rather than mixing their clocks.
+The saved first attempt reaches the tape endpoint but ends before the final
+eight-second hold/removal; the second saved snapshot is partial. Neither has
+the normal mission completion marker. These traces diagnose appearance, not
+lifecycle acceptance.
+
+`check_retention.py run1.csv run1.log retention1.json --allow-incomplete
+--assert-wheels` reports **2,697 SDK calls / 2,692 later reads** and fails on
+0/5/3/101/103/102/2. The same command on the second attempt reports
+**1,045 SDK calls / 1,040 later reads** and the same failing channel set.
+`--allow-incomplete` explicitly records `complete: false`; strict completion
+validation remains the default.
+
+- All ten channels have zero immediate readback error.
+- Every later rotation read is zero, while requested wheel phases vary. This is
+  a real lost-rotation signal, not merely the equivalent phase-one/zero endpoint.
+- Gear deployment changes from requested 1 to approximately 0.994979978.
+- Steering differs by up to 0.015060068; the user's visual impression is recorded
+  without claiming exact numerical retention.
+- Compression 1/6/4 matches every later first-run read within 0.0000000005.
+  Source main-strut excursions are only about 4–5% of normalized channel range;
+  numerical retention does not prove that the subtle movement was visible.
+
+Ranked explanations: a later native animation writer explains lost rotation and
+altered steering/gear; a model/channel mismatch remains a rendering alternative;
+small captured motion explains subtle suspension but cannot explain wheels
+being reset to zero. The comparison changes only write timing. It does not
+amplify suspension or generate wheel motion from velocity.
+
+Prepared `DCSRecorder-Hornet-Wheels-Animation` / `HornetWheelAnimationProbe.dll`
+and `DCSRecorder-Wheel-Animation-Playback.miz` in `package/wheel-animation-ready`.
+It reuses the previously checked build-specific per-object animation hook and
+reapplies the same ten values after the native animation update. The tape bytes
+are identical to the SDK-only package. Existing SDK-only and accepted normal
+modules stay intact.
+
+The focused regression uses the actual repair callback and animation dispatcher
+with the overwrite pattern observed in the live trace. Running
+`wheel_animation_check.exe --without-repair` fails with “later animation erased
+a requested wheel state”; the corrected default passes repeated updates,
+inactive-pending guard and hook restoration. The built timing DLL rejects a
+non-DCS object before appearance/native writes. The unchanged SDK variant still
+passes all 2,462 samples, midpoints, 194 wraps and endpoint/lifecycle guards.
+The new mission passes installed dependency/route/configuration and F10 checks.
+Live after-update retention/rendering is still pending; the saved original
+repro remains red, as expected until a new DCS run supplies corrected evidence.
+
+After the user closed DCS, installed the separate timing module/mission: ten
+installed hashes verified, all 1,865 protected existing hashes unchanged.
+Mission SHA-256:
+`70b580cf545fc579162b37cc3565e135145913d20d630f0b661c6e5d9bf1a5aa`.
+Both variants share tape SHA-256:
+`902a4d99238c40e86ee80ec589160d6e2aa4fafd4e0d7dee086130b0c913953b`.
+The user has instructions to inspect the wheels/NWS and wait for lead removal.

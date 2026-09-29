@@ -143,6 +143,17 @@ target_include_directories(wheel_playback_check PRIVATE "${DCS_ROOT}/API/include
 target_compile_definitions(wheel_playback_check PRIVATE WHEEL_APPEARANCE_PROTOTYPE NOMINMAX)
 target_compile_features(wheel_playback_check PRIVATE cxx_std_17)
 
+add_library(HornetWheelAnimationProbe SHARED probe.cpp state-prototype/playback.cpp)
+target_include_directories(HornetWheelAnimationProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetWheelAnimationProbe PRIVATE WHEEL_APPEARANCE_PROTOTYPE STATE_POSTANIMATION HORNET_RECORDED_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetWheelAnimationProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetWheelAnimationProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_executable(wheel_animation_check wheel-prototype/check_animation.cpp)
+target_include_directories(wheel_animation_check PRIVATE "${DCS_ROOT}/API/include")
+target_compile_definitions(wheel_animation_check PRIVATE WHEEL_APPEARANCE_PROTOTYPE STATE_POSTANIMATION HORNET_RECORDED_PROTOTYPE NOMINMAX)
+target_compile_features(wheel_animation_check PRIVATE cxx_std_17)
+add_test(NAME wheel_animation_boundary COMMAND wheel_animation_check)
+
 # Separate integrated engine target; older installed controllers are preserved.
 add_library(HornetEngineStagedProbe SHARED probe.cpp object_probe.cpp)
 target_include_directories(HornetEngineStagedProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
