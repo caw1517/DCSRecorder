@@ -82,3 +82,10 @@ The actual converted tape passes native load/evaluation, all wheel samples,
 midpoints, initial/final holds and SDK guards; generated mission dependency,
 route and configuration checks pass. Normal live playback remains pending.
 The user has been asked to close DCS before activating its tape and mission.
+
+After the user confirmed DCS closed, activated the checked package through the
+normal library activation path. Installed mission:
+`DCSRecorder-Playback-4a6e6f9a.miz`, generation
+`4a6e6f9a6b1d4abb8842895465df7c72`. All 730 protected existing file hashes and
+the original recording hash remain unchanged. The active wheel-controller tape
+and metadata match the prepared package. Live normal playback is the next gate.
