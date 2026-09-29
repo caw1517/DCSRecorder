@@ -91,6 +91,9 @@ class Library:
                 if metadata['canopy_available']:
                     item['status_label'] += ' + canopy'
                     item['reason'] += ' Canopy position and transitions are recorded.'
+                if metadata['wheels_available']:
+                    item['status_label'] += ' + wheels'
+                    item['reason'] += ' Wheel rotation, suspension and nose-wheel steering are recorded.'
             except (ValueError, OSError, OverflowError) as exc:
                 item['reason'] = str(exc)
             result.append(item)
@@ -120,6 +123,9 @@ class Library:
         smoke = self.settings.get('smoke_capture', False)
         lights = self.settings.get('lights_capture', False)
         canopy = self.settings.get('canopy_capture', False)
+        wheels = self.settings.get('wheels_capture', False)
+        if wheels and not canopy:
+            raise ValueError('Wheel capture requires the installed canopy, lights and engine workflow.')
         if canopy and not (lights and engine):
             raise ValueError('Canopy capture requires the installed lights and engine workflow.')
         if lights and not engine:
@@ -129,6 +135,7 @@ class Library:
         prefix = 'DCSRecorder-Practice-Smoke-' if smoke else 'DCSRecorder-Practice-Engine-' if engine else 'DCSRecorder-Practice-Exterior-'
         if lights: prefix = 'DCSRecorder-Practice-Lights-'
         if canopy: prefix = 'DCSRecorder-Practice-Canopy-'
+        if wheels: prefix = 'DCSRecorder-Practice-Wheels-'
         destination = self.saved / 'Missions' / (prefix + uuid.uuid4().hex[:8] + '.miz')
         script = (EXPERIMENT / ('record_flight_engine_mission.lua' if engine else 'record_flight_mission.lua')).read_text(encoding='utf-8-sig')
         # Metadata and wording are specific to the app-generated practice mission.
@@ -140,6 +147,8 @@ class Library:
             script = 'DCSRECORDER_LIGHTS=true\n' + script
         if canopy:
             script = 'DCSRECORDER_CANOPY=true\n' + script
+        if wheels:
+            script = 'DCSRECORDER_WHEELS=true\n' + script
         script = script.replace(' samples written to DCS.log. Ready for extraction. Keep this DCS session until the recording is collected.',
                                 ' samples captured. Automatic save is pending; confirm the take appears in the companion flight library before closing DCS.')
         script = script.replace(' into DCS.log.', '. Use the companion flight library to confirm automatic saving after Stop.')
@@ -158,6 +167,8 @@ class Library:
             with zipfile.ZipFile(self.settings['baseline_mission']) as source, zipfile.ZipFile(destination, 'x', zipfile.ZIP_DEFLATED) as target:
                 for entry in source.infolist():
                     target.writestr(entry, (folder / 'mission').read_bytes() if entry.filename == 'mission' else source.read(entry.filename))
+        if wheels:
+            return {'mission': str(destination), 'message': 'Practice mission created with recorded wheels, suspension, steering, canopy, lights, surfaces and engines.' + (' White smoke is fitted and captured.' if smoke else '') + ' Record with F10 Start/Stop, then confirm the saved take includes wheels in the flight library.'}
         if canopy:
             return {'mission': str(destination), 'message': 'Practice mission created with canopy, lights, surfaces and engines.' + (' White smoke is fitted and captured.' if smoke else '') + ' Record with F10 Start/Stop, then confirm the saved take includes canopy in the flight library.'}
         if lights:
@@ -199,7 +210,7 @@ class Library:
     def activate(self, output, manifest, generation):
         module=manifest.get('module','DCSRecorder-Hornet-Staged')
         binary=manifest.get('binary','HornetStagedProbe')
-        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe'),('DCSRecorder-Hornet-Engine-Staged','HornetEngineStagedProbe'),('DCSRecorder-Hornet-Lights-Staged','HornetLightsStagedProbe'),('DCSRecorder-Hornet-Canopy-Staged','HornetCanopyStagedProbe')):
+        if (module,binary) not in (('DCSRecorder-Hornet-Staged','HornetStagedProbe'),('DCSRecorder-Hornet-State-Staged','HornetStateStagedProbe'),('DCSRecorder-Hornet-Engine-Staged','HornetEngineStagedProbe'),('DCSRecorder-Hornet-Lights-Staged','HornetLightsStagedProbe'),('DCSRecorder-Hornet-Canopy-Staged','HornetCanopyStagedProbe'),('DCSRecorder-Hornet-Wheels-Staged','HornetWheelsStagedProbe')):
             raise ValueError('Unsupported playback module')
         mod = self.saved / 'Mods/aircraft' / module
         # Install once with the tested installer. Updates replace only the tape,

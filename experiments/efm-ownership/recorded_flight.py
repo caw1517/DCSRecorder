@@ -6,6 +6,7 @@ import engine_state
 import smoke_state
 import light_state
 import canopy_state
+import wheel_state
 
 def quaternion(f,u,r):
     m=[[f[i],u[i],r[i]] for i in range(3)];trace=sum(m[i][i] for i in range(3))
@@ -19,7 +20,7 @@ def quaternion(f,u,r):
 
 def read(path):
     with Path(path).open(newline='',encoding='utf-8-sig') as f: rows=list(csv.reader(f))
-    if not rows or rows[0] not in (['DCSREC',str(v)] for v in range(1,7)): raise ValueError('Unsupported recording version')
+    if not rows or rows[0] not in (['DCSREC',str(v)] for v in range(1,8)): raise ValueError('Unsupported recording version')
     version=int(rows[0][1])
     metadata={};i=1
     while i<len(rows) and rows[i] and rows[i][0]!='t':
@@ -35,8 +36,10 @@ def read(path):
     if version<4 and any(k.startswith('smoke_') for k in metadata): raise ValueError('Legacy recording cannot declare measured smoke')
     if version>=5 and metadata.get('light_profile')!=light_state.PROFILE: raise ValueError('Unsupported light profile')
     if version<5 and 'light_profile' in metadata: raise ValueError('Legacy recording cannot declare lights')
-    if version==6 and metadata.get('canopy_profile')!=canopy_state.PROFILE: raise ValueError('Unsupported canopy profile')
+    if version>=6 and metadata.get('canopy_profile')!=canopy_state.PROFILE: raise ValueError('Unsupported canopy profile')
     if version<6 and 'canopy_profile' in metadata: raise ValueError('Legacy recording cannot declare canopy')
+    if version>=7 and metadata.get('wheel_profile')!=wheel_state.PROFILE: raise ValueError('Unsupported wheel profile')
+    if version<7 and 'wheel_profile' in metadata: raise ValueError('Legacy recording cannot declare wheels')
     has_smoke=version==4 or (version>=5 and 'smoke_profile' in metadata)
     if version>=5 and not has_smoke and any(k.startswith('smoke_') for k in metadata): raise ValueError('Incomplete smoke metadata')
     expected=columns(version,has_smoke)
@@ -89,15 +92,21 @@ def read(path):
             lights=[float(row[k]) for k in light_state.COLUMNS]
             if any(not math.isfinite(v) or not 0<=v<=1 for v in lights): raise ValueError('Invalid light sample')
             sample.extend(lights)
-    if version==6:
+    if version>=6:
         for sample,row in zip(samples,raw):
             canopy=float(row['arg_38'])
             if not math.isfinite(canopy) or not 0<=canopy<=1: raise ValueError('Invalid canopy sample')
             sample.append(canopy)
+    if version>=7:
+        for sample,row in zip(samples,raw):
+            wheels=[float(row[k]) for k in wheel_state.COLUMNS]
+            if any(not math.isfinite(v) or not (-1 if c==2 else 0)<=v<=1 for c,v in zip(wheel_state.CHANNELS,wheels)):
+                raise ValueError('Invalid wheel sample')
+            sample.extend(wheels)
     if has_smoke: metadata['smoke_events']=smoke_state.transitions(metadata,raw)
     for sample in samples:sample[0]-=start
     metadata.update(duration=samples[-1][0],samples=len(samples),source_time=start,recording_version=version,
-                    exterior_available=version>=2,engine_available=version>=3,smoke_available=has_smoke,lights_available=version>=5,canopy_available=version==6)
+                    exterior_available=version>=2,engine_available=version>=3,smoke_available=has_smoke,lights_available=version>=5,canopy_available=version>=6,wheels_available=version>=7)
     return metadata,samples,raw
 
 def convert(source,destination):
@@ -105,12 +114,13 @@ def convert(source,destination):
     destination=Path(destination);destination.parent.mkdir(parents=True,exist_ok=True)
     # Smoke commands are embedded in the mission. Lights and canopy extend the
     # native tape explicitly; older recordings keep their existing tape version.
-    metadata['native_tape_version']=5 if metadata['canopy_available'] else 4 if metadata['lights_available'] else min(metadata['recording_version'],3)
+    metadata['native_tape_version']=6 if metadata['wheels_available'] else 5 if metadata['canopy_available'] else 4 if metadata['lights_available'] else min(metadata['recording_version'],3)
     text=f'DCSREC_PLAYBACK_V{metadata["native_tape_version"]}\n'+str(len(samples))+'\n'
     if metadata['exterior_available']:text+=PROFILE+'\n'
     if metadata['engine_available']:text+=engine_state.PROFILE+'\n'
     if metadata['lights_available']:text+=light_state.PROFILE+'\n'
     if metadata['canopy_available']:text+=canopy_state.PROFILE+'\n'
+    if metadata['wheels_available']:text+=wheel_state.PROFILE+'\n'
     text+=''.join(' '.join(f'{v:.15g}' for v in row)+'\n' for row in samples)
     destination.write_text(text,encoding='ascii')
     destination.with_suffix('.json').write_text(json.dumps(metadata,indent=2)+'\n')

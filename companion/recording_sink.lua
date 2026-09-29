@@ -8,6 +8,7 @@ local columns = 't,x,y,z,fx,fy,fz,ux,uy,uz,rx,ry,rz,vx,vy,vz,speedbrake,rpm_left
 local exterior = ',arg_0,arg_3,arg_5,arg_9,arg_10,arg_11,arg_12,arg_13,arg_14,arg_15,arg_16,arg_17,arg_18'
 local engine = ',arg_28,arg_29,arg_89,arg_90,engine_time,engine_core_left,engine_fan_left,engine_thrust_left,engine_power_left,engine_core_right,engine_fan_right,engine_thrust_right,engine_power_right'
 local lights = ',arg_88,arg_190,arg_191,arg_192,arg_193,arg_210,arg_212'
+local wheels = ',arg_1,arg_6,arg_4,arg_101,arg_103,arg_102,arg_2'
 local capture_engine,capture_smoke
 local history_index, active, serial = 0, nil, 0
 local function announce(text) log.write('DCS_RECORDER_SAVE', log.INFO, text) end
@@ -51,7 +52,7 @@ local function open_take(id, hex)
     abandon('new take')
     assert(#hex <= 8192 and #hex % 2 == 0 and not hex:find('[^%x]'), 'Invalid recorder metadata')
     local metadata = hex:gsub('..', function(pair) return string.char(tonumber(pair,16)) end)
-    local version=metadata:match('^DCSREC,([123456])\n')
+    local version=metadata:match('^DCSREC,([1234567])\n')
     assert(version, 'Invalid recorder version')
     if version~='1' then assert(metadata:find('\nstate_profile,hornet-exterior-v1\n',1,true),'Invalid exterior state profile') end
     local source_id
@@ -70,8 +71,9 @@ local function open_take(id, hex)
     end
     local has_engine=tonumber(version)>=3
     if tonumber(version)>=5 then assert(metadata:find('\nlight_profile,hornet-lights-v1\n',1,true),'Invalid light profile')end
-    if version=='6' then assert(metadata:find('\ncanopy_profile,hornet-canopy-v1\n',1,true),'Invalid canopy profile')end
-    local header=columns..(version~='1' and exterior or '')..(has_engine and engine or '')..(has_smoke and ',smoke_time,smoke_on' or '')..(tonumber(version)>=5 and lights or '')..(version=='6' and ',arg_38' or '')..'\n'
+    if tonumber(version)>=6 then assert(metadata:find('\ncanopy_profile,hornet-canopy-v1\n',1,true),'Invalid canopy profile')end
+    if version=='7' then assert(metadata:find('\nwheel_profile,hornet-wheels-v1\n',1,true),'Invalid wheel profile')end
+    local header=columns..(version~='1' and exterior or '')..(has_engine and engine or '')..(has_smoke and ',smoke_time,smoke_on' or '')..(tonumber(version)>=5 and lights or '')..(tonumber(version)>=6 and ',arg_38' or '')..(version=='7' and wheels or '')..'\n'
     local filename
     repeat
         serial = serial + 1
@@ -79,7 +81,7 @@ local function open_take(id, hex)
     until not lfs.attributes(filename .. '.partial') and not lfs.attributes(filename .. '.csv')
     local file = assert(io.open(filename .. '.partial', 'wb'))
     active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, version=version,source_id=source_id,
-        has_engine=has_engine,has_smoke=has_smoke,commas=version=='6' and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
+        has_engine=has_engine,has_smoke=has_smoke,commas=version=='7' and 50 or tonumber(version)>=6 and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
     checked(file.write,file,metadata,header); checked(file.flush,file)
     write_status('RECORDING\nRecording in progress; use F10 Stop to save.')
 end
@@ -98,9 +100,9 @@ local function consume(line)
         local light_data=''
         if tonumber(active.version)>=5 then
             local fields={};for value in (data..','):gmatch('(.-),')do fields[#fields+1]=value end
-            local last=active.version=='6' and 44 or 43
+            local last=active.version=='7' and 51 or active.version=='6' and 44 or 43
             assert(#fields==last,'Invalid appearance mission row')
-            for i=37,last do local v=tonumber(fields[i]);assert(v and v==v and v>=0 and v<=1,'Invalid light/canopy value')end
+            for i=37,last do local v=tonumber(fields[i]);assert(v and v==v and v>=(i==51 and -1 or 0) and v<=1,'Invalid light/canopy/wheel value')end
             light_data=','..table.concat(fields,',',37,last);data=table.concat(fields,',',1,36)
         end
         if active.has_engine then data=capture_engine(data,active) end

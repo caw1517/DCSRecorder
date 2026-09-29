@@ -181,6 +181,19 @@ target_include_directories(canopy_integrated_check PRIVATE "${DCS_ROOT}/API/incl
 target_compile_features(canopy_integrated_check PRIVATE cxx_std_17)
 target_compile_definitions(canopy_integrated_check PRIVATE NOMINMAX)
 
+# Wheels-capable integrated controller, installed separately from earlier versions.
+add_library(HornetWheelsStagedProbe SHARED probe.cpp object_probe.cpp)
+target_include_directories(HornetWheelsStagedProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetWheelsStagedProbe PRIVATE HORNET_PROTOTYPE HORNET_RECORDED_PROTOTYPE HORNET_STAGED_PROTOTYPE HORNET_ENGINE_STAGED_PROTOTYPE ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetWheelsStagedProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetWheelsStagedProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_test(NAME wheels_staged_callback_contract COMMAND probe_check $<TARGET_FILE:HornetWheelsStagedProbe>)
+add_executable(wheels_integrated_check wheel-prototype/check_integrated.cpp)
+target_include_directories(wheels_integrated_check PRIVATE "${DCS_ROOT}/API/include")
+target_compile_features(wheels_integrated_check PRIVATE cxx_std_17)
+target_compile_definitions(wheels_integrated_check PRIVATE NOMINMAX)
+
+
 # Separate four-channel engine appearance experiment: SDK fixture + live timing variant.
 foreach(engine_target HornetEngineSDKProbe HornetEngineAppearanceProbe HornetEngineSoundProbe HornetEngineSounderProbe HornetEngineAudibilityProbe)
   add_library(${engine_target} SHARED probe.cpp state-prototype/playback.cpp)

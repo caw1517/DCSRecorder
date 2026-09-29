@@ -2,7 +2,8 @@
 local sink_path,engine_path,root,mode=assert(arg[1]),assert(arg[2]),assert(arg[3]),arg[4] or 'normal'
 local smoke_path=arg[5]
 if smoke_path=='-' then smoke_path=nil end
-local canopy=arg[6]=='canopy'
+local wheels=arg[6]=='wheels'
+local canopy=arg[6]=='canopy' or wheels
 local lights=arg[6]=='lights' or canopy
 root=root:gsub('\\','/')..'/'
 local callbacks,now,id,history=nil,10,16777472,{}
@@ -50,6 +51,7 @@ local metadata='DCSREC,3\naircraft,FA-18C_hornet\nlivery,Blue Angels Jet Team\nt
 if smoke_path then metadata=metadata:gsub('DCSREC,3','DCSREC,4')..'smoke_profile,hornet-native-smoke-v1\nsmoke_station,10\nsmoke_clsid,{INV-SMOKE-WHITE}\n'end
 if lights then metadata=metadata:gsub('DCSREC,[34]','DCSREC,5')..'light_profile,hornet-lights-v1\n'end
 if canopy then metadata=metadata:gsub('DCSREC,5','DCSREC,6')..'canopy_profile,hornet-canopy-v1\n'end
+if wheels then metadata=metadata:gsub('DCSREC,6','DCSREC,7')..'wheel_profile,hornet-wheels-v1\n'end
 local hex=metadata:gsub('.',function(c)return string.format('%02x',c:byte())end)
 emit('BEGIN,1,'..hex)
 for i=0,300 do
@@ -61,6 +63,10 @@ for i=0,300 do
     for _,v in ipairs({.8,.7,.5,.4})do values[#values+1]=v end
     if lights then for c=1,7 do values[#values+1]=(mode=='invalid_light' and c==1) and 1.1 or (c==5 and (i%4<2 and 0 or .9) or c/10) end end
     if canopy then values[#values+1]=mode=='invalid_canopy' and 'nan' or (.9*i/300)end
+    if wheels then
+        for _,v in ipairs({.71+i/3000,.82+i/10000,.83-i/10000,(.97+i*.03)%1,(.98+i*.02)%1,(.99+i*.01)%1,-.7+i/300*1.4})do values[#values+1]=v end
+        if mode=='invalid_wheel' then values[#values]='nan' end
+    end
     for j,v in ipairs(values)do values[j]=tostring(v)end
     emit('DATA,1,'..(i+1)..','..table.concat(values,','))
 end

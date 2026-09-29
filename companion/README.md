@@ -151,6 +151,15 @@ visible with a reason; incomplete .partial files are counted separately.
 
 ## Verification and acceptance
 
+Wheel capture is implemented with `wheels_capture` in the separately installed
+wheel workflow. New missions save version-seven recordings; the library adds
+`+ wheels` for measured wheel rotation, strut compression and nose-wheel steering.
+These use native tape version six and a separate integrated controller. Existing
+recordings keep their original module/format. Isolated recorded taxi animations
+are accepted; the normal app workflow is installed and awaiting live validation.
+Current airborne playback limits remain in place. See the
+[wheel integration checkpoint](../experiments/efm-ownership/results/wheels-integration-2026-09-29/README.md).
+
 Canopy capture is implemented in the separately staged canopy workflow. New
 canopy-enabled practice missions save version-six recordings and the library
 adds `+ canopy`, selecting a separate canopy-capable controller. Initial position

@@ -6,6 +6,7 @@
 #include "hornet_engine.h"
 #include "hornet_lights.h"
 #include "hornet_canopy.h"
+#include "hornet_wheels.h"
 
 namespace hornet_appearance {
 // Prototype defaults, not recorded-flight animation playback. SDK callbacks
@@ -44,6 +45,15 @@ inline bool apply_lights(const ed_object_api_entry* api,ED_OBJECT_HANDLE handle,
     for(size_t i=0;i<values.size();++i)api->ed_set_single_arg(handle,hornet_lights::channels[i],static_cast<float>(values[i]));
     view=api->ed_get_object_args(handle);if(!view.data || view.size<=212)return false;
     for(size_t i=0;i<values.size();++i)if(view.data[hornet_lights::channels[i]]!=static_cast<float>(values[i]))return false;
+    return true;
+}
+inline bool apply_wheels(const ed_object_api_entry* api,ED_OBJECT_HANDLE handle,uint64_t id,const hornet_wheels::Values& values) {
+    if(!handle || !id || !api || !api->ed_get_object_id || !api->ed_get_object_args || !api->ed_set_single_arg ||
+       api->ed_get_object_id(handle)!=id || !hornet_wheels::valid(values))return false;
+    auto view=api->ed_get_object_args(handle);if(!view.data || view.size<=103)return false;
+    for(size_t i=0;i<values.size();++i)api->ed_set_single_arg(handle,hornet_wheels::channels[i],static_cast<float>(values[i]));
+    view=api->ed_get_object_args(handle);if(!view.data || view.size<=103)return false;
+    for(size_t i=0;i<values.size();++i)if(view.data[hornet_wheels::channels[i]]!=static_cast<float>(values[i]))return false;
     return true;
 }
 inline bool apply_canopy(const ed_object_api_entry* api,ED_OBJECT_HANDLE handle,uint64_t id,double value) {
