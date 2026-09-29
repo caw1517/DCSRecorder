@@ -8,8 +8,9 @@ is the issue-tracking entry point.
 The user selected **white smoke only for V1**. Normal capture and recorded white
 smoke playback are accepted. Canopy and wheel/suspension/NWS animations now have
 accepted isolated and normal app workflows. Remaining V1 fidelity work includes
-the remaining light evidence, numerical review and combined regression, with
-ground state and contact coordinated through their existing tickets.
+the final combined live pass and refueling-light evidence. Numerical review and
+combined offline regression pass. By user choice, landing/taxi ground illumination
+will be checked with ground operations.
 
 These features are explicitly deferred to V2 and do not block V1:
 
@@ -58,13 +59,17 @@ milestone, not the full one-aircraft product milestone.
 
 | Work | Remaining scope |
 | --- | --- |
-| [Visual and engine state](https://github.com/caw1517/DCSRecorder/issues/6) | Accepted motion/surfaces, native engine sound/nozzles/afterburner, white smoke, tested light states, canopy and wheel/suspension/NWS playback. The wheel-capable normal app workflow is accepted for its airborne take. Remaining light evidence, numerical review and combined regression still keep this issue open; ground starts/contact and high-speed wheel sampling remain separate validation gates. |
+| [Visual and engine state](https://github.com/caw1517/DCSRecorder/issues/6) | Accepted motion/surfaces, native engine sound/nozzles/afterburner, white smoke, tested light states, canopy and wheel/suspension/NWS playback. The wheel-capable normal app workflow is accepted for its airborne take. Numerical audit and combined offline regression pass. Final combined live/refueling-light evidence keeps this issue open; ground starts/contact and high-speed wheel sampling remain separate gates. |
 | [Exact starting position and state](https://github.com/caw1517/DCSRecorder/issues/11) | Extend accepted exact airborne initialization to stationary hot ground starts, original parking/demo spots and synchronized aircraft state. |
-| [Flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7) | Validate ground transitions, low passes, hard maneuvers and longer full-demo durations. Remove remaining speed/duration restrictions as the corresponding behavior is implemented and verified. |
+| [Flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7) | Validate ground transitions, landing/taxi light ground illumination, low passes, hard maneuvers and longer full-demo durations. Remove remaining speed/duration restrictions as the corresponding behavior is implemented and verified. |
 | [Essential physical interactions](https://github.com/caw1517/DCSRecorder/issues/3) | Ground contact, collision/damage and wake in both directions; decide how physical disturbances affect the recorded path. |
 | [Installation and compatibility](https://github.com/caw1517/DCSRecorder/issues/8) | Portable setup, local asset preparation, supported-build maintenance, rollback and performance. |
 | [Layered playback](https://github.com/caw1517/DCSRecorder/issues/9) | After one-aircraft gates: independently identified takes sharing a playback clock while another is recorded. Preserve originals and verify timing/performance. |
 | [Recorded lead calls](https://github.com/caw1517/DCSRecorder/issues/10) | Research audio capture/delivery, onset/latency, drift, pause alignment and synchronization. Ordering relative to layers remains open. |
+
+## Historical checkpoints
+
+These entries record the progression of experiments; current status is above.
 
 The fresh application workflow is accepted after the
 [missing-gear diagnosis](../experiments/efm-ownership/results/application-gear-2026-09-27/README.md).

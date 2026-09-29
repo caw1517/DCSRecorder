@@ -1,0 +1,271 @@
+{
+  "tape_sha256": "9f4348133fdf7b754e1b0281651d4e30a3394af0559d29bd973127fe0afbb058",
+  "duration": 32.2,
+  "native_samples": 1612,
+  "object_id": "16777472",
+  "appearance": {
+    "1": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "6": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "4": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "101": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 1612
+    },
+    "103": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 1612
+    },
+    "102": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 1612
+    },
+    "2": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "38": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "88": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 25
+    },
+    "190": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "191": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "192": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "193": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "210": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "212": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "28": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 892
+    },
+    "29": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 892
+    },
+    "89": {
+      "rows": 1612,
+      "requested_error": 3.0531133177191805e-16,
+      "readback_error": 4.994615832032423e-13,
+      "native_overwrites": 1612
+    },
+    "90": {
+      "rows": 1612,
+      "requested_error": 3.0531133177191805e-16,
+      "readback_error": 4.990174939933922e-13,
+      "native_overwrites": 1612
+    },
+    "0": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "3": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "5": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "9": {
+      "rows": 1612,
+      "requested_error": 2.7755575615628914e-17,
+      "readback_error": 4.995726055057048e-13,
+      "native_overwrites": 1612
+    },
+    "10": {
+      "rows": 1612,
+      "requested_error": 2.7755575615628914e-17,
+      "readback_error": 4.997668945350142e-13,
+      "native_overwrites": 1612
+    },
+    "11": {
+      "rows": 1612,
+      "requested_error": 9.999813477268304e-15,
+      "readback_error": 4.980460488468452e-13,
+      "native_overwrites": 1608
+    },
+    "12": {
+      "rows": 1612,
+      "requested_error": 2.9999874112673908e-15,
+      "readback_error": 4.995448499300892e-13,
+      "native_overwrites": 1608
+    },
+    "13": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 4.998501612618611e-13,
+      "native_overwrites": 1612
+    },
+    "14": {
+      "rows": 1612,
+      "requested_error": 0,
+      "readback_error": 4.995170943544736e-13,
+      "native_overwrites": 1612
+    },
+    "15": {
+      "rows": 1612,
+      "requested_error": 4.000001285059396e-15,
+      "readback_error": 4.996836278081673e-13,
+      "native_overwrites": 1612
+    },
+    "16": {
+      "rows": 1612,
+      "requested_error": 1.0000680839006293e-15,
+      "readback_error": 4.998224056862455e-13,
+      "native_overwrites": 1612
+    },
+    "17": {
+      "rows": 1612,
+      "requested_error": 1.000013873792005e-15,
+      "readback_error": 4.990452495690079e-13,
+      "native_overwrites": 1612
+    },
+    "18": {
+      "rows": 1612,
+      "requested_error": 1.000013873792005e-15,
+      "readback_error": 4.972827705174154e-13,
+      "native_overwrites": 1612
+    }
+  },
+  "engine": {
+    "1:2": {
+      "rows": 17725,
+      "max_error": 4.995726055057048e-13,
+      "min_returned": 0.159163609147,
+      "max_returned": 0.494638115168
+    },
+    "1:0": {
+      "rows": 15222,
+      "max_error": 4.99711383383783e-13,
+      "min_returned": 0.736149013042,
+      "max_returned": 0.85551661253
+    },
+    "2:2": {
+      "rows": 17725,
+      "max_error": 4.999889391399392e-13,
+      "min_returned": 0.159150347114,
+      "max_returned": 0.494642347097
+    },
+    "2:0": {
+      "rows": 13611,
+      "max_error": 4.99711383383783e-13,
+      "min_returned": 0.736148953438,
+      "max_returned": 0.855516552925
+    },
+    "1:1": {
+      "rows": 3223,
+      "max_error": 4.996558722325517e-13,
+      "min_returned": 0.396198749542,
+      "max_returned": 0.714024066925
+    },
+    "2:1": {
+      "rows": 3223,
+      "max_error": 4.990452495690079e-13,
+      "min_returned": 0.396226912737,
+      "max_returned": 0.714024066925
+    }
+  },
+  "engine_callers": {
+    "DCS.exe": 28843,
+    "Sound.dll": 41886
+  },
+  "engine_passthrough_calls": 1611,
+  "later_mission": {
+    "exterior": {
+      "rows": 1613,
+      "max_error": 4.999809316563741e-10
+    },
+    "lights": {
+      "rows": 1613,
+      "max_error": 0
+    },
+    "canopy": {
+      "rows": 1613,
+      "max_error": 0
+    },
+    "wheels": {
+      "rows": 1613,
+      "max_error": 0
+    }
+  },
+  "motion": {
+    "rows": 1612,
+    "tape_position_error_m": 0,
+    "tape_basis_component_error": 5.000722058667861e-13,
+    "sdk_float_position_rounding_m": 0.03456294359010758,
+    "velocity_readback_error_mps": 0
+  },
+  "interpretation": "Numerical delivery and mission completion only; rendering/audio and unexercised channels require human evidence.",
+  "source_sha256": "3dae246d802655b782051c9628615dedeaeae2a8b2f2cd2a67bdf027b230385b",
+  "regenerated_tape_identical": true
+}

@@ -1,0 +1,169 @@
+{
+  "tape_sha256": "2faec4156e66c0c730969288474161d565270946c855aa37873ae8bf53810930",
+  "duration": 31.98,
+  "native_samples": 1601,
+  "object_id": "16777472",
+  "appearance": {
+    "28": {
+      "rows": 1601,
+      "requested_error": 6.94410448002e-15,
+      "readback_error": 5.000444502911705e-13,
+      "native_overwrites": 1005
+    },
+    "29": {
+      "rows": 1601,
+      "requested_error": 6.94410448002e-15,
+      "readback_error": 4.965194921879856e-13,
+      "native_overwrites": 1005
+    },
+    "89": {
+      "rows": 1601,
+      "requested_error": 1.36609473733e-17,
+      "readback_error": 4.99933427988708e-13,
+      "native_overwrites": 1424
+    },
+    "90": {
+      "rows": 1601,
+      "requested_error": 1.36609473733e-17,
+      "readback_error": 4.985456492079265e-13,
+      "native_overwrites": 1424
+    },
+    "0": {
+      "rows": 1601,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "3": {
+      "rows": 1601,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "5": {
+      "rows": 1601,
+      "requested_error": 0,
+      "readback_error": 0,
+      "native_overwrites": 0
+    },
+    "9": {
+      "rows": 1601,
+      "requested_error": 3.469446951953614e-18,
+      "readback_error": 4.992117830227016e-13,
+      "native_overwrites": 1601
+    },
+    "10": {
+      "rows": 1601,
+      "requested_error": 3.469446951953614e-18,
+      "readback_error": 4.987538160250438e-13,
+      "native_overwrites": 1601
+    },
+    "11": {
+      "rows": 1601,
+      "requested_error": 1.299999062391588e-15,
+      "readback_error": 4.903022432500848e-13,
+      "native_overwrites": 1492
+    },
+    "12": {
+      "rows": 1601,
+      "requested_error": 2.4000034815410687e-15,
+      "readback_error": 4.989342272665453e-13,
+      "native_overwrites": 1496
+    },
+    "13": {
+      "rows": 1601,
+      "requested_error": 0,
+      "readback_error": 4.992672941739329e-13,
+      "native_overwrites": 1601
+    },
+    "14": {
+      "rows": 1601,
+      "requested_error": 0,
+      "readback_error": 4.994893387788579e-13,
+      "native_overwrites": 1601
+    },
+    "15": {
+      "rows": 1601,
+      "requested_error": 2.000000642529698e-15,
+      "readback_error": 4.937161790508071e-13,
+      "native_overwrites": 1601
+    },
+    "16": {
+      "rows": 1601,
+      "requested_error": 1.0000680839006293e-15,
+      "readback_error": 4.991701496592782e-13,
+      "native_overwrites": 1601
+    },
+    "17": {
+      "rows": 1601,
+      "requested_error": 1.9999735374753858e-15,
+      "readback_error": 4.992117830227016e-13,
+      "native_overwrites": 1599
+    },
+    "18": {
+      "rows": 1601,
+      "requested_error": 1.9999735374753858e-15,
+      "readback_error": 4.99780772322822e-13,
+      "native_overwrites": 1599
+    }
+  },
+  "engine": {
+    "1:2": {
+      "rows": 17216,
+      "max_error": 4.987787960430978e-12,
+      "min_returned": 0.151137605309,
+      "max_returned": 1.86926245689
+    },
+    "1:0": {
+      "rows": 14852,
+      "max_error": 4.990230451085154e-12,
+      "min_returned": 0.693557679653,
+      "max_returned": 1.00042450428
+    },
+    "2:2": {
+      "rows": 17216,
+      "max_error": 4.980460488468452e-12,
+      "min_returned": 0.151113554835,
+      "max_returned": 1.86923193932
+    },
+    "2:0": {
+      "rows": 13252,
+      "max_error": 4.9829029791226276e-12,
+      "min_returned": 0.693557143211,
+      "max_returned": 1.00042879581
+    },
+    "1:1": {
+      "rows": 3201,
+      "max_error": 4.995115432393504e-12,
+      "min_returned": 0.379388034344,
+      "max_returned": 1.02755987644
+    },
+    "2:1": {
+      "rows": 3201,
+      "max_error": 5.000000413701855e-12,
+      "min_returned": 0.379376679659,
+      "max_returned": 1.02748978138
+    }
+  },
+  "engine_callers": {
+    "DCS.exe": 27338,
+    "Sound.dll": 41600
+  },
+  "engine_passthrough_calls": 1600,
+  "later_mission": {
+    "exterior": {
+      "rows": 0,
+      "max_error": 0
+    }
+  },
+  "motion": {
+    "rows": 1601,
+    "tape_position_error_m": 9.094947017729282e-13,
+    "tape_basis_component_error": 4.999056724130924e-13,
+    "sdk_float_position_rounding_m": 0.03462388777288608,
+    "velocity_readback_error_mps": 0
+  },
+  "interpretation": "Numerical delivery and mission completion only; rendering/audio and unexercised channels require human evidence.",
+  "source_sha256": "7e7f04a29ecb8d201f4e05cb7363ea8a5bfacda271c42933023863f30ee60aac",
+  "regenerated_tape_identical": true
+}
