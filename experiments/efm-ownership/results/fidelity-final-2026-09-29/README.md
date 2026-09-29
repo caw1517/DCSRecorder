@@ -80,3 +80,39 @@ changing canopy/taxi-wheel tests remain accepted and are not repeated in flight.
 The issue remains open pending that final pass. Exact stationary starts, contact,
 high-speed/reverse wheel sampling and ground illumination remain under the
 ground work. White smoke is V1; sound depth and other smoke colors remain V2.
+
+## Final combined capture received
+
+The user completed `20260929T212400Z-0001.csv`: 4,760 samples over 95.18 seconds,
+119.42–165.50 m/s, valid normal version-seven metadata and explicit user stop.
+Source SHA-256 is
+`9c0378dd228c7577e3c6576342d027ebd5763779c2506c180c6070838cc217b9`.
+The saved log includes all nine sequence phases and cleanup. All 242,760 mission
+fields are preserved in the saved recording, including the sample times and
+all appearance channels. Native helper values additionally pass the production
+alignment/identity/range checks during conversion.
+
+The recording exercises gear 0–1, brake 0–1, signed control surfaces, both flames
+0–0.6114, nozzle motion, native power to 1.4015, four white-smoke transitions,
+dim/bright navigation/formation, strobes and landing/taxi light. Refuel argument
+212 now measures the intended sequence: zero before extension, 0.322331 during
+ON, zero with master OFF, 0.322331 after master ON, then zero after retraction.
+This establishes nonzero refuel capture, not yet its playback rendering.
+Canopy, compression and steering remain at their measured airborne states.
+
+Prepared `package/final-fidelity-playback` using the normal integrated wheel
+controller and source-preserving converter. The playback mission has the same
+19:00 time and date as capture. Installed DCS dependency/route/configuration
+checks pass, as do native tape evaluation at 100 Hz and the actual-tape wheel
+interpolation/endpoint/SDK checks. The user has been asked to close DCS before
+activation; live combined playback remains pending. The source CSV and capture
+log are safely retained locally under `capture/`; its derived
+[summary](capture/summary.json) records ranges and phase coverage.
+
+After the user confirmed DCS closed, the normal activation path installed
+**DCSRecorder-Playback-591abac7.miz**, generation
+`591abac7c4854203bdc8ee597e3d9b6b`. The prior tape and metadata are backed up.
+The two active tape files match the checked package; all 4,104 protected existing
+module, hook and recording files retain their hashes. The original recording
+hash is unchanged. The user has the final playback instructions. Visual/audio
+acceptance, live delivery audit and issue closure remain pending.
