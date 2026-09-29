@@ -108,7 +108,10 @@ to zero and altered steering/deployment after each write. The separate
 and `wheel_animation_check` to compare the same tape after the guarded native
 animation update. Its distinct mission is
 **DCSRecorder-Wheel-Animation-Playback.miz**, with the same F10 sequence.
-Live retention and rendering remain required before acceptance.
+That comparison is now accepted: the user saw correct wheels, NWS and suspension
+during braking/turning; 2,858 later reads match all ten channels and completion
+is verified. This is isolated appearance acceptance, not normal app integration
+or ground-contact validation. See the evidence checkpoint for details.
 
 `wheel_animation_check.exe --without-repair` reproduces the lost values; default
 execution checks the actual repair callback through the native dispatcher.

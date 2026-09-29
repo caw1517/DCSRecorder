@@ -1,8 +1,8 @@
 # Wheel and suspension checkpoint — 28 September 2026
 
-Status: both live taxi captures saved and analyzed. First wheel playback shows
-native wheel/gear/steering overwrites; suspension values survive. A separate
-post-animation timing comparison is checked and installed, awaiting live testing. Normal canopy integration
+Status: separate captured wheel/suspension/steering playback accepted visually
+and numerically after post-animation correction. Normal wheel recording/playback
+integration remains pending. Normal canopy integration
 is accepted in its own evidence record.
 
 The [prototype](../../wheel-prototype/README.md) samples deployment, compression
@@ -185,3 +185,37 @@ Mission SHA-256:
 Both variants share tape SHA-256:
 `902a4d99238c40e86ee80ec589160d6e2aa4fafd4e0d7dee086130b0c913953b`.
 The user has instructions to inspect the wheels/NWS and wait for lead removal.
+
+## Post-animation playback accepted — 29 September
+
+The user reports everything looked visually correct, including suspension
+movement during braking and turning. There is no dedicated suspension phase:
+this test reproduces the real strut movement in the saved taxi, without an
+artificial extension/compression sequence. Wheel rotation and NWS are accepted
+within that same isolated appearance test.
+
+Saved evidence: `playback-animation-accepted-2026-09-29/`, process 45112,
+object 16777472. Strict `check_retention.py ... --assert-wheels` passes:
+2,862 SDK calls and 2,858 independent later mission reads, with no mismatched
+channel among all ten. The mission completed normally after 49.22 seconds of
+capture plus the eight-second endpoint hold; playback object destruction is
+logged. All 28,620 post-animation channel readbacks have zero error.
+
+The post-animation trace directly confirms the cause: DCS changes each gear
+deployment and wheel-rotation channel on all 2,862 updates, and steering on 634
+updates; the callback repairs them before the independent mission reads.
+Compression is already retained and needs no correction in this run. The
+original SDK-only saved repro remains a failing comparison; the same retention
+check passes against this new live run.
+
+Cleanup reports `animation_hook_already_replaced`: the destructor had changed
+the object's table, so guarded cleanup releases ownership without overwriting
+that replacement. It does not claim a literal `animation_hook_restored` event.
+All ten installed package hashes still match, and the original steering capture
+SHA-256 remains unchanged.
+
+This accepts recorded low-speed wheel, steering and suspension **appearance**
+on the isolated test lead. Normal app/schema integration is next. High-speed
+rotation sampling, reverse motion, unloaded/airborne strut capture, real ground
+placement/contact and takeoff/landing remain distinct validation work. The
+fidelity issue remains open for integration and the other remaining groups.
