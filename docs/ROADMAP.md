@@ -1,14 +1,15 @@
 # Roadmap: complete one-aircraft playback first
 
-Updated 26 September 2026. The [GitHub map](https://github.com/caw1517/DCSRecorder/issues/1)
+Updated 29 September 2026. The [GitHub map](https://github.com/caw1517/DCSRecorder/issues/1)
 is the issue-tracking entry point.
 
 ## V1 scope and V2 backlog
 
 The user selected **white smoke only for V1**. Normal capture and recorded white
-smoke playback are accepted. The remaining V1 state groups are exterior lights,
-canopy, wheel rotation/suspension compression and combined validation, with ground
-state and contact coordinated through their existing tickets.
+smoke playback are accepted. Canopy and wheel/suspension/NWS animations now have
+accepted isolated and normal app workflows. Remaining V1 fidelity work includes
+the remaining light evidence, numerical review and combined regression, with
+ground state and contact coordinated through their existing tickets.
 
 These features are explicitly deferred to V2 and do not block V1:
 
@@ -57,7 +58,7 @@ milestone, not the full one-aircraft product milestone.
 
 | Work | Remaining scope |
 | --- | --- |
-| [Visual and engine state](https://github.com/caw1517/DCSRecorder/issues/6) | The user visually accepted combined version-two motion and gear/flap/control-surface playback, including stabilators. Continuous afterburner appearance remains an acknowledged engine-state gap. Retain integrated numerical/lifecycle checks; next add suspension compression, wheel spin, canopy, smoke, lights, separate engine nozzles, afterburner effects and sound. Coordinate suspension/wheel evidence with ground-contact tests. Speed brake already follows the tape. |
+| [Visual and engine state](https://github.com/caw1517/DCSRecorder/issues/6) | Accepted motion/surfaces, native engine sound/nozzles/afterburner, white smoke, tested light states, canopy and wheel/suspension/NWS playback. The wheel-capable normal app workflow is accepted for its airborne take. Remaining light evidence, numerical review and combined regression still keep this issue open; ground starts/contact and high-speed wheel sampling remain separate validation gates. |
 | [Exact starting position and state](https://github.com/caw1517/DCSRecorder/issues/11) | Extend accepted exact airborne initialization to stationary hot ground starts, original parking/demo spots and synchronized aircraft state. |
 | [Flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7) | Validate ground transitions, low passes, hard maneuvers and longer full-demo durations. Remove remaining speed/duration restrictions as the corresponding behavior is implemented and verified. |
 | [Essential physical interactions](https://github.com/caw1517/DCSRecorder/issues/3) | Ground contact, collision/damage and wake in both directions; decide how physical disturbances affect the recorded path. |

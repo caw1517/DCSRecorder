@@ -156,7 +156,7 @@ wheel workflow. New missions save version-seven recordings; the library adds
 `+ wheels` for measured wheel rotation, strut compression and nose-wheel steering.
 These use native tape version six and a separate integrated controller. Existing
 recordings keep their original module/format. Isolated recorded taxi animations
-are accepted; the normal app workflow is installed and awaiting live validation.
+and the normal airborne app workflow are accepted visually and numerically.
 Current airborne playback limits remain in place. See the
 [wheel integration checkpoint](../experiments/efm-ownership/results/wheels-integration-2026-09-29/README.md).
 

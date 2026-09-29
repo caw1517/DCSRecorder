@@ -1,6 +1,6 @@
 # Normal wheel capture/playback integration — 29 September 2026
 
-Status: implemented, checked and installed; normal live capture/playback pending.
+Status: normal live capture/playback accepted for the demonstrated airborne take.
 The [separate taxi animation test](../wheels-2026-09-28/README.md) is already
 accepted visually and numerically for wheel rotation, strut motion and NWS.
 
@@ -89,3 +89,35 @@ normal library activation path. Installed mission:
 `4a6e6f9a6b1d4abb8842895465df7c72`. All 730 protected existing file hashes and
 the original recording hash remain unchanged. The active wheel-controller tape
 and metadata match the prepared package. Live normal playback is the next gate.
+
+## Normal playback accepted
+
+The user reports “Looked good for me” for `DCSRecorder-Playback-4a6e6f9a.miz`.
+Evidence from process 24484 is saved under ignored `playback-accepted/` before
+further work. All seven channels match the recorded values on every one of
+1,612 native post-animation updates and all 1,613 later mission reads during
+playing/completion. DCS resets the three wheel phases before each native update;
+the integrated callback restores recorded phase one. Compression and steering
+remain zero throughout this airborne take, as captured.
+
+The pre-release observations are kept separate: 189 waiting, 150 countdown and
+one release-requested read contain zeros, including raw wheel phase zero rather
+than one. Those wheel phases represent the same endpoint of the measured
+period-one rotation, but this evidence does not claim raw snapshot equality
+before release or validate arbitrary nonzero initial ground states. Exact raw
+matching is established once recorded playback begins.
+
+Mission COMPLETE occurs at 39.040 seconds, reporting elapsed approximately
+32.22 seconds; the 32.20-second tape endpoint is clamped and applied before
+completion is published. Native events confirm `staged_exterior_complete` and
+object destruction. Cleanup reports `step_hook_already_replaced`, the guarded
+destruction path that clears ownership without overwriting the destructor's
+replacement table. Other appearance immediate readbacks agree within log
+precision (maximum difference about 1e-14); broader motion/engine numerical
+review remains a separate gate. Original recording SHA-256 is unchanged.
+
+Normal wheel capture, library classification, conversion, activation and playback
+are accepted for this flight. The separate accepted taxi animation test supplies
+changing strut/wheel/NWS evidence. Remaining light evidence, numerical review and
+combined regression keep the fidelity issue open. Ground starts/contact,
+high-speed/reverse wheel sampling and takeoff/landing remain distinct work.
