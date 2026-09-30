@@ -1,0 +1,27 @@
+{
+  "before_sha256": "5d9bac610d324ca52f79a02e1c4eb28a4062d7449f9272387ce1d3de1e6d7102",
+  "after_sha256": "637d773d12f75e48e6ca8c35b259b3f65a76cac1d2efd2ffa17401715fae8954",
+  "mission_changed_paths": [
+    "/coalition/blue/country/1/plane/group/2/units/1/Radio",
+    "/coalition/blue/country/1/plane/group/3/units/1/Radio",
+    "/currentKey",
+    "/trig/actions/2",
+    "/trig/conditions/2",
+    "/trig/custom",
+    "/trig/customStartup",
+    "/trig/events"
+  ],
+  "source_trigrules_equal": true,
+  "aircraft_inventory_equal": false,
+  "removed_members": [],
+  "added_members": [],
+  "changed_members": [
+    "l10n/DEFAULT/dictionary",
+    "l10n/DEFAULT/mapResource",
+    "mission"
+  ],
+  "authored_resource_bytes_equal": true,
+  "recorder_resource_bytes_equal": true,
+  "default_dictionary_equal": false,
+  "default_resource_map_equal": true
+}
