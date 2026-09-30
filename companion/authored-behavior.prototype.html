@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Authored mission compatibility — decision prototype</title>
+<style>
+body{font:16px/1.55 system-ui,sans-serif;margin:40px auto;padding:0 24px;max-width:1050px;color:#e5e9f1;background:#151b24}h1,h2{line-height:1.2}h2{font-size:21px;margin-top:30px}.intro,small{color:#b4bece}.panel{padding:20px;border:1px solid #46536a;border-radius:12px;margin:18px 0;background:#202937}button{font:inherit;padding:9px 13px;margin:4px;border:1px solid #73849f;border-radius:7px;color:inherit;background:#273449;cursor:pointer}button:hover,button[aria-selected=true]{background:#37587d}dl{display:grid;grid-template-columns:180px 1fr;gap:8px}dt{color:#a9c1df}dd{margin:0}ul{padding-left:23px}.bad{color:#ffb9b9}.good{color:#a2dfc4}#notice{border-left:4px solid #79aeea;padding:10px 16px}a{color:#a2c9ff}
+</style>
+<h1>Keep the mission. Make conflicts visible.</h1>
+<p class="intro">Throwaway decision prototype: which authored behavior can accompany a recorded aircraft? This page simulates preparation review. It neither inspects a real mission nor proves behavior in DCS. The policy below is proposed, pending your review.</p>
+<div id="notice">One real playback aircraft is preferred throughout staging, flight and parked completion. The surrounding mission keeps running.</div>
+<div class="panel" aria-live="polite"><h2>Current review</h2><dl id="state"></dl><ul id="findings"></ul></div>
+<h2>Explore a mission</h2><div id="actions"></div>
+<h2>Guided walkthroughs</h2><div id="tabs" role="tablist"></div><div class="panel"><p id="scenario"></p><div id="steps"></div></div>
+<small>Boundary: preservation of serialized content is necessary, but it cannot establish equivalent script behavior. Unknown code, dynamic references and replacement-object assumptions require separate evidence. No route, trigger or script is silently discarded.</small>
+<script>
+const Compatibility = (() => {
+  const initial = () => ({route:false,remove:false,unknown:false,standin:false,collision:false,reviewed:false,prepared:false,revision:1,preparations:0});
+  function evaluate(s) {
+    const blockers=[];
+    if(s.route) blockers.push('Selected aircraft has an AI task or route action that would command movement/state. Remove the conflict in the authored mission or choose another aircraft.');
+    if(s.remove) blockers.push('An authored trigger activates, deactivates, destroys or respawns the selected aircraft. Playback owns this lifecycle; preparation is refused.');
+    if(s.unknown) blockers.push('A custom script uses dynamic aircraft references. Compatibility has not been established; preparation is refused pending a supported adapter or bounded review.');
+    if(s.standin) blockers.push('A stand-in changes object identity and may generate birth/death events or break cached references. It has no approved compatibility path.');
+    return {blockers,flag:s.collision?'DCSR_DEMO_2_READY':'DCSR_DEMO_1_READY',preserved:['Unrelated aircraft, their routes and supported tasks','Known compatible authored triggers and resource bytes','Authored flag values and resolved briefing text'],status:blockers.length?'Blocked':s.prepared?'Prepared (simulation)':s.reviewed?'Ready to prepare':'Review required'};
+  }
+  function act(old,action) {
+    if(action==='reset') return initial();
+    let s={...old};
+    if(['route','remove','unknown','standin','collision'].includes(action)){s[action]=!s[action];s.reviewed=false;s.prepared=false;s.revision++;}
+    if(action==='review' && !evaluate(s).blockers.length)s.reviewed=true;
+    if(action==='prepare' && s.reviewed && !evaluate(s).blockers.length){s.prepared=true;s.preparations++;}
+    return s;
+  }
+  return {initial,evaluate,act};
+})();
+</script>
+<script>
+let current=Compatibility.initial(),active=0,step=0;
+const labels={reset:'Reset',route:'Toggle conflicting AI task',remove:'Toggle destroy/respawn trigger',unknown:'Toggle unknown script',standin:'Toggle temporary stand-in',collision:'Toggle occupied recorder flag',review:'Confirm supported review',prepare:'Prepare again from saved source'};
+const scenarios=[
+ {name:'Preserve the scene',text:'Known background behavior and read-only references remain. Confirm the review, then prepare twice. The same source produces one owned trigger/resource set, not duplicates.',steps:['reset','review','prepare','prepare']},
+ {name:'AI command conflicts',text:'A route action tells the recorded aircraft to fly elsewhere. Preparation refuses. Edit the source to remove that conflict, then review the changed revision.',steps:['reset','route','prepare','route','review','prepare']},
+ {name:'Object identity matters',text:'A mission destroys or replaces the selected aircraft. Renaming a stand-in cannot promise that cached object references or events remain equivalent.',steps:['reset','remove','standin','review','prepare']},
+ {name:'Flags and unknown code',text:'A known occupied name gets another isolated allocation. Unknown dynamic script use remains blocked even after that known collision is avoided.',steps:['reset','collision','review','prepare','unknown','prepare']}
+];
+function button(label,fn){const b=document.createElement('button');b.textContent=label;b.onclick=fn;return b;}
+function dispatch(a){current=Compatibility.act(current,a);render();}
+for(const [a,label]of Object.entries(labels))document.querySelector('#actions').append(button(label,()=>dispatch(a)));
+scenarios.forEach((s,i)=>{const b=button(s.name,()=>{active=i;step=0;current=Compatibility.initial();render();});b.setAttribute('role','tab');document.querySelector('#tabs').append(b);});
+function render(){
+ const e=Compatibility.evaluate(current),state=document.querySelector('#state');state.replaceChildren();
+ for(const [k,v]of Object.entries({'Scene revision':current.revision,'Preparation':e.status,'Aircraft identity':current.standin?'Replacement proposed; unverified':'Same runtime object preferred','Recorder flag':e.flag,'Owned additions':current.prepared?'One trigger and resource set':'None','Preparation attempts':current.preparations,'Review confirmed':current.reviewed?'Yes':'No'})){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=k;dd.textContent=v;state.append(dt,dd);}
+ const findings=document.querySelector('#findings');findings.replaceChildren();
+ for(const msg of (e.blockers.length?e.blockers:e.preserved)){const li=document.createElement('li');li.textContent=msg;li.className=e.blockers.length?'bad':'good';findings.append(li);}
+ document.querySelector('#scenario').textContent=scenarios[active].text;
+ [...document.querySelector('#tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',String(i===active)));
+ const steps=document.querySelector('#steps');steps.replaceChildren();scenarios[active].steps.forEach((a,i)=>{const b=button(`${i+1}. ${labels[a]}`,()=>{step=i+1;dispatch(a);});b.disabled=i!==step;steps.append(b);});
+}
+render();
+</script></html>

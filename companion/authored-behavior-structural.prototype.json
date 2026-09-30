@@ -1,0 +1,25 @@
+{
+  "status": "structural controls only; live evidence pending",
+  "mission_after_removing_owned_additions_equals_source": true,
+  "changed_existing_members": [
+    "mission",
+    "l10n/DEFAULT/mapResource"
+  ],
+  "added_members": [
+    "DCSRecorderBehaviorProbe/manifest.json",
+    "l10n/DEFAULT/dcsr-probe-2.lua"
+  ],
+  "authored_resource_bytes_equal": true,
+  "briefing_dictionary_bytes_equal": true,
+  "reprepare_from_same_source_byte_identical": true,
+  "manifest": {
+    "prototype_only": true,
+    "source_sha256": "fa839e5c214d2a01935a491715d5602f2220bb244a90ff323e3f5e5c30a06731",
+    "trigger_index": 3,
+    "resource_key": "ResKey_DCSR_probe_11001",
+    "owned_flag": "DCSR_PROBE_2_READY",
+    "resource": "dcsr-probe-2.lua"
+  },
+  "030-Behavior-Source_sha256": "fa839e5c214d2a01935a491715d5602f2220bb244a90ff323e3f5e5c30a06731",
+  "031-Behavior-Prepared_sha256": "5d9bac610d324ca52f79a02e1c4eb28a4062d7449f9272387ce1d3de1e6d7102"
+}
