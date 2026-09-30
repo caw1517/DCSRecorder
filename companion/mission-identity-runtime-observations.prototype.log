@@ -1,0 +1,9 @@
+2026-09-30 02:32:29.513 INFO    IDENTITY_PROBE (Main): hook_installed expected_bytes=3119515
+2026-09-30 02:34:13.528 INFO    IDENTITY_PROBE (Main): event=load_begin result=MATCH marker=ORIGINAL expected_bytes=3119515 actual_bytes=3119515 filename=<SavedGames>/DCS/Missions//020-Identity-LoadProbe-valid.miz
+2026-09-30 02:34:29.973 INFO    IDENTITY_PROBE (Main): event=load_end result=MATCH marker=ORIGINAL expected_bytes=3119515 actual_bytes=3119515 filename=<SavedGames>/DCS/Missions//020-Identity-LoadProbe-valid.miz
+2026-09-30 02:34:30.113 INFO    IDENTITY_PROBE (Main): event=simulation_start result=MATCH marker=ORIGINAL expected_bytes=3119515 actual_bytes=3119515 filename=<SavedGames>/DCS/Missions//020-Identity-LoadProbe-valid.miz
+2026-09-30 02:35:16.420 INFO    IDENTITY_PROBE (Main): event=frame result=MISMATCH marker=ORIGINAL expected_bytes=3119515 actual_bytes=3119504 filename=<SavedGames>/DCS/Missions//020-Identity-LoadProbe-valid.miz
+2026-09-30 02:40:09.752 INFO    IDENTITY_PROBE (Main): event=simulation_stop result=MISMATCH marker=ORIGINAL expected_bytes=3119515 actual_bytes=3119504 filename=<SavedGames>/DCS/Missions//020-Identity-LoadProbe-valid.miz
+2026-09-30 02:40:18.784 INFO    IDENTITY_PROBE (Main): event=load_begin result=MISMATCH marker=ORIGINAL expected_bytes=3119515 actual_bytes=3119504 filename=<SavedGames>/DCS/Missions//020-Identity-LoadProbe-valid.miz
+2026-09-30 02:40:28.426 INFO    IDENTITY_PROBE (Main): event=load_end result=MISMATCH marker=ORIGINAL expected_bytes=3119515 actual_bytes=3119504 filename=<SavedGames>/DCS/Missions//020-Identity-LoadProbe-valid.miz
+2026-09-30 02:40:28.513 INFO    IDENTITY_PROBE (Main): event=simulation_start result=MISMATCH marker=ORIGINAL expected_bytes=3119515 actual_bytes=3119504 filename=<SavedGames>/DCS/Missions//020-Identity-LoadProbe-valid.miz
