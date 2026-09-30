@@ -1,6 +1,6 @@
 # Mission identity and edit detection — decision prototype
 
-Status: **draft; live Mission Editor round trips and user review pending**.
+Status: **draft; core live Mission Editor round trips observed; copy/reorder, runtime boundary and user review still pending**.
 This is evidence for [Prove mission identity and edit detection across Mission Editor saves](https://github.com/caw1517/DCSRecorder/issues/18), a child of [Complete single-aircraft playback, then add layered flights](https://github.com/caw1517/DCSRecorder/issues/1). It does not implement the authored-mission workflow or close the ground milestone.
 
 Open `mission-identity.prototype.html` directly in a browser. It is a self-contained, in-memory simulation of the proposed decision. Every aircraft operation and load check in the page is simulated, not a claim about observed DCS behavior.
@@ -11,11 +11,26 @@ How can the companion retain an aircraft association across edited missions with
 
 ## Evidence collected
 
-Installed build: **2.9.29.27468**. Local source inspection and an archive-only control were completed. The data probe parsed an existing local practice mission without executing mission Lua, made a four-stock-Hornet scratch fixture, and repacked the fixture with different ZIP ordering/compression. The archive SHA-256 changed; parsed mission-table and aircraft-inventory hashes stayed equal.
+Installed build: **2.9.29.27468**. Local source inspection, an archive-only control and live Mission Editor saves were completed on September 29, 2026. The data probe parsed an existing local practice mission without executing mission Lua, made a four-stock-Hornet scratch fixture, and repacked the fixture with different ZIP ordering/compression. The archive SHA-256 changed; parsed mission-table and aircraft-inventory hashes stayed equal.
 
-That establishes the distinction between archive bytes and parsed content. It does **not** establish Mission Editor round-trip behavior. Source-derived expectations below still require live confirmation.
+The ZIP-only control establishes the distinction between archive bytes and parsed content. The separate live observations below establish bounded editor behavior. Source-derived copy/paste expectations remain unconfirmed live.
 
-The computer-use tool found the DCS window once, but capture returned `Computer Use app approval timed out`. Subsequent window inventories did not expose DCS, although a DCS process existed. No Mission Editor input, save, rename, copy, deletion, or flight was performed by this probe. Browser automation also rejected the local `file:` preview under its URL policy; JavaScript syntax was checked, but visual browser QA is unverified.
+Window access recovered after the user brought DCS forward. All actions used disposable scratch missions: `000-Identity-Probe-20260929.miz`, then Save As to `1000-Identity-Probe-20260929.miz`. Each saved stage was copied into local evidence before further changes. No original authored mission, installed hook or production code was changed. The fixture uses airborne starts; no flight or ground playback was tested. Browser automation rejected the local `file:` preview under its URL policy; JavaScript syntax was checked, but automated visual browser QA is unverified.
+
+### Observed live editor behavior
+
+The compact [observation record](mission-identity-observations.prototype.json) includes exact archive/content hashes, per-stage IDs/names, marker survival and changed data paths. Raw mission archives and full snapshots remain local under `experiments/efm-ownership/results/mission-identity-2026-09-29/`.
+
+| Operation | Observed result | Implication |
+| --- | --- | --- |
+| Open four-aircraft fixture; Save As | Unit IDs 10111–10114 and group IDs 10101–10104 retained, along with names. Custom mission-root and unit UUID fields removed. Root ZIP marker removed; `DCSRecorderProbe/identity.json` retained. | Editor IDs help locate candidates. Custom fields are not durable; a preserved archive manifest still cannot prove aircraft continuity. |
+| Save without placing/editing an object | Aircraft inventory equal. Archive and parsed mission hashes changed; `currentKey` and failure-entry `id` fields changed. An attempted Ctrl+S selected the add-ship tool, but no placement occurred and the saved coalition inventory did not change. | Exact archive equality is stricter than aircraft equality; do not classify the whole mission by its aircraft alone. This was not a completely input-free control. |
+| Rename original unit/group 3 | Both names gained `r`; numeric IDs retained. The save also added `dynSpawnTemplate=false` and removed empty waypoint properties. | Rename does not require a new aircraft association; unexpected non-name changes must still be reported. |
+| Add three Hornets, growing four to seven | Original IDs, names and authored positions retained. New units 10115–10117, groups 10105–10107. Existing unit 10111 radio channel changed 305→124; unit 10113 lost `hardpoint_racks=true` and gained `payload.ammo_type=1`; empty waypoint properties changed. | Demonstrates count-independent candidate correspondence, **not** unchanged configuration or end-to-end take compatibility. The sequence included selection/centering; the cause of each extra change was not isolated. No normalization rule is inferred. |
+| Delete highest-ID aircraft; save; create replacement elsewhere; save | The replacement reused unit ID 10117, group ID 10107, unit name `Aerial-3-1` and group name `Aerial-3`. Comparing old/replacement data showed only unit/group/first-waypoint coordinates changed. | Matching IDs and names do not establish continuity. A moved replacement must not inherit the old take automatically. |
+| Explicitly reopen the replacement mission and save | Seven aircraft and all IDs/names retained; replacement group gained `radioSet`, and `currentKey` changed. Nested marker still present. | Reopen/save is observed, but full semantic equality cannot be claimed. |
+
+The live four-to-seven case contains additional configuration differences, so it cannot certify the proposed compatible-additions path. That path remains a prototype policy, not a working association implementation. All snapshots use single-aircraft groups; within-group ordering and leader effects were not exercised.
 
 ### Source-derived findings
 
@@ -71,7 +86,7 @@ The recorded first pose belongs to the take, separately from the authored spawn.
 
 Proposed recovery text: **“This mission copy changed, or its identity could not be verified. Open the authored mission in Mission Editor, save it, and generate a new recording/playback copy in DCS Recorder. You can also use the scene saved with this take. The recorded flight has not been changed.”**
 
-## Live round-trip protocol still required
+## Live round-trip protocol and remaining checks
 
 Use only scratch copies generated by `mission-identity-probe.prototype.py`. Never overwrite an authored original. Keep the before/after archives and a short observation log; snapshot each output with the probe. For each step record DCS build, operation, output filename, unit/group IDs and names, configuration/placement differences, marker survival and resource inventory.
 
@@ -79,14 +94,14 @@ Use only scratch copies generated by `mission-identity-probe.prototype.py`. Neve
 | --- | --- | --- |
 | Baseline | Generate four-aircraft fixture from a local existing practice mission | Completed, synthetic fixture |
 | ZIP control | Repack without running Mission Editor | Completed; archive changed, parsed mission/inventory unchanged |
-| Open/save | Open fixture in Mission Editor and Save As to a fresh file | Pending |
-| Re-save | Save unchanged, close/reopen, Save As under another name | Pending |
-| Rename | Rename one unit and its group; save a separate copy | Pending |
-| Add | Add three aircraft without altering existing starts/configurations | Pending |
+| Open/save | Open fixture in Mission Editor and Save As to a fresh file | Observed; snapshot 03 |
+| Re-save | Save, explicitly reopen and save again | Observed; snapshots 04 and 09, extra fields changed as documented above |
+| Rename | Rename one unit and its group; preserve a separate evidence copy | Observed; snapshot 05 |
+| Add | Add three aircraft and compare original starts/configurations | Observed; snapshot 06. Starts retained; configuration differences prevent claiming a compatible-only addition |
 | Reorder | Reorder groups/units where the editor allows; identify leader/task effects | Pending |
-| Duplicate | Copy/paste a group and save | Pending |
-| Delete/recreate | On a disposable branch of the fixture, remove the highest-ID aircraft, save/reload, create a replacement; compare IDs | Pending |
-| Preservation | Compare custom unit/root fields and root/nested archive resources after editor saves | Pending |
+| Duplicate | Copy/paste a group and save | Pending; automated Ctrl chords did not operate as intended in DCS; source-only finding |
+| Delete/recreate | Remove highest-ID aircraft, save/reload, create a replacement; compare IDs | Observed; snapshots 07–08 confirm ID/name reuse |
+| Preservation | Compare custom unit/root fields and root/nested archive resources after editor saves | Observed; nested marker retained through snapshot 09, custom fields/root marker lost on first Save As |
 | Runtime | Observe a valid generated load, edited copy, archive repack, missing checker, restart and Mission Editor test flight | Pending; load verifier is not implemented |
 
 Example commands (use an available Python 3 executable):

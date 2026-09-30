@@ -1,0 +1,797 @@
+{
+  "build": "2.9.29.27468",
+  "date_local": "2026-09-29",
+  "scope": "Observed scratch Mission Editor archive saves; airborne stock Hornets. No flight, recording, playback, or runtime-verifier validation.",
+  "snapshots": [
+    {
+      "name": "02-editor-input",
+      "archive_sha256": "524922f9ae58b8762e2c81b90341c109b8e13973e3bde42eb075a5c76ce4dca7",
+      "mission_table_sha256": "6ad3818231f974b4684d75129a2728ab451b1aad744c0a389f2c13b8d3aad8d7",
+      "aircraft_inventory_sha256": "f1c46126cd738bebe00dbb736995122a4fc9df347e0019b6268aa7663989bfb1",
+      "aircraft": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        }
+      ],
+      "custom_root_field": true,
+      "custom_unit_fields": true,
+      "root_archive_marker": true,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "03-editor-save-as",
+      "archive_sha256": "21cb3a61fd8ac9c81db21a86f52b58ef06e59a86f867accde163917d3024c137",
+      "mission_table_sha256": "e4163f1139793559d17057716f5e5cd5bd8f4f93625345f6a2f240f28f605fbb",
+      "aircraft_inventory_sha256": "74e2f8e72f07aa73a1e661dae2cbbed63d58a24d80e468a5a955d7b355a836f6",
+      "aircraft": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "04-editor-resave",
+      "archive_sha256": "87241e43c6f009614f959574fee4ea023e269951d4c04b1dd09642b859e12850",
+      "mission_table_sha256": "964bef891815e229caa066872a6c9eb8a092831f8809e532427a8a830047b6a7",
+      "aircraft_inventory_sha256": "09eafde013f760e7b8f4703f702410f838b2332e4d27223aaa59373a1a0a1cbb",
+      "aircraft": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "05-editor-rename",
+      "archive_sha256": "fac2cc39f676b9ee6e86e6b09530cda26b0fbd1f1e69f3bb17438fb882733494",
+      "mission_table_sha256": "4e4dfa6fb7114e15b0acd250f0a59df53979ad6cc10cda357cde15a976795f43",
+      "aircraft_inventory_sha256": "1a2096317a59b7edb7f0a68544b9d15b725c6fafe250be8eb8d3cebc32804bf5",
+      "aircraft": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "06-editor-seven-aircraft",
+      "archive_sha256": "1dbad4726d0394b2f733db959ed89bbc2964a78e4bc7f8375855a24287efe848",
+      "mission_table_sha256": "893a1b56c3687c58e5dedea7b5987a3dbd2b1a9ba268de66a3f2b0a58fe8cda7",
+      "aircraft_inventory_sha256": "828a0c33ce8de003b3c375add23341887328ac306f8e30f9379d1b6b28b4f144",
+      "aircraft": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        },
+        {
+          "unit_id": 10115,
+          "unit_name": "Aerial-1-1",
+          "group_id": 10105,
+          "group_name": "Aerial-1"
+        },
+        {
+          "unit_id": 10116,
+          "unit_name": "Aerial-2-1",
+          "group_id": 10106,
+          "group_name": "Aerial-2"
+        },
+        {
+          "unit_id": 10117,
+          "unit_name": "Aerial-3-1",
+          "group_id": 10107,
+          "group_name": "Aerial-3"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "07-editor-deleted",
+      "archive_sha256": "c0be3105d0d035c08ef254a55b577c9418a502e67ffa9239711277ec71aa4ef0",
+      "mission_table_sha256": "54a6b5dfe2f61ebc1784b27b3626fb5640ae01ec6302edd22600cc661e3dace8",
+      "aircraft_inventory_sha256": "8bef5980dc4728857dbe5e0cab123389f9dd97e187fcc052d6c85500f8a04799",
+      "aircraft": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        },
+        {
+          "unit_id": 10115,
+          "unit_name": "Aerial-1-1",
+          "group_id": 10105,
+          "group_name": "Aerial-1"
+        },
+        {
+          "unit_id": 10116,
+          "unit_name": "Aerial-2-1",
+          "group_id": 10106,
+          "group_name": "Aerial-2"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "08-editor-recreated",
+      "archive_sha256": "38e3ea4d45df46e04d3c20d3bf2b2b2c0a101ccec8a25a7b92d7a0583a7fafab",
+      "mission_table_sha256": "88e8db17a821beebbd17be92bd3c61cb9f8a48d95eded2f3de1fff874c96fb43",
+      "aircraft_inventory_sha256": "8bd0bad79c3569fb2dc9476806a19add363bc974b026ea5033d193a4af4735d3",
+      "aircraft": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        },
+        {
+          "unit_id": 10115,
+          "unit_name": "Aerial-1-1",
+          "group_id": 10105,
+          "group_name": "Aerial-1"
+        },
+        {
+          "unit_id": 10116,
+          "unit_name": "Aerial-2-1",
+          "group_id": 10106,
+          "group_name": "Aerial-2"
+        },
+        {
+          "unit_id": 10117,
+          "unit_name": "Aerial-3-1",
+          "group_id": 10107,
+          "group_name": "Aerial-3"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "09-editor-reopened",
+      "archive_sha256": "904191e8dba2b685339975e8466ef020d039eb736324577f7508a7034c6bb692",
+      "mission_table_sha256": "8096ec9970aa02ac0ef5c50b05420064c68a4b47cf7c7ffc61b917732d26391d",
+      "aircraft_inventory_sha256": "a2c17a8cadeaa50de979be107490f66a18b37657a0573083e5df77b64273d8a7",
+      "aircraft": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        },
+        {
+          "unit_id": 10115,
+          "unit_name": "Aerial-1-1",
+          "group_id": 10105,
+          "group_name": "Aerial-1"
+        },
+        {
+          "unit_id": 10116,
+          "unit_name": "Aerial-2-1",
+          "group_id": 10106,
+          "group_name": "Aerial-2"
+        },
+        {
+          "unit_id": 10117,
+          "unit_name": "Aerial-3-1",
+          "group_id": 10107,
+          "group_name": "Aerial-3"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    }
+  ],
+  "transitions": [
+    {
+      "before": "02-editor-input",
+      "after": "03-editor-save-as",
+      "added_ids": [],
+      "removed_ids": [],
+      "common_aircraft_changed_paths": {
+        "10112": [
+          "/unit/AddPropAircraft/STN_L16",
+          "/unit/AddPropAircraft/VoiceCallsignLabel",
+          "/unit/AddPropAircraft/VoiceCallsignNumber",
+          "/unit/Radio",
+          "/unit/dataCartridge",
+          "/unit/datalinks",
+          "/unit/dcsrecorder_probe_uuid"
+        ],
+        "10113": [
+          "/unit/AddPropAircraft/STN_L16",
+          "/unit/AddPropAircraft/VoiceCallsignLabel",
+          "/unit/AddPropAircraft/VoiceCallsignNumber",
+          "/unit/Radio",
+          "/unit/dataCartridge",
+          "/unit/datalinks",
+          "/unit/dcsrecorder_probe_uuid"
+        ],
+        "10114": [
+          "/unit/AddPropAircraft/STN_L16",
+          "/unit/AddPropAircraft/VoiceCallsignLabel",
+          "/unit/AddPropAircraft/VoiceCallsignNumber",
+          "/unit/Radio",
+          "/unit/dataCartridge",
+          "/unit/datalinks",
+          "/unit/dcsrecorder_probe_uuid"
+        ],
+        "10111": [
+          "/unit/AddPropAircraft/STN_L16",
+          "/unit/AddPropAircraft/VoiceCallsignLabel",
+          "/unit/AddPropAircraft/VoiceCallsignNumber",
+          "/unit/Radio/1/channelsNames",
+          "/unit/Radio/2/channelsNames",
+          "/unit/dataCartridge",
+          "/unit/datalinks",
+          "/unit/dcsrecorder_probe_uuid"
+        ]
+      },
+      "mission_changed_paths": [
+        "/coalition/blue/country/1/plane/group/1/units/1/AddPropAircraft/STN_L16",
+        "/coalition/blue/country/1/plane/group/1/units/1/AddPropAircraft/VoiceCallsignLabel",
+        "/coalition/blue/country/1/plane/group/1/units/1/AddPropAircraft/VoiceCallsignNumber",
+        "/coalition/blue/country/1/plane/group/1/units/1/Radio/1/channelsNames",
+        "/coalition/blue/country/1/plane/group/1/units/1/Radio/2/channelsNames",
+        "/coalition/blue/country/1/plane/group/1/units/1/dataCartridge",
+        "/coalition/blue/country/1/plane/group/1/units/1/datalinks",
+        "/coalition/blue/country/1/plane/group/1/units/1/dcsrecorder_probe_uuid",
+        "/coalition/blue/country/1/plane/group/2/units/1/AddPropAircraft/STN_L16",
+        "/coalition/blue/country/1/plane/group/2/units/1/AddPropAircraft/VoiceCallsignLabel",
+        "/coalition/blue/country/1/plane/group/2/units/1/AddPropAircraft/VoiceCallsignNumber",
+        "/coalition/blue/country/1/plane/group/2/units/1/Radio",
+        "/coalition/blue/country/1/plane/group/2/units/1/dataCartridge",
+        "/coalition/blue/country/1/plane/group/2/units/1/datalinks",
+        "/coalition/blue/country/1/plane/group/2/units/1/dcsrecorder_probe_uuid",
+        "/coalition/blue/country/1/plane/group/3/units/1/AddPropAircraft/STN_L16",
+        "/coalition/blue/country/1/plane/group/3/units/1/AddPropAircraft/VoiceCallsignLabel",
+        "/coalition/blue/country/1/plane/group/3/units/1/AddPropAircraft/VoiceCallsignNumber",
+        "/coalition/blue/country/1/plane/group/3/units/1/Radio",
+        "/coalition/blue/country/1/plane/group/3/units/1/dataCartridge",
+        "/coalition/blue/country/1/plane/group/3/units/1/datalinks",
+        "/coalition/blue/country/1/plane/group/3/units/1/dcsrecorder_probe_uuid",
+        "/coalition/blue/country/1/plane/group/4/units/1/AddPropAircraft/STN_L16",
+        "/coalition/blue/country/1/plane/group/4/units/1/AddPropAircraft/VoiceCallsignLabel",
+        "/coalition/blue/country/1/plane/group/4/units/1/AddPropAircraft/VoiceCallsignNumber",
+        "/coalition/blue/country/1/plane/group/4/units/1/Radio",
+        "/coalition/blue/country/1/plane/group/4/units/1/dataCartridge",
+        "/coalition/blue/country/1/plane/group/4/units/1/datalinks",
+        "/coalition/blue/country/1/plane/group/4/units/1/dcsrecorder_probe_uuid",
+        "/currentKey",
+        "/dcsrecorder_probe_lineage",
+        "/failures/BATTERY_OVERHEAT",
+        "/failures/BAT_SOLENOID_DEFECTIVE",
+        "/failures/BAT_SOLENOID_WIRING",
+        "/failures/BOOSTER_COIL",
+        "/failures/BOOST_REG",
+        "/failures/CARBAIR_BREAK_LEADS",
+        "/failures/CARBAIR_GND_LEAD",
+        "/failures/CARBAIR_OPEN_CIRCUIT_BLB",
+        "/failures/CARBAIR_SHORT_CIRCUIT",
+        "/failures/CARBAIR_SHORT_CIRCUIT_BLB",
+        "/failures/CARBAIR_SHORT_CIRCUIT_LEADS",
+        "/failures/CLOGGED_FUEL_STRAINER",
+        "/failures/COMPASS_ERRATIC_INDIACATON",
+        "/failures/COMPASS_ERRATIC_OPERATION",
+        "/failures/COMPASS_NO_TORQUE",
+        "/failures/COMPASS_POINTER_PULLS",
+        "/failures/COOLANT_BREAK_BULB",
+        "/failures/COOLANT_DEFECTIVE_IND",
+        "/failures/COOLANT_POOR_CONNTECT",
+        "/failures/COOLANT_RADIATOR_MOTOR",
+        "/failures/COOLANT_RADIATOR_SENSOR",
+        "/failures/COOLANT_RADIATOR_WIRING",
+        "/failures/COOLANT_SHORT_CIRCUIT",
+        "/failures/COOLANT_UNPRES",
+        "/failures/D2_LEFT_CYLINDER",
+        "/failures/D2_RIGHT_CYLINDER",
+        "/failures/DEFECTIVE_INSTRUMENT",
+        "/failures/DEFECTIVE_MECHANISM",
+        "/failures/DOORS_TVC_BROKEN",
+        "/failures/DOORS_TV_JAMMED",
+        "/failures/ENGINE_JAM",
+        "/failures/EXT_HYDRO_LEAK",
+        "/failures/F2_BOTTOM_CYLINDER",
+        "/failures/F2_TOP_CYLINDER",
+        "/failures/FUEL_PUMP_FAILURE",
+        "/failures/FUEL_VALVE_LEAK",
+        "/failures/Failure_Comp_ADC",
+        "/failures/Failure_Comp_MC1",
+        "/failures/Failure_Comp_MC2",
+        "/failures/Failure_Ctrl_Aileron",
+        "/failures/Failure_Ctrl_FCS_Ch1",
+        "/failures/Failure_Ctrl_FCS_Ch2",
+        "/failures/Failure_Ctrl_FCS_Ch3",
+        "/failures/Failure_Ctrl_FCS_Ch4",
+        "/failures/Failure_Ctrl_LEF",
+        "/failures/Failure_ECS_OBOGS",
+        "/failures/Failure_ECS_Valve",
+        "/failures/Failure_Elec_EmergencyBattery",
+        "/failures/Failure_Elec_LeftGenerator",
+        "/failures/Failure_Elec_LeftTransformerRectifier",
+        "/failures/Failure_Elec_RightGenerator",
+        "/failures/Failure_Elec_RightTransformerRectifier",
+        "/failures/Failure_Elec_UtilityBattery",
+        "/failures/Failure_Fuel_ExtTankTransferC",
+        "/failures/Failure_Fuel_ExtTankTransferL",
+        "/failures/Failure_Fuel_ExtTankTransferR",
+        "/failures/Failure_Fuel_LeftBoostPump",
+        "/failures/Failure_Fuel_QuantityGaging",
+        "/failures/Failure_Fuel_RightBoostPump",
+        "/failures/Failure_Fuel_Tank1Transfer",
+        "/failures/Failure_Fuel_Tank4Transfer",
+        "/failures/Failure_Gear_NWS",
+        "/failures/Failure_Gear_WOW",
+        "/failures/Failure_Hyd_HYD1A_Leak",
+        "/failures/Failure_Hyd_HYD1B_Leak",
+        "/failures/Failure_Hyd_HYD2A_Leak",
+        "/failures/Failure_Hyd_HYD2B_Leak",
+        "/failures/Failure_Hyd_IsolatedHYD2BSystem_Leak",
+        "/failures/Failure_PP_EngL_AB_FFCS",
+        "/failures/Failure_PP_EngL_Main_FFCS",
+        "/failures/Failure_PP_EngL_Nozzle_CS",
+        "/failures/Failure_PP_EngL_OilLeak",
+        "/failures/Failure_PP_EngR_AB_FFCS",
+        "/failures/Failure_PP_EngR_Main_FFCS",
+        "/failures/Failure_PP_EngR_Nozzle_CS",
+        "/failures/Failure_PP_EngR_OilLeak",
+        "/failures/Failure_PP_LeftAMAD_OilLeak",
+        "/failures/Failure_PP_LeftPTS",
+        "/failures/Failure_PP_RightAMAD_OilLeak",
+        "/failures/Failure_PP_RightPTS",
+        "/failures/Failure_Sens_LeftPitotHeater",
+        "/failures/Failure_Sens_RightPitotHeater",
+        "/failures/GENERATOR_FAULT",
+        "/failures/HORIZON_BAR_NOT_SETTLE",
+        "/failures/HYDRO_LOW_AIR_PRESSURE",
+        "/failures/IGNITION_NO_OUTPUT",
+        "/failures/IGNITION_TERM_CONNECT",
+        "/failures/INSUF_FUEL_PRES",
+        "/failures/INT_HYDRO_LEAK",
+        "/failures/LEFT_TANK_PUMP_FAULT",
+        "/failures/LEFT_WING_TANK_LEAK",
+        "/failures/L_GEAR_DLK_FAULT",
+        "/failures/L_GEAR_UPL_FAULT",
+        "/failures/MAGNETO_1",
+        "/failures/MAGNETO_2",
+        "/failures/MAIN_L_GEAR_D_LOCK",
+        "/failures/MAIN_R_GEAR_D_LOCK",
+        "/failures/MANIFOLD_LINE_LEAK",
+        "/failures/MANIFOLD_SHIFT",
+        "/failures/OIL_DILUTION_SOLENOID",
+        "/failures/OIL_DILUTION_WIRE",
+        "/failures/OIL_LEAK",
+        "/failures/OIL_RADIATOR_MOTOR",
+        "/failures/OIL_RADIATOR_SENSOR",
+        "/failures/OIL_RADIATOR_WIRING",
+        "/failures/PITOT_HEAT_ELEMENT",
+        "/failures/PITOT_HEAT_WIRING",
+        "/failures/PROP_GOVERNOR",
+        "/failures/PUMP_FAILS",
+        "/failures/PUMP_RELIEF_VALVE_LEAKS",
+        "/failures/PUMP_RELIEF_VALVE_SCREEN_CLOGGED",
+        "/failures/PUMP_SEPARATOR_CLOGGED",
+        "/failures/RIGHT_TANK_PUMP_FAULT",
+        "/failures/RIGHT_WING_TANK_LEAK",
+        "/failures/R_GEAR_DLK_FAULT",
+        "/failures/R_GEAR_UPL_FAULT",
+        "/failures/STARTER_BURNOUT",
+        "/failures/STARTER_RELAY",
+        "/failures/STARTER_SOLENOID",
+        "/failures/STARTER_WIRING",
+        "/failures/SUPERCHARGER_LIGHT",
+        "/failures/SUPERCHARGER_SOLENOID",
+        "/failures/SUPERCHARGER_WIRE",
+        "/failures/TACH_BREAK_CIRCUIT",
+        "/failures/TACH_BREAK_IN_INDICATOR",
+        "/failures/TACH_POOR_CONNECTION",
+        "/failures/TACH_RESISTANCE_ADJ",
+        "/failures/TAIL_GEAR_C_CABLE",
+        "/failures/TAIL_GEAR_D_LOCK",
+        "/failures/TAIL_GEAR_FAIL_GO_DOWN",
+        "/failures/TAIL_GEAR_FAIL_GO_UP",
+        "/failures/TAIL_GEAR_U_LOCK",
+        "/failures/TURNIND_INCORRECT_SENS_DEFECTIVE",
+        "/failures/TURNIND_INCORRECT_SENS_VAC_HIGH",
+        "/failures/TURNIND_INCORRECT_SENS_VAC_LOW",
+        "/failures/TURNIND_POINTER_FAILS_DEFECTIVE",
+        "/failures/TURNIND_POINTER_FAILS_NO_VACUUM",
+        "/failures/TURNIND_POINTER_NOT_SET_ZERO",
+        "/failures/TURNIND_POINTER_VIBRATES",
+        "/failures/UNLOAD_VALVE_NOT_LOAD",
+        "/failures/UNLOAD_VALVE_NOT_UNLOAD",
+        "/failures/VHF_CRYSTAL",
+        "/failures/VHF_SHORTED_CTL_BOX",
+        "/failures/VHF_SQUELCH_RELAY",
+        "/failures/VHF_VT207_DEFECTIVE",
+        "/failures/VHF_VT_BURNED_OUT",
+        "/requiredModules/F/A-18C",
+        "/trig/custom",
+        "/trig/customStartup",
+        "/trig/events"
+      ],
+      "changed_archive_entries": [
+        "dcsrecorder-probe.json",
+        "l10n/DEFAULT/dictionary",
+        "mission",
+        "options"
+      ]
+    },
+    {
+      "before": "03-editor-save-as",
+      "after": "04-editor-resave",
+      "added_ids": [],
+      "removed_ids": [],
+      "common_aircraft_changed_paths": {},
+      "mission_changed_paths": [
+        "/currentKey",
+        "/failures/Failure_Comp_ADC/id",
+        "/failures/Failure_Comp_MC1/id",
+        "/failures/Failure_Comp_MC2/id",
+        "/failures/Failure_Ctrl_Aileron/id",
+        "/failures/Failure_Ctrl_FCS_Ch1/id",
+        "/failures/Failure_Ctrl_FCS_Ch2/id",
+        "/failures/Failure_Ctrl_FCS_Ch3/id",
+        "/failures/Failure_Ctrl_FCS_Ch4/id",
+        "/failures/Failure_Ctrl_LEF/id",
+        "/failures/Failure_ECS_OBOGS/id",
+        "/failures/Failure_ECS_Valve/id",
+        "/failures/Failure_Elec_EmergencyBattery/id",
+        "/failures/Failure_Elec_LeftGenerator/id",
+        "/failures/Failure_Elec_LeftTransformerRectifier/id",
+        "/failures/Failure_Elec_RightGenerator/id",
+        "/failures/Failure_Elec_RightTransformerRectifier/id",
+        "/failures/Failure_Elec_UtilityBattery/id",
+        "/failures/Failure_Fuel_ExtTankTransferC/id",
+        "/failures/Failure_Fuel_ExtTankTransferL/id",
+        "/failures/Failure_Fuel_ExtTankTransferR/id",
+        "/failures/Failure_Fuel_LeftBoostPump/id",
+        "/failures/Failure_Fuel_QuantityGaging/id",
+        "/failures/Failure_Fuel_RightBoostPump/id",
+        "/failures/Failure_Fuel_Tank1Transfer/id",
+        "/failures/Failure_Fuel_Tank4Transfer/id",
+        "/failures/Failure_Gear_NWS/id",
+        "/failures/Failure_Gear_WOW/id",
+        "/failures/Failure_Hyd_HYD1A_Leak/id",
+        "/failures/Failure_Hyd_HYD1B_Leak/id",
+        "/failures/Failure_Hyd_HYD2A_Leak/id",
+        "/failures/Failure_Hyd_HYD2B_Leak/id",
+        "/failures/Failure_Hyd_IsolatedHYD2BSystem_Leak/id",
+        "/failures/Failure_PP_EngL_AB_FFCS/id",
+        "/failures/Failure_PP_EngL_Main_FFCS/id",
+        "/failures/Failure_PP_EngL_Nozzle_CS/id",
+        "/failures/Failure_PP_EngL_OilLeak/id",
+        "/failures/Failure_PP_EngR_AB_FFCS/id",
+        "/failures/Failure_PP_EngR_Main_FFCS/id",
+        "/failures/Failure_PP_EngR_Nozzle_CS/id",
+        "/failures/Failure_PP_EngR_OilLeak/id",
+        "/failures/Failure_PP_LeftAMAD_OilLeak/id",
+        "/failures/Failure_PP_LeftPTS/id",
+        "/failures/Failure_PP_RightAMAD_OilLeak/id",
+        "/failures/Failure_PP_RightPTS/id",
+        "/failures/Failure_Sens_LeftPitotHeater/id",
+        "/failures/Failure_Sens_RightPitotHeater/id"
+      ],
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "04-editor-resave",
+      "after": "05-editor-rename",
+      "added_ids": [],
+      "removed_ids": [],
+      "common_aircraft_changed_paths": {
+        "10113": [
+          "/group_name",
+          "/group_settings/dynSpawnTemplate",
+          "/group_settings/name",
+          "/route/points/1/properties",
+          "/unit/name"
+        ]
+      },
+      "mission_changed_paths": [
+        "/coalition/blue/country/1/plane/group/3/dynSpawnTemplate",
+        "/coalition/blue/country/1/plane/group/3/name",
+        "/coalition/blue/country/1/plane/group/3/route/points/1/properties",
+        "/coalition/blue/country/1/plane/group/3/units/1/name",
+        "/currentKey"
+      ],
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "05-editor-rename",
+      "after": "06-editor-seven-aircraft",
+      "added_ids": [
+        10115,
+        10116,
+        10117
+      ],
+      "removed_ids": [],
+      "common_aircraft_changed_paths": {
+        "10113": [
+          "/unit/hardpoint_racks",
+          "/unit/payload/ammo_type"
+        ],
+        "10111": [
+          "/route/points/1/properties",
+          "/unit/Radio/1/channels/1"
+        ]
+      },
+      "mission_changed_paths": [
+        "/coalition/blue/country/1/plane/group/1/route/points/1/properties",
+        "/coalition/blue/country/1/plane/group/1/units/1/Radio/1/channels/1",
+        "/coalition/blue/country/1/plane/group/3/units/1/hardpoint_racks",
+        "/coalition/blue/country/1/plane/group/3/units/1/payload/ammo_type",
+        "/coalition/blue/country/1/plane/group/5",
+        "/coalition/blue/country/1/plane/group/6",
+        "/coalition/blue/country/1/plane/group/7",
+        "/currentKey",
+        "/map/centerX",
+        "/map/centerY"
+      ],
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "06-editor-seven-aircraft",
+      "after": "07-editor-deleted",
+      "added_ids": [],
+      "removed_ids": [
+        10117
+      ],
+      "common_aircraft_changed_paths": {
+        "10115": [
+          "/group_settings/radioSet"
+        ],
+        "10116": [
+          "/group_settings/radioSet"
+        ]
+      },
+      "mission_changed_paths": [
+        "/coalition/blue/country/1/plane/group/5/radioSet",
+        "/coalition/blue/country/1/plane/group/6/radioSet",
+        "/coalition/blue/country/1/plane/group/7",
+        "/currentKey"
+      ],
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "07-editor-deleted",
+      "after": "08-editor-recreated",
+      "added_ids": [
+        10117
+      ],
+      "removed_ids": [],
+      "common_aircraft_changed_paths": {},
+      "mission_changed_paths": [
+        "/coalition/blue/country/1/plane/group/7",
+        "/currentKey"
+      ],
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "08-editor-recreated",
+      "after": "09-editor-reopened",
+      "added_ids": [],
+      "removed_ids": [],
+      "common_aircraft_changed_paths": {
+        "10117": [
+          "/group_settings/radioSet"
+        ]
+      },
+      "mission_changed_paths": [
+        "/coalition/blue/country/1/plane/group/7/radioSet",
+        "/currentKey"
+      ],
+      "changed_archive_entries": [
+        "mission"
+      ]
+    }
+  ],
+  "delete_recreate": {
+    "unit_id_reused": true,
+    "group_id_reused": true,
+    "unit_name_reused": true,
+    "group_name_reused": true,
+    "changed_paths": [
+      "/group_settings/x",
+      "/group_settings/y",
+      "/route/points/1/x",
+      "/route/points/1/y",
+      "/unit/x",
+      "/unit/y"
+    ],
+    "before_xy": [
+      -308301.00707385,
+      912732.69885514
+    ],
+    "after_xy": [
+      -311239.57850242,
+      913804.41314085
+    ]
+  }
+}
