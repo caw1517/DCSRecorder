@@ -1,0 +1,3 @@
+Missing-checker experiment: diagnostic hook absent before DCS restart; zero IDENTITY_PROBE lines in new log; user reported cockpit briefing loaded.
+2026-09-30 03:14:07.293 INFO    Dispatcher (Main): loadMission <Temp>\DCS\tempMission.miz
+2026-09-30 03:14:24.082 INFO    Dispatcher (Main): loadMission Done: Control passed to the player
