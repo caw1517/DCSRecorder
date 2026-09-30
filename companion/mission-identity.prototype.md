@@ -1,0 +1,104 @@
+# Mission identity and edit detection — decision prototype
+
+Status: **draft; live Mission Editor round trips and user review pending**.
+This is evidence for [Prove mission identity and edit detection across Mission Editor saves](https://github.com/caw1517/DCSRecorder/issues/18), a child of [Complete single-aircraft playback, then add layered flights](https://github.com/caw1517/DCSRecorder/issues/1). It does not implement the authored-mission workflow or close the ground milestone.
+
+Open `mission-identity.prototype.html` directly in a browser. It is a self-contained, in-memory simulation of the proposed decision. Every aircraft operation and load check in the page is simulated, not a claim about observed DCS behavior.
+
+## Question
+
+How can the companion retain an aircraft association across edited missions without treating an editor ID, name, array position, aircraft count, or copied marker as proof that an aircraft survived? What can it actually verify about the generated mission loaded by DCS?
+
+## Evidence collected
+
+Installed build: **2.9.29.27468**. Local source inspection and an archive-only control were completed. The data probe parsed an existing local practice mission without executing mission Lua, made a four-stock-Hornet scratch fixture, and repacked the fixture with different ZIP ordering/compression. The archive SHA-256 changed; parsed mission-table and aircraft-inventory hashes stayed equal.
+
+That establishes the distinction between archive bytes and parsed content. It does **not** establish Mission Editor round-trip behavior. Source-derived expectations below still require live confirmation.
+
+The computer-use tool found the DCS window once, but capture returned `Computer Use app approval timed out`. Subsequent window inventories did not expose DCS, although a DCS process existed. No Mission Editor input, save, rename, copy, deletion, or flight was performed by this probe. Browser automation also rejected the local `file:` preview under its URL policy; JavaScript syntax was checked, but visual browser QA is unverified.
+
+### Source-derived findings
+
+Paths below are under the locally installed `D:/DCS World`. Vendor source is not copied into this repository.
+
+| Behavior | Evidence | Implication |
+| --- | --- | --- |
+| Aircraft serialization creates explicit-field group and unit tables | `MissionEditor/modules/me_mission.lua:3921`, `:3982`, `:4031` | Arbitrary custom unit/group UUID fields are not a durable mechanism. |
+| Mission-root serialization also constructs an explicit table | `me_mission.lua:4511` | Do not rely on arbitrary mission-root fields surviving. |
+| Rename updates names and name indexes | `me_mission.lua:5886`, `:5903` | Numeric IDs are useful correspondence hints during rename, not identity proof. |
+| Copy recursively clones a group then replaces names and IDs | `MissionEditor/modules/me_copy_paste.lua:281`, `:317` | Copying can duplicate custom in-memory markers; names/IDs change by policy. |
+| Load resets maximum IDs; rebuilds them from surviving objects; normal save reloads | `me_mission.lua:2313`, `:3389`, `:3438`, `:4899`; new IDs at `:5759`, `:9615`, `:9645` | Deleting the highest-ID objects, saving and creating new ones can reuse IDs. |
+| Save As reaches the same serialization path | `MissionEditor/modules/me_menubar.lua:756`; `me_toolbar.lua:748`; `me_mission.lua:4809`, `:4823` | A new filename does not imply new aircraft or a new lineage. |
+| Dedicated non-`l10n` archive members are tracked for repacking | `Scripts/dictionary.lua:537`, `:573`, `:622` | A nested manifest may survive saves; it still cannot certify per-aircraft edit history. |
+| Root-level resources move under `l10n/DEFAULT`; unmapped resources have different preservation rules | `Scripts/dictionary.lua:555`, `:575`, `:607` | Test root and nested markers separately; never infer survival from a ZIP-only copy. |
+| Hook API exposes mission filename and load callbacks | `API/Sim_ControlAPI.html:158`, `:545`; `Scripts/Hooks/webGUI.lua:274` | A host-side check is a candidate, not yet demonstrated to check the exact bytes consumed by every load path. |
+
+Current recorder evidence: `library.py` hashes generated package files before activation. `prepare_staged_playback.py` derives the tape token from `recorded-flight.txt`. `make_staged_playback_mission.lua` embeds that token. None of these establishes authored-mission lineage or detects arbitrary changes to the generated mission at load. `recording_sink.lua` captures `source_unit_id` for native-state association; that is not historical mission provenance.
+
+## Proposed contract — requires user review
+
+### Companion-owned lineage and association history
+
+- Store a random lineage identifier and persistent aircraft-association identifiers in a companion registry. Keep immutable source and prepared `.miz` bytes, their hashes, the selected unit locator, and the mapping approved for each revision. A take points to those immutable records and the actual selected recording aircraft.
+- A filename, Save As, archive marker, numeric ID or name is a hint, not sufficient proof of lineage or aircraft continuity. Joining a newly imported revision to an existing lineage is explicit. A copied manifest may offer a candidate lineage but cannot authorize the join.
+- A byte-identical already-known mission can reuse its recorded mapping. For a different source revision, show the scene changes and candidate aircraft. **Require confirmation once for that revision before using an earlier take**, even when IDs and names match. Reusing that exact approved revision does not ask again. Repacking may be explained as content-identical, but remains a newly reviewed archive in this conservative first contract.
+- Candidate discovery is independent of aircraft count and list position. Show all relevant candidates with location, type, livery, payload, unit/group IDs and names; never silently pick the first match. Duplicate locators, missing aircraft and ambiguous candidates block automatic preparation.
+- A deliberate new association is a new revision-specific record. It does not rewrite the take's original source/prepared revision or claim that an indistinguishable recreated unit is historically the same entity. Even a retained marker cannot distinguish a copied replacement if the original was deleted. Snapshot comparison cannot recover unobserved edit history.
+- If the entire resulting archive is byte-identical to a previously approved snapshot, no file-based comparison can detect the intervening delete/recreate history. Reuse in that case means reuse of the same approved scene content, not proof of uninterrupted editor-entity existence. The simulated reused-ID scenario represents a newly imported archive with matching aircraft fields; it must not be read as a detector for identical bytes.
+- Removing an aircraft does not free its companion association identifier for automatic reuse. Restoring the saved scene is always available. Re-association requires explicit selection and compatibility checks; review cannot override an incompatible authored start or aircraft configuration.
+- Four to seven aircraft requires no reassignment of the original four. Review the three additions, confirm the recorded aircraft in the new revision, and retain earlier mappings and snapshots. Added aircraft remain ordinary aircraft; no simultaneous playback capacity is implied.
+- Legacy recordings retain their existing compatibility path and missing-provenance status. An editor ID in an old recording does not supply a source revision, prepared revision or lineage. Do not fabricate any of them.
+
+### Meaningful comparison, separate from byte hashes
+
+Store both exact archive hashes and a versioned semantic projection. Parse mission files as data, never execute their Lua to inspect them. Reject unsupported input forms rather than evaluating them.
+
+Treat map/table serialization order separately from ordered behavior. Aircraft/group container reorderings may be compared by validated unique locators; route waypoint order, action order and task order remain significant. Group membership and leader changes are meaningful even when they result from a reorder. Duplicate IDs/names must be surfaced. Localization/resource indirection must be resolved before claiming textual equality. Unknown fields or resource changes are reported as unclassified, never silently ignored as safe.
+
+For a recorded aircraft, compare type, coalition/country, livery, payload and aircraft properties, authored location/altitude/heading, start mode, airfield/parking/carrier attachment and relevant group/start settings. Establish numeric tolerances only from observed round trips; until then, unexplained differences require review or refusal, not a guessed tolerance. Unsupported terrain/weather/build/configuration and changed recorded-aircraft authored placement refuse preparation. Selected-aircraft task/trigger compatibility remains governed by [Define compatibility with authored triggers and aircraft tasks](https://github.com/caw1517/DCSRecorder/issues/19).
+
+Scene review covers added/removed/moved other aircraft and objects, player position, resources, time/weather, scripts, triggers and other mission settings. Review does not certify arbitrary script safety or collision clearance. Keep preservation checking separate from association checking: unselected mission contents must still survive preparation.
+
+The recorded first pose belongs to the take, separately from the authored spawn. Beginning recording after taxi does not make the two positions equal. Neither newer-scene selection nor aircraft re-association translates the measured path.
+
+### Generated-file verification boundaries
+
+1. At preparation, hash the actual source snapshot, compare its semantic projection with the saved revision, validate the explicit mapping, and create an immutable generated copy. Record its exact archive hash in an external preparation record along with take identity and build/profile information. The expected hash must not be derived from an editable manifest inside the file it is verifying.
+2. Before activation, verify the package against that record, as the present code already does for its generated files.
+3. Investigate a trusted companion/GUI-hook check at mission load. It must identify and read the intended generated archive, compare exact bytes, and tie the result to this load session and take. Missing checker, missing record, unreadable archive or mismatch must leave recording/playback unverified and refuse start. The native/mission handshake needs a session-specific approval before release; the current tape token alone does not implement that gate.
+4. A read of `getMissionFilename()` proves only what was read from that path at that moment. It is not proof of which bytes DCS consumed. Test callback timing, temporary Mission Editor test-flight files, restart, replacement during load and old approvals before declaring a supported load path. Until then, runtime checking is **unproven**.
+5. A valid initial archive hash does not detect or authorize later script-driven world changes, dynamic spawn/movement, native mods or changes after verification. A missing/removed in-mission checker cannot report its own absence; enforcement must be outside the editable copy. No universal edit detection or hostile tamper resistance is promised.
+
+Proposed recovery text: **“This mission copy changed, or its identity could not be verified. Open the authored mission in Mission Editor, save it, and generate a new recording/playback copy in DCS Recorder. You can also use the scene saved with this take. The recorded flight has not been changed.”**
+
+## Live round-trip protocol still required
+
+Use only scratch copies generated by `mission-identity-probe.prototype.py`. Never overwrite an authored original. Keep the before/after archives and a short observation log; snapshot each output with the probe. For each step record DCS build, operation, output filename, unit/group IDs and names, configuration/placement differences, marker survival and resource inventory.
+
+| Step | Action | Evidence status |
+| --- | --- | --- |
+| Baseline | Generate four-aircraft fixture from a local existing practice mission | Completed, synthetic fixture |
+| ZIP control | Repack without running Mission Editor | Completed; archive changed, parsed mission/inventory unchanged |
+| Open/save | Open fixture in Mission Editor and Save As to a fresh file | Pending |
+| Re-save | Save unchanged, close/reopen, Save As under another name | Pending |
+| Rename | Rename one unit and its group; save a separate copy | Pending |
+| Add | Add three aircraft without altering existing starts/configurations | Pending |
+| Reorder | Reorder groups/units where the editor allows; identify leader/task effects | Pending |
+| Duplicate | Copy/paste a group and save | Pending |
+| Delete/recreate | On a disposable branch of the fixture, remove the highest-ID aircraft, save/reload, create a replacement; compare IDs | Pending |
+| Preservation | Compare custom unit/root fields and root/nested archive resources after editor saves | Pending |
+| Runtime | Observe a valid generated load, edited copy, archive repack, missing checker, restart and Mission Editor test flight | Pending; load verifier is not implemented |
+
+Example commands (use an available Python 3 executable):
+
+```text
+python companion/mission-identity-probe.prototype.py seed INPUT.miz SCRATCH.miz --output seed.json
+python companion/mission-identity-probe.prototype.py snapshot BEFORE.miz AFTER.miz --output roundtrip.json
+python companion/mission-identity-probe.prototype.py repack INPUT.miz REPACKED.miz --output repack.json
+```
+
+`seed` and `repack` refuse to overwrite a destination archive. The parser supports only the serialized Lua data subset needed for this bounded probe; it is not a production parser. The scratch fixture removes the old recorder triggers and adds unknown-field/resource sentinels solely for preservation experiments. Do not fly it. Raw `.miz` files, vendor sources and full mission snapshots stay local.
+
+## Resolution gate
+
+Do not close the decision ticket yet. Required: observed editor round trips, explicit user review of the association/recovery policy and prototype, a precise supported runtime-verification boundary, and a permanent context pointer to the reviewed prototype. The implementation and full-flight evidence gates stay open after this decision is eventually resolved.
