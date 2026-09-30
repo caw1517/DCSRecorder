@@ -1,7 +1,9 @@
 # Mission identity and edit detection — decision prototype
 
-Status: **draft; core live Mission Editor round trips observed; copy/reorder, runtime boundary and user review still pending**.
+Status: **association policy approved by the user; core live Mission Editor round trips observed; remaining evidence gates open**.
 This is evidence for [Prove mission identity and edit detection across Mission Editor saves](https://github.com/caw1517/DCSRecorder/issues/18), a child of [Complete single-aircraft playback, then add layered flights](https://github.com/caw1517/DCSRecorder/issues/1). It does not implement the authored-mission workflow or close the ground milestone.
+
+User review: after the explanation of one authored mission with per-aircraft recordings, immutable saved scenes, and confirmation once per changed revision, the user answered **“Sure, I trust your guidance on this.”** This approves the proposed association/recovery policy through the live discussion. No further approval of that same policy is required. It does not turn simulated cases or unobserved simulator behavior into evidence, and does not imply a hands-on review of the HTML.
 
 Open `mission-identity.prototype.html` directly in a browser. It is a self-contained, in-memory simulation of the proposed decision. Every aircraft operation and load check in the page is simulated, not a claim about observed DCS behavior.
 
@@ -50,7 +52,7 @@ Paths below are under the locally installed `D:/DCS World`. Vendor source is not
 
 Current recorder evidence: `library.py` hashes generated package files before activation. `prepare_staged_playback.py` derives the tape token from `recorded-flight.txt`. `make_staged_playback_mission.lua` embeds that token. None of these establishes authored-mission lineage or detects arbitrary changes to the generated mission at load. `recording_sink.lua` captures `source_unit_id` for native-state association; that is not historical mission provenance.
 
-## Proposed contract — requires user review
+## Approved association policy and verification requirements
 
 ### Companion-owned lineage and association history
 
@@ -81,10 +83,10 @@ The recorded first pose belongs to the take, separately from the authored spawn.
 1. At preparation, hash the actual source snapshot, compare its semantic projection with the saved revision, validate the explicit mapping, and create an immutable generated copy. Record its exact archive hash in an external preparation record along with take identity and build/profile information. The expected hash must not be derived from an editable manifest inside the file it is verifying.
 2. Before activation, verify the package against that record, as the present code already does for its generated files.
 3. Investigate a trusted companion/GUI-hook check at mission load. It must identify and read the intended generated archive, compare exact bytes, and tie the result to this load session and take. Missing checker, missing record, unreadable archive or mismatch must leave recording/playback unverified and refuse start. The native/mission handshake needs a session-specific approval before release; the current tape token alone does not implement that gate.
-4. A read of `getMissionFilename()` proves only what was read from that path at that moment. It is not proof of which bytes DCS consumed. Test callback timing, temporary Mission Editor test-flight files, restart, replacement during load and old approvals before declaring a supported load path. Until then, runtime checking is **unproven**.
+4. A read of `getMissionFilename()` proves only what was read from that path at that moment. It is not proof of which bytes DCS consumed. The installed API documents a filename and load/start callbacks but supplies no byte-consumption or atomic verification guarantee. Test callback timing, temporary Mission Editor test-flight files, restart, replacement during load and old approvals before declaring a supported load path. Until then, runtime checking is **unproven**, with **no verified runtime load path**. The existing preparation/activation hash check is the current verified boundary; it must not be presented as runtime mission verification.
 5. A valid initial archive hash does not detect or authorize later script-driven world changes, dynamic spawn/movement, native mods or changes after verification. A missing/removed in-mission checker cannot report its own absence; enforcement must be outside the editable copy. No universal edit detection or hostile tamper resistance is promised.
 
-Proposed recovery text: **“This mission copy changed, or its identity could not be verified. Open the authored mission in Mission Editor, save it, and generate a new recording/playback copy in DCS Recorder. You can also use the scene saved with this take. The recorded flight has not been changed.”**
+Recovery text: **“This mission copy changed, or its identity could not be verified. Open the authored mission in Mission Editor, save it, and generate a new recording/playback copy in DCS Recorder. You can also use the scene saved with this take. The recorded flight has not been changed.”**
 
 ## Live round-trip protocol and remaining checks
 
@@ -116,4 +118,4 @@ python companion/mission-identity-probe.prototype.py repack INPUT.miz REPACKED.m
 
 ## Resolution gate
 
-Do not close the decision ticket yet. Required: observed editor round trips, explicit user review of the association/recovery policy and prototype, a precise supported runtime-verification boundary, and a permanent context pointer to the reviewed prototype. The implementation and full-flight evidence gates stay open after this decision is eventually resolved.
+The user's policy approval is complete and the prototype has a permanent branch/commit pointer. Do not close the decision ticket yet: copy/reorder coverage, a controlled compatible-additions case, and the generated-load investigation remain incomplete. Following approval, the DCS process was still running but no usable DCS window appeared in the computer-use inventory; no additional live operation was claimed. Resume the outstanding probes when window access is available, without requesting the same policy approval again. The implementation and full-flight evidence gates stay open after this decision is eventually resolved.
