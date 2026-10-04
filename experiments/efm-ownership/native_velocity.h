@@ -42,7 +42,7 @@ inline const char* validate(const void* handle,const turn_path::Motion& motion,b
         return "motion_state_unreadable";
     double speed2=0;
     for(int i=0;i<3;++i) {
-        if(!std::isfinite(current[i]) || std::abs(current[i])>400 ||
+        if(!std::isfinite(current[i]) ||
            !std::isfinite(rates[i]) ||
            !std::isfinite(motion.velocity[i]) || !std::isfinite(motion.angular[i])
 #ifndef HORNET_STAGED_PROTOTYPE
@@ -58,19 +58,9 @@ inline const char* validate(const void* handle,const turn_path::Motion& motion,b
     // Only this separately built hold-only controller can command zero motion.
     // It cannot replay low-speed tapes or release into flight.
     if(!held_start::stationary(motion)) return "held_motion_rejected";
-#elif defined(HORNET_SURFACE_PROTOTYPE)
-    // Grounded tape samples (source in_air=0) may be stationary or slow. Airborne
-    // samples keep the release rule: zero hold motion or the airborne range.
-    if(ground ? speed2>turn_path::max_speed*turn_path::max_speed :
-       (!held_start::stationary(motion) &&
-        (speed2<70*70 || speed2>turn_path::max_speed*turn_path::max_speed)))return "velocity_speed_rejected";
-#elif defined(HORNET_RELEASE_PROTOTYPE)
-    // Only this separate release control accepts zero hold motion or the
-    // existing airborne speed range. Recording-reader guards stay intact.
-    if(!held_start::stationary(motion) &&
-       (speed2<70*70 || speed2>turn_path::max_speed*turn_path::max_speed))return "velocity_speed_rejected";
 #else
-    if(speed2<70*70 || speed2>turn_path::max_speed*turn_path::max_speed) return "velocity_speed_rejected";
+    // Recorded speed is never limited; commanded velocity need only be finite.
+    (void)ground;(void)speed2;
 #endif
     return "valid";
 }

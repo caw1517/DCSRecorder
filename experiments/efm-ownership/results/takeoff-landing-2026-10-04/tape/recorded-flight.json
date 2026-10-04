@@ -1,0 +1,106 @@
+{
+  "aircraft": "FA-18C_hornet",
+  "livery": "blue angels jet team",
+  "theatre": "Caucasus",
+  "state_profile": "hornet-exterior-v1",
+  "engine_profile": "hornet-native-engine-v1",
+  "smoke_profile": "hornet-native-smoke-v1",
+  "smoke_station": "10",
+  "smoke_clsid": "{INV-SMOKE-WHITE}",
+  "light_profile": "hornet-lights-v1",
+  "canopy_profile": "hornet-canopy-v1",
+  "wheel_profile": "hornet-wheels-v1",
+  "contact_profile": "hornet-contact-v1",
+  "source_unit_id": "1",
+  "source": "Blue Angel #1 - Lead",
+  "authored_source_sha256": "7da72749866d21e24c339165cc7580f093bc196f32b3a02460cfd390a864f75a",
+  "authored_lineage": "9217256bd24e4ccda5a5921c531d239d",
+  "authored_association": "762c447c74e948198d80d8726c826d54",
+  "capture_timing": "frame-batch-v1",
+  "capture_build": "2.9.30.28536",
+  "wind_ground": "0",
+  "wind_2000": "0",
+  "wind_8000": "0",
+  "contact": {
+    "profile": "hornet-contact-v1",
+    "grounded_samples": 3003,
+    "airborne_samples": 9433,
+    "first_grounded": true,
+    "last_grounded": true,
+    "health_unchanged": true,
+    "grounded_origin_agl": [
+      1.8117033501000037,
+      2.7012512121000043
+    ],
+    "surfaces": [
+      5
+    ]
+  },
+  "parked_endpoint": {
+    "profile": "hornet-parked-endpoint-v1-provisional",
+    "eligible": true,
+    "criteria": {
+      "min_tail_seconds": 2.0,
+      "max_speed": 0.05,
+      "max_displacement": 0.05,
+      "max_heading_change": 0.2,
+      "min_engine_core": 0.5,
+      "health": "unchanged",
+      "contact": "grounded"
+    },
+    "measured": {
+      "tail_seconds": 2.58,
+      "samples": 130,
+      "boundary_failure": [
+        "moving"
+      ],
+      "max_speed": 0.04763977126348857,
+      "max_displacement": 0.024640641443965806,
+      "max_heading_change": 0.0024888788361465686,
+      "min_engine_core": 0.699999392033
+    }
+  },
+  "smoke_events": [
+    {
+      "time": 0.0,
+      "on": false
+    },
+    {
+      "time": 45.087,
+      "on": true
+    },
+    {
+      "time": 62.081,
+      "on": false
+    },
+    {
+      "time": 85.986,
+      "on": true
+    },
+    {
+      "time": 136.18099999999998,
+      "on": false
+    },
+    {
+      "time": 145.084,
+      "on": true
+    },
+    {
+      "time": 148.483,
+      "on": false
+    }
+  ],
+  "duration": 248.7,
+  "samples": 12436,
+  "source_time": 18.627,
+  "recording_version": 8,
+  "exterior_available": true,
+  "engine_available": true,
+  "smoke_available": true,
+  "lights_available": true,
+  "canopy_available": true,
+  "wheels_available": true,
+  "contact_available": true,
+  "surface_available": true,
+  "native_tape_version": 7
+}

@@ -29,7 +29,7 @@ class SurfacePlayback(unittest.TestCase):
         return build(TAKE, EXPANDED, 2, 4, self.root/name, 'DCSRecorder-Authored-Playback-test.miz',
                      dcs=DCS, saved=SAVED, saved_games=saved_games)
 
-    def test_grounded_rows_may_be_stationary_but_airborne_rows_may_not(self):
+    def test_recorded_speed_is_never_limited(self):
         metadata, samples, _ = read(TAKE)
         self.assertTrue(metadata['surface_available'])
         self.assertEqual({s[-1] for s in samples}, {1})
@@ -39,8 +39,8 @@ class SurfacePlayback(unittest.TestCase):
         rows[header+1][rows[header].index('in_air')] = '1'  # stationary first sample, declared airborne
         changed = self.root/'changed.csv'
         with changed.open('w', newline='', encoding='utf-8') as f: csv.writer(f, lineterminator='\n').writerows(rows)
-        with self.assertRaisesRegex(ValueError, 'below the current airborne playback minimum'):
-            read(changed)
+        metadata, samples, _ = read(changed)  # slow airborne sample is accepted
+        self.assertEqual(samples[0][-1], 0)
 
     def test_ground_package_uses_surface_controller_and_hot_ground_start(self):
         result = self.build()

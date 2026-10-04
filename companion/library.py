@@ -279,8 +279,10 @@ class Library:
         """Install only what this take changes. Shared module files must already
         match exactly; per-take files are replaced after a backup, with rollback."""
         payload, module, control = output / 'payload', manifest['module'], manifest['control']
-        # The controller differs between airborne and ground (surface) takes.
+        # The controller differs between airborne and ground (surface) takes, and
+        # aircraft.lua mirrors the lead's mod stores (Blue Angels HANHART).
         per_take = {f'Mods/aircraft/{module}/bin/recorded-flight.txt', f'Mods/aircraft/{module}/bin/recorded-flight.json',
+                    f'Mods/aircraft/{module}/aircraft.lua',
                     f"Mods/aircraft/{module}/bin/{manifest['binary']}.dll",
                     f'Scripts/{control}/expected.lua', f'Scripts/Hooks/{control}.lua'}
         mission = 'Missions/' + manifest['mission']

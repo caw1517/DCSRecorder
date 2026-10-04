@@ -79,17 +79,11 @@ def read(path, *, ground_trial_log=None):
         if sum(x*y for x,y in zip(cross,r))<0.999: raise ValueError('Reflected orientation basis')
         speed=math.sqrt(sum(x*x for x in v))
         elapsed=t-samples[0][0] if samples else 0
-        # Version 8 carries source contact per row: grounded rows may be slow or
-        # stationary; airborne rows keep the airborne speed envelope.
+        # Version 8 carries source contact per row. Recorded speed is never limited:
+        # integrity is checked by finiteness, timing and position/velocity continuity.
         grounded=version>=8 and contact_state.parse(d)[0]==0
         flags.append(grounded)
         if ground_report is not None and speed>5:raise ValueError('Ground trial exceeds bounded taxi speed')
-        if speed>260:
-            raise ValueError(f'Recorded speed {speed:.2f} m/s exceeds the current playback maximum of 260 m/s at {elapsed:.2f} s. '
-                             'This limit uses ground speed (about 505 knots), not cockpit indicated airspeed. The recording is saved.')
-        if ground_report is None and not grounded and speed<70:
-            raise ValueError(f'Recorded speed {speed:.2f} m/s is below the current airborne playback minimum of 70 m/s at {elapsed:.2f} s. '
-                             'Ground starts and transitions are not yet supported. The recording is saved.')
         if not 0<=brake<=1:
             raise ValueError(f'Invalid speed-brake value {brake:g} at {elapsed:.2f} s; expected 0 to 1.')
         q=quaternion(f,u,r)

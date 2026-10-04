@@ -40,6 +40,34 @@ def validate_take(metadata, raw, footer):
     if footer != 'user_stop': raise ValueError('Take did not end with F10 Stop')
 
 
+def mirror_stores(aircraft_lua, lead, dcs, saved_games):
+    """Make the playback module draw every store the authored lead carries.
+
+    The module declares the unmodified stock Hornet's stores. The Blue Angels mod
+    adds a HANHART centerline store by editing the installed stock Hornet; that
+    entry is mirrored verbatim when the mod declares the store. Any other store the
+    module cannot draw is refused by station rather than shown as a bare pylon.
+    """
+    import re
+    text = aircraft_lua.read_text(encoding='utf-8')
+    declared = set(re.findall(r'CLSID\s*=\s*"([^"]+)"', text))
+    stock = (dcs/'CoreMods/aircraft/FA-18C/FA-18C_hornet.lua').read_text(encoding='utf-8', errors='replace')
+    for station, store in sorted(((lead.get('payload') or {}).get('pylons') or {}).items()):
+        clsid = (store or {}).get('CLSID')
+        if not clsid or clsid in declared: continue
+        lines = [l for l in stock.splitlines() if re.search(r'CLSID\s*=\s*"' + re.escape(clsid) + '"', l)]
+        mod = any(re.search(r'CLSID\s*=\s*"' + re.escape(clsid) + '"', f.read_text(encoding='utf-8', errors='replace'))
+                  for f in (saved_games/'Mods/tech').glob('*/*.lua')) if (saved_games/'Mods/tech').exists() else False
+        if clsid != '{HANHART}' or station != 5 or len(lines) != 1 or not mod:
+            raise ValueError(f'Station {station} of the recorded Hornet carries {clsid}, which the playback aircraft cannot draw. '
+                             'Remove it in Mission Editor and save a new revision.')
+        clean = '\t{ CLSID = "<CLEAN>",\targ_value = 1, add_mass = -ctrPylonMass\t},'
+        if text.count(clean) != 1: raise ValueError('Playback module centerline layout changed')
+        text = text.replace(clean, lines[0].rstrip() + '\n' + clean)
+        declared.add(clsid)
+    aircraft_lua.write_text(text, encoding='utf-8')
+
+
 def plane_groups(mission):
     # The count verify_hornet_routes.lua checks: every plane group in the mission.
     return sum(len((c.get('plane') or {}).get('group') or {}) for side in mission['coalition'].values()
@@ -136,6 +164,8 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
                  [HERE/'check_authored_hook.lua', payload, CONTROL, mission_name, namespace],
                  [HERE/'check_authored_mission.lua', control, namespace, manifest['selected_name']]):
         subprocess.run([luae, *map(str, args)], check=True)
+    # After the scene-module check, so a missing mod is named as such.
+    mirror_stores(mod/'aircraft.lua', a.selected(a.read_source(source)[2], lead_id)['unit'], dcs, Path(saved_games))
     refs, problems = check_resources.problems(miz.read_bytes())
     if problems: raise ValueError('Unresolved resources: '+'; '.join(problems))
     result = dict(profile='authored-playback-ground-v1' if metadata.get('surface_available') else 'authored-playback-airborne-v1',

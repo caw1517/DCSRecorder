@@ -20,6 +20,9 @@
 #include "turn_path.h"
 #ifdef HORNET_RECORDED_PROTOTYPE
 #include "recorded_path.h"
+#ifdef HORNET_SURFACE_PROTOTYPE
+#include "surface-start/ai_ground.h"
+#endif
 #ifdef HORNET_STAGED_PROTOTYPE
 #include "staged_playback.h"
 #ifdef HORNET_RELEASE_PROTOTYPE
@@ -53,6 +56,7 @@ std::ofstream body_file;
 std::ofstream motion_file;
 #ifdef HORNET_GROUND_TRACE
 std::ofstream ground_pose_file;
+std::ofstream ai_phase_file; // read-only woAIPlane phase fields (research #36)
 #endif
 #ifdef HORNET_STAGED_PROTOTYPE
 std::ofstream exterior_file,engine_file;
@@ -72,6 +76,8 @@ struct Observation {
     // Surface controller: the take ended on a grounded sample. Ownership, ground
     // pose restoration and the final supported state continue until destroy.
     bool parked=false;
+    bool ground_flag_logged=false,taxi_mode_logged=false;
+    int steps_since_sdk=0;uint64_t extra_restores=0;double native_step_dt=0.02,last_sdk_elapsed=0;
     bool exterior_pending=false,exterior_finished=false;
     double exterior_elapsed=0;
     float snapshot_brake=0;
@@ -123,6 +129,7 @@ void drain_engine(Observation& state,double time) {
 #ifdef HORNET_GROUND_TRACE
 // Read-only boundary evidence: distinguish native integration from animation
 // or later pose replacement. No extra pose/velocity writes are performed.
+void record(const char* event, ED_OBJECT_HANDLE handle, uint64_t cookie,double time, uint64_t calls);
 void trace_ground_pose(const char* phase,const void* handle,const Observation& state) {
     if(state.path.samples.empty() || !ground_pose_file)return;
     std::array<float,16> pose{};std::array<double,3> precise{};
@@ -135,6 +142,20 @@ void trace_ground_pose(const char* phase,const void* handle,const Observation& s
     for(double v:precise)ground_pose_file<<','<<v;
     for(int k=0;k<3;++k)ground_pose_file<<','<<pose[12+k];
     ground_pose_file<<'\n';ground_pose_file.flush();
+    // Offsets from the woAIPlane complete object (SDK handle - 8), DCS 2.9.30 static
+    // reading in docs/research/dcs-ai-plane-ground-phase.md. Guarded reads only.
+    if(ai_phase_file) {
+        const auto complete=object-8;
+        int32_t mode=0;double height=0;float y=0;uint8_t b7cb=0,b26d3=0,b5591=0,gate=0;uint64_t q5568=0;
+        const bool ok=native_identity::read(complete+0x7f4,mode) && native_identity::read(complete+0x248,height) &&
+            native_identity::read(complete+0x1b0,y) && native_identity::read(complete+0x7cb,b7cb) &&
+            native_identity::read(complete+0x26d3,b26d3) && native_identity::read(complete+0x5568,q5568) &&
+            native_identity::read(complete+0x5591,b5591) && native_identity::read(complete+0x5002,gate);
+        ai_phase_file<<phase<<','<<state.calls<<','<<state.step_calls<<','<<state.clock.last<<','<<state.clock.elapsed<<','
+            <<state.path.ground_at(state.clock.elapsed)<<','<<ok<<','<<mode<<','<<height<<','<<y<<','<<int(b7cb)<<','
+            <<int(b26d3)<<','<<q5568<<','<<int(b5591)<<','<<int(gate)<<'\n';
+        ai_phase_file.flush();
+    }
 }
 void after_ground_native_step(const void* handle) {
     std::lock_guard<std::mutex> guard(lock);
@@ -263,6 +284,27 @@ void after_native_animation(const void* handle) {
     }
 }
 #endif
+#ifdef HORNET_SURFACE_PROTOTYPE
+// Tape motion at replay time t; zero while held or parked.
+turn_path::Motion surface_motion(const Observation& state,double t) {
+    return state.clock.playing() && !state.parked?state.path.motion_at(t):turn_path::Motion{};
+}
+// After touchdown DCS ran 2-3 native steps per SDK tick (takeoff-landing live-8);
+// only the first was restored. Extra steps in the same tick restore the tape at
+// the replay time they represent, from the previous interval's step length.
+void restore_extra_step(const void* handle,Observation& state) {
+    if(!state.clock.playing() || state.steps_since_sdk<2 || state.steps_since_sdk>5)return;
+    const auto id=api && api->ed_get_object_id ? api->ed_get_object_id(reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle))) : 0;
+    if(!id || id!=state.runtime_id)return;
+    const double t=std::min(state.clock.elapsed+(state.steps_since_sdk-1)*state.native_step_dt,state.path.duration());
+    const auto target=state.path.at(t);
+    auto motion=surface_motion(state,t);
+    native_body::Sample before{},after{};
+    const char* status=native_motion::apply(handle,id,before,after,&target,nullptr,false,&motion,state.runtime_id,true);
+    if(std::strcmp(status,"called")==0) {++state.extra_restores;trace_ground_pose("before_extra_step_restored",handle,state);}
+    else {state.step_status=status;state.motion_active=false;staged_playback::publish(api,reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle)),state.token,staged_playback::failed);}
+}
+#endif
 void before_native_step(const void* handle) {
     std::lock_guard<std::mutex> guard(lock);
     const auto sdk_handle=reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle));
@@ -270,6 +312,12 @@ void before_native_step(const void* handle) {
     if(it==observed.end()) return;
     auto& state=it->second;
     ++state.step_calls;
+#ifdef HORNET_SURFACE_PROTOTYPE
+    if(state.motion_active) {
+        ++state.steps_since_sdk;
+        if(!state.step_pending) {restore_extra_step(handle,state);return;}
+    }
+#endif
     if(!state.motion_active || !state.step_pending) return;
 #ifdef HORNET_GROUND_TRACE
     trace_ground_pose("before_step",handle,state);
@@ -289,19 +337,27 @@ void before_native_step(const void* handle) {
        ) state.step_status="step_state_rejected";
     else {
 #ifdef HORNET_GROUND_TRACE
-#ifdef HORNET_GROUND_PROTOTYPE
+        // Live traces show the native ground correction replaces pose after the
+        // SDK command and before this integration boundary, and keeps doing so on
+        // airborne samples after liftoff (the takeoff take stayed pinned to the
+        // runway for 1.35 s). Surface takes therefore restore before every step.
         const bool ground=true;
-#else
-        const bool ground=state.path.ground_at(state.clock.elapsed);
-#endif
         if(ground) {
-            // Live ground traces show the native ground correction replaces pose
-            // after the SDK command and before this integration boundary. Restore
-            // the same guarded tape sample here; consume only this SDK tick's work.
+            // Restore the same guarded tape sample here; consume only this SDK tick's work.
             const auto target=state.path.at(state.clock.elapsed);
             native_body::Sample before{},after{};
             state.step_status=native_motion::apply(handle,id,before,after,&target,nullptr,
                                                    false,&state.step_motion,state.runtime_id,true);
+#ifdef HORNET_SURFACE_PROTOTYPE
+            if(state.path.ground_at(state.clock.elapsed)) {
+                const int flag=surface_ai::hold_ground_flag(handle);
+                if(flag<0)state.step_status="ground_flag_unconfirmed";
+                else if(flag>0 && !state.ground_flag_logged){state.ground_flag_logged=true;record("ground_flag_set",reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle)),0,state.clock.elapsed,state.calls);}
+                const int mode=surface_ai::hold_taxi_mode(handle);
+                if(mode<0)state.step_status="taxi_mode_unconfirmed";
+                else if(mode>0 && !state.taxi_mode_logged){state.taxi_mode_logged=true;record("taxi_mode_set",reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle)),0,state.clock.elapsed,state.calls);}
+            }
+#endif
             if(std::strcmp(state.step_status,"called")==0)
                 trace_ground_pose("before_step_restored",handle,state);
         } else {
@@ -420,6 +476,8 @@ void open_log() {
 #ifdef HORNET_GROUND_TRACE
     ground_pose_file.open(folder/("ground-pose-"+std::to_string(GetCurrentProcessId())+".csv"));
     ground_pose_file<<"phase,id,call,step,model_time,replay_time,readable,target_x,target_y,target_z,precise_x,precise_y,precise_z,float_x,float_y,float_z\n"<<std::setprecision(15);
+    ai_phase_file.open(folder/("ai-phase-"+std::to_string(GetCurrentProcessId())+".csv"));
+    ai_phase_file<<"phase,call,step,model_time,replay_time,tape_ground,readable,mode_7f4,height_248,pos_y_1b0,b_7cb,b_26d3,q_5568,b_5591,gate_5002\n"<<std::setprecision(15);
 #endif
 #ifdef HORNET_STAGED_PROTOTYPE
     exterior_file.open(folder/("exterior-"+std::to_string(GetCurrentProcessId())+".csv"));
@@ -710,7 +768,11 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         const bool ground=false;
 #endif
 #ifdef HORNET_SURFACE_PROTOTYPE
-        const auto target_motion=state.clock.playing() && !state.parked?state.path.motion_at(elapsed):turn_path::Motion{};
+        const auto target_motion=surface_motion(state,elapsed);
+        // Native step length over the last SDK interval, for extra-step restores.
+        if(state.steps_since_sdk>0 && elapsed>state.last_sdk_elapsed)
+            state.native_step_dt=std::clamp((elapsed-state.last_sdk_elapsed)/state.steps_since_sdk,0.005,0.1);
+        state.last_sdk_elapsed=elapsed;state.steps_since_sdk=0;
 #elif defined(HORNET_RELEASE_PROTOTYPE)
         const auto target_motion=state.clock.playing()?state.path.motion_at(elapsed):turn_path::Motion{};
 #elif defined(HORNET_HELD_PROTOTYPE)
@@ -839,6 +901,21 @@ extern "C" __declspec(dllexport) void ed_on_object_destroy(ED_OBJECT_HANDLE hand
     }
 #endif
     record("destroy", handle, cookie, 0, it == observed.end() ? 0 : it->second.calls);
+#ifdef HORNET_GROUND_TRACE
+    // Read-only: which native path destroyed the object (module+RVA per frame).
+    if(ai_phase_file) {
+        void* frames[48]{};const auto n=RtlCaptureStackBackTrace(0,48,frames,nullptr);
+        ai_phase_file<<"destroy_stack";
+        for(USHORT i=0;i<n;++i) {
+            HMODULE m=nullptr;wchar_t name[MAX_PATH]{};
+            GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                reinterpret_cast<LPCWSTR>(frames[i]),&m);
+            if(m)GetModuleFileNameW(m,name,MAX_PATH);
+            ai_phase_file<<','<<std::filesystem::path(name).filename().string()<<"+0x"<<std::hex<<(reinterpret_cast<uintptr_t>(frames[i])-reinterpret_cast<uintptr_t>(m))<<std::dec;
+        }
+        ai_phase_file<<'\n';ai_phase_file.flush();
+    }
+#endif
     observed.erase(handle);
 }
 static_assert(std::is_same_v<decltype(&ed_setup_object_api), PFN_ED_SETUP_OBJECT_API>);

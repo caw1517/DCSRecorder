@@ -110,14 +110,12 @@ class CanopyWorkflowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'canopy profile'):
             read(source)
 
-    def test_library_explains_speed_limit_separately_from_animation(self):
+    def test_library_explains_invalid_speed_brake(self):
         source, = self.capture()
         with source.open() as stream:
             rows = list(csv.reader(stream))
         header = next(i for i, row in enumerate(rows) if row[0] == 't')
         for column, value, expected in (
-            ('vx', '267.668715', 'Recorded speed 267.67 m/s exceeds the current playback maximum of 260 m/s at 1.00 s'),
-            ('vx', '69', 'Recorded speed 69.00 m/s is below the current airborne playback minimum of 70 m/s at 1.00 s'),
             ('speedbrake', '1.1', 'Invalid speed-brake value 1.1 at 1.00 s'),
         ):
             with self.subTest(column=column, value=value):
@@ -131,6 +129,19 @@ class CanopyWorkflowTests(unittest.TestCase):
                 self.assertIn(expected, entry['reason'])
                 self.assertEqual(source.read_bytes(), original)
 
+
+    def test_library_never_limits_recorded_speed(self):
+        source, = self.capture()
+        with source.open() as stream:
+            rows = list(csv.reader(stream))
+        header = next(i for i, row in enumerate(rows) if row[0] == 't')
+        changed = [row[:] for row in rows]
+        changed[header+51][rows[header].index('vx')] = '267.668715'
+        with source.open('w', newline='') as stream:
+            csv.writer(stream).writerows(changed)
+        entry, = self.library.entries()
+        self.assertNotIn('Recorded speed', entry['reason'])
+        self.assertNotIn('playback m', entry['reason'])
     def test_packaged_practice_emits_measured_canopy(self):
         result = self.library.practice()
         with zipfile.ZipFile(result['mission']) as archive:

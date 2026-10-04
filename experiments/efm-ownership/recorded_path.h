@@ -92,12 +92,10 @@ struct Path {
             double speed2=0;for(double v:s.v) {if(!std::isfinite(v))return "recording_sample_rejected";speed2+=v*v;}
 #ifdef HORNET_GROUND_PROTOTYPE
             if(!ground_trial::speed_allowed(speed2) ||
-#elif defined(HORNET_SURFACE_PROTOTYPE)
-            // Grounded source samples may be slow or stationary; airborne samples
-            // keep the airborne envelope.
-            if((s.ground ? speed2>260*260 : (speed2<70*70 || speed2>260*260)) ||
 #else
-            if(speed2<70*70 || speed2>260*260 ||
+            // Recorded speed is never limited; samples need only be finite.
+            (void)speed2;
+            if(
 #endif
                std::abs(dot(s.q,s.q)-1)>0.001 || s.brake<0 || s.brake>1)return "recording_limits_rejected";
             if(i==0 && s.t!=0)return "recording_clock_rejected";
