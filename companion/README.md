@@ -7,6 +7,14 @@ Python 3; it is not yet a portable desktop distribution.
 
 ## Supported scope
 
+An opt-in **2.9.30.28536 companion trial** is now prepared via
+`install_build_trial.py`. Settings must explicitly select that build; the default
+profile below remains unchanged. The trial uses separate playback and native
+capture DLLs, preserves installed predecessors and backs up the changed capture
+scripts/settings. It requires a fresh complete recording from the new build.
+Offline capture, packaging and activation checks pass; a user-operated normal
+record-to-playback run is still required. The app displays a trial banner.
+
 DCS 2.9.29.27468, stock F/A-18C, Blue Angels Jet Team livery, Caucasus, zero wind,
 airborne recordings of 5 to 300 seconds and 70 to 260 m/s. Initial attitude must
 be within 10 degrees of level. Staged playback no longer imposes an altitude
@@ -197,3 +205,13 @@ specific extra durations or frame-rate settings were supplied. See the
 and the boundary between current support and follow-up work.
 
 Live automatic-save result: 1,975 samples / 39.48 seconds, saved 9 ms after Stop, byte-for-byte verification passed, and no unfinished file remained. Both earlier failed captures were recovered. The hook now checks storage on startup, reads DCS log history, accepts void-success file operations, and verifies complete saved bytes before publication.
+
+New practice missions in the opt-in 2.9.30 trial declare `capture_timing,frame-batch-v1`.
+This retains short GUI log batches with actual engine/smoke observation timestamps:
+initial observations must arrive within 50 ms, subsequent lag and native clock
+gaps within 150 ms. Older missions retain the strict 50 ms policy. Generate a
+fresh practice mission after installing this update. Offline batching regressions
+pass. On 30 September 2026 the user accepted live recording and playback on this
+build: 2,863 samples over 57.24 seconds, logged playback completion, working gear,
+spoilers and smoke, and smooth formation flying. See the
+[acceptance checkpoint](../experiments/efm-ownership/results/held-start-2026-09-30/README.md).

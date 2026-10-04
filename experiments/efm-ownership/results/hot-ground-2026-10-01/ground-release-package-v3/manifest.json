@@ -1,0 +1,187 @@
+{
+  "profile": "ground-start-bound-take-v1",
+  "dcs_build": "2.9.30.28536",
+  "module": "DCSRecorder-Hornet-Ground-Test",
+  "binary": "HornetGroundProbe",
+  "mission": "049-Hornet-Ground-Hold-Release.miz",
+  "recording": {
+    "aircraft": "FA-18C_hornet",
+    "livery": "Blue Angels Jet Team",
+    "theatre": "Caucasus",
+    "state_profile": "hornet-exterior-v1",
+    "engine_profile": "hornet-native-engine-v1",
+    "smoke_profile": "hornet-native-smoke-v1",
+    "smoke_station": "10",
+    "smoke_clsid": "{INV-SMOKE-WHITE}",
+    "light_profile": "hornet-lights-v1",
+    "canopy_profile": "hornet-canopy-v1",
+    "wheel_profile": "hornet-wheels-v1",
+    "source_unit_id": "1",
+    "source": "Observer",
+    "capture_timing": "frame-batch-v1",
+    "capture_build": "2.9.30.28536",
+    "wind_ground": "0",
+    "wind_2000": "0",
+    "wind_8000": "0",
+    "smoke_events": [
+      {
+        "time": 0.0,
+        "on": false
+      }
+    ],
+    "duration": 19.8,
+    "samples": 991,
+    "source_time": 6.056,
+    "recording_version": 7,
+    "exterior_available": true,
+    "engine_available": true,
+    "smoke_available": true,
+    "lights_available": true,
+    "canopy_available": true,
+    "wheels_available": true,
+    "ground_trial": {
+      "source_sha256": "d5bf1359c33276536924e42f28a114bdb4562cce083b8044dfef8e7a40a25791",
+      "contact_log_sha256": "0fc7bc82527305324e35f75a9a75b041a982b9e1e5b960bebfa3c7dfd8d2daa0",
+      "samples": 991,
+      "scope": "One measured ground take; experimental playback, not general ground eligibility"
+    },
+    "native_tape_version": 6
+  },
+  "initial": {
+    "token_high": 0.7213553786277771,
+    "token_low": 0.8285616636276245,
+    "expected": {
+      "21": 0.0,
+      "38": 0.0,
+      "0": 1.0,
+      "3": 1.0,
+      "5": 1.0,
+      "9": 0.633149325848,
+      "10": 0.633149325848,
+      "11": -0.633735537529,
+      "12": -0.633735537529,
+      "13": 0.352031856775,
+      "14": 0.352031826973,
+      "15": 0.499983161688,
+      "16": 0.499983400106,
+      "17": 0.955205321312,
+      "18": -0.945355832577,
+      "28": 0.0,
+      "29": 0.0,
+      "89": 0.763111829758,
+      "90": 0.763111829758,
+      "88": 0.918121933937,
+      "190": 0.918121933937,
+      "191": 0.918121933937,
+      "192": 0.918121933937,
+      "193": 0.0,
+      "210": 0.988225162029,
+      "212": 0.0,
+      "1": 0.754257440567,
+      "6": 0.839811086655,
+      "4": 0.839851379395,
+      "101": 1.0,
+      "103": 1.0,
+      "102": 1.0,
+      "2": 0.00194847339299
+    },
+    "smoke_events": {
+      "1": {
+        "time": 0.0,
+        "on": false
+      }
+    },
+    "duration": 19.8,
+    "minimum_hold": 30,
+    "ground": true
+  },
+  "source_package_manifest": "d87151a62ce44894532d7184f8ed4bc3f987c5635eda8310f8544f3cd4ab08ce",
+  "status": "Ground pre-integration pose restore built and offline checked; live hold and release pending",
+  "files": {
+    "Missions/049-Hornet-Ground-Hold-Release.miz": "65ebbae6b920c0f53cc223508aa1c96cc290d38d5f47f6e68af1c723af954745",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/aircraft.lua": "0d80697c5460da9569bec62827329a27c92f9ae1082a53b07921e86eed242bf4",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/entry.lua": "f9e7db700428d33c123ea7338434f3ee92c839a36f47bd5bbb36fb03c8c816d3",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/bin/HornetGroundProbe.dll": "4a2e49e9d343783d650f8749260f12b7870b3cefcce88c58e193c9b22c00ae39",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/bin/recorded-flight.json": "d0b6f49d4acb073c84562f95f128c77e6e4178fdf0b2377762ca39e27bb23e67",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/bin/recorded-flight.txt": "0f77ac142d8d2623b15ca5b9652f0f56952f8b4499496ccee11e93cc03e9a6c1",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Datalinks/Link16.dlg": "7075e314bd0c4f0322c9e7d7cabfa9dc55bef2b708125768209e70b0bbceebeb",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Cockpit/Scripts/device_init.lua": "197073e97be4a1aee552ee43b91fd4c0c9db36aaa9907820d5f3a3b249e178a5",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Liveries/DCSRecorder-Hornet-Ground-Test/Blue Angels Jet Team.zip": "2d7787d059a72d3f7ca10c9baa8ee4f5d3a330a12175cc1e20e4d8d33b95ef66",
+    "Scripts/DCSRecorderGroundControl/expected.lua": "bc5b8c930a87203dec0efc78715d8abd1b37d1f55b14d48e260809c82958de51",
+    "Scripts/DCSRecorderGroundControl/session_guard.lua": "fe494fd7f7de84ff1718ffa8f9c1249477a43039a8fadf30d7dd3adb61ba6bb7",
+    "Scripts/Hooks/DCSRecorderGroundControl.lua": "6edd6c735c0b093ccd3a6cbd81d7c6247909173789d2bf53f6ec9b87d567dad1"
+  },
+  "reference_repair": {
+    "changes": [
+      {
+        "path": [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          3,
+          "route",
+          "points",
+          2,
+          "ETA"
+        ],
+        "expected": 142.85714285714286,
+        "loaded": 142.85714285714,
+        "delta": -2.8705926524708048e-12
+      },
+      {
+        "path": [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          3,
+          "route",
+          "points",
+          2,
+          "x"
+        ],
+        "expected": -298949.6333980179,
+        "loaded": -298949.63339802,
+        "delta": -2.0954757928848267e-09
+      },
+      {
+        "path": [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          3,
+          "route",
+          "points",
+          2,
+          "y"
+        ],
+        "expected": 696363.1257562209,
+        "loaded": 696363.12575622,
+        "delta": -9.313225746154785e-10
+      }
+    ],
+    "captured_archive_sha256": "f9a351a8b5f5548989c39dc1c8b1537943bec5104a338895614a2a24ebacd164",
+    "runtime_comparison": "Exact and unchanged"
+  },
+  "pose_trace": {
+    "before_sha256": "2c53ad3bed72b5e97d49c24ffb7e0d53e2e9e4957c21e4f5b45cbe84a62a8aaf",
+    "after_sha256": "c4b62274adb589360f4799468b146b5a9390e76d2021ea9f561f563b6f288a46",
+    "scope": "Read-only pose traces for ground build only"
+  },
+  "pose_boundary_repair": {
+    "evidence": "Both live mission starts in ground-pose-26844.csv show a pose replacement between SDK apply and before_step, surviving after_step and after_animation; held error reaches 0.109632271 m.",
+    "change": "Ground-only: reapply same recorded pose and motion at before_step with all native_motion guards; consume existing pending SDK tick once; publish failure if any step guard fails.",
+    "regression": "check_held_pose.py fails on retained original trace; only a new live trace can establish repair success.",
+    "source_sha256": "db9f244de63fa7ad2d5deb8d975d397000c8c545c358fc51bc790ab21a173ffc"
+  }
+}

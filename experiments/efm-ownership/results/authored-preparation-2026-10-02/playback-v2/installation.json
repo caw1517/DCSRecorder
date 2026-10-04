@@ -1,0 +1,13 @@
+﻿{
+    "Status":  "Authored playback installed; live readiness/release pending",
+    "UpdateFrom":  "E:/Projects/DCS_Recorder/experiments/efm-ownership/results/authored-preparation-2026-10-02/playback-v1",
+    "Files":  [
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Name":  "Scripts/DCSRecorderAuthoredControl/expected.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\authored-preparation-2026-10-02\\playback-v2\\payload\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Hash":  "909edebdf7c48a74de9b13256bf26018f45d403803290546b071ab531f75b5ba"
+                  }
+              ],
+    "Utc":  "2026-10-03T18:03:58.3179759Z"
+}

@@ -1,0 +1,46 @@
+{
+  "status": "Read-only field comparison; native setters and hooks remain untested",
+  "statuses": {
+    "read": 208,
+    "destroyed": 1
+  },
+  "native_samples": 208,
+  "mission_samples": 200,
+  "completed": true,
+  "native_ids": [
+    16777472
+  ],
+  "mission_ids": [
+    9001
+  ],
+  "all_null_fm": true,
+  "engine_counts": [
+    2
+  ],
+  "raw_clock_comparison": {
+    "count": 200,
+    "position_rms_m": 4.4980451337250775,
+    "position_max_m": 4.5004323636178265,
+    "velocity_max_mps": 0.1933302216782561
+  },
+  "best_observed_phase_offset_seconds": 0.02,
+  "phase_aligned_comparison": {
+    "count": 200,
+    "position_rms_m": 0.0015406110234685805,
+    "position_max_m": 0.008794600696706675,
+    "velocity_max_mps": 0.010509076562225574
+  },
+  "position_representation_max_m": 0.033359694895967504,
+  "pitch_range": [
+    0,
+    2.65304327011
+  ],
+  "pitch_rate_range": [
+    -0.172436237335,
+    1.97679698467
+  ],
+  "sha256": {
+    "native.jsonl": "5009d732ce27c642e807279d207a727c5d23959caef2bd5587478eb9a9746a23",
+    "mission.log": "9d0ed3c2172e7979a61d0ddfed116ca6501def450d098617da0dff0cd5458745"
+  }
+}

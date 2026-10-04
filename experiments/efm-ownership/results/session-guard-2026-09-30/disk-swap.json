@@ -1,0 +1,8 @@
+{
+  "status": "Verified refusal for loaded edited content while disposable disk file matches valid archive",
+  "path": "C:/Users/w_can/Saved Games/DCS/Missions/033-Session-Guard-DiskSwap.miz",
+  "session": "1790807175_4_488690",
+  "before_sha256": "70B84700DBEF8C9F6ED8B85A28AA874DD8BA0693257EB14208F8A2C6DFA07EEF",
+  "after_sha256": "000E997795699CF19A03B225E270804AD58FC1F8CA6CA9C53E0C457AD1E15C97",
+  "replaced_utc": "2026-09-30T22:26:56.9769526Z"
+}

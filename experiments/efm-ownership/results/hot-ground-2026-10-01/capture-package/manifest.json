@@ -1,0 +1,24 @@
+{
+  "profile": "hot-ground-source-capture-v1",
+  "dcs_build": "2.9.30.28536",
+  "mission": "047-Hornet-Hot-Ground-Capture.miz",
+  "sha256": "9ab9e30b4198c086c5811568d7c4fbaadbec6d949430ba19c7700a65c0d92b3e",
+  "source": "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\041-Hornet-Snapshot-Capture.miz",
+  "source_sha256": "2e2b220726f27fd60f2375ac32ec136acef0406408b179f77e0dabdcbad66074",
+  "ground_source": "D:\\DCS World\\Mods\\aircraft\\FA-18C\\Missions\\QuickStart\\Caucasus FA-18C Cold and Dark.miz",
+  "ground_source_sha256": "2b8b31af42286c93df067dce9514fdee4a1f7fd668f6bf54dc2742c26a300d57",
+  "contact_binding": "c81109bd72708169efd7d4e9cf4aa4c0c10a5ef4200d326fb52f27b0f76ad721",
+  "placement": {
+    "x": -284566.03125,
+    "y": 682401.25,
+    "heading": -2.2154997603118,
+    "parking": "1",
+    "parking_id": "15"
+  },
+  "preparation_sources": {
+    "prepare_capture.py": "ad9bcab960df508b1d7381cad4b9bb9dd5083f1225420d8f51cf6756062ef9da",
+    "contact.lua": "2ab8aa99aa1ff9b3237c6bedbf713403d59d9e4b1846d82c879ecbeec14a507b",
+    "check_capture.lua": "3d58ac3c5ab320cc75ae8ffcd887c252b23868df4235569aee9b840bb2dff4e7"
+  },
+  "status": "Offline checks passed; real capture and hot-ground playback acceptance pending"
+}

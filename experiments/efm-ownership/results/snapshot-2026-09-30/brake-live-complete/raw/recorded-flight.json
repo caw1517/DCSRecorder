@@ -1,0 +1,37 @@
+{
+  "aircraft": "FA-18C_hornet",
+  "livery": "Blue Angels Jet Team",
+  "theatre": "Caucasus",
+  "state_profile": "hornet-exterior-v1",
+  "engine_profile": "hornet-native-engine-v1",
+  "smoke_profile": "hornet-native-smoke-v1",
+  "smoke_station": "10",
+  "smoke_clsid": "{INV-SMOKE-WHITE}",
+  "light_profile": "hornet-lights-v1",
+  "canopy_profile": "hornet-canopy-v1",
+  "wheel_profile": "hornet-wheels-v1",
+  "source_unit_id": "2",
+  "source": "Observer",
+  "capture_timing": "frame-batch-v1",
+  "capture_build": "2.9.30.28536",
+  "wind_ground": "0",
+  "wind_2000": "0",
+  "wind_8000": "0",
+  "smoke_events": [
+    {
+      "time": 0.0,
+      "on": true
+    }
+  ],
+  "duration": 6.319999999999993,
+  "samples": 317,
+  "source_time": 100.668,
+  "recording_version": 7,
+  "exterior_available": true,
+  "engine_available": true,
+  "smoke_available": true,
+  "lights_available": true,
+  "canopy_available": true,
+  "wheels_available": true,
+  "native_tape_version": 6
+}

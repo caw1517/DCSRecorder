@@ -1,0 +1,47 @@
+{
+  "status": "Prepared only; live DCS verification pending",
+  "recordings": [
+    {
+      "source": "C:\\Users\\w_can\\Saved Games\\DCS\\DCSRecorder\\recordings\\20260927T005525Z-0001.csv",
+      "sha256": "1d2c32b2f46d21f840ef9320ccc05c046e393f75b1b9e0568ea2d934c72f2d53",
+      "duration": 80.92,
+      "native_100hz": "PASS: quaternion round trips, full roll through inverted, sign continuity, translated trajectory, velocity, brake, invalid tape guards\nPASS: converted tape loaded and evaluated by native playback at 100 Hz\n",
+      "package": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\demo-envelope-2026-09-26\\package-20260927T005525Z-0001",
+      "dll_sha256": "2260f6a07bb04190d7f1224e012e33e2e43c09a1e9153435b366881d454dbb08"
+    },
+    {
+      "source": "C:\\Users\\w_can\\Saved Games\\DCS\\DCSRecorder\\recordings\\20260927T005915Z-0001.csv",
+      "sha256": "eb281867ee5bec37ebd70ca804e9fa110660598849fed74c0e266e71f0c583f5",
+      "duration": 69.38000000000001,
+      "native_100hz": "PASS: quaternion round trips, full roll through inverted, sign continuity, translated trajectory, velocity, brake, invalid tape guards\nPASS: converted tape loaded and evaluated by native playback at 100 Hz\n",
+      "package": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\demo-envelope-2026-09-26\\package-20260927T005915Z-0001",
+      "dll_sha256": "2260f6a07bb04190d7f1224e012e33e2e43c09a1e9153435b366881d454dbb08"
+    }
+  ],
+  "library": [
+    {
+      "id": "20260927T010126Z-0002.csv",
+      "name": "20260927T010126Z-0002",
+      "created": 1790470910.3767745,
+      "supported": true,
+      "duration": 23.400000000000002,
+      "reason": "Ready for playback"
+    },
+    {
+      "id": "20260927T005915Z-0001.csv",
+      "name": "20260927T005915Z-0001",
+      "created": 1790470824.5015502,
+      "supported": true,
+      "duration": 69.38000000000001,
+      "reason": "Ready for playback"
+    },
+    {
+      "id": "20260927T005525Z-0001.csv",
+      "name": "20260927T005525Z-0001",
+      "created": 1790470606.0783198,
+      "supported": true,
+      "duration": 80.92,
+      "reason": "Ready for playback"
+    }
+  ]
+}

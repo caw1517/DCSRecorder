@@ -1,0 +1,1521 @@
+{
+  "path": "experiments\\efm-ownership\\results\\mission-identity-2026-09-29\\remaining\\12-reordered-seven-input.miz",
+  "archive_sha256": "9905e2555f999f09c7ba4055d87576bfe99f99b464871ed1ac774d7a3f5f2f37",
+  "entries_sha256": {
+    "DCSRecorderProbe/identity.json": "191752277130cf7fa11c5c6425bb4ab64a0f379325a21a6d16cfd4a3455ea345",
+    "l10n/CN/TF-51D flyover.png": "148cf7103d095e974c5aad90d57acb26fff6ca67ba5f33062a0af69eb0aef364",
+    "l10n/CN/dictionary": "4cff1c6b904492107a4af93dc307777b94c863c931b067997ea10c340e2daed4",
+    "l10n/CN/mapResource": "69129e20ca0b2dc67e4db580919001156410e9f68238fe63516bd4ab23cbab9f",
+    "l10n/CS/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png": "5e68c7eff84f52bb3bb94de0fc5d40a84e0a5d3fbb658a483c9a6dbbb68b1014",
+    "l10n/CS/dictionary": "b3b604303165eaaab1ad00bbd5a8a645ad947b499d804fb91f852213f44a0d8d",
+    "l10n/CS/mapResource": "84626c68a572c999cbb136751cf9f30eba34a203f62f9690c02154129f8aaa7d",
+    "l10n/DE/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png": "5e68c7eff84f52bb3bb94de0fc5d40a84e0a5d3fbb658a483c9a6dbbb68b1014",
+    "l10n/DE/dictionary": "f51865385def00da8d291d04b464fc322ed489d6e74570fc4f68fa5239dc8665",
+    "l10n/DE/mapResource": "84626c68a572c999cbb136751cf9f30eba34a203f62f9690c02154129f8aaa7d",
+    "l10n/DEFAULT/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png": "5e68c7eff84f52bb3bb94de0fc5d40a84e0a5d3fbb658a483c9a6dbbb68b1014",
+    "l10n/DEFAULT/dictionary": "916feb6202931ca269f786b75d73662dc6848ac85449058545750a26e61af11f",
+    "l10n/DEFAULT/mapResource": "84626c68a572c999cbb136751cf9f30eba34a203f62f9690c02154129f8aaa7d",
+    "l10n/FR/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png": "5e68c7eff84f52bb3bb94de0fc5d40a84e0a5d3fbb658a483c9a6dbbb68b1014",
+    "l10n/FR/dictionary": "a604bc05a1c46237e37e6943f90d174d7ed0ac78652bbc15c61a930c04ca4862",
+    "l10n/FR/mapResource": "84626c68a572c999cbb136751cf9f30eba34a203f62f9690c02154129f8aaa7d",
+    "l10n/RU/TF-51_FOT_ru{066DE39B-A9A7-4679-B36B-5785C8AFBDA9}.png": "f3ff0e09e5bbd71d9b12f271a8bc2f1716a2c60302350b15cb457437ec61bbec",
+    "l10n/RU/dictionary": "d2b8fe7ce9a8b545d22f2d1ebce63debbcf4b4424ef8bb4ce5a8ca99f6ecab9f",
+    "l10n/RU/mapResource": "c72dc627eb1e6969fbc709c3493fc3b6b358a6e458a2ae0a3c6d05c16c88ddea",
+    "mission": "a3c3d7a2bea9afe418d5e3102cacfbd1770256c06c96d3f84e553cc366c88bdc",
+    "options": "0aa8c3224273d24a88cc7cb899e9cab9e113eabc2519a8568bc712b5723b3d6a",
+    "theatre": "e72cd6342c101ebb2683e038d1fd16dfb94a11ea78da4818d9be3af6e4e9cc55",
+    "warehouses": "bc5312e01c86ac88380c420e333f3cf78eadce294a14eeb43b0eb6ea6b2023a2"
+  },
+  "mission_table_sha256": "7ab7f75e261b3488c15c3324947eca8c3caaa89a9643955bf8c609fb6fced5fd",
+  "aircraft_inventory_sha256": "a2c17a8cadeaa50de979be107490f66a18b37657a0573083e5df77b64273d8a7",
+  "theatre": "Caucasus",
+  "weather": {
+    "wind": {
+      "at8000": {
+        "speed": 0,
+        "dir": 298
+      },
+      "at2000": {
+        "speed": 0,
+        "dir": 291
+      },
+      "atGround": {
+        "speed": 0,
+        "dir": 291
+      }
+    },
+    "enable_fog": false,
+    "season": {
+      "temperature": 15
+    },
+    "qnh": 760,
+    "cyclones": {},
+    "dust_density": 0,
+    "enable_dust": false,
+    "clouds": {
+      "density": 6,
+      "thickness": 200,
+      "preset": "Preset3",
+      "base": 2500,
+      "iprecptns": 0
+    },
+    "atmosphere_type": 0,
+    "groundTurbulence": 0,
+    "halo": {
+      "preset": "off"
+    },
+    "type_weather": 0,
+    "modifiedTime": true,
+    "name": "Winter, clean sky",
+    "fog": {
+      "thickness": 0,
+      "visibility": 25
+    },
+    "visibility": {
+      "distance": 80000
+    },
+    "sea": {
+      "mode": 1
+    }
+  },
+  "top_level_keys": [
+    "coalition",
+    "coalitions",
+    "currentKey",
+    "date",
+    "descriptionBlueTask",
+    "descriptionNeutralsTask",
+    "descriptionRedTask",
+    "descriptionText",
+    "failures",
+    "forcedOptions",
+    "goals",
+    "groundControl",
+    "map",
+    "maxDictId",
+    "pictureFileNameB",
+    "pictureFileNameN",
+    "pictureFileNameR",
+    "pictureFileNameServer",
+    "requiredModules",
+    "result",
+    "sortie",
+    "start_time",
+    "theatre",
+    "trig",
+    "triggers",
+    "trigrules",
+    "version",
+    "weather"
+  ],
+  "aircraft": [
+    {
+      "side": "blue",
+      "country": 2,
+      "category": "plane",
+      "group_id": 10101,
+      "group_name": "Identity Probe Group 1",
+      "unit": {
+        "alt": 2000,
+        "hardpoint_racks": true,
+        "alt_type": "BARO",
+        "livery_id": "Blue Angels Jet Team",
+        "skill": "Player",
+        "speed": 225.02157398901,
+        "AddPropAircraft": {
+          "HelmetMountedDevice": 1,
+          "VoiceCallsignLabel": "CT",
+          "OuterBoard": 0,
+          "InnerBoard": 0,
+          "STN_L16": "07777",
+          "VoiceCallsignNumber": "11"
+        },
+        "type": "FA-18C_hornet",
+        "Radio": {
+          "1": {
+            "channelsNames": {},
+            "modulations": {
+              "1": 0,
+              "2": 0,
+              "4": 0,
+              "8": 0,
+              "16": 0,
+              "17": 0,
+              "9": 0,
+              "18": 0,
+              "19": 0,
+              "10": 0,
+              "20": 0,
+              "11": 0,
+              "3": 0,
+              "6": 0,
+              "12": 0,
+              "13": 0,
+              "7": 0,
+              "14": 0,
+              "5": 0,
+              "15": 0
+            },
+            "channels": {
+              "1": 124,
+              "2": 264,
+              "4": 256,
+              "8": 257,
+              "16": 261,
+              "17": 267,
+              "9": 255,
+              "18": 251,
+              "19": 253,
+              "10": 262,
+              "20": 266,
+              "11": 259,
+              "3": 265,
+              "6": 250,
+              "12": 268,
+              "13": 269,
+              "7": 270,
+              "14": 260,
+              "5": 254,
+              "15": 263
+            }
+          },
+          "2": {
+            "channelsNames": {},
+            "modulations": {
+              "1": 0,
+              "2": 0,
+              "4": 0,
+              "8": 0,
+              "16": 0,
+              "17": 0,
+              "9": 0,
+              "18": 0,
+              "19": 0,
+              "10": 0,
+              "20": 0,
+              "11": 0,
+              "3": 0,
+              "6": 0,
+              "12": 0,
+              "13": 0,
+              "7": 0,
+              "14": 0,
+              "5": 0,
+              "15": 0
+            },
+            "channels": {
+              "1": 305,
+              "2": 264,
+              "4": 256,
+              "8": 257,
+              "16": 261,
+              "17": 267,
+              "9": 255,
+              "18": 251,
+              "19": 253,
+              "10": 262,
+              "20": 266,
+              "11": 259,
+              "3": 265,
+              "6": 250,
+              "12": 268,
+              "13": 269,
+              "7": 270,
+              "14": 260,
+              "5": 254,
+              "15": 263
+            }
+          }
+        },
+        "unitId": 10111,
+        "psi": 1.4237179714062,
+        "onboard_num": "002",
+        "y": 898938.69885514,
+        "x": -315405.43564528,
+        "name": "Identity Probe Aircraft 1",
+        "payload": {
+          "pylons": {
+            "2": {
+              "CLSID": "<CLEAN>"
+            },
+            "3": {
+              "CLSID": "<CLEAN>"
+            },
+            "5": {
+              "CLSID": "<CLEAN>"
+            },
+            "7": {
+              "CLSID": "<CLEAN>"
+            },
+            "8": {
+              "CLSID": "<CLEAN>"
+            }
+          },
+          "fuel": 3500,
+          "flare": 15,
+          "chaff": 30,
+          "gun": 100
+        },
+        "heading": -1.4237179714062,
+        "callsign": {
+          "1": 4,
+          "2": 1,
+          "name": "Colt11",
+          "3": 1
+        },
+        "datalinks": {
+          "Link16": {
+            "settings": {
+              "FF1_Channel": 2,
+              "FF2_Channel": 3,
+              "transmitPower": 0,
+              "VOCB_Channel": 5,
+              "VOCA_Channel": 4,
+              "AIC_Channel": 1
+            },
+            "network": {
+              "teamMembers": {
+                "1": {
+                  "missionUnitId": 10111
+                }
+              },
+              "donors": {}
+            }
+          }
+        }
+      },
+      "route": {
+        "points": {
+          "1": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "speed": 225.02157398901,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {}
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 0,
+            "ETA_locked": true,
+            "y": 898938.69885514,
+            "x": -315405.43564528,
+            "name": "",
+            "speed_locked": true,
+            "formation_template": ""
+          },
+          "2": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "properties": {
+              "vnav": 1,
+              "scale": 0,
+              "angle": 0,
+              "vangle": 0,
+              "steer": 2
+            },
+            "speed": 225.02157398901,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {}
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 29.458108644474,
+            "ETA_locked": false,
+            "y": 892381.555998,
+            "x": -314434.00707385,
+            "name": "",
+            "speed_locked": true,
+            "formation_template": ""
+          }
+        }
+      },
+      "group_settings": {
+        "lateActivation": false,
+        "tasks": {},
+        "radioSet": false,
+        "task": "Nothing",
+        "uncontrolled": false,
+        "taskSelected": true,
+        "groupId": 10101,
+        "hidden": false,
+        "y": 898938.69885514,
+        "x": -315405.43564528,
+        "name": "Identity Probe Group 1",
+        "communication": true,
+        "uncontrollable": false,
+        "start_time": 0,
+        "modulation": 0,
+        "frequency": 124
+      }
+    },
+    {
+      "side": "blue",
+      "country": 2,
+      "category": "plane",
+      "group_id": 10102,
+      "group_name": "Identity Probe Group 2",
+      "unit": {
+        "alt": 2000,
+        "hardpoint_racks": true,
+        "alt_type": "BARO",
+        "livery_id": "Blue Angels Jet Team",
+        "skill": "High",
+        "speed": 225.02157398901,
+        "AddPropAircraft": {
+          "HelmetMountedDevice": 1,
+          "VoiceCallsignLabel": "CT",
+          "OuterBoard": 0,
+          "InnerBoard": 0,
+          "STN_L16": "0A000",
+          "VoiceCallsignNumber": "11"
+        },
+        "type": "FA-18C_hornet",
+        "unitId": 10112,
+        "psi": 1.4237179714062,
+        "onboard_num": "002",
+        "y": 898938.69885514,
+        "x": -315105.43564528,
+        "name": "Identity Probe Aircraft 2",
+        "payload": {
+          "pylons": {
+            "2": {
+              "CLSID": "<CLEAN>"
+            },
+            "3": {
+              "CLSID": "<CLEAN>"
+            },
+            "5": {
+              "CLSID": "<CLEAN>"
+            },
+            "7": {
+              "CLSID": "<CLEAN>"
+            },
+            "8": {
+              "CLSID": "<CLEAN>"
+            }
+          },
+          "fuel": 3500,
+          "flare": 15,
+          "chaff": 30,
+          "gun": 100
+        },
+        "heading": -1.4237179714062,
+        "callsign": {
+          "1": 4,
+          "2": 1,
+          "name": "Colt11",
+          "3": 1
+        },
+        "datalinks": {
+          "Link16": {
+            "settings": {
+              "FF1_Channel": 2,
+              "FF2_Channel": 3,
+              "transmitPower": 0,
+              "VOCB_Channel": 5,
+              "VOCA_Channel": 4,
+              "AIC_Channel": 1
+            },
+            "network": {
+              "teamMembers": {
+                "1": {
+                  "missionUnitId": 10112
+                }
+              },
+              "donors": {}
+            }
+          }
+        }
+      },
+      "route": {
+        "points": {
+          "1": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "properties": {
+              "addopt": {}
+            },
+            "speed": 225.02157398901,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {}
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 0,
+            "ETA_locked": true,
+            "y": 898938.69885514,
+            "x": -315105.43564528,
+            "name": "",
+            "speed_locked": true,
+            "formation_template": ""
+          },
+          "2": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "properties": {
+              "vnav": 1,
+              "scale": 0,
+              "angle": 0,
+              "vangle": 0,
+              "steer": 2
+            },
+            "speed": 225.02157398901,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {}
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 29.458108644474,
+            "ETA_locked": false,
+            "y": 892381.555998,
+            "x": -314134.00707385,
+            "name": "",
+            "speed_locked": true,
+            "formation_template": ""
+          }
+        }
+      },
+      "group_settings": {
+        "lateActivation": false,
+        "tasks": {},
+        "radioSet": false,
+        "task": "Nothing",
+        "uncontrolled": false,
+        "taskSelected": true,
+        "groupId": 10102,
+        "hidden": false,
+        "y": 898938.69885514,
+        "x": -315105.43564528,
+        "name": "Identity Probe Group 2",
+        "communication": true,
+        "uncontrollable": false,
+        "start_time": 0,
+        "modulation": 0,
+        "frequency": 124
+      }
+    },
+    {
+      "side": "blue",
+      "country": 2,
+      "category": "plane",
+      "group_id": 10103,
+      "group_name": "Identity Probe Group 3r",
+      "unit": {
+        "alt": 2000,
+        "alt_type": "BARO",
+        "livery_id": "Blue Angels Jet Team",
+        "skill": "High",
+        "speed": 225.02157398901,
+        "AddPropAircraft": {
+          "HelmetMountedDevice": 1,
+          "VoiceCallsignLabel": "CT",
+          "OuterBoard": 0,
+          "InnerBoard": 0,
+          "STN_L16": "00001",
+          "VoiceCallsignNumber": "11"
+        },
+        "type": "FA-18C_hornet",
+        "unitId": 10113,
+        "psi": 1.4237179714062,
+        "onboard_num": "002",
+        "y": 898938.69885514,
+        "x": -314805.43564528,
+        "name": "Identity Probe Aircraft 3r",
+        "payload": {
+          "pylons": {
+            "2": {
+              "CLSID": "<CLEAN>"
+            },
+            "3": {
+              "CLSID": "<CLEAN>"
+            },
+            "5": {
+              "CLSID": "<CLEAN>"
+            },
+            "7": {
+              "CLSID": "<CLEAN>"
+            },
+            "8": {
+              "CLSID": "<CLEAN>"
+            }
+          },
+          "fuel": 3500,
+          "flare": 15,
+          "ammo_type": 1,
+          "chaff": 30,
+          "gun": 100
+        },
+        "heading": -1.4237179714062,
+        "callsign": {
+          "1": 4,
+          "2": 1,
+          "name": "Colt11",
+          "3": 1
+        },
+        "datalinks": {
+          "Link16": {
+            "settings": {
+              "FF1_Channel": 2,
+              "FF2_Channel": 3,
+              "transmitPower": 0,
+              "VOCB_Channel": 5,
+              "VOCA_Channel": 4,
+              "AIC_Channel": 1
+            },
+            "network": {
+              "teamMembers": {
+                "1": {
+                  "missionUnitId": 10113
+                }
+              },
+              "donors": {}
+            }
+          }
+        }
+      },
+      "route": {
+        "points": {
+          "1": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "speed": 225.02157398901,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {}
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 0,
+            "ETA_locked": true,
+            "y": 898938.69885514,
+            "x": -314805.43564528,
+            "name": "",
+            "speed_locked": true,
+            "formation_template": ""
+          },
+          "2": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "properties": {
+              "vnav": 1,
+              "scale": 0,
+              "angle": 0,
+              "vangle": 0,
+              "steer": 2
+            },
+            "speed": 225.02157398901,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {}
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 29.458108644474,
+            "ETA_locked": false,
+            "y": 892381.555998,
+            "x": -313834.00707385,
+            "name": "",
+            "speed_locked": true,
+            "formation_template": ""
+          }
+        }
+      },
+      "group_settings": {
+        "dynSpawnTemplate": false,
+        "lateActivation": false,
+        "tasks": {},
+        "radioSet": false,
+        "task": "Nothing",
+        "uncontrolled": false,
+        "taskSelected": true,
+        "groupId": 10103,
+        "hidden": false,
+        "y": 898938.69885514,
+        "x": -314805.43564528,
+        "name": "Identity Probe Group 3r",
+        "communication": true,
+        "uncontrollable": false,
+        "start_time": 0,
+        "modulation": 0,
+        "frequency": 124
+      }
+    },
+    {
+      "side": "blue",
+      "country": 2,
+      "category": "plane",
+      "group_id": 10104,
+      "group_name": "Identity Probe Group 4",
+      "unit": {
+        "alt": 2000,
+        "hardpoint_racks": true,
+        "alt_type": "BARO",
+        "livery_id": "Blue Angels Jet Team",
+        "skill": "High",
+        "speed": 225.02157398901,
+        "AddPropAircraft": {
+          "HelmetMountedDevice": 1,
+          "VoiceCallsignLabel": "CT",
+          "OuterBoard": 0,
+          "InnerBoard": 0,
+          "STN_L16": "00002",
+          "VoiceCallsignNumber": "11"
+        },
+        "type": "FA-18C_hornet",
+        "unitId": 10114,
+        "psi": 1.4237179714062,
+        "onboard_num": "002",
+        "y": 898938.69885514,
+        "x": -314505.43564528,
+        "name": "Identity Probe Aircraft 4",
+        "payload": {
+          "pylons": {
+            "2": {
+              "CLSID": "<CLEAN>"
+            },
+            "3": {
+              "CLSID": "<CLEAN>"
+            },
+            "5": {
+              "CLSID": "<CLEAN>"
+            },
+            "7": {
+              "CLSID": "<CLEAN>"
+            },
+            "8": {
+              "CLSID": "<CLEAN>"
+            }
+          },
+          "fuel": 3500,
+          "flare": 15,
+          "chaff": 30,
+          "gun": 100
+        },
+        "heading": -1.4237179714062,
+        "callsign": {
+          "1": 4,
+          "2": 1,
+          "name": "Colt11",
+          "3": 1
+        },
+        "datalinks": {
+          "Link16": {
+            "settings": {
+              "FF1_Channel": 2,
+              "FF2_Channel": 3,
+              "transmitPower": 0,
+              "VOCB_Channel": 5,
+              "VOCA_Channel": 4,
+              "AIC_Channel": 1
+            },
+            "network": {
+              "teamMembers": {
+                "1": {
+                  "missionUnitId": 10114
+                }
+              },
+              "donors": {}
+            }
+          }
+        }
+      },
+      "route": {
+        "points": {
+          "1": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "properties": {
+              "addopt": {}
+            },
+            "speed": 225.02157398901,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {}
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 0,
+            "ETA_locked": true,
+            "y": 898938.69885514,
+            "x": -314505.43564528,
+            "name": "",
+            "speed_locked": true,
+            "formation_template": ""
+          },
+          "2": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "properties": {
+              "vnav": 1,
+              "scale": 0,
+              "angle": 0,
+              "vangle": 0,
+              "steer": 2
+            },
+            "speed": 225.02157398901,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {}
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 29.458108644474,
+            "ETA_locked": false,
+            "y": 892381.555998,
+            "x": -313534.00707385,
+            "name": "",
+            "speed_locked": true,
+            "formation_template": ""
+          }
+        }
+      },
+      "group_settings": {
+        "lateActivation": false,
+        "tasks": {},
+        "radioSet": false,
+        "task": "Nothing",
+        "uncontrolled": false,
+        "taskSelected": true,
+        "groupId": 10104,
+        "hidden": false,
+        "y": 898938.69885514,
+        "x": -314505.43564528,
+        "name": "Identity Probe Group 4",
+        "communication": true,
+        "uncontrollable": false,
+        "start_time": 0,
+        "modulation": 0,
+        "frequency": 124
+      }
+    },
+    {
+      "side": "blue",
+      "country": 2,
+      "category": "plane",
+      "group_id": 10105,
+      "group_name": "Aerial-1",
+      "unit": {
+        "alt": 2000,
+        "alt_type": "BARO",
+        "livery_id": "vfa-37",
+        "skill": "High",
+        "speed": 179.86111111111,
+        "AddPropAircraft": {
+          "VoiceCallsignLabel": "ED",
+          "VoiceCallsignNumber": "11",
+          "STN_L16": "00003"
+        },
+        "type": "FA-18C_hornet",
+        "unitId": 10115,
+        "psi": 0,
+        "onboard_num": "010",
+        "y": 900992,
+        "x": -308476,
+        "name": "Aerial-1-1",
+        "payload": {
+          "pylons": {},
+          "fuel": 4900,
+          "flare": 60,
+          "ammo_type": 1,
+          "chaff": 60,
+          "gun": 100
+        },
+        "heading": 0,
+        "callsign": {
+          "1": 1,
+          "2": 1,
+          "name": "Enfield11",
+          "3": 1
+        },
+        "datalinks": {
+          "Link16": {
+            "settings": {
+              "FF1_Channel": 2,
+              "FF2_Channel": 3,
+              "transmitPower": 0,
+              "AIC_Channel": 1,
+              "VOCA_Channel": 4,
+              "VOCB_Channel": 5
+            },
+            "network": {
+              "teamMembers": {
+                "1": {
+                  "missionUnitId": 10115
+                }
+              },
+              "donors": {}
+            }
+          }
+        }
+      },
+      "route": {
+        "points": {
+          "1": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "speed": 179.86111111111,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {
+                  "1": {
+                    "number": 1,
+                    "key": "CAP",
+                    "id": "EngageTargets",
+                    "enabled": true,
+                    "auto": true,
+                    "params": {
+                      "targetTypes": {
+                        "1": "Air"
+                      },
+                      "priority": 0
+                    }
+                  },
+                  "2": {
+                    "number": 2,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 17
+                        }
+                      }
+                    }
+                  },
+                  "3": {
+                    "number": 3,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": 4,
+                          "name": 18
+                        }
+                      }
+                    }
+                  },
+                  "4": {
+                    "number": 4,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 19
+                        }
+                      }
+                    }
+                  },
+                  "5": {
+                    "number": 5,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "targetTypes": {},
+                          "name": 21,
+                          "value": "none;",
+                          "noTargetTypes": {
+                            "1": "Fighters",
+                            "2": "Multirole fighters",
+                            "3": "Bombers",
+                            "4": "Helicopters",
+                            "5": "UAVs",
+                            "6": "Infantry",
+                            "7": "Fortifications",
+                            "8": "Tanks",
+                            "9": "IFV",
+                            "10": "APC",
+                            "11": "Artillery",
+                            "12": "Unarmed vehicles",
+                            "13": "AAA",
+                            "14": "SR SAM",
+                            "15": "MR SAM",
+                            "16": "LR SAM",
+                            "17": "Aircraft Carriers",
+                            "18": "Cruisers",
+                            "19": "Destroyers",
+                            "20": "Frigates",
+                            "21": "Corvettes",
+                            "22": "Light armed ships",
+                            "23": "Unarmed ships",
+                            "24": "Submarines",
+                            "25": "Cruise missiles",
+                            "26": "Antiship Missiles",
+                            "27": "AA Missiles",
+                            "28": "AG Missiles",
+                            "29": "SA Missiles"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "6": {
+                    "number": 6,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "EPLRS",
+                        "params": {
+                          "value": true,
+                          "groupId": 1
+                        }
+                      }
+                    }
+                  },
+                  "7": {
+                    "number": 7,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 35
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 0,
+            "ETA_locked": true,
+            "y": 900992,
+            "x": -308476,
+            "speed_locked": true,
+            "formation_template": ""
+          }
+        }
+      },
+      "group_settings": {
+        "dynSpawnTemplate": false,
+        "modulation": 0,
+        "tasks": {},
+        "radioSet": false,
+        "task": "CAP",
+        "uncontrolled": false,
+        "groupId": 10105,
+        "hidden": false,
+        "y": 900992,
+        "x": -308476,
+        "name": "Aerial-1",
+        "communication": true,
+        "start_time": 0,
+        "frequency": 305
+      }
+    },
+    {
+      "side": "blue",
+      "country": 2,
+      "category": "plane",
+      "group_id": 10106,
+      "group_name": "Aerial-2",
+      "unit": {
+        "alt": 2000,
+        "alt_type": "BARO",
+        "livery_id": "vfa-37",
+        "skill": "High",
+        "speed": 179.86111111111,
+        "AddPropAircraft": {
+          "VoiceCallsignLabel": "SD",
+          "VoiceCallsignNumber": "11",
+          "STN_L16": "00004"
+        },
+        "type": "FA-18C_hornet",
+        "unitId": 10116,
+        "psi": 0,
+        "onboard_num": "011",
+        "y": 906959.27028371,
+        "x": -308439.29278814,
+        "name": "Aerial-2-1",
+        "payload": {
+          "pylons": {},
+          "fuel": 4900,
+          "flare": 60,
+          "ammo_type": 1,
+          "chaff": 60,
+          "gun": 100
+        },
+        "heading": 0,
+        "callsign": {
+          "1": 2,
+          "2": 1,
+          "name": "Springfield11",
+          "3": 1
+        },
+        "datalinks": {
+          "Link16": {
+            "settings": {
+              "FF1_Channel": 2,
+              "FF2_Channel": 3,
+              "transmitPower": 0,
+              "AIC_Channel": 1,
+              "VOCA_Channel": 4,
+              "VOCB_Channel": 5
+            },
+            "network": {
+              "teamMembers": {
+                "1": {
+                  "missionUnitId": 10116
+                }
+              },
+              "donors": {}
+            }
+          }
+        }
+      },
+      "route": {
+        "points": {
+          "1": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "speed": 179.86111111111,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {
+                  "1": {
+                    "number": 1,
+                    "key": "CAP",
+                    "id": "EngageTargets",
+                    "enabled": true,
+                    "auto": true,
+                    "params": {
+                      "targetTypes": {
+                        "1": "Air"
+                      },
+                      "priority": 0
+                    }
+                  },
+                  "2": {
+                    "number": 2,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 17
+                        }
+                      }
+                    }
+                  },
+                  "3": {
+                    "number": 3,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": 4,
+                          "name": 18
+                        }
+                      }
+                    }
+                  },
+                  "4": {
+                    "number": 4,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 19
+                        }
+                      }
+                    }
+                  },
+                  "5": {
+                    "number": 5,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "targetTypes": {},
+                          "name": 21,
+                          "value": "none;",
+                          "noTargetTypes": {
+                            "1": "Fighters",
+                            "2": "Multirole fighters",
+                            "3": "Bombers",
+                            "4": "Helicopters",
+                            "5": "UAVs",
+                            "6": "Infantry",
+                            "7": "Fortifications",
+                            "8": "Tanks",
+                            "9": "IFV",
+                            "10": "APC",
+                            "11": "Artillery",
+                            "12": "Unarmed vehicles",
+                            "13": "AAA",
+                            "14": "SR SAM",
+                            "15": "MR SAM",
+                            "16": "LR SAM",
+                            "17": "Aircraft Carriers",
+                            "18": "Cruisers",
+                            "19": "Destroyers",
+                            "20": "Frigates",
+                            "21": "Corvettes",
+                            "22": "Light armed ships",
+                            "23": "Unarmed ships",
+                            "24": "Submarines",
+                            "25": "Cruise missiles",
+                            "26": "Antiship Missiles",
+                            "27": "AA Missiles",
+                            "28": "AG Missiles",
+                            "29": "SA Missiles"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "6": {
+                    "number": 6,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "EPLRS",
+                        "params": {
+                          "value": true,
+                          "groupId": 2
+                        }
+                      }
+                    }
+                  },
+                  "7": {
+                    "number": 7,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 35
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 0,
+            "ETA_locked": true,
+            "y": 906959.27028371,
+            "x": -308439.29278814,
+            "speed_locked": true,
+            "formation_template": ""
+          }
+        }
+      },
+      "group_settings": {
+        "dynSpawnTemplate": false,
+        "modulation": 0,
+        "tasks": {},
+        "radioSet": false,
+        "task": "CAP",
+        "uncontrolled": false,
+        "groupId": 10106,
+        "hidden": false,
+        "y": 906959.27028371,
+        "x": -308439.29278814,
+        "name": "Aerial-2",
+        "communication": true,
+        "start_time": 0,
+        "frequency": 305
+      }
+    },
+    {
+      "side": "blue",
+      "country": 2,
+      "category": "plane",
+      "group_id": 10107,
+      "group_name": "Aerial-3",
+      "unit": {
+        "alt": 2000,
+        "alt_type": "BARO",
+        "livery_id": "vfa-37",
+        "skill": "High",
+        "speed": 179.86111111111,
+        "AddPropAircraft": {
+          "VoiceCallsignLabel": "UI",
+          "VoiceCallsignNumber": "11",
+          "STN_L16": "00005"
+        },
+        "type": "FA-18C_hornet",
+        "unitId": 10117,
+        "psi": 0,
+        "onboard_num": "012",
+        "y": 913804.41314085,
+        "x": -311239.57850242,
+        "name": "Aerial-3-1",
+        "payload": {
+          "pylons": {},
+          "fuel": 4900,
+          "flare": 60,
+          "ammo_type": 1,
+          "chaff": 60,
+          "gun": 100
+        },
+        "heading": 0,
+        "callsign": {
+          "1": 3,
+          "2": 1,
+          "name": "Uzi11",
+          "3": 1
+        },
+        "datalinks": {
+          "Link16": {
+            "settings": {
+              "FF1_Channel": 2,
+              "FF2_Channel": 3,
+              "transmitPower": 0,
+              "AIC_Channel": 1,
+              "VOCA_Channel": 4,
+              "VOCB_Channel": 5
+            },
+            "network": {
+              "teamMembers": {
+                "1": {
+                  "missionUnitId": 10117
+                }
+              },
+              "donors": {}
+            }
+          }
+        }
+      },
+      "route": {
+        "points": {
+          "1": {
+            "alt": 2000,
+            "action": "Turning Point",
+            "alt_type": "BARO",
+            "speed": 179.86111111111,
+            "task": {
+              "id": "ComboTask",
+              "params": {
+                "tasks": {
+                  "1": {
+                    "number": 1,
+                    "key": "CAP",
+                    "id": "EngageTargets",
+                    "enabled": true,
+                    "auto": true,
+                    "params": {
+                      "targetTypes": {
+                        "1": "Air"
+                      },
+                      "priority": 0
+                    }
+                  },
+                  "2": {
+                    "number": 2,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 17
+                        }
+                      }
+                    }
+                  },
+                  "3": {
+                    "number": 3,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": 4,
+                          "name": 18
+                        }
+                      }
+                    }
+                  },
+                  "4": {
+                    "number": 4,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 19
+                        }
+                      }
+                    }
+                  },
+                  "5": {
+                    "number": 5,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "targetTypes": {},
+                          "name": 21,
+                          "value": "none;",
+                          "noTargetTypes": {
+                            "1": "Fighters",
+                            "2": "Multirole fighters",
+                            "3": "Bombers",
+                            "4": "Helicopters",
+                            "5": "UAVs",
+                            "6": "Infantry",
+                            "7": "Fortifications",
+                            "8": "Tanks",
+                            "9": "IFV",
+                            "10": "APC",
+                            "11": "Artillery",
+                            "12": "Unarmed vehicles",
+                            "13": "AAA",
+                            "14": "SR SAM",
+                            "15": "MR SAM",
+                            "16": "LR SAM",
+                            "17": "Aircraft Carriers",
+                            "18": "Cruisers",
+                            "19": "Destroyers",
+                            "20": "Frigates",
+                            "21": "Corvettes",
+                            "22": "Light armed ships",
+                            "23": "Unarmed ships",
+                            "24": "Submarines",
+                            "25": "Cruise missiles",
+                            "26": "Antiship Missiles",
+                            "27": "AA Missiles",
+                            "28": "AG Missiles",
+                            "29": "SA Missiles"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "6": {
+                    "number": 6,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "EPLRS",
+                        "params": {
+                          "value": true,
+                          "groupId": 3
+                        }
+                      }
+                    }
+                  },
+                  "7": {
+                    "number": 7,
+                    "auto": true,
+                    "id": "WrappedAction",
+                    "enabled": true,
+                    "params": {
+                      "action": {
+                        "id": "Option",
+                        "params": {
+                          "value": true,
+                          "name": 35
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "type": "Turning Point",
+            "ETA": 0,
+            "ETA_locked": true,
+            "y": 913804.41314085,
+            "x": -311239.57850242,
+            "speed_locked": true,
+            "formation_template": ""
+          }
+        }
+      },
+      "group_settings": {
+        "dynSpawnTemplate": false,
+        "modulation": 0,
+        "tasks": {},
+        "radioSet": false,
+        "task": "CAP",
+        "uncontrolled": false,
+        "groupId": 10107,
+        "hidden": false,
+        "y": 913804.41314085,
+        "x": -311239.57850242,
+        "name": "Aerial-3",
+        "communication": true,
+        "start_time": 0,
+        "frequency": 305
+      }
+    }
+  ],
+  "identity_conclusion": "Inventory only. Equality of IDs/names/configuration does not prove continuity."
+}

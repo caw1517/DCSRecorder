@@ -1,0 +1,1007 @@
+{
+  "evidence": "Actual saved archive comparisons; no recording/playback association implementation tested.",
+  "snapshots": [
+    {
+      "name": "02-editor-input",
+      "sha256": "524922f9ae58b8762e2c81b90341c109b8e13973e3bde42eb075a5c76ce4dca7",
+      "mission_table_sha256": "6ad3818231f974b4684d75129a2728ab451b1aad744c0a389f2c13b8d3aad8d7",
+      "count": 4,
+      "identifiers": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        }
+      ],
+      "custom_root_field": true,
+      "custom_unit_fields": true,
+      "root_archive_marker": true,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "03-editor-save-as",
+      "sha256": "21cb3a61fd8ac9c81db21a86f52b58ef06e59a86f867accde163917d3024c137",
+      "mission_table_sha256": "e4163f1139793559d17057716f5e5cd5bd8f4f93625345f6a2f240f28f605fbb",
+      "count": 4,
+      "identifiers": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "04-editor-resave",
+      "sha256": "87241e43c6f009614f959574fee4ea023e269951d4c04b1dd09642b859e12850",
+      "mission_table_sha256": "964bef891815e229caa066872a6c9eb8a092831f8809e532427a8a830047b6a7",
+      "count": 4,
+      "identifiers": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "05-editor-rename",
+      "sha256": "fac2cc39f676b9ee6e86e6b09530cda26b0fbd1f1e69f3bb17438fb882733494",
+      "mission_table_sha256": "4e4dfa6fb7114e15b0acd250f0a59df53979ad6cc10cda357cde15a976795f43",
+      "count": 4,
+      "identifiers": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "06-editor-seven-aircraft",
+      "sha256": "1dbad4726d0394b2f733db959ed89bbc2964a78e4bc7f8375855a24287efe848",
+      "mission_table_sha256": "893a1b56c3687c58e5dedea7b5987a3dbd2b1a9ba268de66a3f2b0a58fe8cda7",
+      "count": 7,
+      "identifiers": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        },
+        {
+          "unit_id": 10115,
+          "unit_name": "Aerial-1-1",
+          "group_id": 10105,
+          "group_name": "Aerial-1"
+        },
+        {
+          "unit_id": 10116,
+          "unit_name": "Aerial-2-1",
+          "group_id": 10106,
+          "group_name": "Aerial-2"
+        },
+        {
+          "unit_id": 10117,
+          "unit_name": "Aerial-3-1",
+          "group_id": 10107,
+          "group_name": "Aerial-3"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "07-editor-deleted",
+      "sha256": "c0be3105d0d035c08ef254a55b577c9418a502e67ffa9239711277ec71aa4ef0",
+      "mission_table_sha256": "54a6b5dfe2f61ebc1784b27b3626fb5640ae01ec6302edd22600cc661e3dace8",
+      "count": 6,
+      "identifiers": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        },
+        {
+          "unit_id": 10115,
+          "unit_name": "Aerial-1-1",
+          "group_id": 10105,
+          "group_name": "Aerial-1"
+        },
+        {
+          "unit_id": 10116,
+          "unit_name": "Aerial-2-1",
+          "group_id": 10106,
+          "group_name": "Aerial-2"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    },
+    {
+      "name": "08-editor-recreated",
+      "sha256": "38e3ea4d45df46e04d3c20d3bf2b2b2c0a101ccec8a25a7b92d7a0583a7fafab",
+      "mission_table_sha256": "88e8db17a821beebbd17be92bd3c61cb9f8a48d95eded2f3de1fff874c96fb43",
+      "count": 7,
+      "identifiers": [
+        {
+          "unit_id": 10111,
+          "unit_name": "Identity Probe Aircraft 1",
+          "group_id": 10101,
+          "group_name": "Identity Probe Group 1"
+        },
+        {
+          "unit_id": 10112,
+          "unit_name": "Identity Probe Aircraft 2",
+          "group_id": 10102,
+          "group_name": "Identity Probe Group 2"
+        },
+        {
+          "unit_id": 10113,
+          "unit_name": "Identity Probe Aircraft 3r",
+          "group_id": 10103,
+          "group_name": "Identity Probe Group 3r"
+        },
+        {
+          "unit_id": 10114,
+          "unit_name": "Identity Probe Aircraft 4",
+          "group_id": 10104,
+          "group_name": "Identity Probe Group 4"
+        },
+        {
+          "unit_id": 10115,
+          "unit_name": "Aerial-1-1",
+          "group_id": 10105,
+          "group_name": "Aerial-1"
+        },
+        {
+          "unit_id": 10116,
+          "unit_name": "Aerial-2-1",
+          "group_id": 10106,
+          "group_name": "Aerial-2"
+        },
+        {
+          "unit_id": 10117,
+          "unit_name": "Aerial-3-1",
+          "group_id": 10107,
+          "group_name": "Aerial-3"
+        }
+      ],
+      "custom_root_field": false,
+      "custom_unit_fields": false,
+      "root_archive_marker": false,
+      "nested_archive_marker": true
+    }
+  ],
+  "transitions": [
+    {
+      "before": "02-editor-input",
+      "after": "03-editor-save-as",
+      "added": [],
+      "removed": [],
+      "common_aircraft_changes": {
+        "10112": [
+          {
+            "path": "/unit/AddPropAircraft/STN_L16",
+            "before": null,
+            "after": "0A000"
+          },
+          {
+            "path": "/unit/AddPropAircraft/VoiceCallsignLabel",
+            "before": null,
+            "after": "CT"
+          },
+          {
+            "path": "/unit/AddPropAircraft/VoiceCallsignNumber",
+            "before": null,
+            "after": "11"
+          },
+          {
+            "path": "/unit/Radio",
+            "before": {
+              "1": {
+                "channels": {
+                  "1": 305,
+                  "10": 262,
+                  "11": 259,
+                  "12": 268,
+                  "13": 269,
+                  "14": 260,
+                  "15": 263,
+                  "16": 261,
+                  "17": 267,
+                  "18": 251,
+                  "19": 253,
+                  "2": 264,
+                  "20": 266,
+                  "3": 265,
+                  "4": 256,
+                  "5": 254,
+                  "6": 250,
+                  "7": 270,
+                  "8": 257,
+                  "9": 255
+                },
+                "modulations": {
+                  "1": 0,
+                  "10": 0,
+                  "11": 0,
+                  "12": 0,
+                  "13": 0,
+                  "14": 0,
+                  "15": 0,
+                  "16": 0,
+                  "17": 0,
+                  "18": 0,
+                  "19": 0,
+                  "2": 0,
+                  "20": 0,
+                  "3": 0,
+                  "4": 0,
+                  "5": 0,
+                  "6": 0,
+                  "7": 0,
+                  "8": 0,
+                  "9": 0
+                }
+              },
+              "2": {
+                "channels": {
+                  "1": 305,
+                  "10": 262,
+                  "11": 259,
+                  "12": 268,
+                  "13": 269,
+                  "14": 260,
+                  "15": 263,
+                  "16": 261,
+                  "17": 267,
+                  "18": 251,
+                  "19": 253,
+                  "2": 264,
+                  "20": 266,
+                  "3": 265,
+                  "4": 256,
+                  "5": 254,
+                  "6": 250,
+                  "7": 270,
+                  "8": 257,
+                  "9": 255
+                },
+                "modulations": {
+                  "1": 0,
+                  "10": 0,
+                  "11": 0,
+                  "12": 0,
+                  "13": 0,
+                  "14": 0,
+                  "15": 0,
+                  "16": 0,
+                  "17": 0,
+                  "18": 0,
+                  "19": 0,
+                  "2": 0,
+                  "20": 0,
+                  "3": 0,
+                  "4": 0,
+                  "5": 0,
+                  "6": 0,
+                  "7": 0,
+                  "8": 0,
+                  "9": 0
+                }
+              }
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/dataCartridge",
+            "before": {
+              "GroupsPoints": {
+                "A/A Waypoint": {},
+                "Initial Point": {},
+                "PB": {},
+                "PP": {},
+                "Sequence 1 Blue": {},
+                "Sequence 2 Red": {},
+                "Sequence 3 Yellow": {},
+                "Start Location": {}
+              },
+              "Points": {}
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/datalinks",
+            "before": null,
+            "after": {
+              "Link16": {
+                "settings": {
+                  "FF1_Channel": 2,
+                  "FF2_Channel": 3,
+                  "transmitPower": 0,
+                  "VOCB_Channel": 5,
+                  "VOCA_Channel": 4,
+                  "AIC_Channel": 1
+                },
+                "network": {
+                  "teamMembers": {
+                    "1": {
+                      "missionUnitId": 10112
+                    }
+                  },
+                  "donors": {}
+                }
+              }
+            }
+          },
+          {
+            "path": "/unit/dcsrecorder_probe_uuid",
+            "before": "PROTOTYPE-AIRCRAFT-2",
+            "after": null
+          }
+        ],
+        "10113": [
+          {
+            "path": "/unit/AddPropAircraft/STN_L16",
+            "before": null,
+            "after": "00001"
+          },
+          {
+            "path": "/unit/AddPropAircraft/VoiceCallsignLabel",
+            "before": null,
+            "after": "CT"
+          },
+          {
+            "path": "/unit/AddPropAircraft/VoiceCallsignNumber",
+            "before": null,
+            "after": "11"
+          },
+          {
+            "path": "/unit/Radio",
+            "before": {
+              "1": {
+                "channels": {
+                  "1": 305,
+                  "10": 262,
+                  "11": 259,
+                  "12": 268,
+                  "13": 269,
+                  "14": 260,
+                  "15": 263,
+                  "16": 261,
+                  "17": 267,
+                  "18": 251,
+                  "19": 253,
+                  "2": 264,
+                  "20": 266,
+                  "3": 265,
+                  "4": 256,
+                  "5": 254,
+                  "6": 250,
+                  "7": 270,
+                  "8": 257,
+                  "9": 255
+                },
+                "modulations": {
+                  "1": 0,
+                  "10": 0,
+                  "11": 0,
+                  "12": 0,
+                  "13": 0,
+                  "14": 0,
+                  "15": 0,
+                  "16": 0,
+                  "17": 0,
+                  "18": 0,
+                  "19": 0,
+                  "2": 0,
+                  "20": 0,
+                  "3": 0,
+                  "4": 0,
+                  "5": 0,
+                  "6": 0,
+                  "7": 0,
+                  "8": 0,
+                  "9": 0
+                }
+              },
+              "2": {
+                "channels": {
+                  "1": 305,
+                  "10": 262,
+                  "11": 259,
+                  "12": 268,
+                  "13": 269,
+                  "14": 260,
+                  "15": 263,
+                  "16": 261,
+                  "17": 267,
+                  "18": 251,
+                  "19": 253,
+                  "2": 264,
+                  "20": 266,
+                  "3": 265,
+                  "4": 256,
+                  "5": 254,
+                  "6": 250,
+                  "7": 270,
+                  "8": 257,
+                  "9": 255
+                },
+                "modulations": {
+                  "1": 0,
+                  "10": 0,
+                  "11": 0,
+                  "12": 0,
+                  "13": 0,
+                  "14": 0,
+                  "15": 0,
+                  "16": 0,
+                  "17": 0,
+                  "18": 0,
+                  "19": 0,
+                  "2": 0,
+                  "20": 0,
+                  "3": 0,
+                  "4": 0,
+                  "5": 0,
+                  "6": 0,
+                  "7": 0,
+                  "8": 0,
+                  "9": 0
+                }
+              }
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/dataCartridge",
+            "before": {
+              "GroupsPoints": {
+                "A/A Waypoint": {},
+                "Initial Point": {},
+                "PB": {},
+                "PP": {},
+                "Sequence 1 Blue": {},
+                "Sequence 2 Red": {},
+                "Sequence 3 Yellow": {},
+                "Start Location": {}
+              },
+              "Points": {}
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/datalinks",
+            "before": null,
+            "after": {
+              "Link16": {
+                "settings": {
+                  "FF1_Channel": 2,
+                  "FF2_Channel": 3,
+                  "transmitPower": 0,
+                  "VOCB_Channel": 5,
+                  "VOCA_Channel": 4,
+                  "AIC_Channel": 1
+                },
+                "network": {
+                  "teamMembers": {
+                    "1": {
+                      "missionUnitId": 10113
+                    }
+                  },
+                  "donors": {}
+                }
+              }
+            }
+          },
+          {
+            "path": "/unit/dcsrecorder_probe_uuid",
+            "before": "PROTOTYPE-AIRCRAFT-3",
+            "after": null
+          }
+        ],
+        "10114": [
+          {
+            "path": "/unit/AddPropAircraft/STN_L16",
+            "before": null,
+            "after": "00002"
+          },
+          {
+            "path": "/unit/AddPropAircraft/VoiceCallsignLabel",
+            "before": null,
+            "after": "CT"
+          },
+          {
+            "path": "/unit/AddPropAircraft/VoiceCallsignNumber",
+            "before": null,
+            "after": "11"
+          },
+          {
+            "path": "/unit/Radio",
+            "before": {
+              "1": {
+                "channels": {
+                  "1": 305,
+                  "10": 262,
+                  "11": 259,
+                  "12": 268,
+                  "13": 269,
+                  "14": 260,
+                  "15": 263,
+                  "16": 261,
+                  "17": 267,
+                  "18": 251,
+                  "19": 253,
+                  "2": 264,
+                  "20": 266,
+                  "3": 265,
+                  "4": 256,
+                  "5": 254,
+                  "6": 250,
+                  "7": 270,
+                  "8": 257,
+                  "9": 255
+                },
+                "modulations": {
+                  "1": 0,
+                  "10": 0,
+                  "11": 0,
+                  "12": 0,
+                  "13": 0,
+                  "14": 0,
+                  "15": 0,
+                  "16": 0,
+                  "17": 0,
+                  "18": 0,
+                  "19": 0,
+                  "2": 0,
+                  "20": 0,
+                  "3": 0,
+                  "4": 0,
+                  "5": 0,
+                  "6": 0,
+                  "7": 0,
+                  "8": 0,
+                  "9": 0
+                }
+              },
+              "2": {
+                "channels": {
+                  "1": 305,
+                  "10": 262,
+                  "11": 259,
+                  "12": 268,
+                  "13": 269,
+                  "14": 260,
+                  "15": 263,
+                  "16": 261,
+                  "17": 267,
+                  "18": 251,
+                  "19": 253,
+                  "2": 264,
+                  "20": 266,
+                  "3": 265,
+                  "4": 256,
+                  "5": 254,
+                  "6": 250,
+                  "7": 270,
+                  "8": 257,
+                  "9": 255
+                },
+                "modulations": {
+                  "1": 0,
+                  "10": 0,
+                  "11": 0,
+                  "12": 0,
+                  "13": 0,
+                  "14": 0,
+                  "15": 0,
+                  "16": 0,
+                  "17": 0,
+                  "18": 0,
+                  "19": 0,
+                  "2": 0,
+                  "20": 0,
+                  "3": 0,
+                  "4": 0,
+                  "5": 0,
+                  "6": 0,
+                  "7": 0,
+                  "8": 0,
+                  "9": 0
+                }
+              }
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/dataCartridge",
+            "before": {
+              "GroupsPoints": {
+                "A/A Waypoint": {},
+                "Initial Point": {},
+                "PB": {},
+                "PP": {},
+                "Sequence 1 Blue": {},
+                "Sequence 2 Red": {},
+                "Sequence 3 Yellow": {},
+                "Start Location": {}
+              },
+              "Points": {}
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/datalinks",
+            "before": null,
+            "after": {
+              "Link16": {
+                "settings": {
+                  "FF1_Channel": 2,
+                  "FF2_Channel": 3,
+                  "transmitPower": 0,
+                  "VOCB_Channel": 5,
+                  "VOCA_Channel": 4,
+                  "AIC_Channel": 1
+                },
+                "network": {
+                  "teamMembers": {
+                    "1": {
+                      "missionUnitId": 10114
+                    }
+                  },
+                  "donors": {}
+                }
+              }
+            }
+          },
+          {
+            "path": "/unit/dcsrecorder_probe_uuid",
+            "before": "PROTOTYPE-AIRCRAFT-4",
+            "after": null
+          }
+        ],
+        "10111": [
+          {
+            "path": "/unit/AddPropAircraft/STN_L16",
+            "before": null,
+            "after": "07777"
+          },
+          {
+            "path": "/unit/AddPropAircraft/VoiceCallsignLabel",
+            "before": null,
+            "after": "CT"
+          },
+          {
+            "path": "/unit/AddPropAircraft/VoiceCallsignNumber",
+            "before": null,
+            "after": "11"
+          },
+          {
+            "path": "/unit/Radio/1/channelsNames",
+            "before": null,
+            "after": {}
+          },
+          {
+            "path": "/unit/Radio/2/channelsNames",
+            "before": null,
+            "after": {}
+          },
+          {
+            "path": "/unit/dataCartridge",
+            "before": {
+              "GroupsPoints": {
+                "A/A Waypoint": {},
+                "Initial Point": {},
+                "PB": {},
+                "PP": {},
+                "Sequence 1 Blue": {},
+                "Sequence 2 Red": {},
+                "Sequence 3 Yellow": {},
+                "Start Location": {}
+              },
+              "Points": {}
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/datalinks",
+            "before": null,
+            "after": {
+              "Link16": {
+                "settings": {
+                  "FF1_Channel": 2,
+                  "FF2_Channel": 3,
+                  "transmitPower": 0,
+                  "VOCB_Channel": 5,
+                  "VOCA_Channel": 4,
+                  "AIC_Channel": 1
+                },
+                "network": {
+                  "teamMembers": {
+                    "1": {
+                      "missionUnitId": 10111
+                    }
+                  },
+                  "donors": {}
+                }
+              }
+            }
+          },
+          {
+            "path": "/unit/dcsrecorder_probe_uuid",
+            "before": "PROTOTYPE-AIRCRAFT-1",
+            "after": null
+          }
+        ]
+      },
+      "changed_archive_entries": [
+        "dcsrecorder-probe.json",
+        "l10n/DEFAULT/dictionary",
+        "mission",
+        "options"
+      ]
+    },
+    {
+      "before": "03-editor-save-as",
+      "after": "04-editor-resave",
+      "added": [],
+      "removed": [],
+      "common_aircraft_changes": {},
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "04-editor-resave",
+      "after": "05-editor-rename",
+      "added": [],
+      "removed": [],
+      "common_aircraft_changes": {
+        "10113": [
+          {
+            "path": "/group_name",
+            "before": "Identity Probe Group 3",
+            "after": "Identity Probe Group 3r"
+          },
+          {
+            "path": "/group_settings/dynSpawnTemplate",
+            "before": null,
+            "after": false
+          },
+          {
+            "path": "/group_settings/name",
+            "before": "Identity Probe Group 3",
+            "after": "Identity Probe Group 3r"
+          },
+          {
+            "path": "/route/points/1/properties",
+            "before": {
+              "addopt": {}
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/name",
+            "before": "Identity Probe Aircraft 3",
+            "after": "Identity Probe Aircraft 3r"
+          }
+        ]
+      },
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "05-editor-rename",
+      "after": "06-editor-seven-aircraft",
+      "added": [
+        10115,
+        10116,
+        10117
+      ],
+      "removed": [],
+      "common_aircraft_changes": {
+        "10113": [
+          {
+            "path": "/unit/hardpoint_racks",
+            "before": true,
+            "after": null
+          },
+          {
+            "path": "/unit/payload/ammo_type",
+            "before": null,
+            "after": 1
+          }
+        ],
+        "10111": [
+          {
+            "path": "/route/points/1/properties",
+            "before": {
+              "addopt": {}
+            },
+            "after": null
+          },
+          {
+            "path": "/unit/Radio/1/channels/1",
+            "before": 305,
+            "after": 124
+          }
+        ]
+      },
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "06-editor-seven-aircraft",
+      "after": "07-editor-deleted",
+      "added": [],
+      "removed": [
+        10117
+      ],
+      "common_aircraft_changes": {
+        "10115": [
+          {
+            "path": "/group_settings/radioSet",
+            "before": null,
+            "after": false
+          }
+        ],
+        "10116": [
+          {
+            "path": "/group_settings/radioSet",
+            "before": null,
+            "after": false
+          }
+        ]
+      },
+      "changed_archive_entries": [
+        "mission"
+      ]
+    },
+    {
+      "before": "07-editor-deleted",
+      "after": "08-editor-recreated",
+      "added": [
+        10117
+      ],
+      "removed": [],
+      "common_aircraft_changes": {},
+      "changed_archive_entries": [
+        "mission"
+      ]
+    }
+  ]
+}

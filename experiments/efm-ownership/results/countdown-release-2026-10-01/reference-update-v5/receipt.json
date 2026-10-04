@@ -1,0 +1,16 @@
+{
+  "Status": "Installed checked diagnostic update; live readiness/release pending",
+  "UpdatedUtc": "2026-10-01T21:58:24.7441228Z",
+  "ChangedFiles": [
+    {
+      "Name": "Scripts/DCSRecorderReleaseControl/expected.lua",
+      "Target": "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\DCSRecorderReleaseControl\\expected.lua",
+      "Source": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\gear-package-v5\\payload\\Scripts\\DCSRecorderReleaseControl\\expected.lua",
+      "Before": "767f3dc6c8b83d829a671e8d2446d78671ead61073832c79448f977c8906d1f1",
+      "After": "f8e233bfb8c672b58081be2ac4b907c3c134ed4213438a20f854967ab43d1d3f"
+    }
+  ],
+  "VerifiedFiles": 14,
+  "UnchangedFiles": 13,
+  "Manifest": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\gear-package-v5\\manifest.json"
+}

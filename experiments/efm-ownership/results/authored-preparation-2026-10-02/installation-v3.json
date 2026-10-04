@@ -1,0 +1,20 @@
+﻿{
+    "Status":  "Two separate mission files installed; live source and prepared comparison pending",
+    "Utc":  "2026-10-03T17:28:56.2429078Z",
+    "Files":  [
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\052-Authored-Scene.miz",
+                      "Name":  "052-Authored-Scene.miz",
+                      "Source":  "source-v3/052-Authored-Scene.miz",
+                      "Hash":  "d6cb9620442d9e44e2d88683e72cc257fc34d2e9cc8cd1735567125ce7a18632",
+                      "SourcePath":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\authored-preparation-2026-10-02\\source-v3\\052-Authored-Scene.miz"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\053-Authored-Recording.miz",
+                      "Name":  "053-Authored-Recording.miz",
+                      "Source":  "recording-v3/prepared.miz",
+                      "Hash":  "81101407d5818bc0e70791948af5c03a6c2d74825c36bfc863b0bb0700f486d3",
+                      "SourcePath":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\authored-preparation-2026-10-02\\recording-v3\\prepared.miz"
+                  }
+              ]
+}

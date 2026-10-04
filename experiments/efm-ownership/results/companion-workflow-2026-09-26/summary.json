@@ -1,0 +1,25 @@
+{
+  "user_report": "It worked!",
+  "status": "App-managed recording, automatic saving, selection, mission generation and playback demonstrated; this replay ended before completion.",
+  "dcs_build": "2.9.29.27468",
+  "package": "d7a5d25a98d04c06acad1d350c7d62df",
+  "recording": "20260926T224052Z-0001.csv",
+  "recording_duration": 39.480000000000004,
+  "recording_samples": 1975,
+  "native_start": 10.801,
+  "native_last_sample": 47.461,
+  "observed_playback_seconds": 36.66,
+  "motion_writes": 1834,
+  "motion_statuses": [
+    "called"
+  ],
+  "first_command_matches_selected_recording": true,
+  "new_take_completion_observed": false,
+  "mission_restart_observed": true,
+  "source_sha256": "a7de9663f8c9e2df4b955a6f8b328b5dc3f754176cfb0be8b79d67ca6da8016b",
+  "raw_sha256": {
+    "dcs.log": "ff2ca09d1a4a7559090c593a08393d297488a5a844dbeafedf8a72b2c06c459a",
+    "native-motion-15596.csv": "10c3c9c243c8cd4499dfb048cd239c7bad87c00ae8b82a01f500566e8785b75e",
+    "objects-15596-256648734.csv": "cb4881f08dc2e9f7b20b4e7c95938fd411e6e6ee576fa4d4d12a33cb3bdb61a4"
+  }
+}

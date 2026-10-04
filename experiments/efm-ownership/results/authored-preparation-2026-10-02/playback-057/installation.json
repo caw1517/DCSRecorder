@@ -1,0 +1,37 @@
+﻿{
+    "Status":  "Authored playback installed; live readiness/release pending",
+    "UpdateFrom":  "E:/Projects/DCS_Recorder/experiments/efm-ownership/results/authored-preparation-2026-10-02/playback-v2",
+    "Files":  [
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\059-Authored-Playback-Edited.miz",
+                      "Name":  "Missions/059-Authored-Playback-Edited.miz",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\authored-preparation-2026-10-02\\playback-057\\payload\\Missions\\059-Authored-Playback-Edited.miz",
+                      "Hash":  "afb3302dbfb71401026a7f1b83eae61432f91315a325055635bc9cabc50c2267"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.json",
+                      "Name":  "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.json",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\authored-preparation-2026-10-02\\playback-057\\payload\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.json",
+                      "Hash":  "42fa14e6e529e0c8adfe0e9bc31f7cd7bbee7c6e0b80dabcbbd67e5f3a256b85"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.txt",
+                      "Name":  "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.txt",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\authored-preparation-2026-10-02\\playback-057\\payload\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.txt",
+                      "Hash":  "655ee9aac135f53d7b557b4fb17d1ff0d41032faee05e2a13510861b7dc75454"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Name":  "Scripts/DCSRecorderAuthoredControl/expected.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\authored-preparation-2026-10-02\\playback-057\\payload\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Hash":  "e7488ba3791a080f6e335e97c3ccb50da5ebaa698d0f927748d0a4b9456d2699"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Name":  "Scripts/Hooks/DCSRecorderAuthoredControl.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\authored-preparation-2026-10-02\\playback-057\\payload\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Hash":  "fa3c0ff44d5e3afea918ccdb18ff12089e709afe791726b3130f784b5f075a18"
+                  }
+              ],
+    "Utc":  "2026-10-03T18:18:44.9100512Z"
+}

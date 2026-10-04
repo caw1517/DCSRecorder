@@ -1,0 +1,23 @@
+{
+  "frames": 2501,
+  "last_elapsed": 50.0,
+  "mission_rows": 999,
+  "errors": {
+    "28": {
+      "immediate_max": 0.0,
+      "later_mission_max": 5.000000413701855e-10
+    },
+    "29": {
+      "immediate_max": 0.0,
+      "later_mission_max": 5.000000413701855e-10
+    },
+    "89": {
+      "immediate_max": 0.0,
+      "later_mission_max": 5.000000413701855e-10
+    },
+    "90": {
+      "immediate_max": 0.0,
+      "later_mission_max": 5.000000413701855e-10
+    }
+  }
+}

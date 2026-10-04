@@ -1,0 +1,283 @@
+{
+  "status": "Static candidates only; object identity, complete layout and live behavior remain unverified",
+  "build": "2.9.30.28536",
+  "guard_count": 33,
+  "guard_matches": 33,
+  "guards": [
+    {
+      "source": "native_body.h",
+      "module": "dcs",
+      "old_rva": "0x7105f7",
+      "candidate_rva": "0x711e17",
+      "matches": true
+    },
+    {
+      "source": "native_body.h",
+      "module": "aifm",
+      "old_rva": "0xa2070",
+      "candidate_rva": "0xa2070",
+      "matches": true
+    },
+    {
+      "source": "native_body.h",
+      "module": "dcs",
+      "old_rva": "0x711152",
+      "candidate_rva": "0x712972",
+      "matches": true
+    },
+    {
+      "source": "native_motion.h",
+      "module": "worldgeneral",
+      "old_rva": "0x68d50",
+      "candidate_rva": "0x685e0",
+      "matches": true
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "worldgeneral",
+      "old_rva": "0x69310",
+      "candidate_rva": "0x68b90",
+      "matches": true
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "worldgeneral",
+      "old_rva": "0x69390",
+      "candidate_rva": "0x68c10",
+      "matches": true
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "dcs",
+      "old_rva": "0x712408",
+      "candidate_rva": "0x713c28",
+      "matches": true
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "dcs",
+      "old_rva": "0x712411",
+      "candidate_rva": "0x713c31",
+      "matches": true
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "dcs",
+      "old_rva": "0x712435",
+      "candidate_rva": "0x713c55",
+      "matches": true
+    },
+    {
+      "source": "native_presentation_pitch.h",
+      "module": "dcs",
+      "old_rva": "0x6d41eb",
+      "candidate_rva": "0x6d4a0b",
+      "matches": true
+    },
+    {
+      "source": "native_presentation_pitch.h",
+      "module": "dcs",
+      "old_rva": "0x6d41f6",
+      "candidate_rva": "0x6d4a16",
+      "matches": true
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x70fef0",
+      "candidate_rva": "0x711710",
+      "matches": true
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x675279",
+      "candidate_rva": "0x675529",
+      "matches": true
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x6b6070",
+      "candidate_rva": "0x6b6480",
+      "matches": true
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x67529c",
+      "candidate_rva": "0x67554c",
+      "matches": true
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x6b73a7",
+      "candidate_rva": "0x6b77b7",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x641492",
+      "candidate_rva": "0x641702",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x6414a2",
+      "candidate_rva": "0x641712",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x6414b4",
+      "candidate_rva": "0x641724",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x6099af",
+      "candidate_rva": "0x609adf",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x6099d1",
+      "candidate_rva": "0x609b01",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "worldgeneral",
+      "old_rva": "0x6a9ff",
+      "candidate_rva": "0x6a27f",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "worldgeneral",
+      "old_rva": "0x6aa44",
+      "candidate_rva": "0x6a2c4",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d164",
+      "candidate_rva": "0x66d3f4",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d174",
+      "candidate_rva": "0x66d404",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d180",
+      "candidate_rva": "0x66d410",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d197",
+      "candidate_rva": "0x66d427",
+      "matches": true
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d1b3",
+      "candidate_rva": "0x66d443",
+      "matches": true
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "sound",
+      "old_rva": "0x13d430",
+      "candidate_rva": "0x13d430",
+      "matches": true
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "dcs",
+      "old_rva": "0x60f110",
+      "candidate_rva": "0x60f240",
+      "matches": true
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "dcs",
+      "old_rva": "0x66d1c0",
+      "candidate_rva": "0x66d450",
+      "matches": true
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "sound",
+      "old_rva": "0x134cbb",
+      "candidate_rva": "0x134cbb",
+      "matches": true
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "sound",
+      "old_rva": "0x134ca5",
+      "candidate_rva": "0x134ca5",
+      "matches": true
+    }
+  ],
+  "structural_checks": [
+    {
+      "check": "locator_offset_0",
+      "matches": true
+    },
+    {
+      "check": "locator_offset_8",
+      "matches": true
+    },
+    {
+      "check": "same_type_and_hierarchy",
+      "matches": true
+    },
+    {
+      "check": "primary_table_boundary",
+      "matches": true
+    },
+    {
+      "check": "vtable_slot_0xc70",
+      "matches": true
+    },
+    {
+      "check": "vtable_slot_0xc10",
+      "matches": true
+    },
+    {
+      "check": "vtable_slot_0xd8",
+      "matches": true
+    },
+    {
+      "check": "vtable_slot_0xe0",
+      "matches": true
+    },
+    {
+      "check": "vtable_slot_0xf0",
+      "matches": true
+    },
+    {
+      "check": "animation_writer_call",
+      "matches": true,
+      "target_rva": "0x669580"
+    }
+  ],
+  "all_checks_pass": true
+}

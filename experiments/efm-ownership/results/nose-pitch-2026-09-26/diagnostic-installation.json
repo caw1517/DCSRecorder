@@ -1,0 +1,12 @@
+{
+  "InstalledUtc": "2026-09-26T23:07:18.2833338Z",
+  "Purpose": "Read-only DEBUG-nose presentation pose logging",
+  "InstalledDll": "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Staged\\bin\\HornetStagedProbe.dll",
+  "BackupDll": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\nose-pitch-2026-09-26\\rollback\\HornetStagedProbe.dll",
+  "PreviousSha256": "4FB9683ED816A7DCF30360FDE8D8BE32D7D0CFB2CF88EC1688E88AE42ABE4E12",
+  "DiagnosticSha256": "84F1EE567B8BF24CA254F03306A609E6C7F853AE5D09DD329ED7072F5193FA5A",
+  "Mission": "DCSRecorder-Playback-d7a5d25a.miz",
+  "TapeSha256": "7A08359BA48BBD9087BEA9DA89B43074B0AAB7B2889F036E5677EA8669ED4B49",
+  "Tests": "11/11 CTests passed",
+  "Status": "Installed; live diagnostic run pending"
+}

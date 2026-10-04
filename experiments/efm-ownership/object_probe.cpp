@@ -22,6 +22,10 @@
 #include "recorded_path.h"
 #ifdef HORNET_STAGED_PROTOTYPE
 #include "staged_playback.h"
+#ifdef HORNET_RELEASE_PROTOTYPE
+#include "release-start/policy.h"
+#include <sstream>
+#endif
 #include "engine_native_layout.h"
 #endif
 namespace playback_path=recorded_path;
@@ -42,6 +46,9 @@ std::ofstream log_file;
 std::ofstream identity_file;
 std::ofstream body_file;
 std::ofstream motion_file;
+#ifdef HORNET_GROUND_PROTOTYPE
+std::ofstream ground_pose_file;
+#endif
 #ifdef HORNET_STAGED_PROTOTYPE
 std::ofstream exterior_file,engine_file;
 #endif
@@ -53,8 +60,13 @@ struct Observation {
 #ifdef HORNET_STAGED_PROTOTYPE
     uint64_t runtime_id=0,token=0;
     bool terminal=false;
+#ifdef HORNET_RELEASE_PROTOTYPE
+    release_start::Clock clock;
+    uint64_t generation=0;
+#endif
     bool exterior_pending=false,exterior_finished=false;
     double exterior_elapsed=0;
+    float snapshot_brake=0;
     uint64_t exterior_applied=0;
     hornet_exterior::Values exterior{};
     hornet_engine::Values engine{};
@@ -71,6 +83,9 @@ struct Observation {
 #endif
 };
 std::unordered_map<ED_OBJECT_HANDLE, Observation> observed;
+#ifdef HORNET_RELEASE_PROTOTYPE
+uint64_t release_generation=0;
+#endif
 
 #ifdef HORNET_RECORDED_PROTOTYPE
 #ifdef HORNET_STAGED_PROTOTYPE
@@ -83,12 +98,43 @@ void drain_engine(Observation& state,double time) {
             char path[32768]{};GetModuleFileNameA(static_cast<HMODULE>(region.AllocationBase),path,sizeof(path));
             module=std::filesystem::path(path).filename().string();rva=call.caller-reinterpret_cast<uintptr_t>(region.AllocationBase);
         }
-        engine_file << state.runtime_id << ',' << time << ',' << time-state.start_time << ',' << module << ',' << rva << ','
+        engine_file << state.runtime_id << ',' << time << ',' <<
+#ifdef HORNET_RELEASE_PROTOTYPE
+            state.exterior_elapsed <<
+#elif defined(HORNET_HELD_PROTOTYPE)
+            held_start::replay_time(time,state.start_time) <<
+#else
+            time-state.start_time <<
+#endif
+            ',' << module << ',' << rva << ','
             << call.engine << ',' << call.channel << ',' << call.overridden << ',' << call.original << ',' << call.returned << '\n';
     }
     engine_file.flush();
     if(lost || !engine_file) {state.motion_active=false;log_file << "engine_trace_failed," << state.runtime_id << ',' << time << '\n';log_file.flush();}
 }
+#ifdef HORNET_GROUND_PROTOTYPE
+// Read-only boundary evidence: distinguish native integration from animation
+// or later pose replacement. No extra pose/velocity writes are performed.
+void trace_ground_pose(const char* phase,const void* handle,const Observation& state) {
+    if(state.path.samples.empty() || !ground_pose_file)return;
+    std::array<float,16> pose{};std::array<double,3> precise{};
+    const auto object=reinterpret_cast<uintptr_t>(handle);
+    const bool readable=native_identity::read(object+0x174,pose) && native_identity::read(object+0x1c8,precise);
+    const auto target=state.path.at_sample(state.clock.elapsed);
+    ground_pose_file<<phase<<','<<state.runtime_id<<','<<state.calls<<','<<state.step_calls<<','
+        <<state.clock.last<<','<<state.clock.elapsed<<','<<readable;
+    for(double v:target.p)ground_pose_file<<','<<v;
+    for(double v:precise)ground_pose_file<<','<<v;
+    for(int k=0;k<3;++k)ground_pose_file<<','<<pose[12+k];
+    ground_pose_file<<'\n';ground_pose_file.flush();
+}
+void after_ground_native_step(const void* handle) {
+    std::lock_guard<std::mutex> guard(lock);
+    const auto key=reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle));
+    const auto it=observed.find(key);
+    if(it!=observed.end() && it->second.motion_active)trace_ground_pose("after_step",handle,it->second);
+}
+#endif
 void after_native_animation(const void* handle) {
     std::lock_guard<std::mutex> guard(lock);
     const auto sdk_handle=reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle));
@@ -96,11 +142,26 @@ void after_native_animation(const void* handle) {
     auto& state=found->second;
     if(!state.motion_active || !state.exterior_pending || !state.path.has_exterior ||
        !api || !api->ed_get_object_id || api->ed_get_object_id(sdk_handle)!=state.runtime_id)return;
+#ifdef HORNET_GROUND_PROTOTYPE
+    trace_ground_pose("after_animation",handle,state);
+#endif
     const auto view=api->ed_get_object_args(sdk_handle);
     if(!view.data || view.size<=18) {state.motion_active=false;return;}
     std::array<float,13> before{};
     for(size_t i=0;i<before.size();++i)before[i]=view.data[hornet_exterior::channels[i]];
     bool applied=hornet_appearance::apply_exterior(api,sdk_handle,state.runtime_id,state.exterior);
+    // Include legacy brake at the same post-animation boundary as other state.
+    const auto brake_view=api->ed_get_object_args(sdk_handle);
+    if(!brake_view.data || brake_view.size<=21)applied=false;
+    else {
+        const float before_brake=brake_view.data[21];
+        const auto status=hornet_appearance::apply(api,sdk_handle,state.snapshot_brake,state.runtime_id,state.path.has_lights);
+        applied=(!std::strcmp(status,"off_verified") || !std::strcmp(status,"recorded_brake_verified")) && applied;
+        const auto after_brake=api->ed_get_object_args(sdk_handle);
+        if(!after_brake.data || after_brake.size<=21)applied=false;
+        else exterior_file << state.runtime_id << ',' << state.calls << ',' << state.exterior_elapsed
+            << ",21," << state.snapshot_brake << ',' << before_brake << ',' << after_brake.data[21] << '\n';
+    }
     if(state.path.has_wheels) {
         const auto wheel_before=api->ed_get_object_args(sdk_handle);
         hornet_wheels::Values before_wheels{};
@@ -167,7 +228,18 @@ void after_native_animation(const void* handle) {
     if(!applied || !exterior_file) {
         state.motion_active=false;state.exterior_pending=false;
         staged_playback::publish(api,sdk_handle,state.token,staged_playback::failed);
-    } else if(state.exterior_finished) {
+    }
+#ifdef HORNET_HELD_PROTOTYPE
+    else if(!staged_playback::publish(api,sdk_handle,state.token,held_start::status)) {
+        state.motion_active=false;state.exterior_pending=false;
+    }
+#endif
+#ifdef HORNET_RELEASE_PROTOTYPE
+    else if(!state.clock.playing()) {
+        if(!staged_playback::publish(api,sdk_handle,state.token,held_start::status))state.motion_active=false;
+    }
+#endif
+    else if(state.exterior_finished) {
         // Completion is visible to Lua only after the final surface sample too.
         if(staged_playback::publish(api,sdk_handle,state.token,staged_playback::complete)) {
             state.terminal=true;
@@ -186,6 +258,9 @@ void before_native_step(const void* handle) {
     auto& state=it->second;
     ++state.step_calls;
     if(!state.motion_active || !state.step_pending) return;
+#ifdef HORNET_GROUND_PROTOTYPE
+    trace_ground_pose("before_step",handle,state);
+#endif
     state.step_pending=false; // A missing SDK callback cannot leave a stale override running.
     native_body::Sample sample{};
     const auto id=api && api->ed_get_object_id ? api->ed_get_object_id(sdk_handle) : 0;
@@ -200,9 +275,21 @@ void before_native_step(const void* handle) {
 #endif
        ) state.step_status="step_state_rejected";
     else {
+#ifdef HORNET_GROUND_PROTOTYPE
+        // Live ground traces show the native ground correction replaces pose
+        // after the SDK command and before this integration boundary. Restore
+        // the same guarded tape sample here; consume only this SDK tick's work.
+        const auto target=state.path.at(state.clock.elapsed);
+        native_body::Sample before{},after{};
+        state.step_status=native_motion::apply(handle,id,before,after,&target,nullptr,
+                                               false,&state.step_motion,state.runtime_id);
+        if(std::strcmp(state.step_status,"called")==0)
+            trace_ground_pose("before_step_restored",handle,state);
+#else
         state.step_status=native_velocity::validate(handle,state.step_motion);
         if(std::strcmp(state.step_status,"valid")==0)
             state.step_status=native_velocity::write_validated(handle,state.step_motion);
+#endif
     }
 #ifdef HORNET_STAGED_PROTOTYPE
     if(std::strcmp(state.step_status,"called")==0) {
@@ -211,21 +298,26 @@ void before_native_step(const void* handle) {
     }
 #endif
     if(std::strcmp(state.step_status,"called")==0) ++state.step_applied;
-    else state.motion_active=false;
+    else {
+        state.motion_active=false;
+#ifdef HORNET_GROUND_PROTOTYPE
+        staged_playback::publish(api,sdk_handle,state.token,staged_playback::failed);
+#endif
+    }
 }
 const char* install_native_step(const void* handle,bool exterior=false,bool engine=false) {
     const auto image=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
     uintptr_t locator=0,next_locator=0;
     // RTTI boundaries establish the complete primary table's exact length.
-    if(!native_identity::read(image+0x11461f8,locator) || locator!=image+0x133b650 ||
-       !native_identity::read(image+0x1146ff0,next_locator) || next_locator!=image+0x133b770)
+    if(!native_identity::read(image+native_build::dcs(0x11461f8),locator) || locator!=image+native_build::dcs(0x133b650) ||
+       !native_identity::read(image+native_build::dcs(0x1146ff0),next_locator) || next_locator!=image+native_build::dcs(0x133b770))
         return "step_table_boundary_mismatch";
     std::array<unsigned char,15> prologue{};
-    if(!native_identity::read(image+0x70fef0,prologue) ||
+    if(!native_identity::read(image+native_build::dcs(0x70fef0),prologue) ||
        prologue!=std::array<unsigned char,15>{0x48,0x8b,0xc4,0x48,0x89,0x58,0x10,0x48,0x89,0x70,0x18,0x48,0x89,0x78,0x20})
         return "step_entry_mismatch";
     std::array<unsigned char,10> callsite{};
-    if(!native_identity::read(image+0x675279,callsite) ||
+    if(!native_identity::read(image+native_build::dcs(0x675279),callsite) ||
        callsite!=std::array<unsigned char,10>{0xff,0x90,0x70,0x0c,0,0,0x48,0x8b,0x4b,0x58})
         return "step_callsite_mismatch";
 #ifdef HORNET_STAGED_PROTOTYPE
@@ -234,22 +326,27 @@ const char* install_native_step(const void* handle,bool exterior=false,bool engi
         unsigned char count=0;
         if(!engine_native_layout::valid() || !native_identity::read(reinterpret_cast<uintptr_t>(handle)-8+0x811,count) || count!=2)
             return "engine_layout_rejected";
-        getters={reinterpret_cast<native_step_hook::RPM>(image+0x66d160),reinterpret_cast<native_step_hook::Scalar>(image+0x66d1c0),reinterpret_cast<native_step_hook::Scalar>(image+0x60f110)};
+        getters={reinterpret_cast<native_step_hook::RPM>(image+native_build::dcs(0x66d160)),reinterpret_cast<native_step_hook::Scalar>(image+native_build::dcs(0x66d1c0)),reinterpret_cast<native_step_hook::Scalar>(image+native_build::dcs(0x60f110))};
     }
     if(exterior) {
         std::array<unsigned char,18> entry{};
         std::array<unsigned char,15> dispatch{};
         std::array<unsigned char,5> writer{};
-        if(!native_identity::read(image+0x6b6070,entry) || entry!=std::array<unsigned char,18>{0x48,0x8b,0xc4,0x48,0x89,0x58,0x10,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57} ||
-           !native_identity::read(image+0x67529c,dispatch) || dispatch!=std::array<unsigned char,15>{0x41,0xb0,1,0x0f,0x28,0xce,0x48,0x8b,1,0xff,0x90,0x10,0x0c,0,0} ||
-           !native_identity::read(image+0x6b73a7,writer) || writer!=std::array<unsigned char,5>{0xe8,0x44,0x1f,0xfb,0xff})return "animation_layout_mismatch";
-        return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+0x1146200,
-            reinterpret_cast<native_step_hook::Step>(image+0x70fef0),&before_native_step,nullptr,
-            reinterpret_cast<native_step_hook::Animation>(image+0x6b6070),&after_native_animation,engine?&getters:nullptr);
+        if(!native_identity::read(image+native_build::dcs(0x6b6070),entry) || entry!=std::array<unsigned char,18>{0x48,0x8b,0xc4,0x48,0x89,0x58,0x10,0x55,0x56,0x57,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57} ||
+           !native_identity::read(image+native_build::dcs(0x67529c),dispatch) || dispatch!=std::array<unsigned char,15>{0x41,0xb0,1,0x0f,0x28,0xce,0x48,0x8b,1,0xff,0x90,0x10,0x0c,0,0} ||
+           !native_identity::read(image+native_build::dcs(0x6b73a7),writer) || writer!=native_build::animation_writer)return "animation_layout_mismatch";
+        return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+native_build::dcs(0x1146200),
+            reinterpret_cast<native_step_hook::Step>(image+native_build::dcs(0x70fef0)),&before_native_step,
+#ifdef HORNET_GROUND_PROTOTYPE
+            &after_ground_native_step,
+#else
+            nullptr,
+#endif
+            reinterpret_cast<native_step_hook::Animation>(image+native_build::dcs(0x6b6070)),&after_native_animation,engine?&getters:nullptr);
     }
 #endif
-    return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+0x1146200,
-        reinterpret_cast<native_step_hook::Step>(image+0x70fef0),&before_native_step);
+    return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+native_build::dcs(0x1146200),
+        reinterpret_cast<native_step_hook::Step>(image+native_build::dcs(0x70fef0)),&before_native_step);
 }
 void stop_native_step(const void* handle,Observation& state) {
     state.step_pending=false;
@@ -265,7 +362,7 @@ void stop_native_step(const void* handle,Observation& state) {
     if(!state.step_hook) return;
     state.step_status=native_step_hook::restore(reinterpret_cast<uintptr_t>(handle)-8);
     state.step_hook=native_step_hook::recognizes(reinterpret_cast<uintptr_t>(handle)-8,
-        native_step_hook::table(),reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr))+0x1146200);
+        native_step_hook::table(),reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr))+native_build::dcs(0x1146200));
 }
 #endif
 
@@ -296,6 +393,10 @@ void open_log() {
     for(const char* prefix:{"velocity_before","velocity_after","velocity_command","angular_command"})
         for(int i=0;i<3;++i) motion_file << ',' << prefix << i;
     motion_file << ",step_hook_calls,step_hook_applied,step_hook_status\n" << std::setprecision(12);
+#ifdef HORNET_GROUND_PROTOTYPE
+    ground_pose_file.open(folder/("ground-pose-"+std::to_string(GetCurrentProcessId())+".csv"));
+    ground_pose_file<<"phase,id,call,step,model_time,replay_time,readable,target_x,target_y,target_z,precise_x,precise_y,precise_z,float_x,float_y,float_z\n"<<std::setprecision(15);
+#endif
 #ifdef HORNET_STAGED_PROTOTYPE
     exterior_file.open(folder/("exterior-"+std::to_string(GetCurrentProcessId())+".csv"));
     exterior_file << "id,call,elapsed,arg,requested,before,after\n" << std::setprecision(12);
@@ -374,6 +475,9 @@ extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handl
     const bool another_object=!observed.empty();
 #endif
     observed[handle] = {};
+#ifdef HORNET_RELEASE_PROTOTYPE
+    observed[handle].generation=++release_generation;
+#endif
 #ifdef HORNET_STAGED_PROTOTYPE
     auto& created=observed[handle];
     created.runtime_id=api && api->ed_get_object_id ? api->ed_get_object_id(handle) : 0;
@@ -394,6 +498,14 @@ extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handl
         if(!observed[handle].token)observed[handle].motion_attempted=true;
 #endif
         if(std::string(status)!="recording_loaded")observed[handle].motion_attempted=true;
+#if defined(HORNET_HELD_PROTOTYPE) || defined(HORNET_RELEASE_PROTOTYPE)
+        const auto& loaded=observed[handle].path;
+        if(!loaded.has_exterior || !loaded.has_engine || !loaded.has_lights ||
+           !loaded.has_canopy || !loaded.has_wheels) {
+            observed[handle].motion_attempted=true;
+            record("held_snapshot_incomplete",handle,cookie,0,0);
+        }
+#endif
     } else observed[handle].motion_attempted=true;
 #endif
 }
@@ -403,6 +515,9 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     if(found==observed.end())return;
     auto& state = found->second;
     ++state.calls;
+#ifdef HORNET_GROUND_PROTOTYPE
+    trace_ground_pose("sdk_entry",handle,state);
+#endif
 #ifdef HORNET_STAGED_PROTOTYPE
     drain_engine(state,time);
 #endif
@@ -431,6 +546,18 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         staged_playback::publish(api,handle,state.token,staged_playback::failed);
         record("exterior_callback_missing",handle,cookie,time,state.calls);return;
     }
+#ifdef HORNET_RELEASE_PROTOTYPE
+    const bool was_playing=state.clock.playing();
+    if(!state.clock.update(time)) {
+        state.motion_active=false;state.motion_attempted=true;stop_native_step(handle,state);
+        staged_playback::publish(api,handle,state.token,staged_playback::failed);
+        record("release_clock_invalid",handle,cookie,time,state.calls);return;
+    }
+    if(!was_playing && state.clock.playing()) {
+        state.start_time=time;
+        record("release_epoch",handle,cookie,time,state.calls);
+    }
+#endif
 #endif
 #ifdef HORNET_RECORDED_PROTOTYPE
     if(!state.motion_active && state.step_hook) stop_native_step(handle,state);
@@ -444,8 +571,21 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #endif
 #ifdef HORNET_STAGED_PROTOTYPE
     if(!state.motion_attempted && !state.path.samples.empty())speedbrake=state.path.brake_at(0);
+#ifdef HORNET_HELD_PROTOTYPE
+    speedbrake=state.path.brake_at(0);
+#endif
+#ifdef HORNET_RELEASE_PROTOTYPE
+    speedbrake=state.path.brake_at(state.clock.elapsed);
+#endif
+    state.snapshot_brake=speedbrake;
     if(state.path.has_exterior) {
+#ifdef HORNET_RELEASE_PROTOTYPE
+        state.exterior_elapsed=state.clock.elapsed;
+#elif defined(HORNET_HELD_PROTOTYPE)
+        state.exterior_elapsed=0;
+#else
         state.exterior_elapsed=state.motion_active?time-state.start_time:0;
+#endif
         const auto sampled=state.path.at_sample(state.exterior_elapsed);
         state.exterior=sampled.exterior;state.engine=sampled.engine;state.lights=sampled.lights;state.canopy=sampled.canopy;state.wheels=sampled.wheels;
         api->ed_set_single_arg(handle,996,static_cast<float>(state.exterior_elapsed/1000));
@@ -513,7 +653,13 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         motion_file << '\n'; motion_file.flush();
     }
     if(state.motion_active) {
+#ifdef HORNET_RELEASE_PROTOTYPE
+        const double elapsed=state.clock.elapsed;
+#elif defined(HORNET_HELD_PROTOTYPE)
+        const double elapsed=held_start::replay_time(time,state.start_time);
+#else
         const double elapsed=time-state.start_time;
+#endif
 #ifdef HORNET_RECORDED_PROTOTYPE
 #ifdef HORNET_STAGED_PROTOTYPE
         const bool release=false; // Apply the endpoint before reporting completion.
@@ -525,7 +671,13 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         const bool release=elapsed>playback_path::duration;
 #endif
         const auto target=state.path.at(elapsed);
+#ifdef HORNET_RELEASE_PROTOTYPE
+        const auto target_motion=state.clock.playing()?state.path.motion_at(elapsed):turn_path::Motion{};
+#elif defined(HORNET_HELD_PROTOTYPE)
+        const turn_path::Motion target_motion{};
+#else
         const auto target_motion=state.path.motion_at(elapsed);
+#endif
         std::array<float,16> pre_command{};
         const bool pre_ok=native_identity::read(reinterpret_cast<uintptr_t>(handle)+0x174,pre_command);
         std::array<float,3> rates_before{},rates_after{};
@@ -596,14 +748,20 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #ifdef HORNET_STAGED_PROTOTYPE
         if(state.motion_active) {
             state.exterior_finished=finished && state.path.has_exterior;
+#ifdef HORNET_RELEASE_PROTOTYPE
+            const auto phase=state.clock.playing()?staged_playback::running:(state.exterior_applied>0?held_start::status:0.0f);
+#elif defined(HORNET_HELD_PROTOTYPE)
+            const auto phase=state.exterior_applied>0?held_start::status:0.0f;
+#else
             const auto phase=finished && !state.path.has_exterior?staged_playback::complete:staged_playback::running;
+#endif
             if(!staged_playback::publish(api,handle,state.token,phase)) {
                 record("staged_status_readback_failed",handle,cookie,time,state.calls);
                 state.motion_active=false;
             } else if(finished && !state.path.has_exterior) {
                 state.terminal=true;state.motion_active=false;
                 record("staged_complete",handle,cookie,time,state.calls);
-            } else if(elapsed==0)record("staged_started",handle,cookie,time,state.calls);
+            } else if(time==state.start_time)record("staged_started",handle,cookie,time,state.calls);
         }
         if(!state.motion_active) {
             stop_native_step(handle,state);
@@ -645,3 +803,6 @@ static_assert(std::is_same_v<decltype(&ed_setup_object_api), PFN_ED_SETUP_OBJECT
 static_assert(std::is_same_v<decltype(&ed_on_object_create), PFN_ED_ON_OBJECT_CREATE>);
 static_assert(std::is_same_v<decltype(&ed_on_object_simulate), PFN_ED_ON_OBJECT_SIMULATE>);
 static_assert(std::is_same_v<decltype(&ed_on_object_destroy), PFN_ED_ON_OBJECT_DESTROY>);
+#ifdef HORNET_RELEASE_PROTOTYPE
+#include "release-start/bridge.h"
+#endif

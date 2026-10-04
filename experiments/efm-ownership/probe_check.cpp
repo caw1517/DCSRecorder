@@ -23,7 +23,9 @@ template<class T> T load(HMODULE dll,const char* name) {
     return reinterpret_cast<T>(value);
 }
 int main(int argc,char** argv) {
-    if(argc!=2) return 2;
+    if(argc!=2 && argc!=3) return 2;
+    const bool owned_staged=argc==3 && std::string(argv[2])=="--owned-staged";
+    if(argc==3 && !owned_staged)return 2;
     auto dll=LoadLibraryA(argv[1]);
     if(!dll) return 3;
     try {
@@ -61,7 +63,7 @@ int main(int argc,char** argv) {
         if(argument_writes!=0) throw std::runtime_error("appearance wrote to incomplete argument view");
         draw_size=draw_args.size();
         simulate_object(object,cookie,1.3);
-        const bool hornet=std::string(argv[1]).find("Hornet")!=std::string::npos && std::string(argv[1]).find("Staged")==std::string::npos;
+        const bool hornet=!owned_staged && std::string(argv[1]).find("Hornet")!=std::string::npos && std::string(argv[1]).find("Staged")==std::string::npos;
         if(hornet) {
             if(draw_args[21]!=0 || draw_args[88]!=0 || draw_args[190]!=0 || draw_args[193]!=0 || draw_args[210]!=0 || draw_args[212]!=0)
                 throw std::runtime_error("Hornet speed brake or lights remain deployed/on");

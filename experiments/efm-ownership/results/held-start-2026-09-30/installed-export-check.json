@@ -1,0 +1,17 @@
+{
+  "build": "2.9.30.28536",
+  "checks": [
+    {
+      "symbol": "?ForcePosition@MovingObject@@UEAAXAEBV?$wPosition3@N@@@Z",
+      "expected_rva": "0x68d50",
+      "installed_rva": "0x685e0",
+      "matches": false
+    },
+    {
+      "symbol": "?VectorVelocity@MovingObject@@UEAAAEBVVec3f@osg@@AEBV23@@Z",
+      "expected_rva": "0x69310",
+      "installed_rva": "0x68b90",
+      "matches": false
+    }
+  ]
+}

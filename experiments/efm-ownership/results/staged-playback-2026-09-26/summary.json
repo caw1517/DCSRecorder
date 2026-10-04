@@ -1,0 +1,70 @@
+{
+  "user_report": "Both starts worked; user confirms restarting/exiting while the lead was still flying.",
+  "dcs_build": "2.9.29.27468",
+  "status": "Start/restart demonstrated; full playback completion remains untested.",
+  "runs": [
+    {
+      "run": 1,
+      "events": {
+        "INITIALIZED": 0.0,
+        "F10_START": 10.438,
+        "RELEASE_REQUESTED": 13.438,
+        "RELEASE": 13.801,
+        "NATIVE_STARTED": 13.82
+      },
+      "native_start": 13.801,
+      "native_last_sample": 45.761,
+      "played_seconds": 31.96,
+      "required_seconds": 38.78,
+      "motion_samples": 1599,
+      "motion_statuses": [
+        "called"
+      ],
+      "held_player_samples": 691,
+      "max_held_player_drift_m": 0.0,
+      "first_command_position_error_m": 0.0,
+      "first_actual_position_error_m": 0.006933468035203687,
+      "first_actual_velocity_error_m_s": 0.0,
+      "completion_observed": false,
+      "mission_failed_event": false
+    },
+    {
+      "run": 2,
+      "events": {
+        "INITIALIZED": 0.0,
+        "F10_START": 3.198,
+        "RELEASE_REQUESTED": 6.198,
+        "RELEASE": 6.801,
+        "NATIVE_STARTED": 6.82
+      },
+      "native_start": 6.801,
+      "native_last_sample": 39.861,
+      "played_seconds": 33.06,
+      "required_seconds": 38.78,
+      "motion_samples": 1654,
+      "motion_statuses": [
+        "called"
+      ],
+      "held_player_samples": 341,
+      "max_held_player_drift_m": 0.0,
+      "first_command_position_error_m": 0.0,
+      "first_actual_position_error_m": 0.006933468035203687,
+      "first_actual_velocity_error_m_s": 0.0,
+      "completion_observed": false,
+      "mission_failed_event": false
+    }
+  ],
+  "raw_sha256": {
+    "dcs.log": "6162cc6d0c143362577977b24761cde9ed144c2fae2980145197d10bead1e193",
+    "native-body-13152.csv": "f8c722f18cb2da2f517f46bbb148fb362f6bd85e0d4556b9de760f7096d67dfc",
+    "native-motion-13152.csv": "9a63ecdcaf2c0334d331675b8d026160bdb0c3faf5ae5f65171863856a3cc9d9",
+    "native-types-13152-253540187.txt": "69359c087e3dd765ddce6af4bd852ae225b7091717bb725fb38b2c7487dfef6c",
+    "objects-13152-253459578.csv": "201e4342f44e9ea29f798f63e41a10b8a5923028ccfba858d33ee747721a07b7"
+  },
+  "limitations": [
+    "No COMPLETE or staged_complete event; both runs ended early.",
+    "Pause/resume not established by these logs.",
+    "Live independent recording continuity not tested.",
+    "Only one runtime ID observed across both lifecycles."
+  ]
+}

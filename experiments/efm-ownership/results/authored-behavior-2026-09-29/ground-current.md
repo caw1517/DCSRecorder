@@ -1,0 +1,66 @@
+## Agreed scope: Hornet mission setup and hot-start parking-to-parking playback
+
+Confirmed with the user on 29 September 2026. This expands the original exact-start issue into the single-aircraft ground-operations effort under [Complete single-aircraft playback, then add layered flights](https://github.com/caw1517/DCSRecorder/issues/1). The requirements below supersede earlier suggestions about relocation and completion behavior; earlier technical evidence is retained below.
+
+- Use DCS Mission Editor to author aircraft starting locations and the surrounding mission. Preserve user-placed trucks, scenery, reference objects and other mission content through recording/playback preparation. A companion preparation step is acceptable if required; an application-side mission editor is not requested.
+- Aircraft placement happens before recording. Support user-authored ground parking/ramp/runway locations and airborne starts within the demonstrated DCS capabilities. Preserve original recorded world coordinates, heading/attitude, velocity, terrain/mission context and aircraft/livery identity. Deliberate relocation of an existing flight is outside this effort. Refuse incompatible authored placement/configuration under the mission-identity decision. Preparation/activation file checks do not certify loaded content; runtime session authorization remains an implementation gate.
+- One Hornet playback aircraft plus the player's aircraft is the current target. Six, twelve or forty aircraft were examples of eventual mission arrangements, not a multi-aircraft acceptance target or capacity promise. Layered recording/playback and other aircraft remain later work.
+- Before release, show the aircraft at its intended starting location so the user can inspect the scene from the player's held starting position. Ground and airborne staging are required. Taxiing/flying into position before release is unnecessary for V1. Prefer one real playback object through staging and completion while the surrounding mission runs. A stand-in requires separate lifecycle, reference/event and visual/audio evidence; it is not an approved shortcut.
+- Capture and replay the complete hot-start sequence: stationary start, taxi, takeoff, flight/demonstration, approach, touchdown, rollout and taxi back to parking. Initial pose and all supported exterior/engine state must represent the same recorded moment before the clock advances. Preserve the original exact-start/snapshot requirements and numerical-retention follow-up below.
+- When a parking-to-parking recording finishes, leave the playback aircraft parked with engines running and supported final recorded state held until mission exit or restart. Do not remove it as the current airborne workflow does. Other valid endings remove the playback aircraft while the player and mission continue; invalid/incomplete takes refuse preparation, as specified by the lifecycle decision.
+- Consolidate the visible DCSRecorder aircraft selection and distinguish developer experiments from normal use. Preserve or explicitly migrate existing recording/mission compatibility; this planning scope does not call for indiscriminate deletion of installed modules.
+
+Startup/shutdown are V2. Additional aircraft, layers, voice capture and intentional relocation are outside this effort. Existing Hornet/Caucasus/zero-wind/build constraints remain the evidence baseline, not a claim that other configurations were tested.
+
+## Wayfinder decisions
+
+This planning pass produces an implementation-ready route, with live user review of decisions; it does not establish implementation acceptance. Decision tickets are native children of the existing map, and native blockers on this issue:
+
+- [Choose Mission Editor integration for authored recording and playback missions](https://github.com/caw1517/DCSRecorder/issues/14).
+- [Choose visible staging and parked completion for playback aircraft](https://github.com/caw1517/DCSRecorder/issues/15).
+- [Choose a concise aircraft registration and compatibility strategy](https://github.com/caw1517/DCSRecorder/issues/16).
+- [Agree on parking-to-parking validation and acceptance](https://github.com/caw1517/DCSRecorder/issues/17).
+
+- [Prove mission identity and edit detection across Mission Editor saves](https://github.com/caw1517/DCSRecorder/issues/18#issuecomment-5903365767).
+- [Define compatibility with authored triggers and aircraft tasks](https://github.com/caw1517/DCSRecorder/issues/19#issuecomment-5903606814).
+
+## Evidence ownership and completion
+
+Coordinate with [Validate the single-aircraft flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7) for ground transitions, low passes, stronger maneuvers, full-demo duration and actual landing/taxi-light ground illumination. Coordinate ground contact with [Validate essential physics for the working playback backend](https://github.com/caw1517/DCSRecorder/issues/3); collision/wake and disturbance policy retain their own requirements. Registration cleanup contributes to [Make the playback prototype portable and explicit about DCS compatibility](https://github.com/caw1517/DCSRecorder/issues/8), whose broader installation/build/rollback gates remain open. [Add layered playback after the single-aircraft milestone](https://github.com/caw1517/DCSRecorder/issues/9) remains deferred.
+
+Current builders assume fixed donor aircraft and trigger layout; readers reject speeds below 70 m/s and takes longer than 300 seconds. The existing playback object is late-activated and destroyed at completion. These are gaps to address with evidence, not product requirements. Accepted wheel animation alone does not establish ground contact or taxi trajectory support.
+
+Related issues close only against their own remaining acceptance evidence. No implementation gate is closed by this scope agreement.
+
+## Retained exact-start requirements and historical evidence
+
+The following is the original issue content. Its earlier relocation option is superseded by the agreed scope above; old lead-in/blend restrictions are historical, as its follow-up explains.
+Part of #1. Required for complete one-aircraft playback. Related: #5 workflow, #6 state fidelity, #7 ground envelope, #3 physics.
+
+The user explicitly requires playback to begin at the original location with aircraft state/animations synchronized to that same moment. Example: a Blue Angels aircraft parked at its specific starting spot just after engines are on. Starting nearby and settling into place is not acceptable final behavior.
+
+The current airborne prototype deliberately uses a five-second lead-in, two-second attitude blend and translation to its captured position. Its speed/altitude guards exclude stationary ground starts. This issue replaces those conveniences for exact-start mode; it does not claim ground support already exists.
+
+Acceptance and investigation:
+- Retain original world position, heading/attitude, velocity, terrain/mission context, precise aircraft/livery identity, and relevant start/parking configuration.
+- Save a complete initial snapshot of supported exterior/engine state, not just changes: gear, flaps, surfaces, canopy, brake, smoke, lights, engine/afterburner indications as observable and writable. Document unavailable channels; matching visuals does not prove full cockpit-system or engine-internal state restoration.
+- Initialize pose and supported state together before advancing the replay clock. Hold the initial state during any user-facing countdown, without taxi/roll/animation drift or acquisition blending after time zero.
+- If later-timestamp starts are offered, reconstruct both pose and state at that timestamp. Do not apply later animation changes to default spawn state.
+- Test stationary hot ground start, first taxi motion, airborne start and mission restart. Coordinate terrain/gear-contact behavior with #7/#3; compare first visible state and subsequent timing, not just the path a few seconds later.
+- Preserve the original location by default. Optional relocated playback must be an explicit separate mode.
+
+Plan the clock/start contract alongside #5. Implement each state/contact dependency with evidence before widening guards. No layers or voice capture in this task. Numerical tolerances remain to be defined from measured behavior.
+
+## Follow-up confirmed after workflow acceptance
+
+The first airborne workflow now initializes the playback aircraft at the original first-sample pose and velocity without translation or attitude blending. Active Pause/F10/countdown stages the player nominally 150 feet behind; native time follows actual activation. This does not establish a complete initial gear/engine snapshot or stationary ground support.
+
+The user explicitly deferred ground starts, takeoff/landing and aircraft-state fidelity to follow-up work. Keep this issue open for hot ground starts, exact parking/demo spots, initial gear/engine state, first taxi motion and deliberate user-selected ground/air staging. Fixed trail spacing is the current airborne default, not the final placement UI.
+
+
+## Numerical retention follow-up from final fidelity acceptance
+
+The final accepted 95.18-second flight exposes a small legacy speed-brake residual after native animation: 2,016 of 4,762 later reads differ from the tape, maximum 0.010002 on the normalized 0–1 scale. Immediate SDK writes pass, but brake argument 21 is not reapplied at the shared post-animation boundary used by newer state channels. The user accepted its visual appearance; exact numerical retention has not been established. Preserve this baseline evidence, repair/verify brake retention while implementing the complete synchronized snapshot, and include countdown, first frame, changing brake and endpoint holds in that validation. This is not a newly agreed product tolerance.
+
+[Final accepted fidelity evidence](https://github.com/caw1517/DCSRecorder/blob/705baec/experiments/efm-ownership/results/fidelity-final-2026-09-29/README.md).
+

@@ -8,7 +8,7 @@
 // Caller owns the guarded aircraft and simulation thread, and invokes this
 // immediately before native integration, after the normal controller update.
 namespace native_presentation_pitch {
-constexpr uintptr_t pitch_offset=0x4db4,rate_offset=0x22b4;
+constexpr uintptr_t pitch_offset=native_build::pitch_offset,rate_offset=0x22b4;
 struct State { uintptr_t owner=0;float pitch=0,rate=0;bool active=false; };
 inline bool put(uintptr_t p,float value) {
     SIZE_T written=0;
@@ -21,9 +21,9 @@ inline bool read_pair(uintptr_t p,float& pitch,float& rate) {
 inline bool layout_valid() {
     const auto image=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
     std::array<unsigned char,8> a{},b{};
-    return native_identity::read(image+0x6d41eb,a) &&
-        a==std::array<unsigned char,8>{0xf3,0x0f,0x10,0x8e,0xb4,0x4d,0,0} &&
-        native_identity::read(image+0x6d41f6,b) &&
+    return native_identity::read(image+native_build::dcs(0x6d41eb),a) &&
+        a==std::array<unsigned char,8>{0xf3,0x0f,0x10,0x8e,native_build::pitch_displacement_low,0x4d,0,0} &&
+        native_identity::read(image+native_build::dcs(0x6d41f6),b) &&
         b==std::array<unsigned char,8>{0xf3,0x0f,0x10,0x86,0xb4,0x22,0,0};
 }
 inline const char* clear_validated(const void* handle,State& state) {

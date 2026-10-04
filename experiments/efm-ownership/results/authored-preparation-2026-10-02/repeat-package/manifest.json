@@ -1,0 +1,62 @@
+{
+  "profile": "authored-recording-v1",
+  "build": "2.9.30.28536",
+  "source_sha256": "deefb9482184b8e886696c479b33248de9c41e403071588a466461f915cf0ea9",
+  "selected_id": 12201,
+  "selected_name": "Record Hornet",
+  "namespace": "DCSR_AUTHORED_2",
+  "trigger_indices": [
+    2
+  ],
+  "role_edits": [
+    [
+      [
+        "coalition",
+        "blue",
+        "country",
+        1,
+        "plane",
+        "group",
+        1,
+        "units",
+        1,
+        "skill"
+      ],
+      "Player"
+    ]
+  ],
+  "message": "F10 > DCS Recorder > Start recording / Stop recording. Authored briefing and scene are preserved.",
+  "preservation": {
+    "restored_structure_equals_source": true,
+    "unchanged_archive_members": [
+      "l10n/DEFAULT/authored-chime.wav",
+      "l10n/DEFAULT/dictionary",
+      "l10n/DEFAULT/mapResource",
+      "l10n/FR/authored-chime.wav",
+      "l10n/FR/dictionary",
+      "l10n/FR/mapResource",
+      "options",
+      "theatre",
+      "warehouses"
+    ],
+    "changed_existing_members": [
+      "mission"
+    ],
+    "added_members": [
+      "DCSRecorder/preparation.json"
+    ]
+  },
+  "prepared_sha256": "7bae48e00e777c1c771c344e7a828b6a50db6dd50dd28873671f73e0d40b87ed",
+  "source_member_hashes": {
+    "l10n/DEFAULT/authored-chime.wav": "f43e68f1f0b774dd797037bf3c1fae5aff9c28bffc1b0b2e7865d82a56aa8b41",
+    "l10n/DEFAULT/dictionary": "8161f0be717658d67888900b323f12fa448dc3ec52234442dd204e3f6100cab9",
+    "l10n/DEFAULT/mapResource": "c34370ab6e3412fda5ef2fb5dce507b5e02f86662f60afd003d10d3db88bea66",
+    "l10n/FR/authored-chime.wav": "f43e68f1f0b774dd797037bf3c1fae5aff9c28bffc1b0b2e7865d82a56aa8b41",
+    "l10n/FR/dictionary": "a376066df71791d8faa9463710877427bc8e5191c94c2ad36bba3bdd9fc15235",
+    "l10n/FR/mapResource": "c34370ab6e3412fda5ef2fb5dce507b5e02f86662f60afd003d10d3db88bea66",
+    "mission": "e06db1f962c58b2b5ef177dd01a338620a0bd9f3c6ad4a8e08c91227e036bfaa",
+    "options": "1034e079252922748732fc8bd9d7c0a4e85e7da1bce0403539730d8fe3241248",
+    "theatre": "e72cd6342c101ebb2683e038d1fd16dfb94a11ea78da4818d9be3af6e4e9cc55",
+    "warehouses": "bc5312e01c86ac88380c420e333f3cf78eadce294a14eeb43b0eb6ea6b2023a2"
+  }
+}

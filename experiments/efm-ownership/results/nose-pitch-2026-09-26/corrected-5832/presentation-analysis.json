@@ -1,0 +1,78 @@
+[
+  {
+    "run": 1,
+    "matched_cache_samples": 1678,
+    "peak": {
+      "elapsed": 19.979999999999997,
+      "cache_time": 26.781,
+      "nose_error_deg": 0.16190878976340883,
+      "up_error_deg": 0.48846374187350106,
+      "measured_local_pitch_deg": 0.15152254632321766,
+      "field_pitch_prediction_deg": 0.0,
+      "measured_local_yaw_deg": 0.057056152345249876,
+      "field_yaw_prediction_deg": 0.0,
+      "pitch_residual_deg": 0.15152254632321766,
+      "yaw_residual_deg": 0.057056152345249876,
+      "other_rotation_flag": 0
+    },
+    "max_abs_pitch_residual_deg": 0.15727683624983468,
+    "max_abs_yaw_residual_deg": 0.08125891859556593
+  },
+  {
+    "run": 2,
+    "matched_cache_samples": 1137,
+    "peak": {
+      "elapsed": 19.979999999999997,
+      "cache_time": 26.781,
+      "nose_error_deg": 0.16190878976340883,
+      "up_error_deg": 0.48846374187350106,
+      "measured_local_pitch_deg": 0.15152254632321766,
+      "field_pitch_prediction_deg": 0.0,
+      "measured_local_yaw_deg": 0.057056152345249876,
+      "field_yaw_prediction_deg": 0.0,
+      "pitch_residual_deg": 0.15152254632321766,
+      "yaw_residual_deg": 0.057056152345249876,
+      "other_rotation_flag": 0
+    },
+    "max_abs_pitch_residual_deg": 0.15727683624983468,
+    "max_abs_yaw_residual_deg": 0.08125891859556593
+  },
+  {
+    "run": 3,
+    "matched_cache_samples": 1965,
+    "peak": {
+      "elapsed": 19.979999999999997,
+      "cache_time": 26.781,
+      "nose_error_deg": 0.16190878976340883,
+      "up_error_deg": 0.48846374187350106,
+      "measured_local_pitch_deg": 0.15152254632321766,
+      "field_pitch_prediction_deg": 0.0,
+      "measured_local_yaw_deg": 0.057056152345249876,
+      "field_yaw_prediction_deg": 0.0,
+      "pitch_residual_deg": 0.15152254632321766,
+      "yaw_residual_deg": 0.057056152345249876,
+      "other_rotation_flag": 0
+    },
+    "max_abs_pitch_residual_deg": 0.15727683624983468,
+    "max_abs_yaw_residual_deg": 0.08125891859556593
+  },
+  {
+    "run": 4,
+    "matched_cache_samples": 5,
+    "peak": {
+      "elapsed": 0.28000000000000025,
+      "cache_time": 7.081,
+      "nose_error_deg": 0.0016285588514595715,
+      "up_error_deg": 0.001628447844932563,
+      "measured_local_pitch_deg": 0.0016282415783878362,
+      "field_pitch_prediction_deg": 0.0,
+      "measured_local_yaw_deg": 3.2137202825607486e-05,
+      "field_yaw_prediction_deg": 0.0,
+      "pitch_residual_deg": 0.0016282415783878362,
+      "yaw_residual_deg": 3.2137202825607486e-05,
+      "other_rotation_flag": 0
+    },
+    "max_abs_pitch_residual_deg": 0.0016282415783878362,
+    "max_abs_yaw_residual_deg": 3.709460257562651e-05
+  }
+]

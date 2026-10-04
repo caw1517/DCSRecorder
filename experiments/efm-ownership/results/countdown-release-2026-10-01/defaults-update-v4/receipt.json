@@ -1,0 +1,30 @@
+{
+  "Status": "Installed explicit Hornet defaults; live readiness/release pending",
+  "UpdatedUtc": "2026-10-01T21:48:59.6234559Z",
+  "ChangedFiles": [
+    {
+      "Name": "Missions/043-Hornet-Countdown-Release.miz",
+      "Target": "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\043-Hornet-Countdown-Release.miz",
+      "Source": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\gear-package-v4\\payload\\Missions\\043-Hornet-Countdown-Release.miz",
+      "Before": "1991d836e5bd146b525d0a959f9b2fed965deded7b06f4c7f170a0143b333390",
+      "After": "df534ca36cb97a7c7036e0d962b1d1e3375b75fa190e432d64aef9b18343144f"
+    },
+    {
+      "Name": "Scripts/DCSRecorderReleaseControl/expected.lua",
+      "Target": "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\DCSRecorderReleaseControl\\expected.lua",
+      "Source": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\gear-package-v4\\payload\\Scripts\\DCSRecorderReleaseControl\\expected.lua",
+      "Before": "acd40f52a2dd9e34846ead06ad1c5b128164dffad8f51890681cb621d1681650",
+      "After": "767f3dc6c8b83d829a671e8d2446d78671ead61073832c79448f977c8906d1f1"
+    },
+    {
+      "Name": "Scripts/Hooks/DCSRecorderReleaseControl.lua",
+      "Target": "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\Hooks\\DCSRecorderReleaseControl.lua",
+      "Source": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\gear-package-v4\\payload\\Scripts\\Hooks\\DCSRecorderReleaseControl.lua",
+      "Before": "1F84454D7829690AF3772E31F71DDA6ACB0841686AC24C23FD6EB1D1957D8E54",
+      "After": "021ef5e27407d24e78bf0b786c5753fc24f732bf34e1d0ee51639b4ae97165a4"
+    }
+  ],
+  "VerifiedFiles": 14,
+  "UnchangedFiles": 11,
+  "Manifest": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\gear-package-v4\\manifest.json"
+}

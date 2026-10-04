@@ -1,0 +1,54 @@
+{
+  "scope": "Deliberate live regular simulator pause during playback",
+  "pid": 22980,
+  "user_review": "Looked good",
+  "installed_hashes": {
+    "Missions/043-Hornet-Countdown-Release.miz": "df534ca36cb97a7c7036e0d962b1d1e3375b75fa190e432d64aef9b18343144f",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/aircraft.lua": "5384b750cb759ba92fae6f9bd3e062803eb9f4fa35324f0aea86389136ed70fa",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/entry.lua": "d1a88fcf5b275a2ffda7e78f8a78b7c4ab32bf4ff98602b9aca993816e6fa52c",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/bin/HornetReleaseProbe.dll": "2d021d6879dfe534bac10d77facd92cf6437c05f98fac789d7282e5f6b78c8be",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/bin/recorded-flight.json": "5bdf3f74d1d7bbb2c8b4b8a6adbabb61e3ca23fa4f457aa89bf3bb050e5eb0fd",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/bin/recorded-flight.txt": "c33122b8c4029d6da65bc20d505608d3cc431c3289374e08ef3a01733447621b",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Datalinks/Link16.dlg": "7075e314bd0c4f0322c9e7d7cabfa9dc55bef2b708125768209e70b0bbceebeb",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Cockpit/Scripts/device_init.lua": "197073e97be4a1aee552ee43b91fd4c0c9db36aaa9907820d5f3a3b249e178a5",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Liveries/DCSRecorder-Hornet-Release-Test/Blue Angels Jet Team.zip": "2d7787d059a72d3f7ca10c9baa8ee4f5d3a330a12175cc1e20e4d8d33b95ef66",
+    "Scripts/DCSRecorderReleaseControl/expected.lua": "f8e233bfb8c672b58081be2ac4b907c3c134ed4213438a20f854967ab43d1d3f",
+    "Scripts/DCSRecorderReleaseControl/session_guard.lua": "fe494fd7f7de84ff1718ffa8f9c1249477a43039a8fadf30d7dd3adb61ba6bb7",
+    "Scripts/Hooks/DCSRecorderReleaseControl.lua": "021ef5e27407d24e78bf0b786c5753fc24f732bf34e1d0ee51639b4ae97165a4"
+  },
+  "mission_event_counts": {
+    "INITIALIZED": 1,
+    "SMOKE": 1,
+    "SAMPLE": 2300,
+    "READY": 1,
+    "COUNTDOWN": 1,
+    "REQUEST": 1,
+    "PLAYER_RELEASED": 1,
+    "NATIVE_RUNNING": 1,
+    "COMPLETE": 1
+  },
+  "playback_wall_seconds": 12.412000179290771,
+  "native_playback_seconds": 8.7,
+  "mission_pause_gaps": [
+    {
+      "wall_seconds": 3.0829999446868896,
+      "model_seconds": 0.019999999999999574,
+      "replay_before": 0.859999971,
+      "replay_after": 0.880000007,
+      "replay_advance_seconds": 0.020000036,
+      "position_advance_m": 2.5320387840396523
+    }
+  ],
+  "native_pause_gaps": [
+    {
+      "wall_seconds": 3.082143999985419,
+      "model_seconds": 0.019999999999999574,
+      "replay_before": 0.8600000000000003,
+      "replay_after": 0.8799999999999999,
+      "command_position_advance_m": 2.5319936065487756
+    }
+  ],
+  "all_native_motion_matched": true
+}

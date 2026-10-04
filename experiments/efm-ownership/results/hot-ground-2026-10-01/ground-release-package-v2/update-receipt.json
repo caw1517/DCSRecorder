@@ -1,0 +1,11 @@
+{
+  "Status": "Updated and verified",
+  "Changed": [
+    "Scripts/DCSRecorderGroundControl/expected.lua",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/bin/HornetGroundProbe.dll"
+  ],
+  "VerifiedFiles": 14,
+  "UnchangedPayloadFiles": 12,
+  "Mission": "049-Hornet-Ground-Hold-Release.miz",
+  "LiveAcceptance": "Pending; reference repaired, read-only pose trace installed"
+}

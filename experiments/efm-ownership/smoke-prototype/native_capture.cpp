@@ -1,5 +1,6 @@
 // Read-only, build-pinned smoke observation. No setter calls or retained objects.
 #include "../native_identity.h"
+#include "../native_capture_build.h"
 #include <array>
 #include <sstream>
 
@@ -19,18 +20,16 @@ std::string sample() {
     if(!cockpit)return "UNAVAILABLE,no_cockpit";
     const auto base=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
     const auto fn=GetProcAddress(cockpit,"?c_LA@cockpit@@YAPEAVIwoLA@@XZ");
-    const std::array<unsigned char,29> accessor={0x48,0x8b,5,0xd1,0xb5,0x14,0,
-        0x48,0x8b,0x48,0x10,0x48,0x85,0xc9,0x74,0x0a,0x48,0x8b,1,
-        0x48,0xff,0xa0,0x40,1,0,0,0x33,0xc0,0xc3};
+    const auto accessor=native_capture_build::accessor;
     // Smoke control iterates 32-byte station entries; byte +24 is emitter enabled.
     const std::array<unsigned char,40> entries={0x4c,0x8b,0x89,0x78,0x25,0,0,
         0x48,0x8b,0xf1,0x8b,0xca,0x48,0x8b,0x86,0x80,0x25,0,0,0x49,0x2b,0xc1,
         0x48,0xc1,0xf8,5,0x48,0x3b,0xc8,0x0f,0x83,7,3,0,0,0x8b,0xf9,0x48,0xc1,0xe7};
     const std::array<unsigned char,10> enabled_check={0x80,0x7f,0x18,0,0x0f,0x85,0xcd,2,0,0};
     const std::array<unsigned char,6> aggregate_write={0x88,0x83,0x40,0x23,0,0};
-    if(reinterpret_cast<uintptr_t>(fn)!=reinterpret_cast<uintptr_t>(cockpit)+0x3f2a30 ||
-       !matches(reinterpret_cast<uintptr_t>(fn),accessor) || !matches(base+0x65a1a3,entries) ||
-       !matches(base+0x65a1f6,enabled_check) || !matches(base+0x65eae8,aggregate_write))
+    if(reinterpret_cast<uintptr_t>(fn)!=reinterpret_cast<uintptr_t>(cockpit)+native_capture_build::cockpit_accessor ||
+       !matches(reinterpret_cast<uintptr_t>(fn),accessor) || !matches(base+native_build::dcs(0x65a1a3),entries) ||
+       !matches(base+native_build::dcs(0x65a1f6),enabled_check) || !matches(base+native_build::dcs(0x65eae8),aggregate_write))
         return "UNAVAILABLE,build_guard";
     void* object=nullptr;
     if(!current(reinterpret_cast<Current>(fn),object) || !object)return "UNAVAILABLE,no_player";

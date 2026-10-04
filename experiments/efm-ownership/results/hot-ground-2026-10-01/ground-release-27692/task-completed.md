@@ -1,0 +1,25 @@
+## Outcome
+
+Use a short actual hot-start recording to validate original ground placement, held inspection and initial release.
+
+Step 4 of 15 in [Complete Hornet mission setup and hot-start parking-to-parking playback](https://github.com/caw1517/DCSRecorder/issues/11). Part of #11.
+
+## Completion checklist
+
+- [x] Stage at the recorded ground position with the complete initial snapshot while surrounding mission activity continues.
+- [x] Observe a 30-second hold and three-second countdown without sliding, bouncing, sinking, unexplained damage or state changes.
+- [x] Release into the first recorded taxi motion without a position jump or mismatched state; retain ground-contact evidence and user review.
+
+## Starting evidence and boundaries
+
+Do not widen low-speed guards solely to make input pass. Coordinate contact evidence with the existing physics work.
+
+## Working agreement
+
+Work through the parent's execution checklist one task at a time. The agent prepares changes and inspects logs; the user performs required live DCS checks one concrete step at a time. Before work, claim the task and inspect existing artifacts and evidence. A prepared package or passing offline check alone does not complete a live acceptance requirement. Close with a completion comment linking implementation/evidence and the user review where required; then check off the matching parent entry. If integration invalidates an earlier result, reopen the affected task rather than retaining an unsupported checkmark.
+
+## Agreed requirements
+
+- [Choose visible staging and parked completion for playback aircraft](https://github.com/caw1517/DCSRecorder/issues/15)
+- [Agree on parking-to-parking validation and acceptance](https://github.com/caw1517/DCSRecorder/issues/17)
+- [Validate essential physics for the working playback backend](https://github.com/caw1517/DCSRecorder/issues/3)

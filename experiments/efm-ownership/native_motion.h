@@ -24,7 +24,7 @@ inline const char* apply(const void* handle, uint32_t object_id,
 #endif
     const auto module=GetModuleHandleW(L"WorldGeneral.dll");
     const auto entry=GetProcAddress(module,"?ForcePosition@MovingObject@@UEAAXAEBV?$wPosition3@N@@@Z");
-    if(!module || reinterpret_cast<uintptr_t>(entry)!=reinterpret_cast<uintptr_t>(module)+0x68d50)
+    if(!module || reinterpret_cast<uintptr_t>(entry)!=reinterpret_cast<uintptr_t>(module)+native_build::world(0x68d50))
         return "export_mismatch";
     std::array<unsigned char,10> bytes{};
     if(!native_identity::read(reinterpret_cast<uintptr_t>(entry),bytes) ||
@@ -72,7 +72,7 @@ inline const char* apply(const void* handle, uint32_t object_id,
         const auto image=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
         std::array<unsigned char,9> instruction{};
         std::array<float,3> rates{};
-        if(!native_identity::read(image+0x712435,instruction) ||
+        if(!native_identity::read(image+native_build::dcs(0x712435),instruction) ||
            instruction!=std::array<unsigned char,9>{0xf3,0x45,0x0f,0x10,0x9e,0xe8,0x01,0,0})
             return "roll_signature_mismatch";
         if(!read_rates(handle,rates)) return "rates_unreadable";

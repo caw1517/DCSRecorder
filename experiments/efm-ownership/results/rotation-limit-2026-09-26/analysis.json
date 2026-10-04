@@ -1,0 +1,107 @@
+[
+  {
+    "file": "20260927T005525Z-0001.csv",
+    "validation": "Take rotation exceeds conservative playback rate limit",
+    "samples": 4047,
+    "duration_s": 80.92,
+    "footer": [
+      "END",
+      "user_stop",
+      "4047"
+    ],
+    "rotation_limit_deg_s": 51.56620156177409,
+    "peak": {
+      "elapsed": 9.74,
+      "total_deg_s": 153.75927455770398,
+      "roll_deg_s": -153.4180562921229,
+      "pitch_deg_s": 8.070284187620553,
+      "yaw_deg_s": 3.930423574261572
+    },
+    "first_over_limit": {
+      "elapsed": 1.56,
+      "total_deg_s": 54.45465848275876,
+      "roll_deg_s": -54.4478480145607,
+      "pitch_deg_s": 0.1355880398866396,
+      "yaw_deg_s": 0.6036790936143797
+    },
+    "over_limit_samples": 205,
+    "altitude_m": [
+      572.468571745,
+      1998.38543512
+    ],
+    "speed_m_s": [
+      119.03062282140803,
+      252.69898935924937
+    ],
+    "recording_gaps": [],
+    "position_discontinuities": []
+  },
+  {
+    "file": "20260927T005915Z-0001.csv",
+    "validation": "Take rotation exceeds conservative playback rate limit",
+    "samples": 3470,
+    "duration_s": 69.38000000000001,
+    "footer": [
+      "END",
+      "user_stop",
+      "3470"
+    ],
+    "rotation_limit_deg_s": 51.56620156177409,
+    "peak": {
+      "elapsed": 37.44,
+      "total_deg_s": 105.8087016894561,
+      "roll_deg_s": 105.46267332997873,
+      "pitch_deg_s": 7.990206751429057,
+      "yaw_deg_s": -1.9122792832096625
+    },
+    "first_over_limit": {
+      "elapsed": 1.9600000000000004,
+      "total_deg_s": 51.65254062032873,
+      "roll_deg_s": 51.64564325245869,
+      "pitch_deg_s": -0.09189909445559977,
+      "yaw_deg_s": -0.6442350872687775
+    },
+    "over_limit_samples": 182,
+    "altitude_m": [
+      530.468392287,
+      2001.73200579
+    ],
+    "speed_m_s": [
+      123.67728204929082,
+      242.85426506781076
+    ],
+    "recording_gaps": [],
+    "position_discontinuities": []
+  },
+  {
+    "file": "20260927T010126Z-0002.csv",
+    "validation": "Ready",
+    "samples": 1171,
+    "duration_s": 23.400000000000002,
+    "footer": [
+      "END",
+      "user_stop",
+      "1171"
+    ],
+    "rotation_limit_deg_s": 51.56620156177409,
+    "peak": {
+      "elapsed": 3.48,
+      "total_deg_s": 32.98284969445651,
+      "roll_deg_s": -32.92856383211726,
+      "pitch_deg_s": 0.14550126654194345,
+      "yaw_deg_s": 1.8720433187561436
+    },
+    "first_over_limit": null,
+    "over_limit_samples": 0,
+    "altitude_m": [
+      1826.90243924,
+      2008.00107625
+    ],
+    "speed_m_s": [
+      231.86960632309624,
+      249.93350023263577
+    ],
+    "recording_gaps": [],
+    "position_discontinuities": []
+  }
+]

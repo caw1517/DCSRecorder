@@ -1,0 +1,154 @@
+{
+  "scope": "One real airborne playback object held at time zero; no release or ground acceptance",
+  "configuration": {
+    "build": "2.9.30.28536",
+    "module": "DCSRecorder-Hornet-Held-Test",
+    "mission": "040-Hornet-Held-Start.miz",
+    "native_pid": 26264
+  },
+  "mission": {
+    "lead_samples": 301,
+    "first_time": 0.02,
+    "last_time": 30.02,
+    "observed_seconds": 30.0,
+    "lead_ids": [
+      9001.0
+    ],
+    "lead_position_drift_m": 0.0,
+    "lead_forward_drift": 0.0,
+    "lead_up_drift": 0.0,
+    "lead_max_speed_mps": 0.0,
+    "lead_max_source_position_error_m": 0.0,
+    "replay_times": [
+      0.0
+    ],
+    "controller_statuses": [
+      0.125
+    ],
+    "appearance_max_source_error": 4.6100000206106273e-10,
+    "appearance_max_drift": 0.0,
+    "player_position_drift_m": 0.0,
+    "witness_displacement_m": 3696.3304199689537,
+    "observation_complete": true
+  },
+  "native_motion": {
+    "writes": 1699,
+    "first_time": 0.0,
+    "last_time": 33.96,
+    "ids": [
+      "16777472"
+    ],
+    "all_motion_matched": true,
+    "max_float_position_readback_error_m": 0.015850966985587044,
+    "max_velocity_after_mps": 0.0,
+    "max_commanded_angular_rate": 0.0,
+    "last_prephysics_calls": 1698,
+    "last_prephysics_applied": 1698
+  },
+  "native_appearance": {
+    "rows": 56067,
+    "channels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      21,
+      28,
+      29,
+      38,
+      88,
+      89,
+      90,
+      101,
+      102,
+      103,
+      190,
+      191,
+      192,
+      193,
+      210,
+      212
+    ],
+    "max_requested_source_error": 0.0,
+    "max_postanimation_source_error": 0.0
+  },
+  "native_engine": {
+    "reads": 75228,
+    "valid_engine_overrides": 73530,
+    "engine_zero_passthrough_reads": 1698,
+    "caller_modules": [
+      "DCS.exe",
+      "Sound.dll"
+    ],
+    "channels": [
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ]
+    ],
+    "all_valid_engines_overridden_at_zero": true,
+    "max_returned_source_error": 0.0
+  },
+  "object_event_counts": {
+    "setup": 1,
+    "create": 1,
+    "recording_loaded": 1,
+    "off_verified": 321,
+    "step_hook_installed": 1,
+    "staged_started": 1,
+    "simulate": 321,
+    "step_hook_already_replaced": 1,
+    "destroy": 1
+  },
+  "cleanup_limit": "Destroy reported step_hook_already_replaced: object table already replaced at destruction; broader restart/failure cleanup remains unverified.",
+  "user_review": {
+    "visible_hold": "Lead perfectly still throughout; scene witness flew away",
+    "engine_sound": "User confirmed steady engine sound"
+  },
+  "hashes": {
+    "040-Hornet-Held-Start.miz": "7483d48cda4203f31cfea5b8d8a7df97c10a37f40aaafa42aab64f3f57a59567",
+    "dcs.log": "d2504d12e9d4733d6046a9d79ab47c6cb8fe993dd02a3e0747f609c9b9f8dbba",
+    "engine-26264.csv": "a8bc3da5f30cae57e7bb8a9aeb0dbadef30bd402952f2de4644595eb12e67098",
+    "exterior-26264.csv": "3bc9583800002389de409e4397f31b8d5af9f78da2ec712e5d8afcecef0c1182",
+    "HornetHeldProbe.dll": "23df85f99addea68d379bb646540cc5e04f63ce4fcc966dc18bc1d6b9c653d72",
+    "native-body-26264.csv": "b0ed878daf88b468e34a501cb4b2f2d394515b445b6c60d5a631435688a624ce",
+    "native-motion-26264.csv": "fd2f788d95b4565593a7e79a48c1140f3b8fee88ad203cf21e1708254120fdb1",
+    "native-types-26264-217266593.txt": "8e0db5885e476fc67ee00d971d70892a0b677dd466ed7ed1db5270f566225c67",
+    "objects-26264-217139984.csv": "88f2de12603884d81a13adee645c032b300f876605a445982868158bf3f6a13f",
+    "recorded-flight.json": "90b90fdf18b5440beaf5db92b60455c5207d3eb86bfa05bf3b0f04059382b7ff",
+    "recorded-flight.txt": "ca297414283f7d0923be148d2a4676cf9cfeb8235aadd32f971dde49f6d61e00"
+  }
+}

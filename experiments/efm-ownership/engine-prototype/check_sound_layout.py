@@ -13,7 +13,7 @@ if __name__=='__main__':
     args=parser.parse_args()
     images={'image':PE(args.dcs_analysis),'world':PE(args.world_analysis)}
     header=Path(__file__).with_name('sound_boundary.h').read_text()
-    guards=re.findall(r'matches\((image|world)\+(0x[0-9a-f]+),std::array<unsigned char,(\d+)>\{([^}]+)\}',header)
+    guards=re.findall(r'matches\((image|world)\+(?:native_build::(?:dcs|world)\()?(0x[0-9a-f]+)\)?,std::array<unsigned char,(\d+)>\{([^}]+)\}',header)
     assert len(guards)==12
     for module,rva,count,values in guards:
         expected=bytes(int(v.strip(),0) for v in values.split(','))

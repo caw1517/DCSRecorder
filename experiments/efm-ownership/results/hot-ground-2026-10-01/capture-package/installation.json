@@ -1,0 +1,13 @@
+{
+  "Status": "Installed and verified",
+  "InstalledUtc": "2026-10-01T22:35:09.4490251Z",
+  "Mission": "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\047-Hornet-Hot-Ground-Capture.miz",
+  "Sha256": "9ab9e30b4198c086c5811568d7c4fbaadbec6d949430ba19c7700a65c0d92b3e",
+  "Dependencies": {
+    "Scripts\\Hooks\\dcs-recorder-autosave.lua": "42B9812B7B9920857DEEC13E2CF2492AA132CDBBC8BEF5F1F932001416FB07FC",
+    "Scripts\\DCSRecorderEngineCapture\\engine_capture.lua": "D3697047C91A1206F61A68C09B0F770FE156B415329F2EF8D7FF819F13B7E840",
+    "Scripts\\DCSRecorderSmokeCapture\\smoke_capture.lua": "17CA1CA6E8FDBC84738474E94595ABA1CD13BC7CB280A2B78E655C8064D30746",
+    "Scripts\\DCSRecorderSmokeCapture\\NativeSmokeCapture2930.dll": "1D5D90C55599CB897C1AB146C1D5CDA5A0D8CACC424DB0C5A21A7DC8422DD5A8",
+    "Scripts\\DCSRecorderEngineCapture\\NativeEngineCapture2930.dll": "C0B801BD4FEFAD45F66D89294D9383F016AB1EBD22FB02667293C35C92499C4E"
+  }
+}

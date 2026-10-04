@@ -19,8 +19,9 @@ def transitions(metadata, raw):
         if row['smoke_on'] not in ('0', '1'):
             raise ValueError('Smoke state must be measured OFF or ON')
         on = int(row['smoke_on'])
-        if not math.isfinite(t) or not 0 <= t - float(row['t']) <= .05:
-            raise ValueError('Smoke sample must be within 50 ms after its motion sample')
+        delay_limit = .15 if previous_time is not None and metadata.get('capture_timing') == 'frame-batch-v1' else .05
+        if not math.isfinite(t) or not 0 <= t - float(row['t']) <= delay_limit:
+            raise ValueError(f'Smoke sample must be within {delay_limit*1000:g} ms after its motion sample')
         if previous_time is not None:
             if not 0 <= t - previous_time <= .15:
                 raise ValueError('Smoke clock gap or reversal')

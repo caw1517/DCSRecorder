@@ -1,0 +1,35 @@
+{
+  "pid": 41868,
+  "user_review": "Complete",
+  "mission_events": {
+    "INITIALIZED": 1,
+    "SMOKE": 1,
+    "SAMPLE": 1422,
+    "READY": 1,
+    "COUNTDOWN": 1,
+    "START_REFUSED": 2,
+    "REQUEST": 1,
+    "PLAYER_RELEASED": 1,
+    "NATIVE_RUNNING": 1
+  },
+  "native_events": {
+    "setup": 1,
+    "create": 1,
+    "recording_loaded": 1,
+    "off_verified": 93,
+    "step_hook_installed": 1,
+    "staged_started": 2,
+    "simulate": 93,
+    "release_committed": 1,
+    "release_epoch": 1,
+    "step_hook_already_replaced": 1,
+    "destroy": 1
+  },
+  "refused_phases": [
+    "countdown",
+    "playing"
+  ],
+  "installed_package": "gear-package-v5",
+  "all_14_installed_hashes_match": true,
+  "scope": "Both duplicate requests refused. Mission exited before recording completion; normal completion is proven in prior runs."
+}

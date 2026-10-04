@@ -1,0 +1,26 @@
+## Resolution — preserve supported behavior; refuse conflicting or unclassified commands
+
+The user approved refusing preparation with a clear explanation when authored commands conflict with the selected playback aircraft, and performed the bounded DCS controls one step at a time. Simple recording missions need not contain custom AI tasks; ordinary route geometry alone is not evidence of a conflict.
+
+### Selected contract
+
+- Preserve unrelated mission objects, supported routes/tasks/triggers, flags, resource bytes and localization. Preserve source IDs/names and group membership where the supported conversion permits it; verify runtime references and semantics separately from serialized text.
+- Playback owns selected-aircraft movement, supported state and lifecycle. Refuse incompatible AI/controller/state actions and activation/destruction/respawn commands, identifying the authored trigger/task and affected aircraft. Do not silently remove them. Unknown/dynamic scripts and references do not receive automatic approval; they require a supported, bounded compatibility path. No blanket override is offered.
+- Prefer one real object through staging, flight and parked completion. Stand-ins remain unsupported until their cached-reference, event, identity and lifecycle behavior is demonstrated, in addition to the prior visual/audio requirements. Matching names or numeric IDs do not prove continuity.
+- Isolate recorder unit/group IDs, trigger indices, flags, resource keys/files, Lua globals, controls and callbacks. Preserve both source and compiled trigger representations. Record owned additions externally; an embedded copied manifest is not authority. Known collisions get unused allocations; random prefixes/string searches cannot prove compatibility with unknown dynamic code.
+- Prepare repeatedly from the same immutable authored source/profile, without accumulating additions. Refuse generated copies as fresh authored input unless a verified reconstruction path exists. Remap only completely understood supported references; opaque scripts, cached objects and unclassified task references cannot be safely rewritten by assumption.
+- Preparation review shows preserved content, owned changes, unclassified behavior and exact conflicts. Explain lifecycle consequences: existence/position triggers may observe parked completion or removal at another ending. Keep mission-load authorization separate, as required by the mission-identity decision.
+
+### Evidence and limits
+
+On DCS 2.9.29.27468, source and append-only prepared stock-Hornet controls produced three exactly matching sample payloads: selected/unrelated IDs, cached references, authored counter/flags and unrelated aircraft coordinates. The authored occupied flag stayed 73, the timed native unit/group-alive trigger changed its flag from 0 to 17, and the prepared diagnostic used its separate allocated flag. Structural comparison retained all original mission data after removing declared additions, preserved authored resource/dictionary bytes, and produced byte-identical repeated preparation.
+
+An actual Mission Editor Save As preserved source trigrules, numeric references and both script resources; the same runtime samples still matched. DCS also removed two AI Radio fields, added an empty dictionary entry and compiled trigger tables, and changed serialization. These are reported differences, not a claim of full mission equality.
+
+The replacement control destroyed/recreated only the disposable stock AI group. Despite the same name and reported unit ID 10302, the cached unit/group references became invalid; fresh lookup found group 10402. Immediate post-destroy existence checks were transiently still true. Numeric events 15 and 18 were observed; no complete event equivalence or guaranteed death event is claimed. This rules out assuming name/ID continuity makes a stand-in transparent.
+
+These controls do not implement actual playback conversion, selected-aircraft task enforcement, staging, ground physics or universal script equivalence. Current donor-specific builders overwrite trigger slots and cannot be reused unchanged for arbitrary authored missions. Integration and full-flight acceptance remain open under [Complete Hornet mission setup and hot-start parking-to-parking playback](https://github.com/caw1517/DCSRecorder/issues/11).
+
+Evidence at [81946bc](https://github.com/caw1517/DCSRecorder/commit/81946bcff30603bfb21384da60283a585152d6f4) on `codex/prototype-authored-behavior`: [matrix, source evidence and handoff](https://github.com/caw1517/DCSRecorder/blob/81946bc/companion/authored-behavior.prototype.md), [interactive decision model](https://github.com/caw1517/DCSRecorder/blob/81946bc/companion/authored-behavior.prototype.html), and [live logs](https://github.com/caw1517/DCSRecorder/blob/81946bc/companion/authored-behavior-runtime.prototype.log). Policy was reviewed in discussion; hands-on HTML review and automated browser visual QA are not claimed.
+
+Python/Lua/HTML syntax, structural reports, live comparisons and staged diff checks passed. Only disposable missions were added; no hooks, mods or production code changed. Raw archives remain local. Their bounded diagnostics stop sampling and unload on mission exit. Close this decision only; retain the ground milestone and its implementation/evidence gates.

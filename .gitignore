@@ -19,3 +19,8 @@ __pycache__/
 /experiments/efm-ownership/results/**/*.jpg
 /experiments/efm-ownership/results/**/*.png
 /experiments/efm-ownership/results/**/*.mp4
+# Packaged playback modules copy stock DCS aircraft files; keep them local.
+/experiments/efm-ownership/results/**/payload/
+/experiments/efm-ownership/results/**/backup*/
+/experiments/efm-ownership/results/**/base/
+/experiments/efm-ownership/results/**/DCSRecorder-Hornet-*/

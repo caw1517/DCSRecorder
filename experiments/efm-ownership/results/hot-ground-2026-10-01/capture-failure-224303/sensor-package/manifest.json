@@ -1,0 +1,7 @@
+{
+  "mission": "048-Hornet-Ground-Sensor-Check.miz",
+  "sha256": "c28cb4dd68f83fc1358d255f1a3617597ec43633684170638f154b71ce5d738f",
+  "source": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\hot-ground-2026-10-01\\capture-package\\047-Hornet-Hot-Ground-Capture.miz",
+  "source_sha256": "9ab9e30b4198c086c5811568d7c4fbaadbec6d949430ba19c7700a65c0d92b3e",
+  "scope": "Temporary read-only sensor diagnosis; no recorder, native hooks, or control changes"
+}

@@ -17,18 +17,18 @@ inline bool layout_matches(uintptr_t image,uintptr_t world) {
     // Instructions establishing descriptor, string, native sounder, Lua reference,
     // engine count, FM member and per-engine array. Fail closed on a changed build.
     return image && world &&
-        matches(image+0x641492,std::array<unsigned char,7>{0x48,0x8b,0x98,0xd8,2,0,0}) &&
-        matches(image+0x6414a2,std::array<unsigned char,8>{0x48,0x83,0xbb,0x50,0x0c,0,0,0}) &&
-        matches(image+0x6414b4,std::array<unsigned char,12>{0x48,0x8d,0xbb,0x40,0x0c,0,0,0x48,0x83,0x7f,0x18,0x0f}) &&
-        matches(image+0x6099af,std::array<unsigned char,7>{0x48,0x8b,0x89,0x28,0x28,0,0}) &&
-        matches(image+0x6099d1,std::array<unsigned char,7>{0x48,0x89,0x83,0x18,0x28,0,0}) &&
-        matches(world+0x6a9ff,std::array<unsigned char,8>{0x48,0x83,0xb9,0x80,2,0,0,0}) &&
-        matches(world+0x6aa44,std::array<unsigned char,7>{0x48,0x89,0x83,0x80,2,0,0}) &&
-        matches(image+0x66d164,std::array<unsigned char,7>{0x0f,0xb6,0x81,0x11,8,0,0}) &&
-        matches(image+0x66d174,std::array<unsigned char,7>{0x48,0x8b,0x81,0x98,0x2f,0,0}) &&
-        matches(image+0x66d180,std::array<unsigned char,7>{0x48,0x8b,0x89,0xa0,0x2f,0,0}) &&
-        matches(image+0x66d197,std::array<unsigned char,11>{0x48,0xff,0x60,0x68,0x48,0xff,0xa0,0x88,0,0,0}) &&
-        matches(image+0x66d1b3,std::array<unsigned char,9>{0xf3,0x0f,0x10,0x81,0xa8,0x2f,0,0,0xc3});
+        matches(image+native_build::dcs(0x641492),std::array<unsigned char,7>{0x48,0x8b,0x98,0xd8,2,0,0}) &&
+        matches(image+native_build::dcs(0x6414a2),std::array<unsigned char,8>{0x48,0x83,0xbb,0x50,0x0c,0,0,0}) &&
+        matches(image+native_build::dcs(0x6414b4),std::array<unsigned char,12>{0x48,0x8d,0xbb,0x40,0x0c,0,0,0x48,0x83,0x7f,0x18,0x0f}) &&
+        matches(image+native_build::dcs(0x6099af),std::array<unsigned char,7>{0x48,0x8b,0x89,0x28,0x28,0,0}) &&
+        matches(image+native_build::dcs(0x6099d1),std::array<unsigned char,7>{0x48,0x89,0x83,0x18,0x28,0,0}) &&
+        matches(world+native_build::world(0x6a9ff),std::array<unsigned char,8>{0x48,0x83,0xb9,0x80,2,0,0,0}) &&
+        matches(world+native_build::world(0x6aa44),std::array<unsigned char,7>{0x48,0x89,0x83,0x80,2,0,0}) &&
+        matches(image+native_build::dcs(0x66d164),std::array<unsigned char,7>{0x0f,0xb6,0x81,0x11,8,0,0}) &&
+        matches(image+native_build::dcs(0x66d174),std::array<unsigned char,7>{0x48,0x8b,0x81,0x98,0x2f,0,0}) &&
+        matches(image+native_build::dcs(0x66d180),std::array<unsigned char,7>{0x48,0x8b,0x89,0xa0,0x2f,0,0}) &&
+        matches(image+native_build::dcs(0x66d197),std::array<unsigned char,11>{0x48,0xff,0x60,0x68,0x48,0xff,0xa0,0x88,0,0,0}) &&
+        matches(image+native_build::dcs(0x66d1b3),std::array<unsigned char,9>{0xf3,0x0f,0x10,0x81,0xa8,0x2f,0,0,0xc3});
 }
 inline bool name_at(uintptr_t address,std::string& name) {
     // The descriptor uses a 32-byte string with inline capacity 15.
@@ -84,7 +84,7 @@ inline void sample(std::ostream& out,const void* handle,uint64_t id,double time)
     uintptr_t table=0;
     if(identity.status!="ok" || identity.module!="DCS.exe" || identity.name!=".?AVwoAIPlane@@" ||
        identity.subobject_offset!=8 || !native_identity::read(complete,table) ||
-       (table!=image+0x1146200 && !native_animation_hook::recognizes(complete,table,image+0x1146200))) {
+       (table!=image+native_build::dcs(0x1146200) && !native_animation_hook::recognizes(complete,table,image+native_build::dcs(0x1146200)))) {
         out << ",\"status\":\"identity_rejected\"}\n";out.flush();return;
     }
     if(!layout_matches(image,world)) {

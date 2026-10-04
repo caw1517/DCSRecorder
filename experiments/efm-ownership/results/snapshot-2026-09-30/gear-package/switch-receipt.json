@@ -1,0 +1,23 @@
+[
+  {
+    "Relative": "DCSRecorder-Hornet-Snapshot-Test/bin/recorded-flight.json",
+    "Source": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\snapshot-2026-09-30\\gear-package\\DCSRecorder-Hornet-Snapshot-Test\\bin\\recorded-flight.json",
+    "Target": "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Snapshot-Test\\bin\\recorded-flight.json",
+    "Before": "f00df688a3435e6ecc6b060ac3395c78392de517e66683be9566c106296f25ff",
+    "After": "5bdf3f74d1d7bbb2c8b4b8a6adbabb61e3ca23fa4f457aa89bf3bb050e5eb0fd"
+  },
+  {
+    "Relative": "DCSRecorder-Hornet-Snapshot-Test/bin/recorded-flight.txt",
+    "Source": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\snapshot-2026-09-30\\gear-package\\DCSRecorder-Hornet-Snapshot-Test\\bin\\recorded-flight.txt",
+    "Target": "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Snapshot-Test\\bin\\recorded-flight.txt",
+    "Before": "aed3a9cfd4c73d86fc6f7a788960b0827c93d4f65afd81fd639a5244cd20fff4",
+    "After": "c33122b8c4029d6da65bc20d505608d3cc431c3289374e08ef3a01733447621b"
+  },
+  {
+    "Relative": "042-Hornet-Snapshot-Hold.miz",
+    "Source": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\snapshot-2026-09-30\\gear-package\\042-Hornet-Snapshot-Hold.miz",
+    "Target": "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\042-Hornet-Snapshot-Hold.miz",
+    "Before": "d26fd979e229f83d83c3b520411972c6bd66e8380453d0f5d1abe68fe9cfa2bc",
+    "After": "bd75df0b400a62b826ab29b339f96818b72cd517032b1f2cad74872f538801d2"
+  }
+]

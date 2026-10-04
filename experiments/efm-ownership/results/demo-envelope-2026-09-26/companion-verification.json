@@ -1,0 +1,32 @@
+{
+  "recordings": [
+    {
+      "id": "20260927T010126Z-0002.csv",
+      "name": "20260927T010126Z-0002",
+      "created": 1790470910.3767745,
+      "supported": true,
+      "duration": 23.400000000000002,
+      "reason": "Ready for playback"
+    },
+    {
+      "id": "20260927T005915Z-0001.csv",
+      "name": "20260927T005915Z-0001",
+      "created": 1790470824.5015502,
+      "supported": true,
+      "duration": 69.38000000000001,
+      "reason": "Ready for playback"
+    },
+    {
+      "id": "20260927T005525Z-0001.csv",
+      "name": "20260927T005525Z-0001",
+      "created": 1790470606.0783198,
+      "supported": true,
+      "duration": 80.92,
+      "reason": "Ready for playback"
+    }
+  ],
+  "partial_count": 0,
+  "hook_installed": true,
+  "save_status": "READY\nLast saved: C:\\Users\\w_can\\Saved Games\\DCS\\DCSRecorder/recordings/20260927T010126Z-0002.csv",
+  "directory": "C:\\Users\\w_can\\Saved Games\\DCS\\DCSRecorder\\recordings"
+}

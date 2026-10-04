@@ -1,16 +1,21 @@
 -- Read measured emitter state after the existing engine/identity association.
-local reader
+local reader,reader_build
 local function finite(v)return type(v)=='number' and v==v and math.abs(v)<math.huge end
 return function(data,active)
     local motion_time=tonumber(data:match('^([^,]+),'))
     local t=Export.LoGetModelTime()
-    assert(finite(t) and motion_time and t>=motion_time and t-motion_time<=.05,'Smoke sample delayed over 50 ms')
+    local max_delay=active.capture_timing=='frame-batch-v1' and active.smoke_time and .15 or .05
+    assert(finite(t) and motion_time and t>=motion_time and t-motion_time<=max_delay,
+        'Smoke sample delayed over '..math.floor(max_delay*1000+.5)..' ms')
     assert(not active.smoke_time or t>=active.smoke_time,'Reversed smoke sample time')
+    assert(not active.smoke_time or t-active.smoke_time<=.15,'Smoke sample clock gap over 150 ms')
     local id=Export.LoGetPlayerPlaneId()
     assert(id==active.engine_player_id,'Smoke/engine player mismatch')
-    if not reader then
-        local err;reader,err=package.loadlib(lfs.writedir()..'Scripts/DCSRecorderSmokeCapture/NativeSmokeCapture.dll','dcs_native_smoke_sample')
+    if not reader or reader_build~=active.capture_build then
+        local binary=active.capture_build=='2.9.30.28536' and 'NativeSmokeCapture2930.dll' or 'NativeSmokeCapture.dll'
+        local err;reader,err=package.loadlib(lfs.writedir()..'Scripts/DCSRecorderSmokeCapture/'..binary,'dcs_native_smoke_sample')
         assert(reader,err or 'Native smoke capture helper unavailable')
+        reader_build=active.capture_build
     end
     local result=reader()
     local on,aggregate,classification
@@ -20,5 +25,6 @@ return function(data,active)
     assert(finite(finish) and finish>=t and finish-t<=.02 and Export.LoGetPlayerPlaneId()==id,'Player/clock changed during smoke read')
     assert(active.smoke_time~=t or active.smoke_on==on,'Smoke changed at one timestamp')
     active.smoke_time=t;active.smoke_on=on
+    active.max_smoke_delay=math.max(active.max_smoke_delay or 0,t-motion_time)
     return data..','..string.format('%.12g',t)..','..on
 end

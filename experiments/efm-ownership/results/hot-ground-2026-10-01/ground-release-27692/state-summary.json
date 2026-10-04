@@ -1,0 +1,8 @@
+{
+  "post_animation_rows": 32703,
+  "post_animation_requested_vs_retained_max": 2.0001361678012586e-14,
+  "mission_channel_comparisons": 32703,
+  "mission_vs_native_requested_max": 5.000000413701855e-10,
+  "missing": 0,
+  "note": "Native requested values implement interpolation and sampled strobe-edge hold. Nearest-source-row comparison is not a valid strobe-edge test; float boundary timing can select the preceding strobe row for one 20 ms sample."
+}

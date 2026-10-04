@@ -1,0 +1,19 @@
+## Resolution — airborne countdown/release accepted
+
+Implemented and live-validated the one-shot release boundary for the accepted airborne Hornet snapshot. The diagnostic holds replay at zero during inspection/countdown, commits one native release, restores recorded initial velocity and drives supported motion/exterior/engine state from the native replay epoch. The user hook releases the player immediately after commit; observed player-to-native callback separation is 1–7 ms, not identical callback timestamps or a newly agreed product tolerance.
+
+Evidence and user review:
+
+- **Normal release, PID 30864:** user said “Okay, it seems to work great” and explicitly confirmed “Yes, smoke was visible at release”. Countdown is 3.000 simulator seconds. Player and playback have zero drift over 832 held/countdown samples each; replay remains zero. First native position and velocity commands match the source at logged precision. All 1,269 motion writes report matching readback; all 41,877 exterior writes match readback. The 8.70-second take completes normally.
+- **Countdown pause, PID 19800:** user said “Worked”. Countdown spans 5.548 wall seconds but exactly 3.000 simulator seconds. A 2.580-second wall gap advances model time only one 20 ms step; replay stays zero and both aircraft remain held.
+- **Playback pause, PID 22980:** user said “Looked good”. A 3.083-second wall gap advances replay from 0.860 to 0.880 seconds, independently confirmed by native callbacks. No wall-time catch-up; the recording completes normally.
+- **Repeated Start, PID 41868:** user said “Complete”. Logs explicitly refuse Start in both countdown and playing phases. Exactly one request, commit and native epoch occur. This mission was exited before completion; completion evidence comes from the preceding runs.
+- **Readiness refusal, retained PID 36760:** the loaded-reference mismatch prevents arming and all release events. All 502 native writes command zero velocity; 501 playback samples remain fixed at time zero. The timeout destroys the playback object and cleans the owned player hold. An audit confirms this run's v4 mission/hook/guard/DLL/tape are byte-identical to accepted v5; only the reviewed expected reference changed. This already supplies live loaded-readiness refusal evidence. Native-unready and other refusal branches also have offline fixtures, not separate live fault injection.
+
+All 11 selected regression checks pass. The real hook accepts captured DCS serialization and rejects meaningful mission edits. All 14 installed hashes match v5. Earlier reference-preparation defects and their red/green reproducers are retained; runtime comparison remains exact.
+
+Implementation: `experiments/efm-ownership/release-start/`, plus conditional release integration in `object_probe.cpp`, `native_velocity.h` and `CMakeLists.txt`. Reproducible measurements, raw logs, installed payload and exact user reviews: `experiments/efm-ownership/results/countdown-release-2026-10-01/README.md`, with per-run analysis files and `measure-final-gates.py`. These are retained local workspace assets, not a published source checkpoint. This extends the [normal-release checkpoint](https://github.com/caw1517/DCSRecorder/issues/22#issuecomment-5941653841).
+
+Accepted scope is the separate airborne diagnostic, DCS 2.9.30.28536, Hornet/Caucasus/zero-wind, and the retained 8.70-second gear-down source. Ground behavior, full cockpit restoration, production authored-session authorization and longer flights remain with their existing tasks. No generic fidelity tolerance is established here.
+
+**Release player and playback on one countdown clock** is complete. The next task is [Prove hot-ground staging and first taxi movement](https://github.com/caw1517/DCSRecorder/issues/23); it is not started by this resolution.

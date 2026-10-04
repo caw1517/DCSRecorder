@@ -1,0 +1,9 @@
+## Brake snapshot result and user-approved smoke exception
+
+The user accepted the brake hold's appearance, reporting that everything looked great except smoke was invisible. The actual recording contains smoke ON from its first sample, and the mission logged an ON command at time 0.000000. The user then explicitly said that smoke need not display while held and may wait until playback resumes. No velocity-dependent cause is claimed; visible ON emission on release remains required and unverified under **Release player and playback on one countdown clock**.
+
+The completed audit has 302 mission samples over 30.02 seconds: zero sampled pose/orientation drift, zero lead velocity, and replay time zero. All 33 appearance channels match after native animation over 52,635 observations, including brake 1.0. All 69,058 valid engine overrides match their first tape values. Later appearance reads have zero drift and maximum source difference 4.02e-10. One create/destroy pair was retained. Historical changing-brake residual 0.010002 remains a separate changing-state follow-up; these hold measurements do not establish its resolution during motion or a product-wide tolerance.
+
+Local evidence: `experiments/efm-ownership/results/snapshot-2026-09-30/brake-live-complete/`, reproduced with `held-start/analyze.py --manifest .../brake-package/manifest.json`. The user review and explicit smoke exception are retained with the evidence.
+
+The separate gear-down take is now prepared and installed into the same diagnostic mission, after DCS was closed. The switch verified the old package and backed up/replaced only its tape, metadata and mission. **042-Hornet-Snapshot-Hold.miz now runs the gear-down snapshot.** Its live first-frame/held review is next. The task remains open; no checklist is marked complete by this checkpoint.

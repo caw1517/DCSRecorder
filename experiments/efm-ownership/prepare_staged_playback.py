@@ -4,6 +4,7 @@ from pathlib import Path
 from recorded_flight import read, convert
 ROOT=Path(__file__).resolve().parent
 SUPPORTED_BUILD='2.9.29.27468'
+TRIAL_BUILD='2.9.30.28536'
 
 
 def lua_literal(value):
@@ -18,10 +19,12 @@ def fingerprint(data):
     for byte in data:value=((value^byte)*1099511628211)&0xffffffffffffffff
     return value
 
-def prepare(recording,output,baseline,donor_mod,dcs):
+def prepare(recording,output,baseline,donor_mod,dcs,*,held_diagnostic=False,build_trial=False):
     recording,output,baseline,donor_mod,dcs=map(Path,(recording,output,baseline,donor_mod,dcs))
     actual=json.loads((dcs/'autoupdate.cfg').read_text(encoding='utf-8-sig'))['version']
-    if actual!=SUPPORTED_BUILD:raise ValueError(f'Unsupported DCS build {actual}; this experiment targets {SUPPORTED_BUILD}')
+    if held_diagnostic and build_trial:raise ValueError('Choose one diagnostic profile')
+    expected=TRIAL_BUILD if held_diagnostic or build_trial else SUPPORTED_BUILD
+    if actual!=expected:raise ValueError(f'Unsupported DCS build {actual}; this experiment targets {expected}')
     metadata,samples,raw=read(recording)
     if metadata['livery']!='Blue Angels Jet Team':raise ValueError('This experiment supports Blue Angels Jet Team only')
     first=samples[0];r=raw[0]
@@ -33,6 +36,11 @@ def prepare(recording,output,baseline,donor_mod,dcs):
     if metadata['lights_available']:module,binary='DCSRecorder-Hornet-Lights-Staged','HornetLightsStagedProbe'
     if metadata['canopy_available']:module,binary='DCSRecorder-Hornet-Canopy-Staged','HornetCanopyStagedProbe'
     if metadata['wheels_available']:module,binary='DCSRecorder-Hornet-Wheels-Staged','HornetWheelsStagedProbe'
+    if held_diagnostic:module,binary='DCSRecorder-Hornet-Held-Assets','HornetHeldProbe'
+    if build_trial:
+        if not metadata['wheels_available'] or metadata.get('capture_build')!=TRIAL_BUILD:
+            raise ValueError('Build trial requires a new complete wheel-enabled recording from '+TRIAL_BUILD)
+        module,binary='DCSRecorder-Hornet-Wheels-Trial2930','HornetWheelsTrial2930'
     dll=ROOT/'build/Release'/f'{binary}.dll'
     for file in (baseline,dll,donor_mod/'entry.lua',donor_mod/'aircraft.lua'):
         if not file.is_file():raise ValueError(f'Missing preparation dependency: {file}')

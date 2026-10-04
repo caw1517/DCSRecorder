@@ -1,0 +1,17 @@
+{
+  "process": 21832,
+  "successful_writes": 4047,
+  "first_time": 7.801,
+  "last_time": 88.721,
+  "duration": 80.92,
+  "other_statuses": [],
+  "last_hook_calls": "4046",
+  "last_hook_applied": "4046",
+  "last_hook_status": "called",
+  "correction_mean_m": 0.02227743512006582,
+  "correction_p95_m": 0.0413182993260719,
+  "correction_max_m": 0.0595259587102604,
+  "max_velocity_write_error": 0.0,
+  "min_command_altitude_m": 572.468571745,
+  "max_command_rate_deg_s": 153.67440533438682
+}

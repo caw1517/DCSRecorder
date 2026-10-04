@@ -1,0 +1,430 @@
+{
+  "profile": "authored-playback-airborne-v1",
+  "dcs_build": "2.9.30.28536",
+  "module": "DCSRecorder-Hornet-Authored-Test",
+  "binary": "HornetAuthoredProbe",
+  "control": "DCSRecorderAuthoredControl",
+  "mission": "056-Authored-Playback.miz",
+  "take": "20261003T174448Z-0001.csv",
+  "take_sha256": "4a1cc599499a27ffb26b11037058c51f9b0183ba18ef56af0661af4bcffca393",
+  "source_sha256": "6179dfb0f0885b0f409305c008c2e739ce866b22b9380cd0a6f7e53685af10c7",
+  "seed_manifest_sha256": "d87151a62ce44894532d7184f8ed4bc3f987c5635eda8310f8544f3cd4ab08ce",
+  "recording": {
+    "aircraft": "FA-18C_hornet",
+    "livery": "Blue Angels Jet Team",
+    "theatre": "Caucasus",
+    "state_profile": "hornet-exterior-v1",
+    "engine_profile": "hornet-native-engine-v1",
+    "light_profile": "hornet-lights-v1",
+    "canopy_profile": "hornet-canopy-v1",
+    "wheel_profile": "hornet-wheels-v1",
+    "source_unit_id": "12201",
+    "source": "Record Hornet",
+    "authored_source_sha256": "6179dfb0f0885b0f409305c008c2e739ce866b22b9380cd0a6f7e53685af10c7",
+    "capture_timing": "frame-batch-v1",
+    "capture_build": "2.9.30.28536",
+    "wind_ground": "0",
+    "wind_2000": "0",
+    "wind_8000": "0",
+    "duration": 22.62,
+    "samples": 1132,
+    "source_time": 17.007,
+    "recording_version": 7,
+    "exterior_available": true,
+    "engine_available": true,
+    "smoke_available": false,
+    "lights_available": true,
+    "canopy_available": true,
+    "wheels_available": true
+  },
+  "mission_manifest": {
+    "profile": "authored-playback-v1",
+    "build": "2.9.30.28536",
+    "source_sha256": "6179dfb0f0885b0f409305c008c2e739ce866b22b9380cd0a6f7e53685af10c7",
+    "selected_id": 12201,
+    "selected_name": "Record Hornet",
+    "player_id": 12202,
+    "player_name": "Wing Hornet",
+    "namespace": "DCSR_AUTHORED_2",
+    "trigger_indices": [
+      2,
+      3
+    ],
+    "role_edits": [
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "type"
+        ],
+        "FA-18C_hornet"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "skill"
+        ],
+        "Player"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "x"
+        ],
+        -315000
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "y"
+        ],
+        892000
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "alt"
+        ],
+        1800
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "alt_type"
+        ],
+        "BARO"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "speed"
+        ],
+        140
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "heading"
+        ],
+        0
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "psi"
+        ],
+        0
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "x"
+        ],
+        -315000
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "y"
+        ],
+        892000
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "x"
+        ],
+        -315000
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "y"
+        ],
+        892000
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "alt"
+        ],
+        1800
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "alt_type"
+        ],
+        "BARO"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "speed"
+        ],
+        140
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "type"
+        ],
+        "Turning Point"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "action"
+        ],
+        "Turning Point"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          2,
+          "units",
+          1,
+          "skill"
+        ],
+        "High"
+      ]
+    ],
+    "initial": {
+      "expected": {
+        "21": 0.0,
+        "38": 0.0,
+        "0": 0.0,
+        "3": 0.0,
+        "5": 0.0,
+        "9": 0.11533036083,
+        "10": 0.115174889565,
+        "11": -0.000244275550358,
+        "12": 0.000439658761024,
+        "13": 0.139793604612,
+        "14": 0.139793604612,
+        "15": 0.0106101222336,
+        "16": 0.0109763452783,
+        "17": 0.00228146091104,
+        "18": 0.00228149187751,
+        "28": 0.0,
+        "29": 0.0,
+        "89": 0.0129789467901,
+        "90": 0.0129725849256,
+        "88": 0.0,
+        "190": 0.0,
+        "191": 0.0,
+        "192": 0.0,
+        "193": 0.0,
+        "210": 0.0,
+        "212": 0.0,
+        "1": 0.0,
+        "6": 0.0,
+        "4": 0.0,
+        "101": 1.0,
+        "103": 1.0,
+        "102": 1.0,
+        "2": -0.0
+      },
+      "token_high": 0.798355758190155,
+      "token_low": 0.6081656217575073,
+      "duration": 22.62,
+      "smoke_events": {
+        "1": {
+          "time": 0,
+          "on": false
+        }
+      }
+    },
+    "player_authored_start_preserved": true,
+    "preservation": {
+      "restored_structure_equals_source": true,
+      "unchanged_archive_members": [
+        "l10n/DEFAULT/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png",
+        "l10n/DEFAULT/authored-chime.wav",
+        "l10n/DEFAULT/dictionary",
+        "l10n/DEFAULT/mapResource",
+        "l10n/FR/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png",
+        "l10n/FR/authored-chime.wav",
+        "l10n/FR/dictionary",
+        "l10n/FR/mapResource",
+        "options",
+        "theatre",
+        "warehouses"
+      ],
+      "changed_existing_members": [
+        "mission"
+      ],
+      "added_members": [
+        "DCSRecorder/preparation.json"
+      ]
+    }
+  },
+  "status": "Offline checked; live readiness, release and scene comparison pending",
+  "files": {
+    "Missions/056-Authored-Playback.miz": "9477fa8d1b343a45f80aa60f16bd258e80b8b398abafcedf30cd930af2f46d57",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/aircraft.lua": "9a976b72d8325fed1bf9a3c560d370effdeba04fc039a6399a7c1763a005fb82",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/HornetAuthoredProbe.dll": "2d021d6879dfe534bac10d77facd92cf6437c05f98fac789d7282e5f6b78c8be",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.json": "b96017800559515e16ff6b7f62e315352127598ef576f8b17ea6ab6308722d20",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.txt": "cb347254af9dd010554e81ad02aff9cb71e2ccb00ee656da03c766b75632af1d",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Cockpit/Scripts/device_init.lua": "197073e97be4a1aee552ee43b91fd4c0c9db36aaa9907820d5f3a3b249e178a5",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Datalinks/Link16.dlg": "7075e314bd0c4f0322c9e7d7cabfa9dc55bef2b708125768209e70b0bbceebeb",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/entry.lua": "d5081fdc8d9ec36f7573b42c23574a4e4227bce79cf620221a41e7a4c91713d1",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Liveries/DCSRecorder-Hornet-Authored-Test/Blue Angels Jet Team.zip": "2d7787d059a72d3f7ca10c9baa8ee4f5d3a330a12175cc1e20e4d8d33b95ef66",
+    "Scripts/DCSRecorderAuthoredControl/expected.lua": "7c4771bdc41597e7e90a80f033de8bc9ab94d8b3010afe4ab7f5d92086caa092",
+    "Scripts/DCSRecorderAuthoredControl/session_guard.lua": "fe494fd7f7de84ff1718ffa8f9c1249477a43039a8fadf30d7dd3adb61ba6bb7",
+    "Scripts/Hooks/DCSRecorderAuthoredControl.lua": "b3bbda62bb300046c5823466ffd837aa0f8f364c46d6ca8f38063d85a31510dd"
+  }
+}

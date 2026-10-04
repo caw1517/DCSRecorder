@@ -1,0 +1,56 @@
+[
+  {
+    "path": [
+      "coalition",
+      "blue",
+      "country",
+      1,
+      "plane",
+      "group",
+      3,
+      "route",
+      "points",
+      2,
+      "ETA"
+    ],
+    "expected": 142.85714285714286,
+    "loaded": 142.85714285714,
+    "delta": -2.8705926524708048e-12
+  },
+  {
+    "path": [
+      "coalition",
+      "blue",
+      "country",
+      1,
+      "plane",
+      "group",
+      3,
+      "route",
+      "points",
+      2,
+      "x"
+    ],
+    "expected": -298949.6333980179,
+    "loaded": -298949.63339802,
+    "delta": -2.0954757928848267e-09
+  },
+  {
+    "path": [
+      "coalition",
+      "blue",
+      "country",
+      1,
+      "plane",
+      "group",
+      3,
+      "route",
+      "points",
+      2,
+      "y"
+    ],
+    "expected": 696363.1257562209,
+    "loaded": 696363.12575622,
+    "delta": -9.313225746154785e-10
+  }
+]

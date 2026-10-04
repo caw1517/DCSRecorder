@@ -25,7 +25,8 @@ int main(int argc,char** argv) {
             return 1;
         }
         for(size_t i=0;i<object.size();++i) {
-            if((i>=0x4db4 && i<0x4db8)||(i>=0x22b4 && i<0x22b8))continue;
+            if((i>=native_presentation_pitch::pitch_offset && i<native_presentation_pitch::pitch_offset+4)||
+               (i>=native_presentation_pitch::rate_offset && i<native_presentation_pitch::rate_offset+4))continue;
             require(object[i]==original[i],"unrelated state changed");
         }
         require(std::string(native_presentation_pitch::clear_validated(other.data(),state))=="presentation_owner_rejected","wrong owner accepted");

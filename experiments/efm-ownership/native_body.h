@@ -2,6 +2,9 @@
 #include "native_identity.h"
 #include <array>
 #include <cmath>
+#ifdef DCSR_BUILD_2930
+#include "build-compatibility/layout_guards.h"
+#endif
 #ifdef HORNET_RECORDED_PROTOTYPE
 #include "native_step_hook.h"
 #endif
@@ -10,6 +13,9 @@
 namespace native_body {
 struct Sample { double position[3]{}, velocity[3]{}; };
 inline const char* sample(const void* handle, Sample& out) {
+#ifdef DCSR_BUILD_2930
+    if(!layout_guards::valid())return "trial_build_guard_rejected";
+#endif
     const auto identity=native_identity::inspect(handle);
     if(identity.status!="ok" || identity.module!="DCS.exe" ||
        identity.name!=".?AVwoAIPlane@@" || identity.subobject_offset!=8) return "identity_mismatch";
@@ -19,7 +25,7 @@ inline const char* sample(const void* handle, Sample& out) {
     std::array<unsigned char,7> plane{};
     std::array<unsigned char,5> getter{};
     if(!aifm) return "aifm_not_loaded";
-    if(!native_identity::read(image+0x7105f7,plane) ||
+    if(!native_identity::read(image+native_build::dcs(0x7105f7),plane) ||
        plane!=std::array<unsigned char,7>{0x49,0x8b,0x8e,0x98,0x2f,0,0}) return "plane_signature_mismatch";
     if(
        !native_identity::read(aifm+0xa2070,getter) ||
@@ -27,9 +33,9 @@ inline const char* sample(const void* handle, Sample& out) {
     const auto complete=reinterpret_cast<uintptr_t>(handle)-identity.subobject_offset;
     uintptr_t vtable=0,fm=0,body=0;
     if(!native_identity::read(complete,vtable)) return "vtable_unreadable";
-    if(vtable!=image+0x1146200
+    if(vtable!=image+native_build::dcs(0x1146200)
 #ifdef HORNET_RECORDED_PROTOTYPE
-       && !native_step_hook::recognizes(complete,vtable,image+0x1146200)
+       && !native_step_hook::recognizes(complete,vtable,image+native_build::dcs(0x1146200))
 #endif
        ) return "vtable_mismatch";
     if(!native_identity::read(complete+0x2f98,fm)) return "fm_unreadable";
@@ -37,7 +43,7 @@ inline const char* sample(const void* handle, Sample& out) {
         // Null-member branch at RVA 0x7110ff reads this float triplet.
         // Its position meaning remains a hypothesis until mission comparison.
         std::array<unsigned char,9> instruction{};
-        if(!native_identity::read(image+0x711152,instruction) ||
+        if(!native_identity::read(image+native_build::dcs(0x711152),instruction) ||
            instruction!=std::array<unsigned char,9>{0xf3,0x41,0x0f,0x58,0x86,0xac,0x01,0,0})
             return "object_position_signature_mismatch";
         float candidate[3]{};

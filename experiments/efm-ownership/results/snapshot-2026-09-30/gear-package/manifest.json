@@ -1,0 +1,79 @@
+{
+  "profile": "snapshot-airborne-v1",
+  "dcs_build": "2.9.30.28536",
+  "module": "DCSRecorder-Hornet-Snapshot-Test",
+  "binary": "HornetSnapshotProbe",
+  "mission": "042-Hornet-Snapshot-Hold.miz",
+  "recording": {
+    "aircraft": "FA-18C_hornet",
+    "livery": "Blue Angels Jet Team",
+    "theatre": "Caucasus",
+    "state_profile": "hornet-exterior-v1",
+    "engine_profile": "hornet-native-engine-v1",
+    "smoke_profile": "hornet-native-smoke-v1",
+    "smoke_station": "10",
+    "smoke_clsid": "{INV-SMOKE-WHITE}",
+    "light_profile": "hornet-lights-v1",
+    "canopy_profile": "hornet-canopy-v1",
+    "wheel_profile": "hornet-wheels-v1",
+    "source_unit_id": "2",
+    "source": "Observer",
+    "capture_timing": "frame-batch-v1",
+    "capture_build": "2.9.30.28536",
+    "wind_ground": "0",
+    "wind_2000": "0",
+    "wind_8000": "0",
+    "smoke_events": [
+      {
+        "time": 0.0,
+        "on": true
+      }
+    ],
+    "duration": 8.700000000000003,
+    "samples": 436,
+    "source_time": 53.451,
+    "recording_version": 7,
+    "exterior_available": true,
+    "engine_available": true,
+    "smoke_available": true,
+    "lights_available": true,
+    "canopy_available": true,
+    "wheels_available": true
+  },
+  "initial": {
+    "x": -315036.431922,
+    "y": 1741.42580226,
+    "z": 892083.145961,
+    "heading": -1.5582375055218827,
+    "speed": 126.49076407758639,
+    "duration": 8.700000000000003,
+    "token_high": 0.5173588395118713,
+    "token_low": 0.17517030239105225,
+    "aircraft": "DCSRecorder-Hornet-Held-Assets",
+    "exterior": 1,
+    "lights": true,
+    "canopy": true,
+    "wheels": true,
+    "smoke_events": [
+      {
+        "time": 0.0,
+        "on": true
+      }
+    ],
+    "smoke_clsid": "{INV-SMOKE-WHITE}"
+  },
+  "status": "Prepared; real-object hold awaits live evidence",
+  "files": {
+    "DCSRecorder-Hornet-Snapshot-Test/aircraft.lua": "3f862c7a0380c05cc67a676d4f18fa6e34f9e104197bf438c6ebf088ec40ab57",
+    "DCSRecorder-Hornet-Snapshot-Test/entry.lua": "dc4b3bc9ebaa958b18f83ffb2bdf7c04e2325f68c3c7290253c39c8db42d8474",
+    "DCSRecorder-Hornet-Snapshot-Test/bin/HornetSnapshotProbe.dll": "b4f79b38d4582db0b6621f52063cf8c15a2bc329900b03e58b81ba197fbd7dbe",
+    "DCSRecorder-Hornet-Snapshot-Test/bin/recorded-flight.json": "5bdf3f74d1d7bbb2c8b4b8a6adbabb61e3ca23fa4f457aa89bf3bb050e5eb0fd",
+    "DCSRecorder-Hornet-Snapshot-Test/bin/recorded-flight.txt": "c33122b8c4029d6da65bc20d505608d3cc431c3289374e08ef3a01733447621b",
+    "DCSRecorder-Hornet-Snapshot-Test/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "DCSRecorder-Hornet-Snapshot-Test/Datalinks/Link16.dlg": "7075e314bd0c4f0322c9e7d7cabfa9dc55bef2b708125768209e70b0bbceebeb",
+    "DCSRecorder-Hornet-Snapshot-Test/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "DCSRecorder-Hornet-Snapshot-Test/Cockpit/Scripts/device_init.lua": "197073e97be4a1aee552ee43b91fd4c0c9db36aaa9907820d5f3a3b249e178a5",
+    "DCSRecorder-Hornet-Snapshot-Test/Liveries/DCSRecorder-Hornet-Snapshot-Test/Blue Angels Jet Team.zip": "2d7787d059a72d3f7ca10c9baa8ee4f5d3a330a12175cc1e20e4d8d33b95ef66",
+    "042-Hornet-Snapshot-Hold.miz": "bd75df0b400a62b826ab29b339f96818b72cd517032b1f2cad74872f538801d2"
+  }
+}

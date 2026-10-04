@@ -1,0 +1,21 @@
+[
+  {
+    "run": 1,
+    "matched_cache_samples": 1965,
+    "peak": {
+      "elapsed": 18.759999999999998,
+      "cache_time": 24.561,
+      "nose_error_deg": 10.211230860346108,
+      "up_error_deg": 10.221989919415796,
+      "measured_local_pitch_deg": 10.210942832768112,
+      "field_pitch_prediction_deg": 10.075747489922199,
+      "measured_local_yaw_deg": 0.0783461484313247,
+      "field_yaw_prediction_deg": 0.0,
+      "pitch_residual_deg": 0.13519534284591295,
+      "yaw_residual_deg": 0.0783461484313247,
+      "other_rotation_flag": 0
+    },
+    "max_abs_pitch_residual_deg": 0.15727711203127193,
+    "max_abs_yaw_residual_deg": 0.08225886830199426
+  }
+]

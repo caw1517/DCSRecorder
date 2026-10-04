@@ -1,0 +1,13 @@
+{
+  "aircraft": "FA-18C_hornet",
+  "livery": "Blue Angels Jet Team",
+  "theatre": "Caucasus",
+  "source": "Observer",
+  "capture_build": "2.9.29.27468",
+  "wind_ground": "0",
+  "wind_2000": "0",
+  "wind_8000": "0",
+  "duration": 80.92,
+  "samples": 4047,
+  "source_time": 2.86
+}

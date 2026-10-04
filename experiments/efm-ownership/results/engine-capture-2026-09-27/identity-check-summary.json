@@ -1,0 +1,116 @@
+{
+  "take": "1",
+  "rows": 441,
+  "export_rows": 441,
+  "duration": 22.0,
+  "issues": [],
+  "complete": true,
+  "mission_id": 2,
+  "export_ids": [
+    16777472
+  ],
+  "same_numeric_id": false,
+  "export_minus_mission_seconds": [
+    0.0009999999999976694,
+    0.012000000000000455
+  ],
+  "export_read_span_seconds": [
+    0.0,
+    0.0
+  ],
+  "max_position_separation_m": 2.9163951255708787,
+  "time_matched_position_samples": 440,
+  "max_time_matched_position_error_m": 0.0009465702094166783,
+  "trajectory_association_passes": true,
+  "alignment_screen_passes": true,
+  "markers": [],
+  "segments": {
+    "baseline": {
+      "arg_28": [
+        0.0,
+        0.0
+      ],
+      "arg_29": [
+        0.0,
+        0.0
+      ],
+      "arg_38": [
+        0.0,
+        0.0
+      ],
+      "arg_39": [
+        -0.0,
+        -0.0
+      ],
+      "arg_40": [
+        0.0,
+        0.0
+      ],
+      "arg_41": [
+        0.0,
+        0.0
+      ],
+      "arg_89": [
+        0.0,
+        0.280919700861
+      ],
+      "arg_90": [
+        0.0,
+        0.28091993928
+      ],
+      "arg_395": [
+        0.119999997318,
+        0.119999997318
+      ],
+      "arg_396": [
+        0.0,
+        0.0
+      ],
+      "arg_397": [
+        0.0,
+        0.0
+      ],
+      "arg_398": [
+        0.0,
+        0.0
+      ],
+      "arg_420": [
+        -0.0727050751448,
+        0.52999997139
+      ],
+      "rpm_left": [
+        84.9528427124,
+        100.028907776
+      ],
+      "rpm_right": [
+        84.9528427124,
+        100.028907776
+      ],
+      "temperature_left": [
+        510.010327254,
+        860.269647499
+      ],
+      "temperature_right": [
+        514.524118947,
+        862.269678798
+      ],
+      "fuel_flow_left": [
+        0.399409063558,
+        1.26305541526
+      ],
+      "fuel_flow_right": [
+        0.399409173326,
+        1.26305531868
+      ]
+    }
+  },
+  "observed_identities": [
+    {
+      "seq": 1,
+      "self_type": "table",
+      "export_id": "16777472",
+      "aircraft_type": "FA-18C_hornet",
+      "unit_name": "New callsign"
+    }
+  ]
+}

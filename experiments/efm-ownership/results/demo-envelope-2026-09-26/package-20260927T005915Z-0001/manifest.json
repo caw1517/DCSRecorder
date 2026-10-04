@@ -1,0 +1,45 @@
+{
+  "status": "Prepared; native/mission handshake and live exact-start validation pending",
+  "dcs_build": "2.9.29.27468",
+  "profile": "staged-v1",
+  "recording": {
+    "aircraft": "FA-18C_hornet",
+    "livery": "Blue Angels Jet Team",
+    "theatre": "Caucasus",
+    "source": "Observer",
+    "capture_build": "2.9.29.27468",
+    "wind_ground": "0",
+    "wind_2000": "0",
+    "wind_8000": "0",
+    "duration": 69.38000000000001,
+    "samples": 3470,
+    "source_time": 3.344
+  },
+  "initial": {
+    "x": -315292.824616,
+    "y": 1993.6582683,
+    "z": 898178.218585,
+    "heading": -1.4238688646757998,
+    "speed": 237.1895121676702,
+    "duration": 69.38000000000001,
+    "token_high": 0.04156917333602905,
+    "token_low": 0.5025126934051514
+  },
+  "files": {
+    "baseline.lua": "0590ba35cf9840913bfe10f8d091d67dd5c011ef7f8e5ff5472f2cdde3c7cb4a",
+    "config.lua": "e90d96bd4e0e4e2f7f73816e5c2adea2d8108a3c6d8a32566bdf041817d5ddb3",
+    "DCSRecorder-Staged-Playback.miz": "ffb646c70bf08c12a7a5ca6ece16682c35837595f13e40241266b54373e67a9f",
+    "mission": "78807b22355da53a6479cb936b811d8434f9e899d0718ebfd5399d9ee9568269",
+    "source-recording.csv": "eb281867ee5bec37ebd70ca804e9fa110660598849fed74c0e266e71f0c583f5",
+    "DCSRecorder-Hornet-Staged/aircraft.lua": "67a3b2be3d9602009d3190665048a5b3ca34b6e7e9957451e10a8b6dd997aee1",
+    "DCSRecorder-Hornet-Staged/entry.lua": "fb85ba92f47947082feb4504a94dc6891829810667ae96e18f0b6c910e29ab21",
+    "DCSRecorder-Hornet-Staged/bin/HornetStagedProbe.dll": "2260f6a07bb04190d7f1224e012e33e2e43c09a1e9153435b366881d454dbb08",
+    "DCSRecorder-Hornet-Staged/bin/recorded-flight.json": "cdfa4c2728951c8c23fd7bdeffcf9db897469f8654450c3f25715095f922c3d6",
+    "DCSRecorder-Hornet-Staged/bin/recorded-flight.txt": "948d8cacda2e133391911171835a7697191eb614c04e68ff1e76791c3ab40e16",
+    "DCSRecorder-Hornet-Staged/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "DCSRecorder-Hornet-Staged/Datalinks/Link16.dlg": "7075e314bd0c4f0322c9e7d7cabfa9dc55bef2b708125768209e70b0bbceebeb",
+    "DCSRecorder-Hornet-Staged/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "DCSRecorder-Hornet-Staged/Cockpit/Scripts/device_init.lua": "197073e97be4a1aee552ee43b91fd4c0c9db36aaa9907820d5f3a3b249e178a5",
+    "DCSRecorder-Hornet-Staged/Liveries/DCSRecorder-Hornet-Staged/Blue Angels Jet Team.zip": "2d7787d059a72d3f7ca10c9baa8ee4f5d3a330a12175cc1e20e4d8d33b95ef66"
+  }
+}

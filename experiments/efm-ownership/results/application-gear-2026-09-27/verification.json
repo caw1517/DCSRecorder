@@ -1,0 +1,23 @@
+{
+  "mission": "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\DCSRecorder-Practice-Exterior-c4d03e7f.miz",
+  "mission_sha256": "8a56cb20cc5a870d6a91875429bd694858214fa2fe575f27bf97e984b725a95d",
+  "source_sha256": "4937c819f8165b86bbd72c60527502f681598f79f187849f327791035f85b1f9",
+  "source_unchanged": true,
+  "api": {
+    "recordings": [
+      {
+        "id": "20260927T035232Z-0001.csv",
+        "name": "20260927T035232Z-0001",
+        "created": 1790481189.675392,
+        "supported": true,
+        "duration": 36.68,
+        "status_label": "Motion only",
+        "reason": "Motion playback available. Gear, flaps and control surfaces were not recorded and cannot replay. Create a new practice mission and record again to capture them."
+      }
+    ],
+    "partial_count": 0,
+    "hook_installed": true,
+    "save_status": "READY\nStorage and DCS log history verified.",
+    "directory": "C:\\Users\\w_can\\Saved Games\\DCS\\DCSRecorder\\recordings"
+  }
+}

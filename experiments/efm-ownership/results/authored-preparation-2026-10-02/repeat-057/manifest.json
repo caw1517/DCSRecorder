@@ -1,0 +1,66 @@
+{
+  "profile": "authored-recording-v1",
+  "build": "2.9.30.28536",
+  "source_sha256": "1e53933cfe41ab935740424da5b1663646a760252e34f268a04c16d9763f223b",
+  "selected_id": 12201,
+  "selected_name": "Record Hornet",
+  "namespace": "DCSR_AUTHORED_2",
+  "trigger_indices": [
+    2
+  ],
+  "role_edits": [
+    [
+      [
+        "coalition",
+        "blue",
+        "country",
+        1,
+        "plane",
+        "group",
+        1,
+        "units",
+        1,
+        "skill"
+      ],
+      "Player"
+    ]
+  ],
+  "message": "F10 > DCS Recorder > Start recording / Stop recording. Authored briefing and scene are preserved.",
+  "preservation": {
+    "restored_structure_equals_source": true,
+    "unchanged_archive_members": [
+      "l10n/FR/dictionary",
+      "l10n/DEFAULT/dictionary",
+      "l10n/FR/mapResource",
+      "l10n/DEFAULT/mapResource",
+      "warehouses",
+      "options",
+      "l10n/FR/authored-chime.wav",
+      "l10n/FR/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png",
+      "l10n/DEFAULT/authored-chime.wav",
+      "l10n/DEFAULT/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png",
+      "theatre"
+    ],
+    "changed_existing_members": [
+      "mission"
+    ],
+    "added_members": [
+      "DCSRecorder/preparation.json"
+    ]
+  },
+  "prepared_sha256": "990a55ec51c05f5c94e858157baab1fbd21716bff1b08666cc6edf8a11fa4e93",
+  "source_member_hashes": {
+    "mission": "574bb650c9e5bb410e8fd07f6dc94b151597a18484158d074cb7869d811de4ee",
+    "l10n/FR/dictionary": "bdfaeb913cb75b329b0a4d3e67926e6858ba93440c474b34d24c28f9f0424cb2",
+    "l10n/DEFAULT/dictionary": "dc692d56474bf1f176122f8e64a44707ec3fcfcf434c1c5833dcd82279a3f0a4",
+    "l10n/FR/mapResource": "afcaf452b8897030221eef92675854aed33f92216696e2445853985e08ee5df1",
+    "l10n/DEFAULT/mapResource": "afcaf452b8897030221eef92675854aed33f92216696e2445853985e08ee5df1",
+    "warehouses": "bc5312e01c86ac88380c420e333f3cf78eadce294a14eeb43b0eb6ea6b2023a2",
+    "options": "5c7d1f735ceb0cff05bbde2456abca6291005cc6df81c2ab1a9e8ed80bf9ad1e",
+    "l10n/FR/authored-chime.wav": "f43e68f1f0b774dd797037bf3c1fae5aff9c28bffc1b0b2e7865d82a56aa8b41",
+    "l10n/FR/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png": "5e68c7eff84f52bb3bb94de0fc5d40a84e0a5d3fbb658a483c9a6dbbb68b1014",
+    "l10n/DEFAULT/authored-chime.wav": "f43e68f1f0b774dd797037bf3c1fae5aff9c28bffc1b0b2e7865d82a56aa8b41",
+    "l10n/DEFAULT/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png": "5e68c7eff84f52bb3bb94de0fc5d40a84e0a5d3fbb658a483c9a6dbbb68b1014",
+    "theatre": "e72cd6342c101ebb2683e038d1fd16dfb94a11ea78da4818d9be3af6e4e9cc55"
+  }
+}

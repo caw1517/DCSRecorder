@@ -89,7 +89,11 @@ extern "C" __declspec(dllexport) void ed_fm_simulate(double dt) {
     sample_simulate(dt);
     // Average over the step for a bounded 2000 N*m*s impulse even at boundary crossings.
     const double overlap = std::max(0.0, std::min(elapsed+dt, 5.5)-std::max(elapsed,5.0));
+#ifdef LAYOUT_READ_ONLY
+    const double pulse = 0;
+#else
     const double pulse = 4000.0 * overlap / dt;
+#endif
     common_moment.x += pulse;
     elapsed += dt; ++calls;
     if (elapsed >= next_log) { record("simulate", pulse); next_log = elapsed + 0.05; }

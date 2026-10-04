@@ -56,9 +56,12 @@ local function open_take(id, hex)
     assert(version, 'Invalid recorder version')
     if version~='1' then assert(metadata:find('\nstate_profile,hornet-exterior-v1\n',1,true),'Invalid exterior state profile') end
     local source_id
+    local capture_build=metadata:match('\ncapture_build,([^\n]+)\n')
+    local capture_timing=metadata:match('\ncapture_timing,([^\n]+)\n')
+    assert(not capture_timing or (capture_timing=='frame-batch-v1' and capture_build=='2.9.30.28536' and tonumber(version)>=3),'Unsupported capture timing profile')
     if tonumber(version)>=3 then
         assert(metadata:find('\nengine_profile,hornet-native-engine-v1\n',1,true),'Invalid engine profile')
-        assert(metadata:find('\ncapture_build,2.9.29.27468\n',1,true),'Unsupported engine capture build')
+        assert(capture_build=='2.9.29.27468' or capture_build=='2.9.30.28536','Unsupported engine capture build')
         source_id=tonumber(metadata:match('\nsource_unit_id,(%d+)\n'));assert(source_id,'Missing source identity')
         if not capture_engine then capture_engine=assert(loadfile(lfs.writedir()..'Scripts/DCSRecorderEngineCapture/engine_capture.lua'))() end
     end
@@ -80,7 +83,7 @@ local function open_take(id, hex)
         filename = directory .. os.date('!%Y%m%dT%H%M%SZ') .. '-' .. string.format('%04d',serial)
     until not lfs.attributes(filename .. '.partial') and not lfs.attributes(filename .. '.csv')
     local file = assert(io.open(filename .. '.partial', 'wb'))
-    active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, version=version,source_id=source_id,
+    active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, version=version,source_id=source_id,capture_build=capture_build,capture_timing=capture_timing,
         has_engine=has_engine,has_smoke=has_smoke,commas=version=='7' and 50 or tonumber(version)>=6 and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
     checked(file.write,file,metadata,header); checked(file.flush,file)
     write_status('RECORDING\nRecording in progress; use F10 Stop to save.')
@@ -125,6 +128,10 @@ local function consume(line)
         local completed=active.name
         checked(os.rename,completed..'.partial',completed..'.csv')
         assert(not lfs.attributes(completed..'.partial') and read_bytes(completed..'.csv')==expected,'Completed recording verification failed')
+        if active.has_engine then
+            announce(string.format('Capture timing: rows=%d engine_max_delay_ms=%.3f smoke_max_delay_ms=%.3f',
+                active.rows,(active.max_engine_delay or 0)*1000,(active.max_smoke_delay or 0)*1000))
+        end
         active=nil
         write_status('READY\nLast saved: '..completed..'.csv')
         announce('Saved recording: ' .. completed .. '.csv')

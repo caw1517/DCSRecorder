@@ -1,0 +1,11 @@
+## Claimed as the remaining ground-milestone decision blocker
+
+The user invoked Wayfinder on [Complete Hornet mission setup and hot-start parking-to-parking playback](https://github.com/caw1517/DCSRecorder/issues/11). Its other five decision blockers are closed; this unclaimed decision is now assigned for the next bounded investigation. The user will operate DCS one step at a time while the agent prepares files and inspects logs.
+
+The user agreed to refuse preparation with an explanation when authored commands conflict with the selected playback aircraft, rather than silently deleting them. Simple recording missions need not have custom AI tasks; ordinary route geometry alone does not prove a conflict. Unknown/dynamic script behavior cannot be certified by string scanning.
+
+Checkpoint [2944ea2](https://github.com/caw1517/DCSRecorder/commit/2944ea2e28382640b13fa7d0d9602d0a374b23cf) on `codex/prototype-authored-behavior` contains the [proposed matrix and evidence](https://github.com/caw1517/DCSRecorder/blob/2944ea2/companion/authored-behavior.prototype.md), [interactive decision model](https://github.com/caw1517/DCSRecorder/blob/2944ea2/companion/authored-behavior.prototype.html), fixture generator and structural report.
+
+Existing production builders assume a fixed donor and overwrite triggers/briefing; they cannot preserve arbitrary authored missions unchanged. The new throwaway stock-aircraft control preserves all original mission data after removing only declared additions, keeps script/dictionary bytes equal, allocates around a deliberately occupied flag, and produces byte-identical output when re-prepared from the same source. Both source and compiled trigger representations are appended consistently. Python/Lua/HTML syntax and staged diff checks passed; browser visual QA is not claimed.
+
+Two disposable missions are installed: `030-Behavior-Source` and `031-Behavior-Prepared`. They contain known script/resource triggers, timed flags, numeric unit/group references, selected/unrelated stock aircraft routes and localized briefing content. No production playback, hook installation or native control change is included. Live comparison, editor round-trip and object-lifetime boundary evidence remain pending. Keep this issue and the ground milestone open.

@@ -1,6 +1,6 @@
 # Roadmap: complete one-aircraft playback first
 
-Updated 29 September 2026. The [GitHub map](https://github.com/caw1517/DCSRecorder/issues/1)
+Updated 30 September 2026. The [GitHub map](https://github.com/caw1517/DCSRecorder/issues/1)
 is the issue-tracking entry point.
 
 ## V1 scope and V2 backlog
@@ -20,9 +20,54 @@ These features are explicitly deferred to V2 and do not block V1:
 
 ## Current milestone
 
+The normal airborne companion workflow is accepted on DCS 2.9.30.28536 after
+the compatibility update and capture-batching fix. The user confirmed working
+gear, spoilers and smoke, fluid playback and smooth formation flying; a
+57.24-second recording validates and playback completion is logged. See the
+[live acceptance checkpoint](../experiments/efm-ownership/results/held-start-2026-09-30/README.md).
+The installed opt-in profile remains selected. The bounded thirty-second
+[airborne held-staging control](../experiments/efm-ownership/results/held-staging-2026-09-30/README.md)
+is now accepted: the real lead remained still, the scene witness kept flying,
+and the user confirmed steady engine sound. Complete initial-snapshot coverage,
+countdown/release, ground staging and ground-to-ground work below remain open.
+
 [Visual and engine-state fidelity](https://github.com/caw1517/DCSRecorder/issues/6)
-is accepted for the documented Hornet V1 scope. Next: exact original starting
-position and synchronized state, followed by the ground-flight envelope.
+is accepted for the documented Hornet V1 scope. Next:
+[Complete Hornet mission setup and hot-start parking-to-parking playback](https://github.com/caw1517/DCSRecorder/issues/11).
+The user confirmed DCS Mission Editor authoring, original recorded placement,
+visible held staging, and parked completion with engines running. This remains
+one-aircraft playback; layers and additional aircraft types follow later.
+
+The current wayfinder pass defines the implementation route and acceptance
+contract. The user accepted
+[Choose Mission Editor integration for authored recording and playback missions](https://github.com/caw1517/DCSRecorder/issues/14#issuecomment-5900259507):
+Mission Editor authoring, companion-prepared copies, saved mission revisions,
+explicit review of updated scenes and refusal to relocate a recorded path.
+[Choose a concise aircraft registration and compatibility strategy](https://github.com/caw1517/DCSRecorder/issues/16)
+can be considered independently. The integration decision precedes
+[Choose visible staging and parked completion for playback aircraft](https://github.com/caw1517/DCSRecorder/issues/15),
+which precedes
+[Agree on parking-to-parking validation and acceptance](https://github.com/caw1517/DCSRecorder/issues/17).
+These are decision tickets; closing them does not establish implementation or
+simulator acceptance. The GitHub map carries native sub-issues and blockers.
+
+The user accepted the
+[visible staging and parked completion lifecycle](https://github.com/caw1517/DCSRecorder/issues/15):
+test the real playback aircraft held visibly at its complete initial snapshot,
+release motion and supported state on one clock after the countdown, and retain
+a validated hot parking endpoint. The surrounding mission keeps running; valid
+non-parking endings remove the playback aircraft while the player's flight
+continues. A stand-in is conditional on proving a seamless handoff. Failure
+cleanup and full mission restart are part of the contract. The reviewed demo is
+preserved on `codex/prototype-playback-lifecycle`; the issue resolution owns the
+details and bounded experiments. Simulator implementation and evidence remain open.
+
+The integration decision exposed two bounded follow-ups:
+[Prove mission identity and edit detection across Mission Editor saves](https://github.com/caw1517/DCSRecorder/issues/18)
+and [Define compatibility with authored triggers and aircraft tasks](https://github.com/caw1517/DCSRecorder/issues/19).
+The latter follows the lifecycle decision. Both retain required evidence before
+ground-operations completion. The reviewed throwaway prototype is captured on
+`codex/prototype-mission-editor-workflow`; it is not production implementation.
 
 
 The [single-aircraft record-to-replay workflow](https://github.com/caw1517/DCSRecorder/issues/5)
@@ -31,11 +76,14 @@ saves completed takes automatically, lists/renames/validates them and generates
 practice/playback missions. The latest fast-roll take completed successfully after
 removing prototype altitude/rate caps. The nose-jump fix remains active.
 
-The player waits in Active Pause; F10 starts a three-second countdown. Actual
+In the accepted airborne implementation, the player waits in Active Pause; F10
+starts a three-second countdown. Actual
 release/activation anchors playback. The lead receives the original first-sample
 pose, velocity and speed brake without acquisition blending or translation; the
 player starts approximately 150 feet behind. Completion removes the lead and
-leaves the mission running. Restarting the mission replays the take.
+leaves the mission running. Restarting the mission replays the take. The agreed
+ground milestone will replace removal after a parking-to-parking take with
+parked completion; that behavior is not implemented by this planning update.
 
 The user accepted all remaining requested workflow checks. Automated and telemetry
 results are recorded separately from that manual confirmation in the
@@ -65,7 +113,7 @@ milestone, not the full one-aircraft product milestone.
 
 | Work | Remaining scope |
 | --- | --- |
-| [Exact starting position and state](https://github.com/caw1517/DCSRecorder/issues/11) | Extend accepted exact airborne initialization to stationary hot ground starts, original parking/demo spots and synchronized aircraft state. Resolve the measured speed-brake retention residual and assess complete pre-release state. |
+| [Complete Hornet mission setup and hot-start parking-to-parking playback](https://github.com/caw1517/DCSRecorder/issues/11) | Mission Editor integration, original authored placement, visible held staging, synchronized initial state, complete ground-to-ground playback, parked completion and concise aircraft registration. Preserve the measured speed-brake retention follow-up and coordinate the existing envelope/physics gates. |
 | [Flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7) | Validate ground transitions, landing/taxi light ground illumination, low passes, hard maneuvers and longer full-demo durations. Remove remaining speed/duration restrictions as the corresponding behavior is implemented and verified. |
 | [Essential physical interactions](https://github.com/caw1517/DCSRecorder/issues/3) | Ground contact, collision/damage and wake in both directions; decide how physical disturbances affect the recorded path. |
 | [Installation and compatibility](https://github.com/caw1517/DCSRecorder/issues/8) | Portable setup, local asset preparation, supported-build maintenance, rollback and performance. |
@@ -167,11 +215,38 @@ milestone; their existing tickets stay open.
 
 ## Placement and state design
 
-The user wants to choose each aircraft's ground or airborne starting location,
-including side-by-side ramp arrangements retained as flights are layered. Fixed
-trail spacing serves the present airborne workflow. Decide how deliberate relocation
-transforms the entire recorded path, especially near terrain; preserve original
-placement by default. This is not authorization to implement multiple aircraft now.
+The user will choose ground or airborne starting locations before recording in
+DCS Mission Editor, along with trucks, scenery and visual reference objects.
+Recording/playback preparation must preserve the authored scene. A companion
+preparation step is acceptable where needed, but DCS Mission Editor is the
+preferred authoring interface. Fixed trail spacing serves the current airborne
+implementation, not the final authoring workflow.
+
+Replay recordings at their original world coordinates. Deliberate relocation of
+an existing flight is outside the current effort. Investigate prevention or
+detection of edited placement mismatches and decide refusal versus warning from
+evidence. Examples of six, twelve or forty aircraft describe possible future
+arrangements, not a capacity guarantee or authorization to implement layers now.
+
+Adding aircraft creates a new authored mission revision. Existing takes retain
+their saved scenes and original paths; a reviewed compatible expanded scene can
+also be selected. A four-aircraft mission can therefore grow to seven without
+discarding earlier takes. Bind recordings to stable per-aircraft association,
+not array order or aircraft count. New aircraft can be recording subjects or the
+player alongside one existing take; simultaneous playback remains later work.
+
+Before release, aircraft must be visible at their intended starting positions
+while the user looks around from a held position. Ground and airborne staging
+are required; taxiing or flying into position before release is unnecessary for
+V1. A temporary stand-in is only an implementation option. Whole-mission pause
+semantics and behavior for incomplete or airborne-ending takes remain decisions.
+After a parking-to-parking take, keep the playback aircraft parked with engines
+running and supported final state held until mission exit or restart.
+
+Reduce Mission Editor clutter from experimental and schema-specific aircraft
+registrations while preserving or explicitly migrating old recordings and
+missions. Inventory and a migration/rollback plan precede installed-file cleanup.
+Startup/shutdown are V2; other aircraft and layered playback remain later work.
 
 Save a complete initial snapshot of supported state, not only subsequent changes.
 If later-start/trim controls are eventually added, reconstruct both pose and state

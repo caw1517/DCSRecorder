@@ -1,0 +1,167 @@
+{
+  "scope": "One real airborne playback object held at time zero; no release or ground acceptance",
+  "configuration": {
+    "build": "2.9.30.28536",
+    "module": "DCSRecorder-Hornet-Snapshot-Test",
+    "mission": "042-Hornet-Snapshot-Hold.miz",
+    "native_pid": 44560
+  },
+  "mission": {
+    "lead_samples": 302,
+    "first_time": 0.0,
+    "last_time": 30.02,
+    "observed_seconds": 30.02,
+    "lead_ids": [
+      9001.0
+    ],
+    "lead_position_drift_m": 0.0,
+    "lead_forward_drift": 0.0,
+    "lead_up_drift": 0.0,
+    "lead_max_speed_mps": 0.0,
+    "lead_max_source_position_error_m": 0.0,
+    "replay_times": [
+      0.0
+    ],
+    "controller_statuses": [
+      0.125
+    ],
+    "appearance_max_source_error": 4.0199998885270816e-10,
+    "appearance_max_drift": 0.0,
+    "player_position_drift_m": 0.0,
+    "witness_displacement_m": 4391.852130604072,
+    "observation_complete": true
+  },
+  "native_motion": {
+    "writes": 1595,
+    "first_time": 0.0,
+    "last_time": 31.88,
+    "ids": [
+      "16777472"
+    ],
+    "all_motion_matched": true,
+    "max_float_position_readback_error_m": 0.013498392559169526,
+    "max_velocity_after_mps": 0.0,
+    "max_commanded_angular_rate": 0.0,
+    "last_prephysics_calls": 1594,
+    "last_prephysics_applied": 1594
+  },
+  "native_appearance": {
+    "rows": 52635,
+    "channels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      21,
+      28,
+      29,
+      38,
+      88,
+      89,
+      90,
+      101,
+      102,
+      103,
+      190,
+      191,
+      192,
+      193,
+      210,
+      212
+    ],
+    "max_requested_source_error": 0.0,
+    "max_postanimation_source_error": 0.0
+  },
+  "native_engine": {
+    "reads": 70652,
+    "valid_engine_overrides": 69058,
+    "engine_zero_passthrough_reads": 1594,
+    "caller_modules": [
+      "DCS.exe",
+      "Sound.dll"
+    ],
+    "channels": [
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ]
+    ],
+    "all_valid_engines_overridden_at_zero": true,
+    "max_returned_source_error": 0.0
+  },
+  "object_event_counts": {
+    "setup": 1,
+    "create": 1,
+    "recording_loaded": 1,
+    "recorded_brake_verified": 302,
+    "step_hook_installed": 1,
+    "staged_started": 1,
+    "simulate": 302,
+    "step_hook_already_replaced": 1,
+    "destroy": 1
+  },
+  "cleanup_limit": "Destroy reported step_hook_already_replaced: object table already replaced at destruction; broader restart/failure cleanup remains unverified.",
+  "user_review": {
+    "visible_smoke": false,
+    "other_visuals": "Everything else looked great",
+    "user_quote": "Everything seems fine except for there was no smoke. I can't really remember if I had the smoke on though when I hit the start recording thing.",
+    "scope": "User observation of first snapshot hold; no video supplied",
+    "held_smoke_required": false,
+    "requirement_change_quote": "I don't need the smoke to be on when it's paused like that. Like if it has to wait until it's resumed, that's okay.",
+    "release_smoke_required": true,
+    "release_smoke_verified": false
+  },
+  "hashes": {
+    "042-Hornet-Snapshot-Hold.miz": "d26fd979e229f83d83c3b520411972c6bd66e8380453d0f5d1abe68fe9cfa2bc",
+    "dcs.log": "1168ee7464d5722e3e9c93f818915e37cbb806fbcf83e99de14ad6633f50940c",
+    "engine-44560.csv": "d5864898524e945c9f56c4c6631f28c3b4cbdba345a0415824f900b696124ff3",
+    "exterior-44560.csv": "37836b54c8bd6b4917c181baa293209a9255c359e73091e8d00ed2f3bec8513f",
+    "HornetSnapshotProbe.dll": "b4f79b38d4582db0b6621f52063cf8c15a2bc329900b03e58b81ba197fbd7dbe",
+    "native-body-44560.csv": "735c16cec0b2a06719cc13a0e35471b91dfa854314b1eaa7bc81534300645d46",
+    "native-motion-44560.csv": "7c8427928f4bd184303cfa5a28c0ac484eb223316b011f0b6338cc3b888f55ed",
+    "native-types-44560-219367062.txt": "8e0db5885e476fc67ee00d971d70892a0b677dd466ed7ed1db5270f566225c67",
+    "objects-44560-219332453.csv": "6ff2c81dd1080530e65cf7ec8d80d602eb286a5904d7be7a63f1e2e33a650dba",
+    "recorded-flight.json": "f00df688a3435e6ecc6b060ac3395c78392de517e66683be9566c106296f25ff",
+    "recorded-flight.txt": "aed3a9cfd4c73d86fc6f7a788960b0827c93d4f65afd81fd639a5244cd20fff4"
+  },
+  "smoke": {
+    "recorded_initial_on": true,
+    "initial_commands": [
+      "INITIAL_SMOKE,0.000000,true"
+    ],
+    "rendering": "User permits absence while held; release onset remains unverified"
+  }
+}

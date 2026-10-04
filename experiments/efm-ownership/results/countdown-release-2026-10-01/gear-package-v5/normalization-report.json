@@ -1,0 +1,70 @@
+{
+  "source_package": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\gear-package-v4",
+  "source_manifest_sha256": "d80051a682d5b512eebeb7045e4726f818a76b4c33ec65cdd6b8977e8c6ba36a",
+  "captured_archive": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\readiness-failure-36760\\raw\\loaded-tempMission.miz",
+  "captured_archive_sha256": "ac973ca48eab21be5cba585de2da90a57d013232efe30bedda45fa7351767b47",
+  "reviewed_changes": [
+    {
+      "path": "coalition[blue][country][1][plane][group][1][units][1][heading]",
+      "kind": "angle_serialization",
+      "delta": 2.000621890374532e-13
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][1][units][1][psi]",
+      "kind": "angle_serialization",
+      "delta": 2.000621890374532e-13
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][1][units][1][dataCartridge]",
+      "kind": "empty_cartridge_omitted"
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][1][units][1][Radio][1][channelsNames]",
+      "kind": "empty_radio_labels_added"
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][1][units][1][Radio][2][channelsNames]",
+      "kind": "empty_radio_labels_added"
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][2][units][1][heading]",
+      "kind": "angle_serialization",
+      "delta": 2.000621890374532e-13
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][2][units][1][psi]",
+      "kind": "angle_serialization",
+      "delta": 2.000621890374532e-13
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][2][units][1][dataCartridge]",
+      "kind": "empty_cartridge_omitted"
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][2][units][1][Radio]",
+      "kind": "non_player_radio_omitted"
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][3][units][1][heading]",
+      "kind": "angle_serialization",
+      "delta": 2.000621890374532e-13
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][3][units][1][psi]",
+      "kind": "angle_serialization",
+      "delta": 2.000621890374532e-13
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][3][units][1][dataCartridge]",
+      "kind": "empty_cartridge_omitted"
+    },
+    {
+      "path": "coalition[blue][country][1][plane][group][3][units][1][Radio]",
+      "kind": "non_player_radio_omitted"
+    }
+  ],
+  "runtime_comparison": "Exact; no ignored keys or numerical tolerance",
+  "changed_payload_files": [
+    "Scripts/DCSRecorderReleaseControl/expected.lua"
+  ]
+}

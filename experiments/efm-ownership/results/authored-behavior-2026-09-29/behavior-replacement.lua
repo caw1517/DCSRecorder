@@ -1,0 +1,275 @@
+-- Disposable stock-AI lifetime probe. Does not replace the player.
+local oldUnit = Unit.getByName('BehaviorSelected')
+local oldGroup = Group.getByName('BehaviorSelectedGroup')
+local function value(o, method)
+    if not o then return 'absent' end
+    local ok,v = pcall(function() return o[method](o) end)
+    return ok and tostring(v) or 'invalid'
+end
+local function report(label)
+    local u=Unit.getByName('BehaviorSelected')
+    local g=Group.getByName('BehaviorSelectedGroup')
+    env.info('REPLACEMENT_BEHAVIOR '..label..' cached_unit_alive='..value(oldUnit,'isExist')..' cached_group_alive='..value(oldGroup,'isExist')..' current_unit='..value(u,'getID')..' current_group='..value(g,'getID'))
+end
+local events={}
+function events:onEvent(e)
+    local name=e.initiator and value(e.initiator,'getName') or ''
+    if name=='BehaviorSelected' then
+        env.info('REPLACEMENT_EVENT id='..tostring(e.id)..' unit='..value(e.initiator,'getID'))
+    end
+end
+world.addEventHandler(events)
+timer.scheduleFunction(function()
+    report('before')
+    oldGroup:destroy()
+    report('removed')
+    coalition.addGroup(2,Group.Category.AIRPLANE,{
+["lateActivation"]=false,
+["tasks"]={
+},
+["radioSet"]=false,
+["task"]="Nothing",
+["uncontrolled"]=false,
+["taskSelected"]=true,
+["route"]={
+["points"]={
+[1]={
+["alt"]=2000,
+["action"]="Turning Point",
+["alt_type"]="BARO",
+["speed"]=225.02157398901,
+["task"]={
+["id"]="ComboTask",
+["params"]={
+["tasks"]={
+},
+},
+},
+["type"]="Turning Point",
+["ETA"]=0,
+["ETA_locked"]=true,
+["y"]=898938.69885514,
+["x"]=-313905.43564528,
+["name"]="",
+["speed_locked"]=true,
+["formation_template"]="",
+},
+[2]={
+["alt"]=2000,
+["action"]="Turning Point",
+["alt_type"]="BARO",
+["properties"]={
+["vnav"]=1,
+["scale"]=0,
+["angle"]=0,
+["vangle"]=0,
+["steer"]=2,
+},
+["speed"]=225.02157398901,
+["task"]={
+["id"]="ComboTask",
+["params"]={
+["tasks"]={
+},
+},
+},
+["type"]="Turning Point",
+["ETA"]=29.458108644474,
+["ETA_locked"]=false,
+["y"]=892381.555998,
+["x"]=-312934.00707385,
+["name"]="",
+["speed_locked"]=true,
+["formation_template"]="",
+},
+},
+},
+["groupId"]=10402,
+["hidden"]=false,
+["units"]={
+[1]={
+["alt"]=2000,
+["hardpoint_racks"]=true,
+["alt_type"]="BARO",
+["livery_id"]="Blue Angels Jet Team",
+["skill"]="High",
+["speed"]=225.02157398901,
+["AddPropAircraft"]={
+["HelmetMountedDevice"]=1,
+["VoiceCallsignLabel"]="CT",
+["OuterBoard"]=0,
+["InnerBoard"]=0,
+["STN_L16"]="07777",
+["VoiceCallsignNumber"]="11",
+},
+["type"]="FA-18C_hornet",
+["Radio"]={
+[1]={
+["channelsNames"]={
+},
+["modulations"]={
+[1]=0,
+[2]=0,
+[4]=0,
+[8]=0,
+[16]=0,
+[17]=0,
+[9]=0,
+[18]=0,
+[19]=0,
+[10]=0,
+[20]=0,
+[11]=0,
+[3]=0,
+[6]=0,
+[12]=0,
+[13]=0,
+[7]=0,
+[14]=0,
+[5]=0,
+[15]=0,
+},
+["channels"]={
+[1]=124,
+[2]=264,
+[4]=256,
+[8]=257,
+[16]=261,
+[17]=267,
+[9]=255,
+[18]=251,
+[19]=253,
+[10]=262,
+[20]=266,
+[11]=259,
+[3]=265,
+[6]=250,
+[12]=268,
+[13]=269,
+[7]=270,
+[14]=260,
+[5]=254,
+[15]=263,
+},
+},
+[2]={
+["channelsNames"]={
+},
+["modulations"]={
+[1]=0,
+[2]=0,
+[4]=0,
+[8]=0,
+[16]=0,
+[17]=0,
+[9]=0,
+[18]=0,
+[19]=0,
+[10]=0,
+[20]=0,
+[11]=0,
+[3]=0,
+[6]=0,
+[12]=0,
+[13]=0,
+[7]=0,
+[14]=0,
+[5]=0,
+[15]=0,
+},
+["channels"]={
+[1]=305,
+[2]=264,
+[4]=256,
+[8]=257,
+[16]=261,
+[17]=267,
+[9]=255,
+[18]=251,
+[19]=253,
+[10]=262,
+[20]=266,
+[11]=259,
+[3]=265,
+[6]=250,
+[12]=268,
+[13]=269,
+[7]=270,
+[14]=260,
+[5]=254,
+[15]=263,
+},
+},
+},
+["unitId"]=10502,
+["psi"]=1.4237179714062,
+["onboard_num"]="002",
+["y"]=898938.69885514,
+["x"]=-313905.43564528,
+["name"]="BehaviorSelected",
+["payload"]={
+["pylons"]={
+[2]={
+["CLSID"]="<CLEAN>",
+},
+[3]={
+["CLSID"]="<CLEAN>",
+},
+[5]={
+["CLSID"]="<CLEAN>",
+},
+[7]={
+["CLSID"]="<CLEAN>",
+},
+[8]={
+["CLSID"]="<CLEAN>",
+},
+},
+["fuel"]=3500,
+["flare"]=15,
+["chaff"]=30,
+["gun"]=100,
+},
+["heading"]=-1.4237179714062,
+["callsign"]={
+[1]=4,
+[2]=1,
+["name"]="Colt11",
+[3]=1,
+},
+["datalinks"]={
+["Link16"]={
+["settings"]={
+["FF1_Channel"]=2,
+["FF2_Channel"]=3,
+["transmitPower"]=0,
+["VOCB_Channel"]=5,
+["VOCA_Channel"]=4,
+["AIC_Channel"]=1,
+},
+["network"]={
+["teamMembers"]={
+[1]={
+["missionUnitId"]=10111,
+},
+},
+["donors"]={
+},
+},
+},
+},
+},
+},
+["y"]=898938.69885514,
+["x"]=-313905.43564528,
+["name"]="BehaviorSelectedGroup",
+["communication"]=true,
+["uncontrollable"]=false,
+["start_time"]=0,
+["modulation"]=0,
+["frequency"]=124,
+})
+    report('replaced')
+    return nil
+end,nil,timer.getTime()+8)
+timer.scheduleFunction(function() report('later');return nil end,nil,timer.getTime()+18)

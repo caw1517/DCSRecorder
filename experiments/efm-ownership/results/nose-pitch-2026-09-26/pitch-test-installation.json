@@ -1,0 +1,11 @@
+{
+  "InstalledUtc": "2026-09-27T00:23:19.8564602Z",
+  "InstalledDll": "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Staged\\bin\\HornetStagedProbe.dll",
+  "PreviousSha256": "84F1EE567B8BF24CA254F03306A609E6C7F853AE5D09DD329ED7072F5193FA5A",
+  "TestSha256": "5D954231C550DC6A8AEC4FEACD6C53AF1EA7F0C8A682BF306BE9CCD717D1C728",
+  "Backup": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\nose-pitch-2026-09-26\\rollback\\HornetStagedProbe-diagnostic-only.dll",
+  "TapeSha256": "7A08359BA48BBD9087BEA9DA89B43074B0AAB7B2889F036E5677EA8669ED4B49",
+  "Mission": "DCSRecorder-Playback-d7a5d25a.miz",
+  "Tests": "12/12 CTests passed",
+  "Status": "Installed pitch suppression experiment; live validation pending"
+}

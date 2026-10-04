@@ -1,0 +1,9 @@
+{
+  "user_quote": "Looked great",
+  "scope": "User accepted the first-visible gear-down state and 30-second hold after instructions to watch for jumps, flashes and unstable gear. No video supplied.",
+  "visible_smoke": null,
+  "held_smoke_required": false,
+  "requirement_change_quote": "I don't need the smoke to be on when it's paused like that. Like if it has to wait until it's resumed, that's okay.",
+  "release_smoke_required": true,
+  "release_smoke_verified": false
+}

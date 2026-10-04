@@ -19,3 +19,19 @@ The user's collection of saved recorded flights, available to name and select fo
 
 **Playback mission**:
 A ready-to-fly mission prepared for a selected recorded flight, containing its playback aircraft and an aircraft for the user to fly alongside it.
+
+**Authored mission**:
+A mission the user prepares in DCS Mission Editor, including aircraft starting positions and the surrounding scenery, objects and visual references.
+
+**Mission revision**:
+A saved version of an authored mission and its scene. A recorded flight retains its association with the mission revision used for recording, even when the authored mission is edited later.
+
+**Aircraft association**:
+The companion's lasting record that an aircraft in one mission revision is the same aircraft in another, confirmed by the user once per changed revision. Editor IDs, names, counts and order only suggest it. A recorded flight belongs to one aircraft association and can play in any revision where that aircraft is confirmed, by default the revision it was recorded in.
+_Avoid_: unit ID (an editor detail that can be reused by a different aircraft).
+
+**Held staging**:
+The period before playback begins when aircraft are visible at their starting positions and the user can inspect the scene from their held position. The surrounding mission continues to run.
+
+**Parked completion**:
+The end of a parking-to-parking playback when the aircraft remains at the user's chosen final stopping position on the ground with engines running and its supported final recorded state held. The position need not be a designated parking slot.

@@ -3,6 +3,7 @@ local sink_path,engine_path,root,mode=assert(arg[1]),assert(arg[2]),assert(arg[3
 local smoke_path=arg[5]
 if smoke_path=='-' then smoke_path=nil end
 local wheels=arg[6]=='wheels'
+local capture_build=arg[7] or '2.9.29.27468'
 local canopy=arg[6]=='canopy' or wheels
 local lights=arg[6]=='lights' or canopy
 root=root:gsub('\\','/')..'/'
@@ -19,6 +20,8 @@ env.Export={LoGetModelTime=function()return now end,
     LoGetSelfData=function()return {Name='FA-18C_hornet',Position={x=(now-10)*220+(mode=='wrong_position' and 10 or 0),y=2000,z=0}}end,
     LoGetEngineInfo=function()return {RPM={left=99,right=98}}end}
 env.package={loadlib=function(path,symbol)
+    local suffix=capture_build=='2.9.30.28536' and '2930.dll' or 'Capture.dll'
+    assert(path:sub(-#suffix)==suffix,'Wrong build capture helper')
     if symbol=='dcs_native_smoke_sample' then
         assert(smoke_path)
         if mode=='smoke_missing' then return nil,'missing smoke helper'end
@@ -45,17 +48,21 @@ env.loadfile=function(path)
 end
 local hook=assert(loadfile(sink_path));setfenv(hook,env);hook()
 local function emit(text)
-    history[#history+1]='DCSREC_LOG,1,'..text;callbacks.onSimulationFrame()
+    history[#history+1]='DCSREC_LOG,1,'..text
+    if not env.defer_pump then callbacks.onSimulationFrame()end
 end
-local metadata='DCSREC,3\naircraft,FA-18C_hornet\nlivery,Blue Angels Jet Team\ntheatre,Caucasus\nsource,Observer\nsource_unit_id,2\nstate_profile,hornet-exterior-v1\nengine_profile,hornet-native-engine-v1\ncapture_build,2.9.29.27468\nwind_ground,0\nwind_2000,0\nwind_8000,0\n'
+local metadata='DCSREC,3\naircraft,FA-18C_hornet\nlivery,Blue Angels Jet Team\ntheatre,Caucasus\nsource,Observer\nsource_unit_id,2\nstate_profile,hornet-exterior-v1\nengine_profile,hornet-native-engine-v1\ncapture_build,'..capture_build..'\nwind_ground,0\nwind_2000,0\nwind_8000,0\n'
 if smoke_path then metadata=metadata:gsub('DCSREC,3','DCSREC,4')..'smoke_profile,hornet-native-smoke-v1\nsmoke_station,10\nsmoke_clsid,{INV-SMOKE-WHITE}\n'end
 if lights then metadata=metadata:gsub('DCSREC,[34]','DCSREC,5')..'light_profile,hornet-lights-v1\n'end
 if canopy then metadata=metadata:gsub('DCSREC,5','DCSREC,6')..'canopy_profile,hornet-canopy-v1\n'end
 if wheels then metadata=metadata:gsub('DCSREC,6','DCSREC,7')..'wheel_profile,hornet-wheels-v1\n'end
+if mode:match('^batch') then metadata=metadata..'capture_timing,frame-batch-v1\n'end
 local hex=metadata:gsub('.',function(c)return string.format('%02x',c:byte())end)
 emit('BEGIN,1,'..hex)
 for i=0,300 do
     local t=10+i*.02;now=t+(mode=='late' and .1 or .01)
+    env.defer_pump=(mode=='batch' and i>=100 and i<103) or
+        (mode=='batch_initial' and i<3) or (mode=='batch_long' and i>=100 and i<110)
     if mode=='changed_player' and i>0 then id=123 end
     if mode=='invalid_player' then id=0 end
     local values={t,(t-10)*220,2000,0,1,0,0,0,1,0,0,0,1,220,0,0,0,'',''}

@@ -1,0 +1,44 @@
+{
+  "status": "User accepted full playback completion; corroborated by native and mission logs.",
+  "dcs_build": "2.9.29.27468",
+  "run_index": 3,
+  "events": {
+    "INITIALIZED": 0.0,
+    "F10_START": 2.376,
+    "RELEASE_REQUESTED": 5.376,
+    "RELEASE": 5.801,
+    "NATIVE_STARTED": 5.82,
+    "COMPLETE": 44.6
+  },
+  "native_start": 5.801,
+  "native_end": 44.581,
+  "playback_seconds": 38.78,
+  "motion_samples": 1940,
+  "motion_statuses": [
+    "called"
+  ],
+  "native_complete": true,
+  "hook_restored": true,
+  "object_destroyed": true,
+  "first_command_position_error_m": 0.0,
+  "first_actual_position_error_m": 0.006933468035203687,
+  "first_actual_velocity_error_m_s": 0.0,
+  "last_command_position_error_m": 0.0,
+  "player_samples_after_complete": 199,
+  "mission_seconds_after_complete": 3.96,
+  "raw_sha256": {
+    "dcs.log": "085c75e98d965dcda9e9af6534df08c493ea1acb48faa886fe6613f7dac971ff",
+    "native-body-13152.csv": "308869afb27a9931be57e512926f99048252417d425b992c2aeb8dd0db336928",
+    "native-motion-13152.csv": "581c7685a3dcc2d40ef020a419601c6e33d06371c8b84cb192277588c5ecac05",
+    "native-types-13152-253540187.txt": "5fa6841e1c0fb313955489b3ba4b901a44f91bca13497edddd19115c03da4b10",
+    "objects-13152-253459578.csv": "c6ed1be54e8ac42b82f4736435b8e80a413276b16f28d642d080469b7093c80a"
+  },
+  "limitations": [
+    "No live independent recording test.",
+    "No confirmed normal pause/resume test.",
+    "Single short Hornet take on the tested DCS build.",
+    "Only one runtime ID observed; changed-ID binding still lacks live evidence."
+  ],
+  "playback_samples_at_completion_tick": 1,
+  "playback_samples_strictly_after_completion_tick": 0
+}

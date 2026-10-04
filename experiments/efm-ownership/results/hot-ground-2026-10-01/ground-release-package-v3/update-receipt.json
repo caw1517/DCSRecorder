@@ -1,0 +1,24 @@
+{
+  "utc": "2026-10-01T23:23:54.665631+00:00",
+  "changed": [
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/bin/HornetGroundProbe.dll"
+  ],
+  "unchanged_files_verified": 13,
+  "files": {
+    "Missions/049-Hornet-Ground-Hold-Release.miz": "65ebbae6b920c0f53cc223508aa1c96cc290d38d5f47f6e68af1c723af954745",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/aircraft.lua": "0d80697c5460da9569bec62827329a27c92f9ae1082a53b07921e86eed242bf4",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/entry.lua": "f9e7db700428d33c123ea7338434f3ee92c839a36f47bd5bbb36fb03c8c816d3",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/bin/HornetGroundProbe.dll": "4a2e49e9d343783d650f8749260f12b7870b3cefcce88c58e193c9b22c00ae39",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/bin/recorded-flight.json": "d0b6f49d4acb073c84562f95f128c77e6e4178fdf0b2377762ca39e27bb23e67",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/bin/recorded-flight.txt": "0f77ac142d8d2623b15ca5b9652f0f56952f8b4499496ccee11e93cc03e9a6c1",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Datalinks/Link16.dlg": "7075e314bd0c4f0322c9e7d7cabfa9dc55bef2b708125768209e70b0bbceebeb",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Cockpit/Scripts/device_init.lua": "197073e97be4a1aee552ee43b91fd4c0c9db36aaa9907820d5f3a3b249e178a5",
+    "Mods/aircraft/DCSRecorder-Hornet-Ground-Test/Liveries/DCSRecorder-Hornet-Ground-Test/Blue Angels Jet Team.zip": "2d7787d059a72d3f7ca10c9baa8ee4f5d3a330a12175cc1e20e4d8d33b95ef66",
+    "Scripts/DCSRecorderGroundControl/expected.lua": "bc5b8c930a87203dec0efc78715d8abd1b37d1f55b14d48e260809c82958de51",
+    "Scripts/DCSRecorderGroundControl/session_guard.lua": "fe494fd7f7de84ff1718ffa8f9c1249477a43039a8fadf30d7dd3adb61ba6bb7",
+    "Scripts/Hooks/DCSRecorderGroundControl.lua": "6edd6c735c0b093ccd3a6cbd81d7c6247909173789d2bf53f6ec9b87d567dad1"
+  },
+  "status": "Installed; new live ground hold required before acceptance"
+}

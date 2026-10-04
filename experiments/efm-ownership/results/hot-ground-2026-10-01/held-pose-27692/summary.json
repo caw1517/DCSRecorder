@@ -1,0 +1,78 @@
+{
+  "events": [
+    "2026-10-01 23:25:20.014 INFO    SCRIPTING (Main): DCSR_RELEASE READY,1790897120_1,1",
+    "2026-10-01 23:25:27.012 INFO    SCRIPTING (Main): DCSR_RELEASE INSPECTION_COMPLETE"
+  ],
+  "samples": 3171,
+  "hold_span_s": 63.4,
+  "mission_position_error_max_m": 0.022016303999997433,
+  "mission_basis_component_error_max": 0.01107880979005,
+  "mission_velocity_max_mps": 0.0,
+  "snapshot_channels": 33,
+  "snapshot_error_max": 4.710000167662542e-10,
+  "contacts": 3171,
+  "in_air": [
+    "0"
+  ],
+  "life": [
+    "20"
+  ],
+  "life0": [
+    "20"
+  ],
+  "surface": [
+    "5"
+  ],
+  "origin_agl_m": [
+    "1.8329908674",
+    "1.85500717163"
+  ],
+  "witness_displacement_m": 8869.86742050146,
+  "boundaries": {
+    "after_step": {
+      "rows": 3173,
+      "position_error_max": 0.02201630422850087,
+      "replay_max": 0.0
+    },
+    "after_animation": {
+      "rows": 3173,
+      "position_error_max": 0.02201630422850087,
+      "replay_max": 0.0
+    }
+  },
+  "engine_rows": 139051,
+  "engine_override_values": {
+    "1/0": [
+      "0.649778664112"
+    ],
+    "1/1": [
+      "0.216046914458"
+    ],
+    "1/2": [
+      "0.0375580824912"
+    ],
+    "2/0": [
+      "0.649778664112"
+    ],
+    "2/1": [
+      "0.216046914458"
+    ],
+    "2/2": [
+      "0.0375580824912"
+    ]
+  },
+  "engine_unoverridden": 3167,
+  "engine_unoverridden_by_engine": {
+    "0": 3167,
+    "1": 0,
+    "2": 0
+  },
+  "startup_note": "Full-run extrema above include initial 0.00-0.10 s startup substeps; stable interval is reported separately, not discarded.",
+  "stable_interval": {
+    "start_s": 0.12,
+    "end_s": 63.42,
+    "samples": 3166,
+    "position_error_max_m": 0.0,
+    "basis_component_error_max": 5.931020995000001e-05
+  }
+}

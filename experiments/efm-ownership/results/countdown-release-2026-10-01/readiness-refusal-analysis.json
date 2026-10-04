@@ -1,0 +1,30 @@
+{
+  "pid": 36760,
+  "observed_reason": "loaded_mismatch:coalition[blue][country][1][plane][group][1][units][1][heading]:value",
+  "mission_events": {
+    "INITIALIZED": 1,
+    "SMOKE": 1,
+    "SAMPLE": 1503,
+    "FAILED": 1,
+    "HOLD_CLEANED": 1
+  },
+  "native_events": {
+    "setup": 1,
+    "create": 1,
+    "recording_loaded": 1,
+    "off_verified": 99,
+    "step_hook_installed": 1,
+    "staged_started": 1,
+    "simulate": 99,
+    "step_hook_already_replaced": 1,
+    "destroy": 1
+  },
+  "zero_velocity_writes": 502,
+  "playback_samples_at_zero": 501,
+  "cleanup": "Playback object destroyed; owned player hold cleaned; no release",
+  "applicability": "v4 and accepted v5 have identical hook, mission, native DLL, tape and guard code; only expected.lua changed after bounded serialization audit",
+  "v4_to_v5_changed_files": [
+    "Scripts/DCSRecorderReleaseControl/expected.lua"
+  ],
+  "scope": "Live loaded-readiness refusal; this was an accidental reference mismatch, not an injected native-unready fault. Other refusal paths have offline fixtures only."
+}

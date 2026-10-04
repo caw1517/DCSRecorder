@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include "native_build.h"
 
 namespace native_identity {
 struct Base { std::string name; int32_t member, vbtable, vbdisp; uint32_t attributes; };

@@ -1,0 +1,1 @@
+assert(loadfile(arg[1]));dofile(arg[2]);local nested;function a_do_script(s) nested=s end;assert(loadstring(mission.trig.actions[1]))();assert(nested==mission.trigrules[1].actions[1].text);assert(loadstring(nested));print('PASS: probe and both packaged trigger representations compile and match')

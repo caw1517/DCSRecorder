@@ -1,0 +1,8 @@
+{
+  "status": "Missing checker refused; original hook restored on disk; full DCS restart required to reactivate",
+  "original": "C:/Users/w_can/Saved Games/DCS/Scripts/Hooks/dcs-recorder-session-control.lua",
+  "preserved": "C:/Users/w_can/Saved Games/DCS/Scripts/DCSRecorderSessionControl/disabled-hook.lua",
+  "sha256": "53FA2BCD02C47E750C2EDFD22D14EE6376BF3E09DBEA0978FE5C31255C9DE1DD",
+  "disabled_utc": "2026-09-30T22:32:25.3281173Z",
+  "restored_utc": "2026-10-01T00:12:39.9157907Z"
+}

@@ -50,6 +50,9 @@ def serve(settings, port=0, open_browser=True):
                 return self.reply(403, {'error': 'Invalid local host.'})
             if self.path == '/':
                 page = Path(__file__).with_name('index.html').read_text(encoding='utf-8').replace('__TOKEN__', token)
+                if library.build_trial:
+                    page=page.replace('Record a flight. Fly alongside it.','DCS '+library.build+' trial · Record a flight, then check playback.')
+                    page=page.replace('DCS 2.9.29.27468','DCS '+library.build)
                 return self.reply(200, page, 'text/html')
             if self.path == '/api/library':
                 try:
@@ -74,7 +77,20 @@ def serve(settings, port=0, open_browser=True):
                 if not 0 < size <= 4096:
                     raise ValueError('Invalid request size.')
                 args = json.loads(self.rfile.read(size))
-                if self.path == '/api/rename':
+                if self.path == '/api/authored/inspect':
+                    result = library.authored_inspect(args['path'])
+                elif self.path == '/api/authored/review':
+                    result = library.authored_review(args['path'], args['source_sha256'], args['lineage'])
+                elif self.path == '/api/authored/revision':
+                    result = library.authored_save_revision(args['path'], args['source_sha256'], args.get('lineage'),
+                                                            args.get('name'), args.get('decisions'))
+                elif self.path == '/api/authored/recording':
+                    result = library.authored_recording(args['path'], args['unit_id'], args['source_sha256'])
+                elif self.path == '/api/authored/playback-options':
+                    result = library.authored_playback_options(args['id'])
+                elif self.path == '/api/authored/playback':
+                    result = library.authored_playback(args['id'], args['player_id'], args['source_sha256'])
+                elif self.path == '/api/rename':
                     library.rename(args['id'], args['name'])
                     result = {'message': 'Recording renamed. Original flight data preserved.'}
                 elif self.path == '/api/practice':

@@ -1,0 +1,33 @@
+{
+  "position_correction_m": {
+    "mean": 0.01950214744885993,
+    "p95": 0.03164608095534177,
+    "max": 0.037313087951420486
+  },
+  "command_integration_error_m": {
+    "mean": 0.01946985828315455,
+    "p95": 0.03163572009122754,
+    "max": 0.03902019896909776
+  },
+  "velocity_overwrite_m_s": {
+    "mean": 0.0,
+    "p95": 0.0,
+    "max": 0.0
+  },
+  "nose_velocity_fit_m_s": {
+    "mean": 12.660997834996563,
+    "p95": 17.326322832036055,
+    "max": 17.933786332533792
+  },
+  "predicted_drift_residual_m": {
+    "mean": 0.255113397142198,
+    "p95": 0.345618684606914,
+    "max": 0.3891118456160543
+  },
+  "step_hook": {
+    "samples": 4577,
+    "confirmed_samples": 4577,
+    "calls": 1759,
+    "applied": 1759
+  }
+}

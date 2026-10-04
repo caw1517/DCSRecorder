@@ -1,0 +1,11 @@
+{
+  "InstalledUtc": "2026-09-27T00:33:45.3760085Z",
+  "InstalledDll": "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Staged\\bin\\HornetStagedProbe.dll",
+  "FinalSha256": "8206CF4DC4B549B6F36EDB771ABE412F4EF2FE88B6F1E5C66D8A55C07F4B145D",
+  "PreviousSha256": "5D954231C550DC6A8AEC4FEACD6C53AF1EA7F0C8A682BF306BE9CCD717D1C728",
+  "BackupDll": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\nose-pitch-2026-09-26\\rollback\\HornetStagedProbe-verified-pitch-test.dll",
+  "Tests": "12/12 CTests passed",
+  "LiveEvidence": "5832: user reports no jump; full third run complete; pose and motion checks pass",
+  "Cleanup": "Temporary pose diagnostics removed; validated pitch correction retained by default for staged playback",
+  "Status": "Final build installed; correction validated live in preceding instrumented build"
+}

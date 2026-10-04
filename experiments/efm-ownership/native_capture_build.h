@@ -1,0 +1,15 @@
+#pragma once
+#include <array>
+#include <cstdint>
+// Export and full accessor verified against the loaded CockpitBase snapshot.
+namespace native_capture_build {
+#ifdef DCSR_BUILD_2930
+inline constexpr uintptr_t cockpit_accessor=0x404ec0;
+inline constexpr std::array<unsigned char,29> accessor={0x48,0x8b,5,0x41,0x01,0x15,0,
+#else
+inline constexpr uintptr_t cockpit_accessor=0x3f2a30;
+inline constexpr std::array<unsigned char,29> accessor={0x48,0x8b,5,0xd1,0xb5,0x14,0,
+#endif
+    0x48,0x8b,0x48,0x10,0x48,0x85,0xc9,0x74,0x0a,0x48,0x8b,1,
+    0x48,0xff,0xa0,0x40,1,0,0,0x33,0xc0,0xc3};
+}

@@ -5,6 +5,9 @@
 #include "hornet_lights.h"
 #include "hornet_canopy.h"
 #include "hornet_wheels.h"
+#ifdef HORNET_GROUND_PROTOTYPE
+#include "ground-start/tape_gate.h"
+#endif
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -52,6 +55,9 @@ struct Path {
     bool has_exterior=false,has_engine=false,has_lights=false,has_canopy=false,has_wheels=false;
     double duration() const { return samples.empty()?0:samples.back().t; }
     const char* load(const std::filesystem::path& filename) {
+#ifdef HORNET_GROUND_PROTOTYPE
+        if(!ground_trial::tape_allowed(filename))return "ground_tape_not_authorized";
+#endif
         samples.clear();has_exterior=false;has_engine=false;has_lights=false;has_canopy=false;has_wheels=false;exact_start=false;translation={};std::ifstream f(filename);std::string header;size_t n=0;
         if(!(f>>header>>n) || (header!="DCSREC_PLAYBACK_V1" && header!="DCSREC_PLAYBACK_V2" && header!="DCSREC_PLAYBACK_V3" && header!="DCSREC_PLAYBACK_V4" && header!="DCSREC_PLAYBACK_V5" && header!="DCSREC_PLAYBACK_V6") || n<2 || n>100000) return "recording_header_rejected";
         const bool wheels=header=="DCSREC_PLAYBACK_V6";
@@ -76,7 +82,11 @@ struct Path {
             for(double v:s.p)if(!std::isfinite(v))return "recording_sample_rejected";
             for(double v:s.q)if(!std::isfinite(v))return "recording_sample_rejected";
             double speed2=0;for(double v:s.v) {if(!std::isfinite(v))return "recording_sample_rejected";speed2+=v*v;}
+#ifdef HORNET_GROUND_PROTOTYPE
+            if(!ground_trial::speed_allowed(speed2) ||
+#else
             if(speed2<70*70 || speed2>260*260 ||
+#endif
                std::abs(dot(s.q,s.q)-1)>0.001 || s.brake<0 || s.brake>1)return "recording_limits_rejected";
             if(i==0 && s.t!=0)return "recording_clock_rejected";
             if(i) {

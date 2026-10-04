@@ -1,0 +1,12 @@
+{
+  "status": "Installed; live hard-turn playback verification pending",
+  "installed_utc": "2026-09-27T01:15:41.351310+00:00",
+  "dll_sha256": "2260f6a07bb04190d7f1224e012e33e2e43c09a1e9153435b366881d454dbb08",
+  "previous_dll_sha256": "8206cf4dc4b549b6f36edb771abe412f4ef2fe88b6f1e5c66d8a55c07f4b145d",
+  "mission": "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\DCSRecorder-Playback-4bcc7985.miz",
+  "source": "C:\\Users\\w_can\\Saved Games\\DCS\\DCSRecorder\\recordings\\20260927T005525Z-0001.csv",
+  "source_sha256": "1d2c32b2f46d21f840ef9320ccc05c046e393f75b1b9e0568ea2d934c72f2d53",
+  "duration": 80.92,
+  "rollback": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\demo-envelope-2026-09-26\\rollback",
+  "package": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\demo-envelope-2026-09-26\\package-20260927T005525Z-0001"
+}

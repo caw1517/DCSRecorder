@@ -1,5 +1,6 @@
 // THROWAWAY read-only Lua helper. No hooks, aircraft writes or retained objects.
 #include "../native_identity.h"
+#include "../native_capture_build.h"
 #include <array>
 #include <cmath>
 #include <iomanip>
@@ -38,12 +39,10 @@ std::string sample() {
     const auto fn=GetProcAddress(cockpit,"?c_LA@cockpit@@YAPEAVIwoLA@@XZ");
     const auto base=reinterpret_cast<uintptr_t>(cockpit);
     // Pinned c_LA implementation: current cockpit's IwHumanPlane -> IwoLA.
-    const std::array<unsigned char,29> expected={0x48,0x8b,5,0xd1,0xb5,0x14,0,
-        0x48,0x8b,0x48,0x10,0x48,0x85,0xc9,0x74,0x0a,0x48,0x8b,1,
-        0x48,0xff,0xa0,0x40,1,0,0,0x33,0xc0,0xc3};
+    const auto expected=native_capture_build::accessor;
     std::array<unsigned char,29> actual{};
-    if(reinterpret_cast<uintptr_t>(fn)!=base+0x3f2a30 ||
-       !native_identity::read(base+0x3f2a30,actual) || actual!=expected)return "UNAVAILABLE,cockpit_build_guard";
+    if(reinterpret_cast<uintptr_t>(fn)!=base+native_capture_build::cockpit_accessor ||
+       !native_identity::read(base+native_capture_build::cockpit_accessor,actual) || actual!=expected)return "UNAVAILABLE,cockpit_build_guard";
     // Sound::JetEngineSounder::update receives IwoLA and invokes these slots.
     const std::array<unsigned char,6> call_rpm={0xff,0x90,0xd8,0,0,0};
     const std::array<unsigned char,6> call_thrust={0xff,0x90,0xe0,0,0,0};

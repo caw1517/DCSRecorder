@@ -1,0 +1,184 @@
+{
+  "profile": "release-airborne-v1",
+  "dcs_build": "2.9.30.28536",
+  "module": "DCSRecorder-Hornet-Release-Test",
+  "binary": "HornetReleaseProbe",
+  "mission": "043-Hornet-Countdown-Release.miz",
+  "source_manifest": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\snapshot-2026-09-30\\gear-package\\manifest.json",
+  "source_manifest_sha256": "ce0539e6af22853f7b589e07c28dc146d55fd0a20cbf2d39ef96ea029e9bc277",
+  "installed_default_sources": {
+    "CoreMods/aircraft/FA-18C/FA-18C_hornet.lua": "9dc0ba7831047b61de3bca9d185f787fc7d41e9df38121e96968a0e6b2a1b2c2",
+    "CoreMods/aircraft/FA-18C/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "CoreMods/aircraft/FA-18C/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "MissionEditor/modules/me_paramFM.lua": "de9845462642269952b0ab36c5a2d172585b7f2a741dbab7d2e88ab1c4f3ce7b"
+  },
+  "recording": {
+    "aircraft": "FA-18C_hornet",
+    "livery": "Blue Angels Jet Team",
+    "theatre": "Caucasus",
+    "state_profile": "hornet-exterior-v1",
+    "engine_profile": "hornet-native-engine-v1",
+    "smoke_profile": "hornet-native-smoke-v1",
+    "smoke_station": "10",
+    "smoke_clsid": "{INV-SMOKE-WHITE}",
+    "light_profile": "hornet-lights-v1",
+    "canopy_profile": "hornet-canopy-v1",
+    "wheel_profile": "hornet-wheels-v1",
+    "source_unit_id": "2",
+    "source": "Observer",
+    "capture_timing": "frame-batch-v1",
+    "capture_build": "2.9.30.28536",
+    "wind_ground": "0",
+    "wind_2000": "0",
+    "wind_8000": "0",
+    "smoke_events": [
+      {
+        "time": 0.0,
+        "on": true
+      }
+    ],
+    "duration": 8.700000000000003,
+    "samples": 436,
+    "source_time": 53.451,
+    "recording_version": 7,
+    "exterior_available": true,
+    "engine_available": true,
+    "smoke_available": true,
+    "lights_available": true,
+    "canopy_available": true,
+    "wheels_available": true
+  },
+  "initial": {
+    "token_high": 0.5173588395118713,
+    "token_low": 0.17517030239105225,
+    "expected": {
+      "21": 0.0,
+      "38": 0.0,
+      "0": 1.0,
+      "3": 1.0,
+      "5": 1.0,
+      "9": 0.168472722173,
+      "10": 0.168565124273,
+      "11": 0.000285096466541,
+      "12": -0.000158366223332,
+      "13": 0.210812777281,
+      "14": 0.210812777281,
+      "15": 0.0613234862685,
+      "16": 0.0610863231122,
+      "17": 0.0080949626863,
+      "18": 0.0080949626863,
+      "28": 0.0,
+      "29": 0.0,
+      "89": 0.0222412236035,
+      "90": 0.0222418308258,
+      "88": 0.914272069931,
+      "190": 0.914272069931,
+      "191": 0.914272069931,
+      "192": 0.914272069931,
+      "193": 0.0,
+      "210": 0.985090315342,
+      "212": 0.0,
+      "1": 0.0,
+      "6": 0.0,
+      "4": 0.0,
+      "101": 1.0,
+      "103": 1.0,
+      "102": 1.0,
+      "2": -0.0
+    },
+    "smoke_events": [
+      {
+        "time": 0.0,
+        "on": true
+      }
+    ],
+    "duration": 8.700000000000003
+  },
+  "status": "Prepared from reviewed DCS serialization; live readiness/release still pending",
+  "files": {
+    "Missions/043-Hornet-Countdown-Release.miz": "df534ca36cb97a7c7036e0d962b1d1e3375b75fa190e432d64aef9b18343144f",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/aircraft.lua": "5384b750cb759ba92fae6f9bd3e062803eb9f4fa35324f0aea86389136ed70fa",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/entry.lua": "d1a88fcf5b275a2ffda7e78f8a78b7c4ab32bf4ff98602b9aca993816e6fa52c",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/bin/HornetReleaseProbe.dll": "2d021d6879dfe534bac10d77facd92cf6437c05f98fac789d7282e5f6b78c8be",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/bin/recorded-flight.json": "5bdf3f74d1d7bbb2c8b4b8a6adbabb61e3ca23fa4f457aa89bf3bb050e5eb0fd",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/bin/recorded-flight.txt": "c33122b8c4029d6da65bc20d505608d3cc431c3289374e08ef3a01733447621b",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Datalinks/Link16.dlg": "7075e314bd0c4f0322c9e7d7cabfa9dc55bef2b708125768209e70b0bbceebeb",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Cockpit/Scripts/device_init.lua": "197073e97be4a1aee552ee43b91fd4c0c9db36aaa9907820d5f3a3b249e178a5",
+    "Mods/aircraft/DCSRecorder-Hornet-Release-Test/Liveries/DCSRecorder-Hornet-Release-Test/Blue Angels Jet Team.zip": "2d7787d059a72d3f7ca10c9baa8ee4f5d3a330a12175cc1e20e4d8d33b95ef66",
+    "Scripts/DCSRecorderReleaseControl/expected.lua": "f8e233bfb8c672b58081be2ac4b907c3c134ed4213438a20f854967ab43d1d3f",
+    "Scripts/DCSRecorderReleaseControl/session_guard.lua": "fe494fd7f7de84ff1718ffa8f9c1249477a43039a8fadf30d7dd3adb61ba6bb7",
+    "Scripts/Hooks/DCSRecorderReleaseControl.lua": "021ef5e27407d24e78bf0b786c5753fc24f732bf34e1d0ee51639b4ae97165a4"
+  },
+  "serialized_reference": {
+    "source_package": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\gear-package-v4",
+    "source_manifest_sha256": "d80051a682d5b512eebeb7045e4726f818a76b4c33ec65cdd6b8977e8c6ba36a",
+    "captured_archive": "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\countdown-release-2026-10-01\\readiness-failure-36760\\raw\\loaded-tempMission.miz",
+    "captured_archive_sha256": "ac973ca48eab21be5cba585de2da90a57d013232efe30bedda45fa7351767b47",
+    "reviewed_changes": [
+      {
+        "path": "coalition[blue][country][1][plane][group][1][units][1][heading]",
+        "kind": "angle_serialization",
+        "delta": 2.000621890374532e-13
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][1][units][1][psi]",
+        "kind": "angle_serialization",
+        "delta": 2.000621890374532e-13
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][1][units][1][dataCartridge]",
+        "kind": "empty_cartridge_omitted"
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][1][units][1][Radio][1][channelsNames]",
+        "kind": "empty_radio_labels_added"
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][1][units][1][Radio][2][channelsNames]",
+        "kind": "empty_radio_labels_added"
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][2][units][1][heading]",
+        "kind": "angle_serialization",
+        "delta": 2.000621890374532e-13
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][2][units][1][psi]",
+        "kind": "angle_serialization",
+        "delta": 2.000621890374532e-13
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][2][units][1][dataCartridge]",
+        "kind": "empty_cartridge_omitted"
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][2][units][1][Radio]",
+        "kind": "non_player_radio_omitted"
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][3][units][1][heading]",
+        "kind": "angle_serialization",
+        "delta": 2.000621890374532e-13
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][3][units][1][psi]",
+        "kind": "angle_serialization",
+        "delta": 2.000621890374532e-13
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][3][units][1][dataCartridge]",
+        "kind": "empty_cartridge_omitted"
+      },
+      {
+        "path": "coalition[blue][country][1][plane][group][3][units][1][Radio]",
+        "kind": "non_player_radio_omitted"
+      }
+    ],
+    "runtime_comparison": "Exact; no ignored keys or numerical tolerance",
+    "changed_payload_files": [
+      "Scripts/DCSRecorderReleaseControl/expected.lua"
+    ]
+  }
+}

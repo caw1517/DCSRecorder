@@ -18,7 +18,7 @@ def quaternion(f,u,r):
         q[0]=(m[k][j]-m[j][k])/s;q[i+1]=s/4;q[j+1]=(m[i][j]+m[j][i])/s;q[k+1]=(m[i][k]+m[k][i])/s
     length=math.sqrt(sum(v*v for v in q));return [v/length for v in q]
 
-def read(path):
+def read(path, *, ground_trial_log=None):
     with Path(path).open(newline='',encoding='utf-8-sig') as f: rows=list(csv.reader(f))
     if not rows or rows[0] not in (['DCSREC',str(v)] for v in range(1,8)): raise ValueError('Unsupported recording version')
     version=int(rows[0][1])
@@ -29,8 +29,11 @@ def read(path):
     if metadata.get('aircraft')!='FA-18C_hornet' or metadata.get('theatre')!='Caucasus' or not metadata.get('livery'):
         raise ValueError('First playback prototype supports a named-livery Hornet on Caucasus only')
     if version>=2 and metadata.get('state_profile')!=PROFILE: raise ValueError('Unsupported exterior state profile')
-    if version>=3 and (metadata.get('engine_profile')!=engine_state.PROFILE or metadata.get('capture_build')!='2.9.29.27468'):
+    if version>=3 and (metadata.get('engine_profile')!=engine_state.PROFILE or metadata.get('capture_build') not in ('2.9.29.27468','2.9.30.28536')):
         raise ValueError('Unsupported native engine profile/build')
+    timing=metadata.get('capture_timing')
+    if timing is not None and (timing!='frame-batch-v1' or version<3 or metadata.get('capture_build')!='2.9.30.28536'):
+        raise ValueError('Unsupported capture timing profile/build')
     if version==1 and 'state_profile' in metadata: raise ValueError('Legacy recording cannot declare exterior state')
     if version<3 and 'engine_profile' in metadata: raise ValueError('Legacy recording cannot declare native engine state')
     if version<4 and any(k.startswith('smoke_') for k in metadata): raise ValueError('Legacy recording cannot declare measured smoke')
@@ -49,6 +52,12 @@ def read(path):
     footer=body.pop()
     if len(footer)!=3 or int(footer[2])!=len(body): raise ValueError('Recording footer/sample count mismatch')
     if footer[1] not in ('user_stop','mission_stop','mission_restart','new_take'): raise ValueError('Recording ended with aircraft loss/error')
+    ground_report=None
+    if ground_trial_log is not None:
+        import importlib.util
+        spec=importlib.util.spec_from_file_location('ground_source_evidence',Path(__file__).parent/'ground-start/source_evidence.py')
+        evidence=importlib.util.module_from_spec(spec);spec.loader.exec_module(evidence)
+        ground_report=evidence.validate(path,metadata,[dict(zip(names,row)) for row in body],ground_trial_log)
     samples=[];raw=[]
     for row in body:
         if len(row)!=len(names): raise ValueError('Truncated sample row')
@@ -66,10 +75,11 @@ def read(path):
         if sum(x*y for x,y in zip(cross,r))<0.999: raise ValueError('Reflected orientation basis')
         speed=math.sqrt(sum(x*x for x in v))
         elapsed=t-samples[0][0] if samples else 0
+        if ground_report is not None and speed>5:raise ValueError('Ground trial exceeds bounded taxi speed')
         if speed>260:
             raise ValueError(f'Recorded speed {speed:.2f} m/s exceeds the current playback maximum of 260 m/s at {elapsed:.2f} s. '
                              'This limit uses ground speed (about 505 knots), not cockpit indicated airspeed. The recording is saved.')
-        if speed<70:
+        if ground_report is None and speed<70:
             raise ValueError(f'Recorded speed {speed:.2f} m/s is below the current airborne playback minimum of 70 m/s at {elapsed:.2f} s. '
                              'Ground starts and transitions are not yet supported. The recording is saved.')
         if not 0<=brake<=1:
@@ -86,7 +96,7 @@ def read(path):
     if len(samples)<2 or not 5<=samples[-1][0]-samples[0][0]<=300: raise ValueError('Record between 5 and 300 seconds')
     start=samples[0][0]
     if version>=3:
-        for sample,engine in zip(samples,engine_state.align(raw)):sample.extend(engine)
+        for sample,engine in zip(samples,engine_state.align(raw,.15 if timing=='frame-batch-v1' else .05)):sample.extend(engine)
     if version>=5:
         for sample,row in zip(samples,raw):
             lights=[float(row[k]) for k in light_state.COLUMNS]
@@ -107,10 +117,11 @@ def read(path):
     for sample in samples:sample[0]-=start
     metadata.update(duration=samples[-1][0],samples=len(samples),source_time=start,recording_version=version,
                     exterior_available=version>=2,engine_available=version>=3,smoke_available=has_smoke,lights_available=version>=5,canopy_available=version>=6,wheels_available=version>=7)
+    if ground_report is not None:metadata['ground_trial']=ground_report
     return metadata,samples,raw
 
-def convert(source,destination):
-    metadata,samples,_=read(source)
+def convert(source,destination, *, ground_trial_log=None):
+    metadata,samples,_=read(source,ground_trial_log=ground_trial_log)
     destination=Path(destination);destination.parent.mkdir(parents=True,exist_ok=True)
     # Smoke commands are embedded in the mission. Lights and canopy extend the
     # native tape explicitly; older recordings keep their existing tape version.

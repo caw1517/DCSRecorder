@@ -1,0 +1,289 @@
+[
+  {
+    "path": "coalition[blue][country][1][plane][group][1][units][1][Radio][1][channelsNames]",
+    "expected": null,
+    "actual": {}
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][1][units][1][Radio][2][channelsNames]",
+    "expected": null,
+    "actual": {}
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][1][units][1][dataCartridge]",
+    "expected": {
+      "GroupsPoints": {
+        "A/A Waypoint": {},
+        "Initial Point": {},
+        "PB": {},
+        "PP": {},
+        "Sequence 1 Blue": {},
+        "Sequence 2 Red": {},
+        "Sequence 3 Yellow": {},
+        "Start Location": {}
+      },
+      "Points": {}
+    },
+    "actual": null
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][1][units][1][heading]",
+    "expected": -1.5582375055219,
+    "actual": -1.5582375055221
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][1][units][1][psi]",
+    "expected": 1.5582375055219,
+    "actual": 1.5582375055221
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][2][units][1][Radio]",
+    "expected": {
+      "1": {
+        "channels": {
+          "1": 305,
+          "10": 262,
+          "11": 259,
+          "12": 268,
+          "13": 269,
+          "14": 260,
+          "15": 263,
+          "16": 261,
+          "17": 267,
+          "18": 251,
+          "19": 253,
+          "2": 264,
+          "20": 266,
+          "3": 265,
+          "4": 256,
+          "5": 254,
+          "6": 250,
+          "7": 270,
+          "8": 257,
+          "9": 255
+        },
+        "modulations": {
+          "1": 0,
+          "10": 0,
+          "11": 0,
+          "12": 0,
+          "13": 0,
+          "14": 0,
+          "15": 0,
+          "16": 0,
+          "17": 0,
+          "18": 0,
+          "19": 0,
+          "2": 0,
+          "20": 0,
+          "3": 0,
+          "4": 0,
+          "5": 0,
+          "6": 0,
+          "7": 0,
+          "8": 0,
+          "9": 0
+        }
+      },
+      "2": {
+        "channels": {
+          "1": 305,
+          "10": 262,
+          "11": 259,
+          "12": 268,
+          "13": 269,
+          "14": 260,
+          "15": 263,
+          "16": 261,
+          "17": 267,
+          "18": 251,
+          "19": 253,
+          "2": 264,
+          "20": 266,
+          "3": 265,
+          "4": 256,
+          "5": 254,
+          "6": 250,
+          "7": 270,
+          "8": 257,
+          "9": 255
+        },
+        "modulations": {
+          "1": 0,
+          "10": 0,
+          "11": 0,
+          "12": 0,
+          "13": 0,
+          "14": 0,
+          "15": 0,
+          "16": 0,
+          "17": 0,
+          "18": 0,
+          "19": 0,
+          "2": 0,
+          "20": 0,
+          "3": 0,
+          "4": 0,
+          "5": 0,
+          "6": 0,
+          "7": 0,
+          "8": 0,
+          "9": 0
+        }
+      }
+    },
+    "actual": null
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][2][units][1][dataCartridge]",
+    "expected": {
+      "GroupsPoints": {
+        "A/A Waypoint": {},
+        "Initial Point": {},
+        "PB": {},
+        "PP": {},
+        "Sequence 1 Blue": {},
+        "Sequence 2 Red": {},
+        "Sequence 3 Yellow": {},
+        "Start Location": {}
+      },
+      "Points": {}
+    },
+    "actual": null
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][2][units][1][heading]",
+    "expected": -1.5582375055219,
+    "actual": -1.5582375055221
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][2][units][1][psi]",
+    "expected": 1.5582375055219,
+    "actual": 1.5582375055221
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][3][units][1][Radio]",
+    "expected": {
+      "1": {
+        "channels": {
+          "1": 305,
+          "10": 262,
+          "11": 259,
+          "12": 268,
+          "13": 269,
+          "14": 260,
+          "15": 263,
+          "16": 261,
+          "17": 267,
+          "18": 251,
+          "19": 253,
+          "2": 264,
+          "20": 266,
+          "3": 265,
+          "4": 256,
+          "5": 254,
+          "6": 250,
+          "7": 270,
+          "8": 257,
+          "9": 255
+        },
+        "modulations": {
+          "1": 0,
+          "10": 0,
+          "11": 0,
+          "12": 0,
+          "13": 0,
+          "14": 0,
+          "15": 0,
+          "16": 0,
+          "17": 0,
+          "18": 0,
+          "19": 0,
+          "2": 0,
+          "20": 0,
+          "3": 0,
+          "4": 0,
+          "5": 0,
+          "6": 0,
+          "7": 0,
+          "8": 0,
+          "9": 0
+        }
+      },
+      "2": {
+        "channels": {
+          "1": 305,
+          "10": 262,
+          "11": 259,
+          "12": 268,
+          "13": 269,
+          "14": 260,
+          "15": 263,
+          "16": 261,
+          "17": 267,
+          "18": 251,
+          "19": 253,
+          "2": 264,
+          "20": 266,
+          "3": 265,
+          "4": 256,
+          "5": 254,
+          "6": 250,
+          "7": 270,
+          "8": 257,
+          "9": 255
+        },
+        "modulations": {
+          "1": 0,
+          "10": 0,
+          "11": 0,
+          "12": 0,
+          "13": 0,
+          "14": 0,
+          "15": 0,
+          "16": 0,
+          "17": 0,
+          "18": 0,
+          "19": 0,
+          "2": 0,
+          "20": 0,
+          "3": 0,
+          "4": 0,
+          "5": 0,
+          "6": 0,
+          "7": 0,
+          "8": 0,
+          "9": 0
+        }
+      }
+    },
+    "actual": null
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][3][units][1][dataCartridge]",
+    "expected": {
+      "GroupsPoints": {
+        "A/A Waypoint": {},
+        "Initial Point": {},
+        "PB": {},
+        "PP": {},
+        "Sequence 1 Blue": {},
+        "Sequence 2 Red": {},
+        "Sequence 3 Yellow": {},
+        "Start Location": {}
+      },
+      "Points": {}
+    },
+    "actual": null
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][3][units][1][heading]",
+    "expected": -1.5582375055219,
+    "actual": -1.5582375055221
+  },
+  {
+    "path": "coalition[blue][country][1][plane][group][3][units][1][psi]",
+    "expected": 1.5582375055219,
+    "actual": 1.5582375055221
+  }
+]

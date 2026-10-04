@@ -1,0 +1,66 @@
+{
+  "profile": "authored-recording-v1",
+  "build": "2.9.30.28536",
+  "source_sha256": "6179dfb0f0885b0f409305c008c2e739ce866b22b9380cd0a6f7e53685af10c7",
+  "selected_id": 12201,
+  "selected_name": "Record Hornet",
+  "namespace": "DCSR_AUTHORED_2",
+  "trigger_indices": [
+    2
+  ],
+  "role_edits": [
+    [
+      [
+        "coalition",
+        "blue",
+        "country",
+        1,
+        "plane",
+        "group",
+        1,
+        "units",
+        1,
+        "skill"
+      ],
+      "Player"
+    ]
+  ],
+  "message": "F10 > DCS Recorder > Start recording / Stop recording. Authored briefing and scene are preserved.",
+  "preservation": {
+    "restored_structure_equals_source": true,
+    "unchanged_archive_members": [
+      "l10n/DEFAULT/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png",
+      "l10n/DEFAULT/authored-chime.wav",
+      "l10n/DEFAULT/dictionary",
+      "l10n/DEFAULT/mapResource",
+      "l10n/FR/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png",
+      "l10n/FR/authored-chime.wav",
+      "l10n/FR/dictionary",
+      "l10n/FR/mapResource",
+      "options",
+      "theatre",
+      "warehouses"
+    ],
+    "changed_existing_members": [
+      "mission"
+    ],
+    "added_members": [
+      "DCSRecorder/preparation.json"
+    ]
+  },
+  "prepared_sha256": "851ae161352065af841b9e03e56bfc9d986bc9b86e4a253ef947ad8ee67f6ab3",
+  "source_member_hashes": {
+    "l10n/DEFAULT/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png": "5e68c7eff84f52bb3bb94de0fc5d40a84e0a5d3fbb658a483c9a6dbbb68b1014",
+    "l10n/DEFAULT/authored-chime.wav": "f43e68f1f0b774dd797037bf3c1fae5aff9c28bffc1b0b2e7865d82a56aa8b41",
+    "l10n/DEFAULT/dictionary": "f4d45d10574abce323b87964b7b699cac13eb987d87ba10cde1978e67f9a9b1e",
+    "l10n/DEFAULT/mapResource": "d068b6171164fb8001f37014dc6dc1bf452da69c812fe0df2bd579471986ca4f",
+    "l10n/FR/TF-51_FOT{536F3A76-B2BB-474a-9948-A6305C48D1DD}.png": "5e68c7eff84f52bb3bb94de0fc5d40a84e0a5d3fbb658a483c9a6dbbb68b1014",
+    "l10n/FR/authored-chime.wav": "f43e68f1f0b774dd797037bf3c1fae5aff9c28bffc1b0b2e7865d82a56aa8b41",
+    "l10n/FR/dictionary": "6e5b2c79f8dd7785784a27bb3f9a573ed46e271671dc7348e04192ba087652b1",
+    "l10n/FR/mapResource": "d068b6171164fb8001f37014dc6dc1bf452da69c812fe0df2bd579471986ca4f",
+    "mission": "b2d62cd312d2d5ff377cdfc16fbc0f4233e8cd43b0d039573b744871e4f9dd0c",
+    "options": "1034e079252922748732fc8bd9d7c0a4e85e7da1bce0403539730d8fe3241248",
+    "theatre": "e72cd6342c101ebb2683e038d1fd16dfb94a11ea78da4818d9be3af6e4e9cc55",
+    "warehouses": "bc5312e01c86ac88380c420e333f3cf78eadce294a14eeb43b0eb6ea6b2023a2"
+  }
+}

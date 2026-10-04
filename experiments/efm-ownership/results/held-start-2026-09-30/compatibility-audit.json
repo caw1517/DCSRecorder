@@ -1,0 +1,663 @@
+{
+  "status": "read-only audit; candidate matches do not validate compatibility",
+  "captured_sections": 15,
+  "sections": {
+    "dcs": [
+      {
+        "name": ".text",
+        "rva": "0x1000",
+        "size": 17756082,
+        "sha256": "8fac1e79d091668c0b139c50e66ac4799eea2f1142c5a0acdf296631ff97a263"
+      },
+      {
+        "name": ".rdata",
+        "rva": "0x10f0000",
+        "size": 3944474,
+        "sha256": "3443f2613dd52504ec481e9edd9d6a4e7f000afbc39583578a1c70ff9d498aac"
+      },
+      {
+        "name": ".pdata",
+        "rva": "0x1564000",
+        "size": 562920,
+        "sha256": "c648a7b443950b45fc197150262b2dad516a6d9c7cdbb3b2bdee0b77d0007b07"
+      }
+    ],
+    "worldgeneral": [
+      {
+        "name": ".text",
+        "rva": "0x1000",
+        "size": 1835438,
+        "sha256": "d85c41dcdfb5160a712efb5c7aa11cf7538dc0bf6dd0848d6a1be2bb429c078b"
+      },
+      {
+        "name": ".rdata",
+        "rva": "0x1c2000",
+        "size": 649296,
+        "sha256": "d239b9db370977c8a5d305051c56e4e7f2db4f714a56ece4efd68d4b44aca0b4"
+      },
+      {
+        "name": ".pdata",
+        "rva": "0x279000",
+        "size": 81936,
+        "sha256": "cff9a476881d1f9828da1885ee5f5a2790a82123bc81103cc291c02c828aaa44"
+      }
+    ],
+    "sound": [
+      {
+        "name": ".text",
+        "rva": "0x1000",
+        "size": 1874878,
+        "sha256": "a2fe5ebd02cbbde5d91b3aaecac4e79d3b85c3489fe1ce47605ecdffc1ec1c05"
+      },
+      {
+        "name": ".rdata",
+        "rva": "0x1cb000",
+        "size": 317402,
+        "sha256": "ac13a31df65ebdda460e33d7457aa7ef147d06e143cd7da32ebd451804cf69bf"
+      },
+      {
+        "name": ".pdata",
+        "rva": "0x227000",
+        "size": 29820,
+        "sha256": "38cf5de2e7bac6cfceb834b63df5c9e96314bdc082e1e8aa46aedda8e04d979c"
+      }
+    ],
+    "aifm": [
+      {
+        "name": ".text",
+        "rva": "0x1000",
+        "size": 971860,
+        "sha256": "4b611b10aa24714514f54bd5458dee19b0cb9d2c9d64b297c3592e87f5cb6b51"
+      },
+      {
+        "name": ".rdata",
+        "rva": "0xef000",
+        "size": 92322,
+        "sha256": "84186140cbf5a701ffa7037763bace712824098ef0ee97a0dfbdb295cfe31436"
+      },
+      {
+        "name": ".pdata",
+        "rva": "0x109000",
+        "size": 15660,
+        "sha256": "44ac30c53416ec8e7959e1c5b7dc4303629804c55330c648a0bc62f16d56a1a2"
+      }
+    ],
+    "cockpit": [
+      {
+        "name": ".text",
+        "rva": "0x1000",
+        "size": 4484191,
+        "sha256": "c1bf175e0a2d6976321f2a156d5f9d9d632d0024397a208205507718b6b3977c"
+      },
+      {
+        "name": ".rdata",
+        "rva": "0x448000",
+        "size": 1100464,
+        "sha256": "fda09657f4d447bdd2b1bd8b23cd7ee2f3ea636af41be3f3dcbb27ae8dcc4d2f"
+      },
+      {
+        "name": ".pdata",
+        "rva": "0x56e000",
+        "size": 146508,
+        "sha256": "ef2f1504c2f69eb04df76106bba022f50219f1be3230dc2d995771096ab88b63"
+      }
+    ]
+  },
+  "function_table_valid": {
+    "dcs": false,
+    "worldgeneral": false,
+    "sound": true,
+    "aifm": true,
+    "cockpit": true
+  },
+  "guard_count": 33,
+  "old_guard_matches": 4,
+  "guards": [
+    {
+      "source": "native_body.h",
+      "module": "dcs",
+      "old_rva": "0x7105f7",
+      "matches_at_old_rva": false,
+      "candidate_count": 35,
+      "candidates": [],
+      "candidates_omitted": true
+    },
+    {
+      "source": "native_body.h",
+      "module": "aifm",
+      "old_rva": "0xa2070",
+      "matches_at_old_rva": true,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0xa2070",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "native_body.h",
+      "module": "dcs",
+      "old_rva": "0x711152",
+      "matches_at_old_rva": false,
+      "candidate_count": 2,
+      "candidates": [
+        {
+          "rva": "0x712972",
+          "function": null
+        },
+        {
+          "rva": "0x712acd",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "native_motion.h",
+      "module": "worldgeneral",
+      "old_rva": "0x68d50",
+      "matches_at_old_rva": false,
+      "candidate_count": 503,
+      "candidates": [],
+      "candidates_omitted": true
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "worldgeneral",
+      "old_rva": "0x69310",
+      "matches_at_old_rva": false,
+      "candidate_count": 503,
+      "candidates": [],
+      "candidates_omitted": true
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "worldgeneral",
+      "old_rva": "0x69390",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x68c10",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "dcs",
+      "old_rva": "0x712408",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x713c28",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "dcs",
+      "old_rva": "0x712411",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x713c31",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "native_velocity.h",
+      "module": "dcs",
+      "old_rva": "0x712435",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x713c55",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "native_presentation_pitch.h",
+      "module": "dcs",
+      "old_rva": "0x6d41eb",
+      "matches_at_old_rva": false,
+      "candidate_count": 0,
+      "candidates": [],
+      "candidates_omitted": false
+    },
+    {
+      "source": "native_presentation_pitch.h",
+      "module": "dcs",
+      "old_rva": "0x6d41f6",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x6d4a16",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x70fef0",
+      "matches_at_old_rva": false,
+      "candidate_count": 198,
+      "candidates": [],
+      "candidates_omitted": true
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x675279",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x675529",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x6b6070",
+      "matches_at_old_rva": false,
+      "candidate_count": 19,
+      "candidates": [],
+      "candidates_omitted": true
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x67529c",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x67554c",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "object_probe.cpp",
+      "module": "dcs",
+      "old_rva": "0x6b73a7",
+      "matches_at_old_rva": false,
+      "candidate_count": 0,
+      "candidates": [],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x641492",
+      "matches_at_old_rva": false,
+      "candidate_count": 2,
+      "candidates": [
+        {
+          "rva": "0x641702",
+          "function": null
+        },
+        {
+          "rva": "0x7c9568",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x6414a2",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x641712",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x6414b4",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x641724",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x6099af",
+      "matches_at_old_rva": false,
+      "candidate_count": 5,
+      "candidates": [
+        {
+          "rva": "0x609adf",
+          "function": null
+        },
+        {
+          "rva": "0x610330",
+          "function": null
+        },
+        {
+          "rva": "0x7b6a60",
+          "function": null
+        },
+        {
+          "rva": "0x7bab8c",
+          "function": null
+        },
+        {
+          "rva": "0x7ebbb9",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x6099d1",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x609b01",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "worldgeneral",
+      "old_rva": "0x6a9ff",
+      "matches_at_old_rva": false,
+      "candidate_count": 2,
+      "candidates": [
+        {
+          "rva": "0x6a27f",
+          "function": null
+        },
+        {
+          "rva": "0x6a364",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "worldgeneral",
+      "old_rva": "0x6aa44",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x6a2c4",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d164",
+      "matches_at_old_rva": false,
+      "candidate_count": 10,
+      "candidates": [
+        {
+          "rva": "0x66d2a1",
+          "function": null
+        },
+        {
+          "rva": "0x66d3f4",
+          "function": null
+        },
+        {
+          "rva": "0x66d454",
+          "function": null
+        },
+        {
+          "rva": "0x66db20",
+          "function": null
+        },
+        {
+          "rva": "0x67ed46",
+          "function": null
+        },
+        {
+          "rva": "0x6b52a1",
+          "function": null
+        },
+        {
+          "rva": "0x6b52e7",
+          "function": null
+        },
+        {
+          "rva": "0x6d8201",
+          "function": null
+        },
+        {
+          "rva": "0x716d7e",
+          "function": null
+        },
+        {
+          "rva": "0x719ed3",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d174",
+      "matches_at_old_rva": false,
+      "candidate_count": 2,
+      "candidates": [
+        {
+          "rva": "0x66d404",
+          "function": null
+        },
+        {
+          "rva": "0x707070",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d180",
+      "matches_at_old_rva": false,
+      "candidate_count": 4,
+      "candidates": [
+        {
+          "rva": "0x65f785",
+          "function": null
+        },
+        {
+          "rva": "0x66078c",
+          "function": null
+        },
+        {
+          "rva": "0x66d410",
+          "function": null
+        },
+        {
+          "rva": "0x66d45f",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d197",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x66d427",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine-prototype/sound_boundary.h",
+      "module": "dcs",
+      "old_rva": "0x66d1b3",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x66d443",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "sound",
+      "old_rva": "0x13d430",
+      "matches_at_old_rva": true,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x13d430",
+          "function": {
+            "start": "0x13d3a8",
+            "end": "0x13d988",
+            "offset": "0x88"
+          }
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "dcs",
+      "old_rva": "0x60f110",
+      "matches_at_old_rva": false,
+      "candidate_count": 3,
+      "candidates": [
+        {
+          "rva": "0x60f240",
+          "function": null
+        },
+        {
+          "rva": "0x7fc51c",
+          "function": null
+        },
+        {
+          "rva": "0x97e9d7",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "dcs",
+      "old_rva": "0x66d1c0",
+      "matches_at_old_rva": false,
+      "candidate_count": 1,
+      "candidates": [
+        {
+          "rva": "0x66d450",
+          "function": null
+        }
+      ],
+      "candidates_omitted": false
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "sound",
+      "old_rva": "0x134cbb",
+      "matches_at_old_rva": true,
+      "candidate_count": 24,
+      "candidates": [],
+      "candidates_omitted": true
+    },
+    {
+      "source": "engine_native_layout.h",
+      "module": "sound",
+      "old_rva": "0x134ca5",
+      "matches_at_old_rva": true,
+      "candidate_count": 3,
+      "candidates": [
+        {
+          "rva": "0x130c8a",
+          "function": {
+            "start": "0x130c82",
+            "end": "0x130f4c",
+            "offset": "0x8"
+          }
+        },
+        {
+          "rva": "0x134ca5",
+          "function": {
+            "start": "0x134be0",
+            "end": "0x135dff",
+            "offset": "0xc5"
+          }
+        },
+        {
+          "rva": "0x16ce9c",
+          "function": {
+            "start": "0x16ce55",
+            "end": "0x16cf5b",
+            "offset": "0x47"
+          }
+        }
+      ],
+      "candidates_omitted": false
+    }
+  ],
+  "table_boundaries": [
+    {
+      "old_rva": "0x11461f8",
+      "expected_target_rva": "0x133b650",
+      "matches": false
+    },
+    {
+      "old_rva": "0x1146ff0",
+      "expected_target_rva": "0x133b770",
+      "matches": false
+    }
+  ]
+}

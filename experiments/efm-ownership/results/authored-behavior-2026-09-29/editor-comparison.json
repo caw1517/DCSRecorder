@@ -1,0 +1,14 @@
+{
+  "before_sha256": "5d9bac610d324ca52f79a02e1c4eb28a4062d7449f9272387ce1d3de1e6d7102",
+  "after_sha256": "5d9bac610d324ca52f79a02e1c4eb28a4062d7449f9272387ce1d3de1e6d7102",
+  "mission_changed_paths": [],
+  "source_trigrules_equal": true,
+  "aircraft_inventory_equal": true,
+  "removed_members": [],
+  "added_members": [],
+  "changed_members": [],
+  "authored_resource_bytes_equal": true,
+  "recorder_resource_bytes_equal": true,
+  "default_dictionary_equal": true,
+  "default_resource_map_equal": true
+}

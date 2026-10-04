@@ -1,0 +1,29 @@
+{
+  "source_sha256": "a7941c02c33c9a3a116db332e0c0cc9198267b2aef2aa049f41eab06b7b4246e",
+  "source_matches_package": true,
+  "version": "DCSREC,2",
+  "samples": 2272,
+  "gear": {
+    "0": {
+      "capture_min": 0.0,
+      "capture_max": 1.0,
+      "playback_min": 0.0,
+      "playback_max": 1.0
+    },
+    "3": {
+      "capture_min": 0.0,
+      "capture_max": 1.0,
+      "playback_min": 0.0,
+      "playback_max": 1.0
+    },
+    "5": {
+      "capture_min": 0.0,
+      "capture_max": 1.0,
+      "playback_min": 0.0,
+      "playback_max": 1.0
+    }
+  },
+  "exterior_writes": 27404,
+  "last_elapsed": 42.14,
+  "max_postwrite_error": 1.0000680839006293e-14
+}

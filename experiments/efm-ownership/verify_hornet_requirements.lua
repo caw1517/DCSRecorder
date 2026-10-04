@@ -2,6 +2,9 @@
 -- official Hornet plugin ID, assuming the user's confirmed enabled installation.
 -- This checks metadata, not entitlement or live module activation.
 local missionFile, pluginFile, editorFile = assert(arg[1]), assert(arg[2]), assert(arg[3])
+-- 'authored': Mission Editor-saved missions may list no modules (observed for
+-- the Hornet); every listed module must still pass the loader predicate.
+local authored = arg[4] == 'authored'
 local function read(path)
     local f=assert(io.open(path,'rb')); local text=f:read('*a'); f:close(); return text
 end
@@ -19,5 +22,5 @@ for _,required in pairs(mission.requiredModules) do
     assert(not rejects(registered,required),
         'Need Modules for mission load: '..required..' (installed plugin ID is '..pluginId..')')
 end
-assert(count==1,'Expected one explicit Hornet dependency')
-print('PASS: mission dependency accepted by installed loader predicate for '..pluginId)
+assert(authored or count==1,'Expected one explicit Hornet dependency')
+print(('PASS: %d mission dependenc%s accepted by installed loader predicate for %s'):format(count,count==1 and 'y' or 'ies',pluginId))

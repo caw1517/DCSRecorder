@@ -1,0 +1,4 @@
+*.miz
+expected.lua
+installation.json
+manifest.json
