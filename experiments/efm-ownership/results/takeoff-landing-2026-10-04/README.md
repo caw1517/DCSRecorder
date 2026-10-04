@@ -80,7 +80,15 @@ The thresholds come from the stopped behaviour in two ground takes: speed < 0.04
 
 ## Airborne-only takes
 
-Every take with contact data (version 8 or later) now plays on the surface controller, even if it never touches the ground. So no take has speed limits. Older takes without contact data keep the approved airborne controller. A live airborne regression run is pending.
+Every take with contact data (version 8 or later) now plays on the surface controller, even if it never touches the ground. So no take has speed limits. Older takes without contact data keep the approved airborne controller.
+
+**Airborne regression (`live-airborne`):**
+- Take `20261004T224643Z-0001`: 21.86 s, airborne throughout, played on the surface controller. The user confirmed "it worked".
+- READY, then release, then COMPLETE; the jet was removed; no crash.
+- Horizontal ≤ 0.008 m, vertical ≤ 0.015 m, attitude ≤ 0.27°, velocity ≤ 0.52 m/s. Clock drift 0 ms. Retention 1e-15. State within 1e-4 (strobe edge excepted). `inAir()` correct. **PASS.**
+- The final completion sample is excluded from comparison: its pose is one step past the end of the recording.
+
+The first attempt was refused at readiness (`loaded_mismatch: weather[enable_fog]`). The scene was saved without a fog table, and DCS adds a fog default on load. `loaded_reference.py` now models that default and matches the real load exactly (`airborne-blocked/`, commit `1f1285f`).
 
 ## Scripts
 

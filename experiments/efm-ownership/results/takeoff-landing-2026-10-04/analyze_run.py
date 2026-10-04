@@ -32,8 +32,9 @@ for l in lines[h+1:]:
     d = dict(zip(cols, l.split(',')))
     src.append({k: float(v) if v else math.nan for k, v in d.items()})
 t0 = src[0]['t']; ts = [r['t'] - t0 for r in src]
-TOUCHDOWN = next(ts[i] for i in range(1, len(src)) if src[i-1]['in_air'] == 1 and src[i]['in_air'] == 0)
-LIFTOFF = next(ts[i] for i in range(1, len(src)) if src[i-1]['in_air'] == 0 and src[i]['in_air'] == 1)
+# Airborne-only takes have no transitions: every playing sample is 'airborne'.
+TOUCHDOWN = next((ts[i] for i in range(1, len(src)) if src[i-1]['in_air'] == 1 and src[i]['in_air'] == 0), math.inf)
+LIFTOFF = next((ts[i] for i in range(1, len(src)) if src[i-1]['in_air'] == 0 and src[i]['in_air'] == 1), -math.inf)
 
 def at(t, keys):
     i = max(1, min(len(ts)-1, bisect.bisect_right(ts, t)))
@@ -45,9 +46,11 @@ def prev(t, key):
 # Playback lead samples
 samples, contact = [], []
 log = (run/'dcs-playback.log').read_text(encoding='utf-8', errors='replace').splitlines()
+# The lead is the sampled unit whose controller status argument (999) is ever nonzero.
+LEAD = next(a[1] for a in (l.split(' SAMPLE,')[1].split(',') for l in log if ' SAMPLE,' in l) if float(a[16]) != 0)
 seen = set()
 for l in log:
-    if ' SAMPLE,' in l and 'Lead' in l:
+    if ' SAMPLE,' in l and l.split(' SAMPLE,')[1].split(',')[1] == LEAD:
         a = l.split(' SAMPLE,')[1].split(',')
         key = ('S', a[0], a[2])
         if key in seen: continue
@@ -95,7 +98,10 @@ def stats(v):
 print('\nPose (horizontal m, vertical m, attitude deg, velocity m/s)')
 order = ['held', 'taxi out + roll', 'liftoff (-3/+5 s)', 'airborne', 'touchdown (-5/+3 s)', 'rollout + taxi in', 'parked']
 for ph in order:
-    sel = [s for s in samples if phase_of(s) == ph and not (ph == 'held' and s['time'] < samples[0]['time'] + LOAD_TRANSIENT)]
+    # Skip the load transient, and a final playing sample whose comparison time
+    # (replay + offset) lies past the end of the recording: it has no source pose.
+    sel = [s for s in samples if phase_of(s) == ph and not (ph == 'held' and s['time'] < samples[0]['time'] + LOAD_TRANSIENT)
+           and not (s['phase'] == 'playing' and s['replay'] + best > ts[-1] + 1e-9)]
     if not sel: continue
     e = [pose_error(s, best) for s in sel]
     vlim = LIMITS['velocity_air'] if ph in ('airborne', 'liftoff (-3/+5 s)', 'touchdown (-5/+3 s)') else LIMITS['velocity_ground']
