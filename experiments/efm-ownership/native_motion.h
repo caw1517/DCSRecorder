@@ -15,7 +15,8 @@ inline bool read_rates(const void* handle, std::array<float,3>& rates) {
 inline const char* apply(const void* handle, uint32_t object_id,
                          native_body::Sample& before, native_body::Sample& after,
                          const std::array<double,16>* commanded, std::array<double,16>* captured=nullptr,
-                         bool neutralize_roll=false,const turn_path::Motion* motion=nullptr, uint64_t expected_id=16777472) {
+                         bool neutralize_roll=false,const turn_path::Motion* motion=nullptr, uint64_t expected_id=16777472,
+                         bool ground=false) {
     if(!expected_id || object_id!=expected_id) return "wrong_object_id";
     if(std::strcmp(native_body::sample(handle,before),"object_position_candidate")!=0)
         return "state_guard_rejected";
@@ -65,7 +66,7 @@ inline const char* apply(const void* handle, uint32_t object_id,
     for(int i=0;i<3;++i) distance2+=std::pow((*commanded)[12+i]-pose[12+i],2);
     if(distance2>100) return "command_step_too_large";
     if(motion) {
-        const auto validation=native_velocity::validate(handle,*motion);
+        const auto validation=native_velocity::validate(handle,*motion,ground);
         if(std::strcmp(validation,"valid")!=0) return validation;
     }
     if(neutralize_roll) {

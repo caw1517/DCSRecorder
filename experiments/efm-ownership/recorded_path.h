@@ -46,21 +46,27 @@ inline Quaternion quaternion(const Pose& p) {
         q[0]=(m[k][j]-m[j][k])/s;q[i+1]=s/4;q[j+1]=(m[i][j]+m[j][i])/s;q[k+1]=(m[i][k]+m[k][i])/s;}
     const double n=std::sqrt(dot(q,q));for(auto& v:q)v/=n;return q;
 }
-struct Sample { double t=0;std::array<double,3> p{},v{};Quaternion q{};double brake=0,canopy=0;hornet_exterior::Values exterior{};hornet_engine::Values engine{};hornet_lights::Values lights{};hornet_wheels::Values wheels{}; };
+struct Sample { double t=0;std::array<double,3> p{},v{};Quaternion q{};double brake=0,canopy=0;bool ground=false;hornet_exterior::Values exterior{};hornet_engine::Values engine{};hornet_lights::Values lights{};hornet_wheels::Values wheels{}; };
 struct Path {
     std::vector<Sample> samples;
     std::array<double,3> translation{};
     Quaternion initial_q{1,0,0,0};
     bool exact_start=false;
-    bool has_exterior=false,has_engine=false,has_lights=false,has_canopy=false,has_wheels=false;
+    bool has_exterior=false,has_engine=false,has_lights=false,has_canopy=false,has_wheels=false,has_contact=false;
     double duration() const { return samples.empty()?0:samples.back().t; }
     const char* load(const std::filesystem::path& filename) {
 #ifdef HORNET_GROUND_PROTOTYPE
         if(!ground_trial::tape_allowed(filename))return "ground_tape_not_authorized";
 #endif
-        samples.clear();has_exterior=false;has_engine=false;has_lights=false;has_canopy=false;has_wheels=false;exact_start=false;translation={};std::ifstream f(filename);std::string header;size_t n=0;
-        if(!(f>>header>>n) || (header!="DCSREC_PLAYBACK_V1" && header!="DCSREC_PLAYBACK_V2" && header!="DCSREC_PLAYBACK_V3" && header!="DCSREC_PLAYBACK_V4" && header!="DCSREC_PLAYBACK_V5" && header!="DCSREC_PLAYBACK_V6") || n<2 || n>100000) return "recording_header_rejected";
-        const bool wheels=header=="DCSREC_PLAYBACK_V6";
+        samples.clear();has_contact=false;has_exterior=false;has_engine=false;has_lights=false;has_canopy=false;has_wheels=false;exact_start=false;translation={};std::ifstream f(filename);std::string header;size_t n=0;
+        if(!(f>>header>>n) || (header!="DCSREC_PLAYBACK_V1" && header!="DCSREC_PLAYBACK_V2" && header!="DCSREC_PLAYBACK_V3" && header!="DCSREC_PLAYBACK_V4" && header!="DCSREC_PLAYBACK_V5" && header!="DCSREC_PLAYBACK_V6"
+#ifdef HORNET_SURFACE_PROTOTYPE
+            && header!="DCSREC_PLAYBACK_V7"
+#endif
+            ) || n<2 || n>100000) return "recording_header_rejected";
+        // V7 adds one source contact flag per sample: 1 grounded, 0 airborne.
+        const bool contact=header=="DCSREC_PLAYBACK_V7";
+        const bool wheels=header=="DCSREC_PLAYBACK_V6" || contact;
         const bool canopy=header=="DCSREC_PLAYBACK_V5" || wheels;
         const bool lights=header=="DCSREC_PLAYBACK_V4" || canopy;
         const bool engine=header=="DCSREC_PLAYBACK_V3" || lights;
@@ -70,6 +76,7 @@ struct Path {
         if(lights) {std::string profile;if(!(f>>profile) || profile!=hornet_lights::profile)return "recording_light_profile_rejected";}
         if(canopy) {std::string profile;if(!(f>>profile) || profile!=hornet_canopy::profile)return "recording_canopy_profile_rejected";}
         if(wheels) {std::string profile;if(!(f>>profile) || profile!=hornet_wheels::profile)return "recording_wheel_profile_rejected";}
+        if(contact) {std::string profile;if(!(f>>profile) || profile!="hornet-contact-v1")return "recording_contact_profile_rejected";}
         std::vector<Sample> loaded;loaded.reserve(n);
         for(size_t i=0;i<n;++i) {
             Sample s;f>>s.t;for(auto& v:s.p)f>>v;for(auto& v:s.q)f>>v;for(auto& v:s.v)f>>v;f>>s.brake;
@@ -78,12 +85,17 @@ struct Path {
             if(lights) {for(auto& v:s.lights)f>>v;if(!f || !hornet_lights::valid(s.lights))return "recording_lights_rejected";}
             if(canopy) {f>>s.canopy;if(!f || !hornet_canopy::valid(s.canopy))return "recording_canopy_rejected";}
             if(wheels) {for(auto& v:s.wheels)f>>v;if(!f || !hornet_wheels::valid(s.wheels))return "recording_wheels_rejected";}
+            if(contact) {double g=-1;f>>g;if(!f || (g!=0 && g!=1))return "recording_contact_rejected";s.ground=g==1;}
             if(!f || !std::isfinite(s.t) || !std::isfinite(s.brake))return "recording_sample_rejected";
             for(double v:s.p)if(!std::isfinite(v))return "recording_sample_rejected";
             for(double v:s.q)if(!std::isfinite(v))return "recording_sample_rejected";
             double speed2=0;for(double v:s.v) {if(!std::isfinite(v))return "recording_sample_rejected";speed2+=v*v;}
 #ifdef HORNET_GROUND_PROTOTYPE
             if(!ground_trial::speed_allowed(speed2) ||
+#elif defined(HORNET_SURFACE_PROTOTYPE)
+            // Grounded source samples may be slow or stationary; airborne samples
+            // keep the airborne envelope.
+            if((s.ground ? speed2>260*260 : (speed2<70*70 || speed2>260*260)) ||
 #else
             if(speed2<70*70 || speed2>260*260 ||
 #endif
@@ -100,7 +112,7 @@ struct Path {
         }
         std::string extra;if(f>>extra)return "recording_trailing_data_rejected";
         if(loaded.back().t<5 || loaded.back().t>300)return "recording_duration_rejected";
-        samples=std::move(loaded);has_exterior=exterior;has_engine=engine;has_lights=lights;has_canopy=canopy;has_wheels=wheels;initial_q=samples.front().q;return "recording_loaded";
+        samples=std::move(loaded);has_exterior=exterior;has_engine=engine;has_lights=lights;has_canopy=canopy;has_wheels=wheels;has_contact=contact;initial_q=samples.front().q;return "recording_loaded";
     }
     bool initialize_exact(const Pose& initial) {
         if(samples.empty())return false;
@@ -151,5 +163,12 @@ struct Path {
         return motion;
     }
     float brake_at(double t) const {return static_cast<float>(at_sample(t).brake);}
+    // Contact of the sample at or before t; airborne-only tapes are never grounded.
+    bool ground_at(double t) const {
+        if(!has_contact || samples.empty())return false;
+        t=std::clamp(t,0.0,duration());
+        auto it=std::upper_bound(samples.begin(),samples.end(),t,[](double t,const Sample& s){return t<s.t;});
+        return (it==samples.begin()?samples.front():*(it-1)).ground;
+    }
 };
 }

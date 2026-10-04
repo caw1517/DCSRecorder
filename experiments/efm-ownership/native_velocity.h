@@ -15,7 +15,7 @@ namespace native_velocity {
 inline bool read(const void* handle,std::array<float,3>& value) {
     return native_identity::read(reinterpret_cast<uintptr_t>(handle)+0x254,value);
 }
-inline const char* validate(const void* handle,const turn_path::Motion& motion) {
+inline const char* validate(const void* handle,const turn_path::Motion& motion,bool ground=false) {
     const auto module=GetModuleHandleW(L"WorldGeneral.dll");
     const auto base=reinterpret_cast<uintptr_t>(module);
     const auto entry=GetProcAddress(module,"?VectorVelocity@MovingObject@@UEAAAEBVVec3f@osg@@AEBV23@@Z");
@@ -58,6 +58,12 @@ inline const char* validate(const void* handle,const turn_path::Motion& motion) 
     // Only this separately built hold-only controller can command zero motion.
     // It cannot replay low-speed tapes or release into flight.
     if(!held_start::stationary(motion)) return "held_motion_rejected";
+#elif defined(HORNET_SURFACE_PROTOTYPE)
+    // Grounded tape samples (source in_air=0) may be stationary or slow. Airborne
+    // samples keep the release rule: zero hold motion or the airborne range.
+    if(ground ? speed2>turn_path::max_speed*turn_path::max_speed :
+       (!held_start::stationary(motion) &&
+        (speed2<70*70 || speed2>turn_path::max_speed*turn_path::max_speed)))return "velocity_speed_rejected";
 #elif defined(HORNET_RELEASE_PROTOTYPE)
     // Only this separate release control accepts zero hold motion or the
     // existing airborne speed range. Recording-reader guards stay intact.

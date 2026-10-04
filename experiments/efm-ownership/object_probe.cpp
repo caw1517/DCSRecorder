@@ -38,6 +38,11 @@ namespace playback_path=turn_path;
 #ifdef HORNET_PROTOTYPE
 #include "hornet_appearance.h"
 #endif
+// The bound ground trial and the general surface controller share read-only
+// ground pose tracing.
+#if defined(HORNET_GROUND_PROTOTYPE) || defined(HORNET_SURFACE_PROTOTYPE)
+#define HORNET_GROUND_TRACE
+#endif
 
 namespace {
 const ed_object_api_entry* api = nullptr;
@@ -46,7 +51,7 @@ std::ofstream log_file;
 std::ofstream identity_file;
 std::ofstream body_file;
 std::ofstream motion_file;
-#ifdef HORNET_GROUND_PROTOTYPE
+#ifdef HORNET_GROUND_TRACE
 std::ofstream ground_pose_file;
 #endif
 #ifdef HORNET_STAGED_PROTOTYPE
@@ -112,7 +117,7 @@ void drain_engine(Observation& state,double time) {
     engine_file.flush();
     if(lost || !engine_file) {state.motion_active=false;log_file << "engine_trace_failed," << state.runtime_id << ',' << time << '\n';log_file.flush();}
 }
-#ifdef HORNET_GROUND_PROTOTYPE
+#ifdef HORNET_GROUND_TRACE
 // Read-only boundary evidence: distinguish native integration from animation
 // or later pose replacement. No extra pose/velocity writes are performed.
 void trace_ground_pose(const char* phase,const void* handle,const Observation& state) {
@@ -142,7 +147,7 @@ void after_native_animation(const void* handle) {
     auto& state=found->second;
     if(!state.motion_active || !state.exterior_pending || !state.path.has_exterior ||
        !api || !api->ed_get_object_id || api->ed_get_object_id(sdk_handle)!=state.runtime_id)return;
-#ifdef HORNET_GROUND_PROTOTYPE
+#ifdef HORNET_GROUND_TRACE
     trace_ground_pose("after_animation",handle,state);
 #endif
     const auto view=api->ed_get_object_args(sdk_handle);
@@ -258,7 +263,7 @@ void before_native_step(const void* handle) {
     auto& state=it->second;
     ++state.step_calls;
     if(!state.motion_active || !state.step_pending) return;
-#ifdef HORNET_GROUND_PROTOTYPE
+#ifdef HORNET_GROUND_TRACE
     trace_ground_pose("before_step",handle,state);
 #endif
     state.step_pending=false; // A missing SDK callback cannot leave a stale override running.
@@ -275,16 +280,27 @@ void before_native_step(const void* handle) {
 #endif
        ) state.step_status="step_state_rejected";
     else {
+#ifdef HORNET_GROUND_TRACE
 #ifdef HORNET_GROUND_PROTOTYPE
-        // Live ground traces show the native ground correction replaces pose
-        // after the SDK command and before this integration boundary. Restore
-        // the same guarded tape sample here; consume only this SDK tick's work.
-        const auto target=state.path.at(state.clock.elapsed);
-        native_body::Sample before{},after{};
-        state.step_status=native_motion::apply(handle,id,before,after,&target,nullptr,
-                                               false,&state.step_motion,state.runtime_id);
-        if(std::strcmp(state.step_status,"called")==0)
-            trace_ground_pose("before_step_restored",handle,state);
+        const bool ground=true;
+#else
+        const bool ground=state.path.ground_at(state.clock.elapsed);
+#endif
+        if(ground) {
+            // Live ground traces show the native ground correction replaces pose
+            // after the SDK command and before this integration boundary. Restore
+            // the same guarded tape sample here; consume only this SDK tick's work.
+            const auto target=state.path.at(state.clock.elapsed);
+            native_body::Sample before{},after{};
+            state.step_status=native_motion::apply(handle,id,before,after,&target,nullptr,
+                                                   false,&state.step_motion,state.runtime_id,true);
+            if(std::strcmp(state.step_status,"called")==0)
+                trace_ground_pose("before_step_restored",handle,state);
+        } else {
+            state.step_status=native_velocity::validate(handle,state.step_motion);
+            if(std::strcmp(state.step_status,"valid")==0)
+                state.step_status=native_velocity::write_validated(handle,state.step_motion);
+        }
 #else
         state.step_status=native_velocity::validate(handle,state.step_motion);
         if(std::strcmp(state.step_status,"valid")==0)
@@ -300,7 +316,7 @@ void before_native_step(const void* handle) {
     if(std::strcmp(state.step_status,"called")==0) ++state.step_applied;
     else {
         state.motion_active=false;
-#ifdef HORNET_GROUND_PROTOTYPE
+#ifdef HORNET_GROUND_TRACE
         staged_playback::publish(api,sdk_handle,state.token,staged_playback::failed);
 #endif
     }
@@ -337,7 +353,7 @@ const char* install_native_step(const void* handle,bool exterior=false,bool engi
            !native_identity::read(image+native_build::dcs(0x6b73a7),writer) || writer!=native_build::animation_writer)return "animation_layout_mismatch";
         return native_step_hook::install(reinterpret_cast<uintptr_t>(handle)-8,image+native_build::dcs(0x1146200),
             reinterpret_cast<native_step_hook::Step>(image+native_build::dcs(0x70fef0)),&before_native_step,
-#ifdef HORNET_GROUND_PROTOTYPE
+#ifdef HORNET_GROUND_TRACE
             &after_ground_native_step,
 #else
             nullptr,
@@ -393,7 +409,7 @@ void open_log() {
     for(const char* prefix:{"velocity_before","velocity_after","velocity_command","angular_command"})
         for(int i=0;i<3;++i) motion_file << ',' << prefix << i;
     motion_file << ",step_hook_calls,step_hook_applied,step_hook_status\n" << std::setprecision(12);
-#ifdef HORNET_GROUND_PROTOTYPE
+#ifdef HORNET_GROUND_TRACE
     ground_pose_file.open(folder/("ground-pose-"+std::to_string(GetCurrentProcessId())+".csv"));
     ground_pose_file<<"phase,id,call,step,model_time,replay_time,readable,target_x,target_y,target_z,precise_x,precise_y,precise_z,float_x,float_y,float_z\n"<<std::setprecision(15);
 #endif
@@ -515,7 +531,7 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     if(found==observed.end())return;
     auto& state = found->second;
     ++state.calls;
-#ifdef HORNET_GROUND_PROTOTYPE
+#ifdef HORNET_GROUND_TRACE
     trace_ground_pose("sdk_entry",handle,state);
 #endif
 #ifdef HORNET_STAGED_PROTOTYPE
@@ -671,6 +687,11 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         const bool release=elapsed>playback_path::duration;
 #endif
         const auto target=state.path.at(elapsed);
+#ifdef HORNET_SURFACE_PROTOTYPE
+        const bool ground=state.path.ground_at(elapsed);
+#else
+        const bool ground=false;
+#endif
 #ifdef HORNET_RELEASE_PROTOTYPE
         const auto target_motion=state.clock.playing()?state.path.motion_at(elapsed):turn_path::Motion{};
 #elif defined(HORNET_HELD_PROTOTYPE)
@@ -693,7 +714,7 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         QueryPerformanceCounter(&apply_start);
         native_body::Sample before{},after{};
 #ifdef HORNET_STAGED_PROTOTYPE
-        const auto status=elapsed<0 ? "staged_clock_reversed" : native_motion::apply(handle,motion_id,before,after,&target,nullptr,false,&target_motion,state.runtime_id);
+        const auto status=elapsed<0 ? "staged_clock_reversed" : native_motion::apply(handle,motion_id,before,after,&target,nullptr,false,&target_motion,state.runtime_id,ground);
 #else
         const auto status=release ? "released" : native_motion::apply(handle,motion_id,before,after,&target,nullptr,false,match_motion ? &target_motion : nullptr);
 #endif

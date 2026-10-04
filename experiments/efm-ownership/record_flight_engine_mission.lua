@@ -6,6 +6,7 @@ local exterior_channels={0,3,5,9,10,11,12,13,14,15,16,17,18,28,29,89,90}
 if DCSRECORDER_LIGHTS then for _,c in ipairs({88,190,191,192,193,210,212})do exterior_channels[#exterior_channels+1]=c end end
 if DCSRECORDER_CANOPY then assert(DCSRECORDER_LIGHTS,'Canopy capture requires lights');exterior_channels[#exterior_channels+1]=38 end
 if DCSRECORDER_WHEELS then assert(DCSRECORDER_CANOPY,'Wheel capture requires canopy');for _,c in ipairs({1,6,4,101,103,102,2})do exterior_channels[#exterior_channels+1]=c end end
+if DCSRECORDER_CONTACT then assert(DCSRECORDER_WHEELS,'Contact capture requires wheels') end
 local function csv(s) return '"'..tostring(s):gsub('"','""')..'"' end
 function r.metadata()
     local u=Unit.getByName(r.source)
@@ -31,8 +32,9 @@ function r.metadata()
     local lights=DCSRECORDER_LIGHTS and '\nlight_profile,hornet-lights-v1' or ''
     local canopy=DCSRECORDER_CANOPY and '\ncanopy_profile,hornet-canopy-v1' or ''
     local wheels=DCSRECORDER_WHEELS and '\nwheel_profile,hornet-wheels-v1' or ''
-    return 'DCSREC,'..(DCSRECORDER_WHEELS and '7' or DCSRECORDER_CANOPY and '6' or DCSRECORDER_LIGHTS and '5' or DCSRECORDER_SMOKE and '4' or '3')..'\naircraft,'..csv(u:getTypeName())..'\nlivery,'..csv(livery)..
-        '\ntheatre,'..csv(env.mission.theatre)..'\nstate_profile,hornet-exterior-v1\nengine_profile,hornet-native-engine-v1'..smoke..lights..canopy..wheels..'\nsource_unit_id,'..tostring(u:getID())..'\nsource,'..csv(r.source)..'\n'
+    local contact=DCSRECORDER_CONTACT and '\ncontact_profile,hornet-contact-v1' or ''
+    return 'DCSREC,'..(DCSRECORDER_CONTACT and '8' or DCSRECORDER_WHEELS and '7' or DCSRECORDER_CANOPY and '6' or DCSRECORDER_LIGHTS and '5' or DCSRECORDER_SMOKE and '4' or '3')..'\naircraft,'..csv(u:getTypeName())..'\nlivery,'..csv(livery)..
+        '\ntheatre,'..csv(env.mission.theatre)..'\nstate_profile,hornet-exterior-v1\nengine_profile,hornet-native-engine-v1'..smoke..lights..canopy..wheels..contact..'\nsource_unit_id,'..tostring(u:getID())..'\nsource,'..csv(r.source)..'\n'
 end
 function r.sample()
     if r.state~='recording' then return 'IDLE' end
@@ -51,6 +53,20 @@ function r.sample()
         local minimum=c==2 and -1 or ((i<=3 or i>13) and 0 or -1)
         if type(value)~='number' or value~=value or value<minimum or value>1 then return 'INVALID' end
         state[i]=string.format('%.12g',value)
+    end
+    if DCSRECORDER_CONTACT then
+        -- Source ground evidence at the same instant: in-air flag, terrain under the
+        -- aircraft origin, health and surface type. Missing values fail the take.
+        local ok,contact=pcall(function()
+            local air=u:inAir();assert(type(air)=='boolean')
+            local ground={x=p.p.x,y=p.p.z}
+            return {air and 1 or 0,land.getHeight(ground),u:getLife(),u:getLife0(),land.getSurfaceType(ground)}
+        end)
+        if not ok then return 'INVALID' end
+        for _,value in ipairs(contact) do
+            if type(value)~='number' or value~=value or value==math.huge or value==-math.huge then return 'INVALID' end
+            state[#state+1]=string.format('%.12g',value)
+        end
     end
     return 'DATA,'..r.take..','..table.concat(values,',')..',,,'..table.concat(state,',')
 end

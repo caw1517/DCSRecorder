@@ -1,0 +1,17 @@
+{
+  "binary": "HornetSurfaceProbe.dll",
+  "sha256": "eea0cd24ece170df32d52f7776b426aeb807c6296f80248b287e0c611d59dfa0",
+  "built_from": {
+    "base_commit": "f90191c71eec66bad9c0122be1cf10b96c67388b",
+    "working_tree_sources": {
+      "object_probe.cpp": "09919a1bf23f3c271779e2d8fe5fb4e4d68377e8bb9a7c87b91f69da01443290",
+      "recorded_path.h": "7ab2f6eb2fc63fbf2df4e43bb893fb1b242a557ca52ec91a7d430407327b9cae",
+      "native_velocity.h": "80bb0e2995b812313166bf868e96329cc742a35eb790b719e57ec14af9bbb9fa",
+      "native_motion.h": "c51691fcb28966653f03bbfe4624469c3061056388e1e0841735bb222073d129",
+      "CMakeLists.txt": "5cc16373f5d05ab4dd2b4a1a0eb596355ee7a29dcbe7a781c124e013af87ddbc",
+      "surface-start/check_path.cpp": "82383bac8f0d5e00ccb802d10fbe8ff138513918764fae541b17b4fd7a88055f"
+    }
+  },
+  "definitions": "HORNET_PROTOTYPE HORNET_RECORDED_PROTOTYPE HORNET_STAGED_PROTOTYPE HORNET_ENGINE_STAGED_PROTOTYPE HORNET_RELEASE_PROTOTYPE HORNET_SURFACE_PROTOTYPE DCSR_BUILD_2930",
+  "offline_checks": "ctest Release: 48/48 including surface_path_check and surface_refusal_check against the real taxi tape"
+}

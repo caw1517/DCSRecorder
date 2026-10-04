@@ -2,7 +2,8 @@
 local sink_path,engine_path,root,mode=assert(arg[1]),assert(arg[2]),assert(arg[3]),arg[4] or 'normal'
 local smoke_path=arg[5]
 if smoke_path=='-' then smoke_path=nil end
-local wheels=arg[6]=='wheels'
+local contact=arg[6]=='contact'
+local wheels=arg[6]=='wheels' or contact
 local capture_build=arg[7] or '2.9.29.27468'
 local canopy=arg[6]=='canopy' or wheels
 local lights=arg[6]=='lights' or canopy
@@ -56,6 +57,7 @@ if smoke_path then metadata=metadata:gsub('DCSREC,3','DCSREC,4')..'smoke_profile
 if lights then metadata=metadata:gsub('DCSREC,[34]','DCSREC,5')..'light_profile,hornet-lights-v1\n'end
 if canopy then metadata=metadata:gsub('DCSREC,5','DCSREC,6')..'canopy_profile,hornet-canopy-v1\n'end
 if wheels then metadata=metadata:gsub('DCSREC,6','DCSREC,7')..'wheel_profile,hornet-wheels-v1\n'end
+if contact then metadata=metadata:gsub('DCSREC,7','DCSREC,8')..'contact_profile,hornet-contact-v1'..string.char(10) end
 if mode:match('^batch') then metadata=metadata..'capture_timing,frame-batch-v1\n'end
 local hex=metadata:gsub('.',function(c)return string.format('%02x',c:byte())end)
 emit('BEGIN,1,'..hex)
@@ -73,6 +75,10 @@ for i=0,300 do
     if wheels then
         for _,v in ipairs({.71+i/3000,.82+i/10000,.83-i/10000,(.97+i*.03)%1,(.98+i*.02)%1,(.99+i*.01)%1,-.7+i/300*1.4})do values[#values+1]=v end
         if mode=='invalid_wheel' then values[#values]='nan' end
+    end
+    if contact then
+        -- Parked, then rolling on the runway; damage and bad flags exercise refusal.
+        for _,v in ipairs({i<200 and 0 or 1,12.5,mode=='damaged' and i>=150 and 0.9 or 1,1,mode=='invalid_contact' and 7 or 5})do values[#values+1]=v end
     end
     for j,v in ipairs(values)do values[j]=tostring(v)end
     emit('DATA,1,'..(i+1)..','..table.concat(values,','))

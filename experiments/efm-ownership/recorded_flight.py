@@ -7,6 +7,7 @@ import smoke_state
 import light_state
 import canopy_state
 import wheel_state
+import contact_state
 
 def quaternion(f,u,r):
     m=[[f[i],u[i],r[i]] for i in range(3)];trace=sum(m[i][i] for i in range(3))
@@ -20,7 +21,7 @@ def quaternion(f,u,r):
 
 def read(path, *, ground_trial_log=None):
     with Path(path).open(newline='',encoding='utf-8-sig') as f: rows=list(csv.reader(f))
-    if not rows or rows[0] not in (['DCSREC',str(v)] for v in range(1,8)): raise ValueError('Unsupported recording version')
+    if not rows or rows[0] not in (['DCSREC',str(v)] for v in range(1,9)): raise ValueError('Unsupported recording version')
     version=int(rows[0][1])
     metadata={};i=1
     while i<len(rows) and rows[i] and rows[i][0]!='t':
@@ -43,6 +44,8 @@ def read(path, *, ground_trial_log=None):
     if version<6 and 'canopy_profile' in metadata: raise ValueError('Legacy recording cannot declare canopy')
     if version>=7 and metadata.get('wheel_profile')!=wheel_state.PROFILE: raise ValueError('Unsupported wheel profile')
     if version<7 and 'wheel_profile' in metadata: raise ValueError('Legacy recording cannot declare wheels')
+    if version>=8 and metadata.get('contact_profile')!=contact_state.PROFILE: raise ValueError('Unsupported contact profile')
+    if version<8 and 'contact_profile' in metadata: raise ValueError('Legacy recording cannot declare ground contact')
     has_smoke=version==4 or (version>=5 and 'smoke_profile' in metadata)
     if version>=5 and not has_smoke and any(k.startswith('smoke_') for k in metadata): raise ValueError('Incomplete smoke metadata')
     expected=columns(version,has_smoke)
@@ -58,7 +61,7 @@ def read(path, *, ground_trial_log=None):
         spec=importlib.util.spec_from_file_location('ground_source_evidence',Path(__file__).parent/'ground-start/source_evidence.py')
         evidence=importlib.util.module_from_spec(spec);spec.loader.exec_module(evidence)
         ground_report=evidence.validate(path,metadata,[dict(zip(names,row)) for row in body],ground_trial_log)
-    samples=[];raw=[]
+    samples=[];raw=[];flags=[]
     for row in body:
         if len(row)!=len(names): raise ValueError('Truncated sample row')
         d=dict(zip(names,row));raw.append(d)
@@ -75,11 +78,15 @@ def read(path, *, ground_trial_log=None):
         if sum(x*y for x,y in zip(cross,r))<0.999: raise ValueError('Reflected orientation basis')
         speed=math.sqrt(sum(x*x for x in v))
         elapsed=t-samples[0][0] if samples else 0
+        # Version 8 carries source contact per row: grounded rows may be slow or
+        # stationary; airborne rows keep the airborne speed envelope.
+        grounded=version>=8 and contact_state.parse(d)[0]==0
+        flags.append(grounded)
         if ground_report is not None and speed>5:raise ValueError('Ground trial exceeds bounded taxi speed')
         if speed>260:
             raise ValueError(f'Recorded speed {speed:.2f} m/s exceeds the current playback maximum of 260 m/s at {elapsed:.2f} s. '
                              'This limit uses ground speed (about 505 knots), not cockpit indicated airspeed. The recording is saved.')
-        if ground_report is None and speed<70:
+        if ground_report is None and not grounded and speed<70:
             raise ValueError(f'Recorded speed {speed:.2f} m/s is below the current airborne playback minimum of 70 m/s at {elapsed:.2f} s. '
                              'Ground starts and transitions are not yet supported. The recording is saved.')
         if not 0<=brake<=1:
@@ -113,10 +120,16 @@ def read(path, *, ground_trial_log=None):
             if any(not math.isfinite(v) or not (-1 if c==2 else 0)<=v<=1 for c,v in zip(wheel_state.CHANNELS,wheels)):
                 raise ValueError('Invalid wheel sample')
             sample.extend(wheels)
+    # Contact evidence is validated and summarized; endpoint eligibility is separate.
+    if version>=8: metadata['contact']=contact_state.summary(raw)
+    # Only takes with grounded samples need the native surface tape and controller.
+    surface=any(flags)
+    if surface:
+        for sample,grounded in zip(samples,flags):sample.append(1 if grounded else 0)
     if has_smoke: metadata['smoke_events']=smoke_state.transitions(metadata,raw)
     for sample in samples:sample[0]-=start
     metadata.update(duration=samples[-1][0],samples=len(samples),source_time=start,recording_version=version,
-                    exterior_available=version>=2,engine_available=version>=3,smoke_available=has_smoke,lights_available=version>=5,canopy_available=version>=6,wheels_available=version>=7)
+                    exterior_available=version>=2,engine_available=version>=3,smoke_available=has_smoke,lights_available=version>=5,canopy_available=version>=6,wheels_available=version>=7,contact_available=version>=8,surface_available=surface)
     if ground_report is not None:metadata['ground_trial']=ground_report
     return metadata,samples,raw
 
@@ -125,13 +138,14 @@ def convert(source,destination, *, ground_trial_log=None):
     destination=Path(destination);destination.parent.mkdir(parents=True,exist_ok=True)
     # Smoke commands are embedded in the mission. Lights and canopy extend the
     # native tape explicitly; older recordings keep their existing tape version.
-    metadata['native_tape_version']=6 if metadata['wheels_available'] else 5 if metadata['canopy_available'] else 4 if metadata['lights_available'] else min(metadata['recording_version'],3)
+    metadata['native_tape_version']=7 if metadata['surface_available'] else 6 if metadata['wheels_available'] else 5 if metadata['canopy_available'] else 4 if metadata['lights_available'] else min(metadata['recording_version'],3)
     text=f'DCSREC_PLAYBACK_V{metadata["native_tape_version"]}\n'+str(len(samples))+'\n'
     if metadata['exterior_available']:text+=PROFILE+'\n'
     if metadata['engine_available']:text+=engine_state.PROFILE+'\n'
     if metadata['lights_available']:text+=light_state.PROFILE+'\n'
     if metadata['canopy_available']:text+=canopy_state.PROFILE+'\n'
     if metadata['wheels_available']:text+=wheel_state.PROFILE+'\n'
+    if metadata['surface_available']:text+=contact_state.PROFILE+'\n'
     text+=''.join(' '.join(f'{v:.15g}' for v in row)+'\n' for row in samples)
     destination.write_text(text,encoding='ascii')
     destination.with_suffix('.json').write_text(json.dumps(metadata,indent=2)+'\n')

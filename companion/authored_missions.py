@@ -375,7 +375,7 @@ def record_script(name, namespace, source_sha, lineage=None, association=None):
     extra = f'\\nauthored_source_sha256,{source_sha}{provenance}\\ncapture_timing,frame-batch-v1\\ncapture_build,{BUILD}\\nwind_ground,0\\nwind_2000,0\\nwind_8000,0\\n'
     assert script.count(old) == 1
     script = script.replace(old, 'csv(r.source)..' + serialize(extra.replace('\\n', '\n')))
-    script = ('DCSRECORDER_WHEELS=true\nDCSRECORDER_CANOPY=true\nDCSRECORDER_LIGHTS=true\n' + script)
+    script = ('DCSRECORDER_CONTACT=true\nDCSRECORDER_WHEELS=true\nDCSRECORDER_CANOPY=true\nDCSRECORDER_LIGHTS=true\n' + script)
     # Only this capture's Lua global names change; the log protocol remains the
     # installed autosave/native-capture contract.
     script = script.replace('DCSRECORDER', namespace)
@@ -432,6 +432,12 @@ def role_edit(mission, row, key, value, edits):
         raise ValueError('Role no longer belongs to mission.')
     edits.append((path+[key], copy.deepcopy(row.get(key, {'__absent__': True}))))
     row[key] = value
+
+
+def role_remove(mission, row, key, edits):
+    """Declared removal of one role field; verify_preservation restores it."""
+    role_edit(mission, row, key, None, edits)
+    del row[key]
 
 
 def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, association=None):
@@ -502,8 +508,16 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     # Playback starts at the actual recording's first pose, even if capture began
     # after spawn. No translation or invented player offset is introduced.
     point=lead['group']['route']['points'][1]
+    # A take whose first sample is grounded (version-8 contact) starts as a hot
+    # ground start at that exact pose; a parking slot would move it.
+    grounded=raw_first.get('in_air')=='0'
     for key,value in dict(x=first[1],y=first[3],alt=first[2],alt_type='BARO',speed=speed,
-                          type='Turning Point',action='Turning Point').items():role_edit(mission,point,key,value,edits)
+                          type='TakeOffGroundHot' if grounded else 'Turning Point',
+                          action='From Ground Area Hot' if grounded else 'Turning Point').items():role_edit(mission,point,key,value,edits)
+    if grounded:
+        for row in (lead['unit'],point):
+            for key in ('parking','parking_id','parking_landing','airdromeId','helipadId','linkUnit'):
+                if key in row:role_remove(mission,row,key,edits)
     role_edit(mission,player['unit'],'skill','Player',edits)
     expected={21:first[11],38:first[42]}
     for channels,values in (([0,3,5,9,10,11,12,13,14,15,16,17,18],first[12:25]),

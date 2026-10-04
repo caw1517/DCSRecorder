@@ -15,6 +15,12 @@ local rejects=assert(loadstring('return function(base,v) '..condition..
     ' return true end return false end'))()
 local registered={enableModules={[pluginId]=true},
     pluginsById={[pluginId]={applied=true,state='installed'}}}
+-- Authored scenes may use other installed plugins (e.g. third-party static
+-- objects); the caller passes the IDs it found declared by installed entry.lua files.
+for i=5,#arg do
+    registered.enableModules[arg[i]]=true
+    registered.pluginsById[arg[i]]={applied=true,state='installed'}
+end
 dofile(missionFile)
 local count=0
 for _,required in pairs(mission.requiredModules) do

@@ -12,7 +12,7 @@ $root=(Resolve-Path -LiteralPath $PackageDirectory).Path
 $payload=(Resolve-Path -LiteralPath (Join-Path $root 'payload')).Path
 $saved=(Resolve-Path -LiteralPath (Join-Path $env:USERPROFILE 'Saved Games/DCS')).Path
 $manifest=Get-Content -LiteralPath (Join-Path $root 'manifest.json') -Raw | ConvertFrom-Json
-if ($manifest.profile -ne 'authored-playback-airborne-v1') { throw 'Unsupported package profile.' }
+if ($manifest.profile -notin @('authored-playback-airborne-v1','authored-playback-ground-v1')) { throw 'Unsupported package profile.' }
 $previous=$null
 if ($UpdateFrom) { $previous=Get-Content -LiteralPath (Join-Path (Resolve-Path -LiteralPath $UpdateFrom).Path 'manifest.json') -Raw | ConvertFrom-Json }
 $items=@()

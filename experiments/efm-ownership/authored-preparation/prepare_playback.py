@@ -20,6 +20,9 @@ import loaded_reference, check_resources
 
 DCS = Path('D:/DCS World')
 SEED = EFM/'results/countdown-release-2026-10-01/gear-package-v5'
+# Takes with grounded samples use the separately built surface controller
+# (release control plus contact-driven ground pose restoration).
+SURFACE = EFM/'results/surface-start-2026-10-03/controller'
 MODULE, BINARY = 'DCSRecorder-Hornet-Authored-Test', 'HornetAuthoredProbe'
 CONTROL = 'DCSRecorderAuthoredControl'
 
@@ -43,7 +46,30 @@ def plane_groups(mission):
                if isinstance(side, dict) for c in (side.get('country') or {}).values())
 
 
-def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved=None):
+def installed_plugins(dcs, saved_games):
+    """Plugin IDs declared by installed entry.lua files (DCS and Saved Games mods)."""
+    import re
+    ids = set()
+    for root in (dcs/'Mods', dcs/'CoreMods', saved_games/'Mods'):
+        for entry in root.glob('*/*/entry.lua') if root.exists() else []:
+            text = entry.read_text(encoding='utf-8', errors='replace')
+            # Literal IDs, or the stock modules' `local self_ID = "..."` form.
+            match = re.search(r'declare_plugin\s*\(\s*"([^"]+)"', text) or re.search(r'local\s+self_ID\s*=\s*"([^"]+)"', text)
+            if match: ids.add(match.group(1))
+    return ids
+
+
+def scene_plugins(mission, dcs, saved_games):
+    """Required modules other than the stock Hornet, each confirmed installed."""
+    required = set((mission.get('requiredModules') or {}).values())
+    missing = required - installed_plugins(dcs, saved_games)
+    if missing:
+        raise ValueError('This scene needs modules that are not installed: ' + ', '.join(sorted(missing)))
+    return sorted(required)
+
+
+def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved=None,
+          saved_games=Path.home()/'Saved Games/DCS'):
     """`saved` is the take's own scene when `source` is a confirmed newer revision."""
     dcs = Path(dcs)
     take, source, output = Path(take), Path(source), Path(output)
@@ -63,7 +89,12 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     (mod/'Liveries'/seed['module']).rename(mod/'Liveries'/MODULE)
     # Same accepted bytes; a distinct file name so Windows never shares the
     # loaded release-test DLL instance with this module.
-    shutil.copy2(oldmod/'bin'/f"{seed['binary']}.dll", mod/'bin'/f'{BINARY}.dll')
+    if metadata.get('surface_available'):
+        surface = json.loads((SURFACE/'manifest.json').read_text(encoding='utf-8'))
+        if digest(SURFACE/surface['binary']) != surface['sha256']: raise ValueError('Surface controller hash mismatch')
+        shutil.copy2(SURFACE/surface['binary'], mod/'bin'/f'{BINARY}.dll')
+    else:
+        shutil.copy2(oldmod/'bin'/f"{seed['binary']}.dll", mod/'bin'/f'{BINARY}.dll')
     convert(take, mod/'bin/recorded-flight.txt')
     token = fingerprint((mod/'bin/recorded-flight.txt').read_bytes())
     blob, entries, mission, manifest = a.playback_entries(source, lead_id, player_id, metadata, samples[0], raw[0], MODULE, token, saved)
@@ -100,14 +131,15 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     (payload/'Scripts/Hooks'/f'{CONTROL}.lua').write_text(hook, encoding='utf-8')
     luae = str(dcs/'bin/luae.exe')
     for args in ([HERE/'check_me_zones.lua', mission_lua],
-                 [EFM/'verify_hornet_requirements.lua', mission_lua, dcs/'Mods/aircraft/FA-18C/entry.lua', dcs/'MissionEditor/modules/me_mission.lua', 'authored'],
+                 [EFM/'verify_hornet_requirements.lua', mission_lua, dcs/'Mods/aircraft/FA-18C/entry.lua', dcs/'MissionEditor/modules/me_mission.lua', 'authored', *scene_plugins(mission, dcs, Path(saved_games))],
                  [EFM/'verify_hornet_routes.lua', mission_lua, dcs/'MissionEditor/modules/me_route.lua', plane_groups(mission)],
                  [HERE/'check_authored_hook.lua', payload, CONTROL, mission_name, namespace],
                  [HERE/'check_authored_mission.lua', control, namespace, manifest['selected_name']]):
         subprocess.run([luae, *map(str, args)], check=True)
     refs, problems = check_resources.problems(miz.read_bytes())
     if problems: raise ValueError('Unresolved resources: '+'; '.join(problems))
-    result = dict(profile='authored-playback-airborne-v1', dcs_build=a.BUILD, module=MODULE, binary=BINARY,
+    result = dict(profile='authored-playback-ground-v1' if metadata.get('surface_available') else 'authored-playback-airborne-v1',
+                  controller_sha256=digest(mod/'bin'/f'{BINARY}.dll'), dcs_build=a.BUILD, module=MODULE, binary=BINARY,
                   control=CONTROL, mission=mission_name, take=take.name, take_sha256=digest(take),
                   source_sha256=manifest['source_sha256'], seed_manifest_sha256=digest(SEED/'manifest.json'),
                   recording=metadata, mission_manifest=manifest,

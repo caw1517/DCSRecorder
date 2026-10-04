@@ -112,6 +112,9 @@ class Library:
                 if metadata['wheels_available']:
                     item['status_label'] += ' + wheels'
                     item['reason'] += ' Wheel rotation, suspension and nose-wheel steering are recorded.'
+                if metadata.get('surface_available'):
+                    item['status_label'] += ' + ground'
+                    item['reason'] += ' Ground contact is recorded; grounded segments play back on the ground controller.'
                 if metadata.get('authored_source_sha256'):
                     record = self.lineage.bind_take(path, metadata, self.authored_packages())
                     item.update(authored=True, status_label='Authored scene · '+item['status_label'],
@@ -257,7 +260,8 @@ class Library:
         output = self.home / 'authored-playback' / generation
         output.parent.mkdir(parents=True, exist_ok=True)
         name = 'DCSRecorder-Authored-Playback-' + generation[:8] + '.miz'
-        manifest = build(take, mission, scene['lead_id'], int(player_id), output, name, dcs=dcs, saved=saved)
+        manifest = build(take, mission, scene['lead_id'], int(player_id), output, name, dcs=dcs, saved=saved,
+                         saved_games=self.saved)
         (output / 'take-provenance.json').write_text(json.dumps(dict(take=record, scene_sha256=scene['sha256'],
                                                      saved_scene=scene['saved']), indent=2), encoding='utf-8')
         self.check_environment()
@@ -272,7 +276,9 @@ class Library:
         """Install only what this take changes. Shared module files must already
         match exactly; per-take files are replaced after a backup, with rollback."""
         payload, module, control = output / 'payload', manifest['module'], manifest['control']
+        # The controller differs between airborne and ground (surface) takes.
         per_take = {f'Mods/aircraft/{module}/bin/recorded-flight.txt', f'Mods/aircraft/{module}/bin/recorded-flight.json',
+                    f"Mods/aircraft/{module}/bin/{manifest['binary']}.dll",
                     f'Scripts/{control}/expected.lua', f'Scripts/Hooks/{control}.lua'}
         mission = 'Missions/' + manifest['mission']
         fresh = not (self.saved/'Mods/aircraft'/module).exists() and not (self.saved/'Scripts'/control).exists()

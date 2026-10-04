@@ -1,0 +1,49 @@
+{
+  "aircraft": "FA-18C_hornet",
+  "livery": "blue angels jet team",
+  "theatre": "Caucasus",
+  "state_profile": "hornet-exterior-v1",
+  "engine_profile": "hornet-native-engine-v1",
+  "light_profile": "hornet-lights-v1",
+  "canopy_profile": "hornet-canopy-v1",
+  "wheel_profile": "hornet-wheels-v1",
+  "contact_profile": "hornet-contact-v1",
+  "source_unit_id": "2",
+  "source": "Blue Angel #1 - Lead",
+  "authored_source_sha256": "de68fda2ba26b4a6c8bedca281825eacba2f658bd779179da7d6beb9258c3a96",
+  "authored_lineage": "be72024993e54941897721bdfef1072e",
+  "authored_association": "0880a8ec1d634879b829899628245c2b",
+  "capture_timing": "frame-batch-v1",
+  "capture_build": "2.9.30.28536",
+  "wind_ground": "0",
+  "wind_2000": "0",
+  "wind_8000": "0",
+  "contact": {
+    "profile": "hornet-contact-v1",
+    "grounded_samples": 1333,
+    "airborne_samples": 0,
+    "first_grounded": true,
+    "last_grounded": true,
+    "health_unchanged": true,
+    "grounded_origin_agl": [
+      1.8097776030000006,
+      1.834786312200002
+    ],
+    "surfaces": [
+      5
+    ]
+  },
+  "duration": 26.639999999999997,
+  "samples": 1333,
+  "source_time": 6.831,
+  "recording_version": 8,
+  "exterior_available": true,
+  "engine_available": true,
+  "smoke_available": false,
+  "lights_available": true,
+  "canopy_available": true,
+  "wheels_available": true,
+  "contact_available": true,
+  "surface_available": true,
+  "native_tape_version": 7
+}
