@@ -12,6 +12,34 @@ recording/playback implementation and its validation status. The integrated
 exterior controller has now passed the user's synchronized visual comparison.
 See the [integrated result](../../experiments/efm-ownership/results/exterior-integration-2026-09-27/README.md).
 
+## Ground operations update — 3 October 2026
+
+Recorded under [Play back short taxi flights through hot parked completion](https://github.com/caw1517/DCSRecorder/issues/27) on DCS 2.9.30.28536 with authored Mission Editor scenes. Evidence: `experiments/efm-ownership/results/surface-start-2026-10-03/`.
+
+- **Ground contact:** version-8 recordings store the source in-air flag, terrain height, life and surface for every sample. Grounded taxi, stop and parked samples play back on the surface controller.
+  - During playback the aircraft stays grounded on every sample, with health unchanged.
+  - Its origin clearance tracks the source within about 0.1 mm at the extremes.
+  - Parked holds of 141.7 s show no pose deviation and no change in any supported channel.
+- **Speed brake (argument 21):** retention is now exact after native animation:
+  - while held, during countdown and at the first frame
+  - while the brake extends and retracts on the ground
+  - through the parked hold
+  
+  This supersedes the 0.010002 residual described below.
+- **Smoke:** authored recordings capture white smoke when the aircraft carries the white pod on station 10. Playback switches within one 20 ms tick of the recorded change.
+- **Strobe (argument 193):** about 0.6% of reads select the adjacent row exactly at a sample boundary (within 4×10⁻¹⁵ s). This is the documented edge rounding, not drift.
+
+### Channels not captured or not restored
+
+Exterior appearance and native engine values are restored. The following are not part of the captured profile, or are only partly represented:
+
+- **Cockpit and internal systems:** switch positions, avionics, fuel, hydraulics and electrical state. Playback restores what the exterior shows, not internal systems.
+- **Engine internals:** only the core and fan RPM, thrust and power getters that feed sound and appearance are restored. Temperatures and fuel flow are not. Remaining sound depth is V2 ([Engine sound depth](https://github.com/caw1517/DCSRecorder/issues/12)).
+- **Refuelling probe:** extension geometry is not captured; only refuel light argument 212 is.
+- **Other animations:** tail hook, launch bar, wing fold, pilot figure, external store changes and vapour/condensation effects are not captured.
+- **Smoke:** only white smoke is supported; multicolor smoke is V2 ([Multicolor smoke](https://github.com/caw1517/DCSRecorder/issues/13)).
+- **Physics:** wheel-level contact forces, collision and wake. Playback contact is evidenced by the aircraft's in-air flag, terrain clearance and life, not by force data. Collision, wake and disturbance response remain separate requirements.
+
 ## Current result — 29 September 2026
 
 The supported Hornet/Blue Angels airborne workflow records and replays motion,
