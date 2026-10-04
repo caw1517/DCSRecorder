@@ -83,7 +83,20 @@ def loaded(mission, dcs='D:/DCS World', custom_aircraft=None, custom_type='-'):
         for action in rule.get('actions', {}).values():
             if action.get('predicate') == 'a_out_text_delay':
                 action.setdefault('KeyDict_text', action['text'])
+    if isinstance(m.get('weather'), dict):
+        weather(m['weather'], m.get('version', 0))
     return {f: number(m[f]) for f in FIELDS if f in m}
+
+
+def weather(w, version):
+    """me_mission.lua fixWeather (DCS 2.9.30): a scene saved without a fog table
+    loads with enable_fog=false and a zero fog table. Observed live on the airborne
+    regression scene (4 October 2026, version 23). The same load did not add the
+    fixFog fog2 default, so only the observed rule is modelled; anything else still
+    fails readiness at runtime."""
+    if not w.get('fog'):
+        w['enable_fog'] = False
+        w['fog'] = {'visibility': 0, 'thickness': 0}
 
 
 def differences(x, y, path=''):
