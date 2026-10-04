@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DCS Recorder — Mission workflow prototype</title>
+<style>
+:root{font:16px/1.5 system-ui,sans-serif;color:#e6edf5;background:#101821;--accent:#75d5c8;--muted:#a5b5c5}
+*{box-sizing:border-box}body{max-width:1220px;margin:0 auto;padding:32px 24px 60px}h1{font-size:30px;line-height:1.2;margin:10px 0}h2{font-size:19px;margin:0 0 16px}h3{font-size:15px;color:var(--accent);margin:0 0 10px}p{max-width:900px}small,.muted{color:var(--muted)}.tag{color:var(--accent);font-size:12px;letter-spacing:.12em;text-transform:uppercase}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{padding:20px;background:#192532;border:1px solid #314254;border-radius:10px}.notice{padding:14px 18px;border-left:4px solid var(--accent);background:#20313c;margin:24px 0;min-height:56px}.actions,.tabs{display:flex;gap:8px;flex-wrap:wrap}button,select{font:inherit;color:inherit;background:#233646;border:1px solid #496275;border-radius:6px;padding:8px 12px;cursor:pointer}button:hover,button:focus-visible{border-color:var(--accent);background:#2d4857}button[aria-selected=true],.primary{border-color:var(--accent);color:var(--accent)}button:disabled{opacity:.38;cursor:default}section{margin-top:28px}dl{margin:0}dt{font-size:12px;text-transform:uppercase;color:var(--muted);margin-top:12px}dd{margin:2px 0;overflow-wrap:anywhere}.wide{grid-column:1/-1}.walk{margin-top:12px}.steps{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.step{max-width:240px;text-align:left}label{display:block;margin:10px 0}select{margin-left:6px}.ok{color:var(--accent)}ul{padding-left:20px}.trail{max-height:170px;overflow:auto;color:var(--muted)}@media(max-width:850px){.grid{grid-template-columns:1fr}body{padding:20px 14px}h1{font-size:25px}}
+</style>
+<header><div class="tag">Throwaway workflow prototype · reviewed design</div>
+<h1>Your mission, one recording, a prepared copy</h1>
+<p>Can you keep designing in DCS Mission Editor, use the companion only to select aircraft and recordings, and reliably replay a flight after the mission has been edited?</p>
+<p class="muted">This is an in-memory demonstration, not a working DCS integration. Aircraft, files and recordings below are examples. Ground operation and change detection still need implementation and simulator validation. Reloading resets everything.</p></header>
+<div class="notice" id="notice" role="status" aria-live="polite"></div>
+<div class="grid" id="state"></div>
+<section class="card"><h2>Free play</h2><p class="muted">Try actions in any order. Editing represents saving the authored mission in Mission Editor; preparing always creates a new copy.</p>
+<div id="actions" class="actions"></div>
+<label>Aircraft you fly during playback <select id="pilot"><option value="Wingman">Wingman</option><option value="Lead">Lead (already assigned to recording)</option></select></label>
+<label>Scene to use for playback <select id="scene"><option value="saved">Saved with the recording (default)</option><option value="edited">Latest authored mission</option></select></label>
+</section>
+<section class="card"><h2>Guided walkthroughs</h2><div class="tabs" id="tabs" role="tablist" aria-label="Mission workflow scenarios"></div><div class="walk" id="walk"></div></section>
+<section class="grid"><div class="card"><h2>Proposed preparation contract</h2><ul><li>The original authored mission and recordings stay unchanged.</li><li>The recording is tied to a saved mission version and its selected aircraft.</li><li>Playback starts at the first recorded pose, not a relocated editor marker.</li><li>The other selected Hornet becomes your flyable aircraft at its authored position.</li><li>Unrelated aircraft, trucks, briefing, triggers and resources are preserved.</li><li>Each generated copy appears in Saved Games/DCS/Missions.</li></ul></div>
+<div class="card"><h2>Changes needing a decision</h2><ul><li>Moved recorded aircraft: proposed hard stop when using the edited mission. Use the saved version or restore its placement.</li><li>Moved player aircraft or scenery: proposed change review, followed by explicit use of that scene.</li><li>Different terrain or ambiguous aircraft identity: proposed hard stop.</li><li>Prepared copies: edit the authored mission and prepare again. Runtime detection of edits to generated copies is still unproven.</li></ul></div>
+<div class="card"><h2>Outside this model</h2><p>How the aircraft is held, released and kept parked belongs to the next lifecycle decision. This file does not simulate DCS pause, contact, collision, trigger execution, scenery safety or additional playback layers.</p><p>Direct editor-only setup remains an alternative to review; the current repository does not implement that workflow.</p></div></section>
+<section class="card"><h2>What happened</h2><ol class="trail" id="trail"></ol></section>
+<script>
+// Portable proposed state model. No file access, storage, network or DOM dependencies.
+const Workflow = (() => {
+ const copy = x => JSON.parse(JSON.stringify(x));
+ const initial = () => ({authored:{revision:1,terrain:'Caucasus',lead:'Ramp A · heading 090',pilot:'Ramp B · heading 090',extras:[{id:'unit-103',name:'Hornet 3',position:'Ramp D'},{id:'unit-104',name:'Hornet 4',position:'Ramp E'}],truck:'Reference point · 1 mile',triggers:2},prepared:null,take:null,output:null,pilot:'Wingman',scene:'saved',reviewed:null,generation:0,message:'Start with four authored Hornets: Lead, Wingman, Hornet 3 and Hornet 4. Only one aircraft will reproduce a recording.',history:[]});
+ const changes = s => {
+  if(!s.take)return [];
+  const a=s.authored,b=s.take.mission,out=[];
+  for(const [key,label] of [['terrain','Terrain'],['lead','Recorded aircraft starting placement'],['pilot','Your aircraft starting placement'],['truck','Reference truck'],['triggers','Authored triggers']])if(a[key]!==b[key])out.push(label);
+  if(JSON.stringify(a.extras)!==JSON.stringify(b.extras))out.push('Mission aircraft added or changed');
+  return out;
+ };
+ const act = (old,action,value) => {
+  const s=copy(old);let message='';
+  const edit=(key,val,label)=>{s.authored[key]=val;s.authored.revision++;s.reviewed=null;message=label+' Saved authored revision '+s.authored.revision+'. Existing prepared copies and takes stay unchanged.';};
+  if(action==='reset')return initial();
+  if(action==='recordPrep'){s.generation++;s.prepared={mission:copy(s.authored),name:'Show-Record-'+s.generation+'.miz',aircraft:'Lead'};message='Created a recording copy: you fly Lead. The original mission remains untouched.';}
+  if(action==='record'){
+   if(!s.prepared)message='Prepare a recording mission first.';
+   else{s.take={name:'Lead take',mission:copy(s.prepared.mission),source:s.prepared.name,aircraft:'Lead',pose:s.prepared.mission.lead,ending:'Parked, engines running'};s.reviewed=null;message='Simulated a completed take from '+s.prepared.name+'. Saved its mission version and original recorded path.';}
+  }
+  if(action==='moveLead')edit('lead','Runway threshold · heading 270','Moved Lead in Mission Editor.');
+  if(action==='restoreLead'){if(!s.take)message='Record a flight first to restore its authored placement.';else edit('lead',s.take.mission.lead,'Restored Lead to its captured authored placement.');}
+  if(action==='movePilot')edit('pilot','Ramp C · heading 090','Moved Wingman in Mission Editor.');
+  if(action==='moveTruck')edit('truck','Reference point · 2 miles','Moved the reference truck in Mission Editor.');
+  if(action==='addTrigger')edit('triggers',s.authored.triggers+1,'Added an authored trigger.');
+  if(action==='addAircraft'){const n=s.authored.extras.length+3;edit('extras',[...s.authored.extras,...Array.from({length:3},(_,i)=>({id:'unit-'+(100+n+i),name:'Hornet '+(n+i),position:'New ramp spot '+(n+i)}))],'Added three Hornets without changing existing aircraft associations.');}
+  if(action==='terrain')edit('terrain','Different terrain','Changed terrain in Mission Editor.');
+  if(action==='pilot'){s.pilot=value;message='Selected '+(s.authored.extras.find(u=>u.id===value)?.name||value)+' as your aircraft during playback.';}
+  if(action==='scene'){s.scene=value;message=value==='saved'?'Playback will use the scene saved with the take. New edits are not included.':'Playback will use the latest authored mission after compatibility checks and change review.';}
+  if(action==='review'){
+   if(!s.take)message='Record a flight first.';
+   else if(s.authored.terrain!==s.take.mission.terrain||s.authored.lead!==s.take.mission.lead)message='Review cannot override terrain or recorded-aircraft placement mismatches.';
+   else{s.reviewed=s.authored.revision;message='Reviewed authored revision '+s.reviewed+': '+(changes(s).join(', ')||'no scene changes')+'. This acknowledges edits; it does not prove obstacle or script safety.';}
+  }
+  if(action==='playPrep'){
+   if(!s.take)message='Choose a completed recording first.';
+   else if(s.pilot===s.take.aircraft)message='Choose a different Hornet to fly. Lead is assigned to playback; one aircraft cannot have both roles.';
+   else {
+    const scene=s.scene==='saved'?s.take.mission:s.authored;
+    const playerPosition=s.pilot==='Wingman'?scene.pilot:scene.extras.find(u=>u.id===s.pilot)?.position;
+    const playerName=s.pilot==='Wingman'?'Wingman':scene.extras.find(u=>u.id===s.pilot)?.name;
+    if(!playerPosition)message='This aircraft is absent from the selected scene. Choose the updated authored mission and review its additions.';
+    else if(scene.terrain!==s.take.mission.terrain)message='Blocked: the terrain differs from the recording. Use its saved mission version.';
+    else if(scene.lead!==s.take.mission.lead)message='Blocked: Lead was moved after recording. Use the saved scene or restore its original placement. The path will not be translated.';
+    else if(s.scene==='edited'&&changes(s).length&&s.reviewed!==s.authored.revision)message='Review scene changes before preparing: '+changes(s).join(', ')+'.';
+    else{s.generation++;s.output={name:'Show-Playback-'+s.generation+'.miz',mission:copy(scene),player:playerName,playerPosition,playback:s.take.aircraft,take:s.take.name,pose:s.take.pose,recorderTriggers:2};message='Created a separate playback copy. Lead follows the original recording; you fly '+playerName+' at '+playerPosition+'.';}
+   }
+  }
+  s.message=message;s.history.push(message);return s;
+ };
+ return {initial,act,changes};
+})();
+// Throwaway presentation shell.
+let state=Workflow.initial(),activeScenario=-1,stepIndex=0;
+const actions=[['recordPrep','Prepare recording copy'],['record','Simulate completed recording'],['playPrep','Prepare playback copy'],['moveLead','Move Lead'],['restoreLead','Restore Lead'],['movePilot','Move Wingman'],['moveTruck','Move reference truck'],['addAircraft','Add three Hornets'],['addTrigger','Add mission trigger'],['terrain','Change terrain'],['review','Review current scene changes'],['reset','Reset everything']];
+const scenarios=[
+ {name:'Four aircraft become seven',text:'Record in a four-aircraft scene, then add three Hornets. Keep the old take and use the expanded scene to fly a new Hornet alongside it. There is still one playback aircraft.',steps:[['recordPrep','Prepare four-aircraft scene'],['record','Save Lead take'],['addAircraft','Add three Hornets'],['pilot','Choose new Hornet 5','unit-105'],['playPrep','Try the old saved scene'],['scene','Use expanded authored mission','edited'],['review','Review the three additions'],['playPrep','Prepare seven-aircraft scene']]},
+ {name:'First flight',text:'Author once, record Lead, then fly Wingman alongside the same take in the same scene.',steps:[['recordPrep','Prepare recording copy'],['record','Fly and save Lead take'],['playPrep','Prepare playback copy']]},
+ {name:'Recorded aircraft moved',text:'Moving the editor aircraft does not move the recorded taxi path. Try the edited scene, see the refusal, then recover the saved scene.',steps:[['recordPrep','Prepare recording copy'],['record','Save Lead take'],['moveLead','Move Lead to runway'],['scene','Use latest authored mission','edited'],['playPrep','Try preparing playback'],['scene','Use scene saved with take','saved'],['playPrep','Prepare with original scene']]},
+ {name:'Truck or player moved',text:'Scene edits are distinct from moving a recording. Review the changed scene, then use it deliberately with the original path.',steps:[['recordPrep','Prepare recording copy'],['record','Save Lead take'],['moveTruck','Move reference truck'],['movePilot','Move Wingman'],['scene','Use latest authored mission','edited'],['playPrep','See changes needing review'],['review','Acknowledge current changes'],['playPrep','Prepare edited scene']]},
+ {name:'Edited after preparation',text:'A generated recording copy is its own version. Later edits to the authored mission do not change the mission you actually flew.',steps:[['recordPrep','Prepare revision 1'],['moveTruck','Edit authored mission to revision 2'],['record','Record prepared revision 1'],['playPrep','Replay the recorded scene']]},
+ {name:'Conflicting aircraft roles',text:'The recorded aircraft and the player need distinct assignments in the playback copy.',steps:[['recordPrep','Prepare recording copy'],['record','Save Lead take'],['pilot','Try to fly Lead too','Lead'],['playPrep','See role conflict'],['pilot','Choose Wingman','Wingman'],['playPrep','Prepare playback']]},
+ {name:'Preserve mission triggers',text:'New recorder controls must coexist with authored triggers. The example adds two recorder-owned triggers; the real mechanism still needs validation.',steps:[['addTrigger','Add an authored trigger'],['recordPrep','Prepare recording copy'],['record','Save Lead take'],['playPrep','Inspect trigger counts']]}
+];
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const field=(k,v)=>'<dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd>';
+const card=(title,fields)=>'<article class="card"><h2>'+esc(title)+'</h2><dl>'+fields.map(([k,v])=>field(k,v)).join('')+'</dl></article>';
+function render(){
+ const s=state,a=s.authored,t=s.take,p=s.prepared,o=s.output;
+ document.getElementById('notice').textContent=s.message;
+ document.getElementById('state').innerHTML=
+ card('Authored mission',[['File','Show.miz · revision '+a.revision],['Terrain',a.terrain],['Lead · Hornet',a.lead],['Wingman · Hornet',a.pilot],['Other authored Hornets',a.extras.map(u=>u.name).join(', ')],['Total aircraft',2+a.extras.length],['Reference truck',a.truck],['User triggers',a.triggers]])+
+ card('Recording and saved scene',[['Prepared recording copy',p?p.name:'None'],['Prepared scene version',p?p.mission.revision:'—'],['Recording',t?t.name:'None'],['Scene saved with recording',t?'Revision '+t.mission.revision:'—'],['Recorded first pose',t?t.pose:'—'],['Recorded endpoint',t?t.ending:'—']])+
+ card('Latest playback copy',[['Output',o?'Saved Games/DCS/Missions/'+o.name:'None'],['Scene version',o?'Revision '+o.mission.revision:'—'],['Playback / player',o?o.playback+' / '+o.player:'—'],['Playback first pose',o?o.pose:'—'],['Player position',o?o.playerPosition:'—'],['Scene aircraft / playback aircraft',o?(2+o.mission.extras.length)+' / 1':'—'],['Reference truck',o?o.mission.truck:'—'],['User / recorder triggers',o?o.mission.triggers+' / '+o.recorderTriggers:'—']])+
+ '<div class="card wide"><h3>Current choices and changes</h3><span>Player: '+esc(s.authored.extras.find(u=>u.id===s.pilot)?.name||s.pilot)+' · Scene: '+(s.scene==='saved'?'saved with recording':'latest authored mission')+' · Reviewed revision: '+esc(s.reviewed??'none')+'</span><p class="muted">Changes since recording: '+esc(Workflow.changes(s).join(', ')||'none')+'. Existing output above remains unchanged until a new copy is successfully prepared.</p></div>';
+ document.getElementById('pilot').innerHTML='<option value="Wingman">Wingman</option><option value="Lead">Lead (already assigned to recording)</option>'+a.extras.map(u=>'<option value="'+esc(u.id)+'">'+esc(u.name)+'</option>').join('');
+ document.getElementById('pilot').value=s.pilot;document.getElementById('scene').value=s.scene;
+ document.getElementById('trail').innerHTML=s.history.map(x=>'<li>'+esc(x)+'</li>').join('');
+ renderWalk();
+}
+function dispatch(action,value){state=Workflow.act(state,action,value);render();}
+document.getElementById('actions').innerHTML=actions.map(([a,label])=>'<button data-action="'+a+'">'+label+'</button>').join('');
+document.getElementById('actions').addEventListener('click',e=>{if(e.target.dataset.action){activeScenario=-1;dispatch(e.target.dataset.action);}});
+for(const id of ['pilot','scene'])document.getElementById(id).addEventListener('change',e=>{activeScenario=-1;dispatch(id,e.target.value);});
+function renderWalk(){
+ document.getElementById('tabs').innerHTML=scenarios.map((x,i)=>'<button role="tab" aria-selected="'+(i===activeScenario)+'" data-scenario="'+i+'">'+x.name+'</button>').join('');
+ const el=document.getElementById('walk');if(activeScenario<0){el.innerHTML='<p class="muted">Choose a scenario to reset the demo and walk through it step by step.</p>';return;}
+ const sc=scenarios[activeScenario];el.innerHTML='<p>'+sc.text+'</p><div class="steps">'+sc.steps.map((x,i)=>'<button class="step '+(i===stepIndex?'primary':'')+'" data-step="'+i+'" '+(i===stepIndex?'':'disabled')+'>'+(i+1)+'. '+x[1]+(i<stepIndex?' ✓':'')+'</button>').join('')+'</div>'+(stepIndex===sc.steps.length?'<p class="ok">Walkthrough complete. Try another scenario or use free play.</p>':'');
+}
+document.getElementById('tabs').addEventListener('click',e=>{if(e.target.dataset.scenario!==undefined){activeScenario=Number(e.target.dataset.scenario);stepIndex=0;state=Workflow.initial();render();}});
+document.getElementById('walk').addEventListener('click',e=>{if(e.target.dataset.step!==undefined){const step=scenarios[activeScenario].steps[stepIndex++];dispatch(step[0],step[2]);}});
+render();
+</script>
+</html>

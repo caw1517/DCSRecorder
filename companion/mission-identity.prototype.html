@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mission identity — decision prototype</title>
+<style>
+:root{font:16px/1.5 system-ui,sans-serif;color:#183047;background:#f1f4f7}body{max-width:1100px;margin:36px auto;padding:0 22px}h1{font-size:30px;margin-bottom:8px}h2{font-size:20px}h3{font-size:16px}p{max-width:85ch}.notice{color:#596b7c;font-size:14px}section{background:white;border:1px solid #d6dfe6;border-radius:10px;padding:20px;margin:18px 0}button,select{font:inherit;border:1px solid #92aabd;border-radius:5px;background:#fff;color:#164d78;padding:8px 12px;margin:4px;cursor:pointer}button:hover{background:#eaf4ff}button:disabled{color:#84909a;background:#f2f4f6;cursor:default}.active{background:#174f7b;color:white}table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:9px;text-align:left;border-bottom:1px solid #e0e6ec}dt{font-weight:650}dd{margin:0 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.status{padding:14px;border-left:5px solid #2774a6;background:#eaf3fa}.stop{border-color:#b76530;background:#fff3e9}.pill{font-size:12px;background:#eaf0f5;padding:3px 6px}.steps button{display:block;text-align:left}#changed{font-weight:600}@media(max-width:750px){.grid{grid-template-columns:1fr}table{font-size:12px}body{padding:0 12px}}
+</style>
+<h1>Which aircraft does this take belong to?</h1>
+<p>Explore how a four-aircraft scene can grow to seven without silently attaching an earlier take to the wrong aircraft.</p>
+<p class="notice">THROWAWAY decision prototype. All actions below simulate the association policy in memory. They do not operate DCS, validate a real mission, or demonstrate Mission Editor save behavior. The user approved confirmation once per changed revision; simulator evidence is documented separately.</p>
+<section><h2>Current state</h2><p id="changed" aria-live="polite"></p><div id="status" class="status" aria-live="polite"></div><div class="grid"><div><h3>Saved with the take</h3><dl id="saved"></dl></div><div><h3>Selected scene and checks</h3><dl id="current"></dl></div></div><table><thead><tr><th>Aircraft</th><th>Editor ID</th><th>Configuration</th><th>Authored start</th><th>Correspondence</th></tr></thead><tbody id="aircraft"></tbody></table></section>
+<section><h2>Review a changed revision</h2><p>Editor IDs and names are clues. Even an identical-looking replacement cannot prove that the original aircraft survived. Confirm the intended aircraft for this specific revision; the original take and its saved scene stay unchanged.</p><label for="candidate">Aircraft to associate with this take:</label><select id="candidate"></select><div><button id="review">Review the scene changes</button><button id="confirm">Confirm the selected aircraft for this revision</button><button id="prepare">Prepare playback copy</button><button id="verify">Check generated copy at load (simulation)</button></div><p id="reviewSummary"></p></section>
+<section><h2>Free play</h2><div id="actions"></div></section>
+<section><h2>Guided walkthroughs</h2><div id="tabs" role="tablist"></div><h3 id="scenarioTitle"></h3><p id="scenarioDescription"></p><div id="steps" class="steps"></div></section>
+<section><h2>What the decision must acknowledge</h2><ul><li>The companion owns persistent aircraft associations and immutable mission revisions. A mission filename, list position, aircraft count, callsign, name or numeric editor ID is insufficient by itself.</li><li>Selected-aircraft configuration and authored placement must remain compatible. The first recorded pose is separate and never moves when the scene changes.</li><li>A future trusted load check could compare the generated archive against an external preparation record. That needs live validation. The existing recording fingerprint checks the tape, not the mission.</li><li>Later script actions, editor test flights from temporary data, a missing checker, and changes after verification need explicit coverage decisions. This demo makes no universal detection claim.</li><li>Legacy takes keep their existing playback path. Selecting a scene now cannot create missing historical provenance.</li></ul></section>
+<script>
+// Pure decision model. DOM code below is only a display and input adapter.
+const IdentityModel = (() => {
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const unit = (id,name) => ({id,name,type:'Stock Hornet',livery:'Blue Angels',loadout:'Recorded loadout',spawn:'Parking 12; heading 90°'});
+  const compatible = (u,t) => ['type','livery','loadout','spawn'].every(k=>u[k]===t[k]);
+  const initial = () => {
+    const aircraft=[unit(101,'Lead'),unit(102,'Wing 2'),unit(103,'Wing 3'),unit(104,'Wing 4')];
+    aircraft.slice(1).forEach((u,i)=>u.spawn=`Parking ${13+i}; heading 90°`);
+    return {revision:1,serial:1,aircraft,terrain:'Caucasus',wind:'Zero wind',legacy:false,
+      take:{association:'Aircraft A / Lineage L',sourceRevision:1,preparedRevision:'Recording copy R1',aircraft:clone(aircraft[0]),firstPose:'Runway hold point, 410 m from authored parking'},
+      selected:101,reviewed:true,confirmed:true,changes:[],generated:null,notice:'The saved revision has a confirmed aircraft association.'};
+  };
+  function candidates(s){return s.aircraft.filter(u=>compatible(u,s.take.aircraft));}
+  function verdict(s){
+    if(s.legacy)return {ok:false,text:'Legacy take: authored-scene provenance is unavailable. Use its existing compatibility path; do not invent an association.'};
+    if(s.terrain!=='Caucasus'||s.wind!=='Zero wind')return {ok:false,text:'Stop: terrain or weather is incompatible. Use the saved scene or restore supported settings.'};
+    const ids=s.aircraft.map(u=>u.id);
+    if(new Set(ids).size!==ids.length)return {ok:false,text:'Stop: duplicate editor IDs make this revision ambiguous. Repair it in Mission Editor and import again.'};
+    const old=s.aircraft.find(u=>u.id===s.take.aircraft.id);
+    if(old&&!compatible(old,s.take.aircraft))return {ok:false,text:'Stop: the recorded aircraft’s configuration or authored start changed. Restore it or use the saved scene. The recorded path will not move.'};
+    if(!candidates(s).length)return {ok:false,text:'Stop: no compatible aircraft is present. Use the saved scene or restore the aircraft; do not choose by name alone.'};
+    if(!s.reviewed)return {ok:false,text:'Review required: inspect this scene revision and its changes before preparing playback.'};
+    if(!s.confirmed)return {ok:false,text:'Aircraft confirmation required: identify the intended aircraft for this revision. A matching ID or name is not proof.'};
+    if(!candidates(s).some(u=>u.id===s.selected))return {ok:false,text:'Select a compatible aircraft explicitly.'};
+    return {ok:true,text:'Ready for preparation under the proposed policy. The original take, first pose and saved mission remain unchanged.'};
+  }
+  function transition(state,action,value){
+    if(action==='reset')return initial();
+    if(action==='saved')return state.legacy?{...clone(state),notice:'This legacy take has no saved authored scene. Its original playback path remains available outside this prototype.'}:initial();
+    const s=clone(state);
+    const edit=message=>{s.revision=++s.serial;s.reviewed=false;s.confirmed=false;s.changes.push(message);s.notice=message;};
+    if(action==='add'){const max=Math.max(100,...s.aircraft.map(u=>u.id));for(let i=1;i<=3;i++){const u=unit(max+i,`Added ${max+i}`);u.spawn=`New parking ${max+i}`;s.aircraft.push(u);}edit('Added three ordinary aircraft; existing aircraft are unchanged.');}
+    if(action==='rename'){const u=s.aircraft.find(u=>u.id===101);if(u){u.name+=' renamed';edit('Renamed Lead. Its ID is a clue; review and confirmation are still required.');}}
+    if(action==='reorder'){s.aircraft.reverse();edit('Reordered the aircraft list. The take never binds to a list position.');}
+    if(action==='saveas'){edit('Imported a Save As revision. Select the existing lineage deliberately; filename does not establish it.');}
+    if(action==='replace'){const i=s.aircraft.findIndex(u=>u.id===101);if(i>=0){s.aircraft[i]=clone(s.take.aircraft);edit('Deleted and recreated an indistinguishable aircraft with the same name and ID. Only your edit history reveals this.');}}
+    if(action==='duplicate'){const u=clone(s.take.aircraft);u.id=Math.max(...s.aircraft.map(a=>a.id))+1;u.name='Lead copy';s.aircraft.push(u);edit('Duplicated Lead at an identical start. There are now multiple compatible candidates; select explicitly.');}
+    if(action==='remove'){s.aircraft=s.aircraft.filter(u=>u.id!==101);s.selected=null;edit('Deleted the original candidate. No replacement is chosen automatically.');}
+    if(action==='move'){const u=s.aircraft.find(u=>u.id===101);if(u){u.spawn='Parking 99; heading 180°';edit('Moved the authored start. First recorded pose and measured path remain fixed.');}}
+    if(action==='loadout'){const u=s.aircraft.find(u=>u.id===101);if(u){u.loadout='Different payload';edit('Changed the recorded aircraft’s payload.');}}
+    if(action==='weather'){s.wind='Crosswind';edit('Changed weather to an unsupported crosswind.');}
+    if(action==='legacy'){s.legacy=true;s.notice='Historical source/prepared mission revisions are absent.';}
+    if(action==='select'){s.selected=Number(value);s.confirmed=false;s.notice='Candidate selected. Confirm this revision-specific association after review.';}
+    if(action==='review'){s.reviewed=true;s.notice='Scene changes reviewed. This does not certify collision or script safety.';}
+    if(action==='confirm'){
+      if(s.reviewed&&candidates(s).some(u=>u.id===s.selected)&&!s.legacy){s.confirmed=true;s.notice='Confirmed the intended aircraft for this revision only. No historical provenance was changed.';}
+      else s.notice='Review changes and select a compatible aircraft first.';
+    }
+    if(action==='prepare'){
+      const result=verdict(s);s.notice=result.text;
+      if(result.ok)s.generated={revision:s.revision,aircraft:s.selected,archive:'exact prepared bytes',checker:'available',laterScript:false,checked:false,result:'Not checked at load'};
+    }
+    if(action==='editGenerated'&&s.generated){s.generated.archive='modified or repacked';s.generated.checked=false;s.notice='The generated archive was changed; its embedded tape token could still match.';}
+    if(action==='noChecker'&&s.generated){s.generated.checker='unavailable';s.generated.checked=false;s.notice='Trusted checker is unavailable. No verified start may be issued.';}
+    if(action==='laterScript'&&s.generated){s.generated.laterScript=true;s.notice='A later mission script changes the world. Matching initial archive bytes does not detect or certify this behavior.';}
+    if(action==='verify'){
+      if(!s.generated)s.notice='Prepare a copy first.';
+      else{const g=s.generated;g.checked=true;g.result=g.checker!=='available'?'REFUSE: load verification unavailable':g.archive!=='exact prepared bytes'?'REFUSE: generated copy changed; edit the authored source and regenerate':'PASS: archive matches in this simulation; later runtime behavior is not certified';s.notice=g.result;}
+    }
+    return s;
+  }
+  return {initial,transition,verdict,candidates};
+})();
+</script>
+<script>
+const labels={reset:'Reset all',saved:'Use saved scene',add:'Add three aircraft',rename:'Rename Lead',reorder:'Reverse aircraft order',saveas:'Import Save As revision',replace:'Delete/recreate with same ID and name',duplicate:'Duplicate Lead',remove:'Remove original Lead',move:'Move Lead’s authored start',loadout:'Change Lead’s loadout',weather:'Set crosswind',legacy:'Use a legacy take',editGenerated:'Edit generated copy',noChecker:'Disable load checker',laterScript:'Run a later world-changing script',review:'Review scene changes',confirm:'Confirm selected aircraft',prepare:'Prepare playback copy',verify:'Check copy at load'};
+const scenarios=[
+ ['Saved scene','The known revision uses its existing confirmed association.',['prepare','verify']],
+ ['Four to seven','Add ordinary aircraft. Confirm the original Lead in the reviewed revision; its take stays fixed.',['add','review','confirm','prepare','verify']],
+ ['Rename and reorder','The same Lead moves to a different list position and gets a new display name.',['rename','reorder','review','confirm','prepare']],
+ ['Reused identity','An indistinguishable recreation defeats ID/name/content heuristics. The policy still requires your explicit confirmation.',['replace','review','confirm','prepare']],
+ ['Missing and ambiguous','Duplicate Lead, then delete the original. Choose Lead copy in the selector yourself before confirming.',['duplicate','remove','review','confirm','prepare']],
+ ['Moved spawn','Review cannot override an incompatible start. Return to the saved scene.',['move','review','confirm','prepare','saved','prepare']],
+ ['Generated edits','Matching tape identity would not catch this changed archive. A trusted archive check must refuse it.',['prepare','editGenerated','verify']],
+ ['Limits','An initial byte match does not certify later scripts. A missing checker must refuse a verified start.',['prepare','verify','laterScript','noChecker','verify']],
+ ['Legacy','Selecting a mission today cannot supply the original source revision for an old take.',['legacy','review','confirm','prepare']]
+];
+let state=IdentityModel.initial(), scenario=0, step=0;
+const el=id=>document.getElementById(id);
+const field=(parent,label,value)=>{const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;parent.append(dt,dd);};
+function dispatch(action,value){state=IdentityModel.transition(state,action,value);render();}
+function render(){
+ el('changed').textContent=state.notice;const v=IdentityModel.verdict(state);el('status').textContent=v.text;el('status').className='status'+(v.ok?'':' stop');
+ el('saved').replaceChildren();field(el('saved'),'Persistent association',state.legacy?'Unavailable':state.take.association);field(el('saved'),'Saved source / prepared copy',state.legacy?'Unavailable':`Revision ${state.take.sourceRevision} / ${state.take.preparedRevision}`);field(el('saved'),'Authored spawn',state.legacy?'Unavailable':state.take.aircraft.spawn);field(el('saved'),'First recorded pose (unchanged)',state.take.firstPose);
+ el('current').replaceChildren();field(el('current'),'Chosen revision / scene',`Revision ${state.revision}; ${state.aircraft.length} aircraft; ${state.terrain}; ${state.wind}`);field(el('current'),'Review / aircraft confirmation',`${state.reviewed?'Reviewed':'Pending'} / ${state.confirmed?'Confirmed for this revision':'Pending'}`);field(el('current'),'Selected candidate',state.selected??'None');field(el('current'),'Generated copy',state.generated?`Revision ${state.generated.revision}, aircraft ${state.generated.aircraft}; ${state.generated.archive}; checker ${state.generated.checker}; ${state.generated.result}`:'None');field(el('current'),'Later script change',state.generated?.laterScript?'Present; outside archive identity assurance':'Not simulated');
+ const candidates=IdentityModel.candidates(state);el('aircraft').replaceChildren();for(const u of state.aircraft){const tr=document.createElement('tr');for(const val of [u.name,u.id,`${u.type}; ${u.livery}; ${u.loadout}`,u.spawn,candidates.some(c=>c.id===u.id)?'Compatible candidate — not identity proof':'Not compatible with saved take']){const td=document.createElement('td');td.textContent=val;tr.append(td);}el('aircraft').append(tr);}
+ el('candidate').replaceChildren();const empty=document.createElement('option');empty.value='';empty.textContent='Select an aircraft';el('candidate').append(empty);for(const u of candidates){const o=document.createElement('option');o.value=u.id;o.textContent=`${u.name} (editor ID ${u.id})`;el('candidate').append(o);}el('candidate').value=state.selected??'';
+ el('reviewSummary').textContent=state.changes.length?'Changes since saved scene: '+state.changes.join(' '):'No scene changes.';
+ el('scenarioTitle').textContent=scenarios[scenario][0];el('scenarioDescription').textContent=scenarios[scenario][1];el('steps').replaceChildren();scenarios[scenario][2].forEach((a,i)=>{const b=document.createElement('button');b.textContent=`${i<step?'✓ ':''}${i+1}. ${labels[a]}`;b.disabled=i!==step;b.onclick=()=>{step++;dispatch(a);};el('steps').append(b);});
+ Array.from(el('tabs').children).forEach((b,i)=>{b.className=i===scenario?'active':'';b.setAttribute('aria-selected',String(i===scenario));});
+}
+for(const [action,label] of Object.entries(labels)){if(['review','confirm','prepare','verify'].includes(action))continue;const b=document.createElement('button');b.textContent=label;b.onclick=()=>dispatch(action);el('actions').append(b);}
+scenarios.forEach((s,i)=>{const b=document.createElement('button');b.textContent=s[0];b.setAttribute('role','tab');b.onclick=()=>{scenario=i;step=0;state=IdentityModel.initial();render();};el('tabs').append(b);});
+['review','confirm','prepare','verify'].forEach(a=>el(a).onclick=()=>dispatch(a));el('candidate').onchange=e=>dispatch('select',e.target.value);render();
+</script></html>

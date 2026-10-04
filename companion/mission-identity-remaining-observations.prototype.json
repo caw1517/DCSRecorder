@@ -1,0 +1,168 @@
+[
+  {
+    "before": "09-editor-reopened",
+    "after": "13-editor-copy",
+    "before_hash": "904191e8dba2b685339975e8466ef020d039eb736324577f7508a7034c6bb692",
+    "after_hash": "f6f8fee8efad0012d19700bce55088c9c991b15338d74d24f304cdc96d93686f",
+    "before_group_order": [
+      10101,
+      10102,
+      10103,
+      10104,
+      10105,
+      10106,
+      10107
+    ],
+    "after_group_order": [
+      10101,
+      10102,
+      10103,
+      10104,
+      10105,
+      10106,
+      10107,
+      10108
+    ],
+    "added_ids": [
+      10118
+    ],
+    "removed_ids": [],
+    "common_aircraft_changed_paths": {},
+    "inventory_equal": false
+  },
+  {
+    "before": "10-controlled-four-input",
+    "after": "14-controlled-four-saved",
+    "before_hash": "521f8446c506bd9cf64f3bd51edab34b9cee463f0dcfb7a4bed93e838c380f17",
+    "after_hash": "7c6d29033d9cb56d62686715d3877ae037255d4c28f41a8347a1ba07f005dfa7",
+    "before_group_order": [
+      10101,
+      10102,
+      10103,
+      10104
+    ],
+    "after_group_order": [
+      10101,
+      10102,
+      10103,
+      10104
+    ],
+    "added_ids": [],
+    "removed_ids": [],
+    "common_aircraft_changed_paths": {},
+    "inventory_equal": true
+  },
+  {
+    "before": "11-controlled-seven-input",
+    "after": "15-controlled-seven-saved",
+    "before_hash": "b4b5eae8d83d26d27bc39eea9a44638d360043c701d168ca1a9c34e464a792ec",
+    "after_hash": "02405585535e089ba86360f60620633becbdf7fe4accd63d0dd1e5876c95e8ed",
+    "before_group_order": [
+      10101,
+      10102,
+      10103,
+      10104,
+      10105,
+      10106,
+      10107
+    ],
+    "after_group_order": [
+      10101,
+      10102,
+      10103,
+      10104,
+      10105,
+      10106,
+      10107
+    ],
+    "added_ids": [],
+    "removed_ids": [],
+    "common_aircraft_changed_paths": {},
+    "inventory_equal": true
+  },
+  {
+    "before": "14-controlled-four-saved",
+    "after": "15-controlled-seven-saved",
+    "before_hash": "7c6d29033d9cb56d62686715d3877ae037255d4c28f41a8347a1ba07f005dfa7",
+    "after_hash": "02405585535e089ba86360f60620633becbdf7fe4accd63d0dd1e5876c95e8ed",
+    "before_group_order": [
+      10101,
+      10102,
+      10103,
+      10104
+    ],
+    "after_group_order": [
+      10101,
+      10102,
+      10103,
+      10104,
+      10105,
+      10106,
+      10107
+    ],
+    "added_ids": [
+      10115,
+      10116,
+      10117
+    ],
+    "removed_ids": [],
+    "common_aircraft_changed_paths": {},
+    "inventory_equal": false
+  },
+  {
+    "before": "12-reordered-seven-input",
+    "after": "16-reordered-seven-saved",
+    "before_hash": "9905e2555f999f09c7ba4055d87576bfe99f99b464871ed1ac774d7a3f5f2f37",
+    "after_hash": "797f0ba80fc9850c5d708adf7735be12d5c5fcba9d208590fa8bab1e536697cf",
+    "before_group_order": [
+      10107,
+      10106,
+      10105,
+      10104,
+      10103,
+      10102,
+      10101
+    ],
+    "after_group_order": [
+      10107,
+      10106,
+      10105,
+      10104,
+      10103,
+      10102,
+      10101
+    ],
+    "added_ids": [],
+    "removed_ids": [],
+    "common_aircraft_changed_paths": {},
+    "inventory_equal": true
+  },
+  {
+    "before": "15-controlled-seven-saved",
+    "after": "16-reordered-seven-saved",
+    "before_hash": "02405585535e089ba86360f60620633becbdf7fe4accd63d0dd1e5876c95e8ed",
+    "after_hash": "797f0ba80fc9850c5d708adf7735be12d5c5fcba9d208590fa8bab1e536697cf",
+    "before_group_order": [
+      10101,
+      10102,
+      10103,
+      10104,
+      10105,
+      10106,
+      10107
+    ],
+    "after_group_order": [
+      10107,
+      10106,
+      10105,
+      10104,
+      10103,
+      10102,
+      10101
+    ],
+    "added_ids": [],
+    "removed_ids": [],
+    "common_aircraft_changed_paths": {},
+    "inventory_equal": true
+  }
+]
