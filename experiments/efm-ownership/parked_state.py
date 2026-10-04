@@ -1,16 +1,17 @@
 """Parked-endpoint eligibility for version-8 takes: the final interval must be
 stationary, grounded, undamaged and engines-running. Read-only.
 
-The thresholds are PROVISIONAL baselines for measurement, not agreed tolerances;
-they are reported with every result and are to be agreed with the user under the
-tolerance task. A zero-speed last sample or wheel compression alone never qualifies.
+Thresholds agreed with the user on 4 October 2026 (takeoff/landing task, #28) from
+three real ground takes: once stopped, speed settles below 0.042 m/s within 0.5 s,
+position stays within 0.024 m and heading within 0.011 deg; idle core is 0.65-0.70.
+A zero-speed last sample or wheel compression alone never qualifies.
 """
 import math
 import contact_state
 
-PROFILE = 'hornet-parked-endpoint-v1-provisional'
+PROFILE = 'hornet-parked-endpoint-v1'
 MIN_TAIL_SECONDS = 2.0       # final interval that must satisfy every criterion
-MAX_SPEED = 0.05             # m/s, every sample in the interval
+MAX_SPEED = 0.1              # m/s, every sample in the interval
 MAX_DISPLACEMENT = 0.05      # m, from the final position
 MAX_HEADING_CHANGE = 0.2     # degrees, from the final heading
 MIN_ENGINE_CORE = 0.5        # both engines' normalized core speed (idle about 0.65)

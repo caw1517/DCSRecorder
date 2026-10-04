@@ -117,8 +117,10 @@ def read(path, *, ground_trial_log=None):
             sample.extend(wheels)
     # Contact evidence is validated and summarized; endpoint eligibility is separate.
     if version>=8: metadata['contact']=contact_state.summary(raw)
-    # Only takes with grounded samples need the native surface tape and controller.
-    surface=any(flags)
+    # Every take with contact data uses the surface tape and controller, including
+    # airborne-only takes: it has no speed limits (user decision, 4 October 2026).
+    # Older takes keep the approved airborne controller.
+    surface=version>=8
     if surface:
         for sample,grounded in zip(samples,flags):sample.append(1 if grounded else 0)
         metadata['parked_endpoint']=parked_state.endpoint(raw)

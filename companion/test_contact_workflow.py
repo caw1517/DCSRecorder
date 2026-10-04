@@ -44,6 +44,23 @@ class ContactWorkflowTests(unittest.TestCase):
         convert(source, tape)
         self.assertEqual(tape.read_text().splitlines()[0], 'DCSREC_PLAYBACK_V7')
 
+    def test_airborne_only_contact_take_uses_surface_tape(self):
+        # No speed limits anywhere: every contact take plays on the surface controller.
+        source, = self.capture()
+        lines = source.read_text(encoding='utf-8').splitlines()
+        header = next(i for i, l in enumerate(lines) if l.startswith('t,x,'))
+        column = lines[header].split(',').index('in_air')
+        for i in range(header+1, len(lines)):
+            if lines[i].startswith('END'): break
+            fields = lines[i].split(','); fields[column] = '1'; lines[i] = ','.join(fields)
+        source.write_text('\n'.join(lines)+'\n', encoding='utf-8')
+        metadata, samples, _ = read(source)
+        self.assertEqual(metadata['contact']['grounded_samples'], 0)
+        self.assertTrue(metadata['surface_available'])
+        self.assertEqual({s[-1] for s in samples}, {0})
+        self.assertFalse(metadata['parked_endpoint']['eligible'])
+        self.assertIn('airborne', metadata['parked_endpoint']['measured']['boundary_failure'])
+
     def test_damage_is_reported_not_hidden(self):
         source, = self.capture('damaged')
         metadata, _, _ = read(source)
