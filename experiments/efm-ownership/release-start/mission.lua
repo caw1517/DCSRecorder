@@ -58,6 +58,12 @@ local function sample(name)
     emit(string.format('SAMPLE,%s,%s,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9g,%s',
         s.phase,name,timer.getTime(),p.p.x,p.p.y,p.p.z,p.x.x,p.x.y,p.x.z,p.y.x,p.y.y,p.y.z,
         v.x,v.y,v.z,1000*u:getDrawArgumentValue(996),u:getDrawArgumentValue(999),table.concat(values,',')))
+    if c.contact and name=='StagedPlayback' then
+        -- Playback-side contact and health: in-air flag, terrain, origin clearance, life.
+        local h=land.getHeight({x=p.p.x,y=p.p.z})
+        emit(string.format('CONTACT,%s,%.9f,%d,%.12g,%.12g,%.12g,%.12g,%d',s.phase,timer.getTime(),u:inAir() and 1 or 0,
+            h,p.p.y-h,u:getLife(),u:getLife0(),land.getSurfaceType({x=p.p.x,y=p.p.z})))
+    end
 end
 local function smoke(u)
     local elapsed=1000*u:getDrawArgumentValue(996)
@@ -97,8 +103,26 @@ local function tick()
         elseif status==.5 and s.phase=='playing' then
             smoke(u);sample('Observer');sample('StagedPlayback');u:destroy();s.phase='complete'
             emit('COMPLETE');notice('Recording ended. Report first movement, smoke onset, and any jump or sound change. Exit normally.');return
+        elseif status==.375 and s.phase=='playing' then
+            -- Native holds a grounded ending; keep it only when preparation measured
+            -- an eligible stationary, grounded, engines-running endpoint.
+            smoke(u)
+            if c.parked then
+                s.phase='parked';s.parked_time=now;emit(string.format('PARKED,%.9f,%.9f',now,1000*u:getDrawArgumentValue(996)))
+                notice('Recording ended. The aircraft stays parked with engines running until you exit or restart the mission.')
+            else
+                sample('Observer');sample('StagedPlayback');u:destroy();s.phase='complete'
+                emit('COMPLETE,not_parked');notice('Recording ended away from an eligible parked position; the aircraft was removed.');return
+            end
         elseif s.phase=='playing' or now-s.release_time>1 then s.fail('native_release_not_confirmed');return end
-        if now-s.release_time>c.duration+2 then s.fail('completion_timeout');return end
+        if s.phase~='parked' and now-s.release_time>c.duration+2 then s.fail('completion_timeout');return end
+    elseif s.phase=='parked' then
+        if status~=.375 then s.fail('parked_hold_lost');return end
+        smoke(u)
+        if now-s.parked_time>75 then
+            -- Long holds: keep evidence at one sample per second.
+            sample('Observer');sample('StagedPlayback');return now+1
+        end
     end
     sample('Observer');sample('StagedPlayback');sample('SceneWitness')
     return now+.02

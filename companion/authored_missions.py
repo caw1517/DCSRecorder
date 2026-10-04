@@ -526,6 +526,9 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     config=dict(expected=expected,token_high=((token>>40)&0xffffff)/16777216,
                 token_low=(token&0xffffff)/16777216,duration=metadata['duration'],
                 smoke_events=dict(enumerate(metadata.get('smoke_events') or [dict(time=0,on=False)],1)))
+    if metadata.get('surface_available'):
+        # Ground takes log playback-side contact; a measured eligible endpoint stays parked.
+        config.update(contact=True,parked=bool((metadata.get('parked_endpoint') or {}).get('eligible')))
     script=(EFM/'release-start/mission.lua').read_text(encoding='utf-8')
     # Replace exact literals before inserting arbitrary authored names.
     script=script.replace("'StagedPlayback'",'__LEAD_NAME__').replace("'Observer'",'__PLAYER_NAME__')
@@ -560,7 +563,8 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     manifest=dict(profile='authored-playback-v1',build=BUILD,source_sha256=sha(blob),saved_scene_sha256=sha(saved_blob),selected_id=unit_id,
                   selected_name=lead['unit']['name'],player_id=player_id,player_name=player['unit']['name'],
                   namespace=namespace,trigger_indices=[index,cleanup],role_edits=edits,initial=config,
-                  player_authored_start_preserved=True,behavior=behavior)
+                  player_authored_start_preserved=True,behavior=behavior,
+                  parked_endpoint=metadata.get('parked_endpoint'))
     # Check the entire player's authored group apart from the deliberate skill change.
     player_check=copy.deepcopy(player['group'])
     next(iter(player_check['units'].values()))['skill']=selected(original,player_id)['unit']['skill']

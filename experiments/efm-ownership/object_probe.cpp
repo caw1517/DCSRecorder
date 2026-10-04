@@ -69,6 +69,9 @@ struct Observation {
     release_start::Clock clock;
     uint64_t generation=0;
 #endif
+    // Surface controller: the take ended on a grounded sample. Ownership, ground
+    // pose restoration and the final supported state continue until destroy.
+    bool parked=false;
     bool exterior_pending=false,exterior_finished=false;
     double exterior_elapsed=0;
     float snapshot_brake=0;
@@ -242,6 +245,11 @@ void after_native_animation(const void* handle) {
 #ifdef HORNET_RELEASE_PROTOTYPE
     else if(!state.clock.playing()) {
         if(!staged_playback::publish(api,sdk_handle,state.token,held_start::status))state.motion_active=false;
+    }
+#endif
+#ifdef HORNET_SURFACE_PROTOTYPE
+    else if(state.parked) {
+        if(!staged_playback::publish(api,sdk_handle,state.token,staged_playback::parked))state.motion_active=false;
     }
 #endif
     else if(state.exterior_finished) {
@@ -595,7 +603,10 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #endif
     state.snapshot_brake=speedbrake;
     if(state.path.has_exterior) {
-#ifdef HORNET_RELEASE_PROTOTYPE
+#ifdef HORNET_SURFACE_PROTOTYPE
+        // Replay time stops at the end of the take; a parked hold repeats the final sample.
+        state.exterior_elapsed=std::min(state.clock.elapsed,state.path.duration());
+#elif defined(HORNET_RELEASE_PROTOTYPE)
         state.exterior_elapsed=state.clock.elapsed;
 #elif defined(HORNET_HELD_PROTOTYPE)
         state.exterior_elapsed=0;
@@ -680,6 +691,12 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #ifdef HORNET_STAGED_PROTOTYPE
         const bool release=false; // Apply the endpoint before reporting completion.
         const bool finished=elapsed>=state.path.duration();
+#ifdef HORNET_SURFACE_PROTOTYPE
+        if(finished && !state.parked && state.path.ground_at(state.path.duration())) {
+            state.parked=true;
+            record("staged_parked",handle,cookie,time,state.calls);
+        }
+#endif
 #else
         const bool release=elapsed>state.path.duration();
 #endif
@@ -692,7 +709,9 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #else
         const bool ground=false;
 #endif
-#ifdef HORNET_RELEASE_PROTOTYPE
+#ifdef HORNET_SURFACE_PROTOTYPE
+        const auto target_motion=state.clock.playing() && !state.parked?state.path.motion_at(elapsed):turn_path::Motion{};
+#elif defined(HORNET_RELEASE_PROTOTYPE)
         const auto target_motion=state.clock.playing()?state.path.motion_at(elapsed):turn_path::Motion{};
 #elif defined(HORNET_HELD_PROTOTYPE)
         const turn_path::Motion target_motion{};
@@ -769,7 +788,9 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #ifdef HORNET_STAGED_PROTOTYPE
         if(state.motion_active) {
             state.exterior_finished=finished && state.path.has_exterior;
-#ifdef HORNET_RELEASE_PROTOTYPE
+#ifdef HORNET_SURFACE_PROTOTYPE
+            const auto phase=state.parked?staged_playback::parked:state.clock.playing()?staged_playback::running:(state.exterior_applied>0?held_start::status:0.0f);
+#elif defined(HORNET_RELEASE_PROTOTYPE)
             const auto phase=state.clock.playing()?staged_playback::running:(state.exterior_applied>0?held_start::status:0.0f);
 #elif defined(HORNET_HELD_PROTOTYPE)
             const auto phase=state.exterior_applied>0?held_start::status:0.0f;

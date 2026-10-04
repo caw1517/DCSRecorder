@@ -8,6 +8,7 @@ import light_state
 import canopy_state
 import wheel_state
 import contact_state
+import parked_state
 
 def quaternion(f,u,r):
     m=[[f[i],u[i],r[i]] for i in range(3)];trace=sum(m[i][i] for i in range(3))
@@ -126,6 +127,7 @@ def read(path, *, ground_trial_log=None):
     surface=any(flags)
     if surface:
         for sample,grounded in zip(samples,flags):sample.append(1 if grounded else 0)
+        metadata['parked_endpoint']=parked_state.endpoint(raw)
     if has_smoke: metadata['smoke_events']=smoke_state.transitions(metadata,raw)
     for sample in samples:sample[0]-=start
     metadata.update(duration=samples[-1][0],samples=len(samples),source_time=start,recording_version=version,

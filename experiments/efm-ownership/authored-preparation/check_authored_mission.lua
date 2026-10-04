@@ -26,6 +26,11 @@ local function run(mode)
         return config().expected[i] or 0
     end
     function unit:getController()return {setCommand=function()end}end
+    -- Ground takes also log playback-side contact and health.
+    function unit:inAir()return false end
+    function unit:getLife()return 20 end
+    function unit:getLife0()return 20 end
+    land={getHeight=function()return 0 end,getSurfaceType=function()return 5 end}
     Unit={getByName=function(name)return unit end}
     local before={};for k in pairs(_G)do before[k]=true end
     chunk()

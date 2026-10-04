@@ -57,6 +57,40 @@ class SurfacePlayback(unittest.TestCase):
         self.assertEqual(player['group']['route']['points'][1]['type'], 'TakeOffGroundHot')
         self.assertIn('Blue Angels Mods by Razor, Coop & Thomaz', mission['requiredModules'])
 
+    def rewritten(self, change):
+        rows = list(csv.reader(io.StringIO(TAKE.read_text(encoding='utf-8'))))
+        header = next(i for i, r in enumerate(rows) if r and r[0] == 't')
+        rows = change(rows, header, rows[header])
+        path = self.root/'rewritten.csv'
+        with path.open('w', newline='', encoding='utf-8') as f: csv.writer(f, lineterminator='\n').writerows(rows)
+        return read(path)[0]['parked_endpoint']
+
+    def test_parked_endpoint_measured_and_configured(self):
+        endpoint = read(TAKE)[0]['parked_endpoint']
+        self.assertTrue(endpoint['eligible'])
+        self.assertGreater(endpoint['measured']['tail_seconds'], 6)
+        manifest = self.build()['mission_manifest']
+        self.assertTrue(manifest['initial']['parked'] and manifest['initial']['contact'])
+        self.assertEqual(manifest['parked_endpoint'], endpoint)
+
+    def test_moving_or_engine_off_ending_is_not_parked(self):
+        def cut(rows, header, names):
+            # End the take one second after the taxi stop began (still decelerating).
+            body = rows[header+1:-1]
+            keep = next(i for i, r in enumerate(body) if float(r[0])-float(body[0][0]) > 20.0)
+            return rows[:header+1]+body[:keep]+[['END', 'user_stop', str(keep)]]
+        moving = self.rewritten(cut)
+        self.assertFalse(moving['eligible'])
+        self.assertIn('moving', moving['measured']['boundary_failure'])
+
+        def engine_off(rows, header, names):
+            column = names.index('engine_core_right')
+            for row in rows[-60:-1]: row[column] = '0.3'
+            return rows
+        stopped = self.rewritten(engine_off)
+        self.assertFalse(stopped['eligible'])
+        self.assertEqual(stopped['measured']['boundary_failure'], ['engines_not_running'])
+
     def test_scene_module_that_is_not_installed_is_refused(self):
         with self.assertRaisesRegex(ValueError, 'needs modules that are not installed: Blue Angels Mods'):
             self.build(saved_games=self.root/'empty')

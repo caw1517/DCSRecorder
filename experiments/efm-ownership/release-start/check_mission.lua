@@ -3,6 +3,9 @@ local function run(mode)
     local now,queue,logs,commands,flags=0,{},{},{},{}
     local status,elapsed,removed,smoke=.125,0,false,0
     DCSR_RELEASE_CONFIG={token_high=.2,token_low=.3,duration=8,expected={[21]=.7},smoke_events={{time=0,on=true},{time=2,on=false}}}
+    local ground=mode:match('parked')~=nil
+    if ground then DCSR_RELEASE_CONFIG.contact=true;DCSR_RELEASE_CONFIG.parked=mode~='not_parked' end
+    land={getHeight=function()return 1990 end,getSurfaceType=function()return 5 end}
     env={info=function(s)logs[#logs+1]=s end}
     trigger={action={outText=function()end,setUserFlag=function(k,v)flags[k]=v end}}
     timer={getTime=function()return now end,scheduleFunction=function(fn,param,t)queue[#queue+1]={fn,param,t}end}
@@ -20,6 +23,9 @@ local function run(mode)
         if i==21 then return mode=='bad_snapshot' and 0 or .7 end
         return 0
     end
+    function unit:inAir()return false end
+    function unit:getLife()return 20 end
+    function unit:getLife0()return 20 end
     function unit:getController()return {setCommand=function(_,c)assert(c.id=='SMOKE_ON_OFF');smoke=smoke+1 end}end
     Unit={getByName=function(name)if mode=='missing' and name=='StagedPlayback' then return nil end;return unit end}
     assert(loadfile(path))()
@@ -61,8 +67,21 @@ local function run(mode)
     for i=1,100 do advance(23.04)end
     elapsed=2;advance(23.08);assert(smoke==2,'smoke did not use native replay time')
     if mode=='playing_failure' then status=.75;advance(23.12);assert(s.phase=='failed' and flags.DCSR_RELEASE_CLEANUP==0);return end
+    local function count(prefix)local n=0;for _,line in ipairs(logs)do if line:find(prefix,1,true)then n=n+1 end end;return n end
+    if ground then
+        assert(count('DCSR_RELEASE CONTACT,')>0,'ground take logged no playback contact')
+        status=.375;elapsed=8;advance(23.12)
+        if mode=='not_parked' then assert(s.phase=='complete' and removed and count('COMPLETE,not_parked')==1);return end
+        assert(s.phase=='parked' and not removed and count('DCSR_RELEASE PARKED,')==1)
+        -- Held well past the take: no completion timeout, sampling continues.
+        local before=count('DCSR_RELEASE CONTACT,parked');advance(90);assert(s.phase=='parked' and not removed)
+        assert(count('DCSR_RELEASE CONTACT,parked')>before)
+        if mode=='parked_lost' then status=.75;advance(92);assert(s.phase=='failed' and removed);return end
+        advance(400);assert(s.phase=='parked' and not removed);return
+    end
+    assert(count('DCSR_RELEASE CONTACT,')==0,'airborne take logged ground contact')
     status=.5;elapsed=8;advance(23.12)
     assert(s.phase=='complete' and removed and flags.DCSR_RELEASE_CLEANUP==0)
 end
-for _,mode in ipairs({'success','mismatch','bad_snapshot','missing','no_bridge','readiness_lost','no_ack','playing_failure'})do run(mode)end
-print('PASS: mission countdown, native-clock smoke, repeated requests, pause, initial/readiness/ack failure, held cleanup and completion')
+for _,mode in ipairs({'success','mismatch','bad_snapshot','missing','no_bridge','readiness_lost','no_ack','playing_failure','parked','not_parked','parked_lost'})do run(mode)end
+print('PASS: mission countdown, native-clock smoke, repeated requests, pause, initial/readiness/ack failure, held cleanup, completion and parked hold/removal')

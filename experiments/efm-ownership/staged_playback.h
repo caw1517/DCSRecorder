@@ -10,6 +10,8 @@
 namespace staged_playback {
 inline constexpr int token_high_arg=997,token_low_arg=998,status_arg=999;
 inline constexpr float running=0.25f,complete=0.5f,failed=0.75f;
+// Surface controller only: a grounded ending held at its final pose and state.
+inline constexpr float parked=0.375f;
 inline uint64_t fingerprint(const std::filesystem::path& path) {
     std::ifstream file(path,std::ios::binary);
     if(!file)return 0;

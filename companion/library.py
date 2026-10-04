@@ -267,9 +267,12 @@ class Library:
         self.check_environment()
         self.install_authored(output, manifest, generation)
         player = manifest['mission_manifest']['player_name']
+        ending = {True: ' At the end it stays parked with engines running until you exit or restart.',
+                  False: ' It did not end in an eligible parked position, so it is removed at the end.'
+                  }.get(manifest['mission_manifest']['initial'].get('parked'), '')
         return {'mission': str(self.saved / 'Missions' / name),
                 'message': f'Playback mission ready. You fly {player} from its authored start. Load it, wait for Ready, '
-                           'then F10 > DCS Recorder playback > Start playback. Earlier authored playback missions now refuse to start.'
+                           'then F10 > DCS Recorder playback > Start playback.' + ending + ' Earlier authored playback missions now refuse to start.'
                            + review_notes(manifest['mission_manifest']['behavior'])}
 
     def install_authored(self, output, manifest, generation):
