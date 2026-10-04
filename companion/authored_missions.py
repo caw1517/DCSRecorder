@@ -280,12 +280,21 @@ def validate_supported(mission, role_ids):
     for row in rows:
         if not supported_livery(row['unit'].get('livery_id')):
             raise ValueError('The current playback profile requires the Blue Angels Jet Team livery.')
+    # Authors may place every aircraft ahead of time. Other Client slots stay
+    # unchanged (single player does not fly them); only one Player can exist.
+    others = []
     for row in aircraft(mission):
-        if row['unit'].get('skill') in ('Player', 'Client') and row['unit']['unitId'] not in role_ids:
-            raise ValueError('An unrelated player/client slot would change roles. Select it explicitly or change its skill in Mission Editor.')
+        if row['unit']['unitId'] in role_ids:
+            continue
+        if row['unit'].get('skill') == 'Player':
+            raise ValueError(f"\"{row['unit'].get('name')}\" is also set to Player. Set it to Client in Mission Editor; "
+                             'DCS Recorder makes the aircraft you choose the Player.')
+        if row['unit'].get('skill') == 'Client':
+            others.append(row['unit'].get('name'))
     report = behavior_report(mission, role_ids)
     if report['conflicts']:
         raise ValueError(refusal(report['conflicts']))
+    report['preserved'] += [f'Client slot "{name}" (not flown in this session)' for name in others]
     return rows, report
 
 
@@ -366,7 +375,12 @@ def append_start(mission, index, script, label):
     trig['funcStartup'][index] = f'if mission.trig.conditions[{index}]() then mission.trig.actions[{index}]() end'
 
 
-def record_script(name, namespace, source_sha, lineage=None, association=None):
+def carries_smoke(unit):
+    """The recorder's smoke profile: the white smoke pod on station 10."""
+    return (((unit.get('payload') or {}).get('pylons') or {}).get(10) or {}).get('CLSID') == '{INV-SMOKE-WHITE}'
+
+
+def record_script(name, namespace, source_sha, lineage=None, association=None, smoke=False):
     script = (EFM/'record_flight_engine_mission.lua').read_text(encoding='utf-8-sig')
     script = script.replace("source='Observer'", 'source=' + serialize(name))
     old = "csv(r.source)..'\\n'"
@@ -375,7 +389,8 @@ def record_script(name, namespace, source_sha, lineage=None, association=None):
     extra = f'\\nauthored_source_sha256,{source_sha}{provenance}\\ncapture_timing,frame-batch-v1\\ncapture_build,{BUILD}\\nwind_ground,0\\nwind_2000,0\\nwind_8000,0\\n'
     assert script.count(old) == 1
     script = script.replace(old, 'csv(r.source)..' + serialize(extra.replace('\\n', '\n')))
-    script = ('DCSRECORDER_CONTACT=true\nDCSRECORDER_WHEELS=true\nDCSRECORDER_CANOPY=true\nDCSRECORDER_LIGHTS=true\n' + script)
+    # White smoke is captured only when the aircraft carries the smoke pod (V1: white only).
+    script = ('DCSRECORDER_SMOKE=true\n' if smoke else '') + ('DCSRECORDER_CONTACT=true\nDCSRECORDER_WHEELS=true\nDCSRECORDER_CANOPY=true\nDCSRECORDER_LIGHTS=true\n' + script)
     # Only this capture's Lua global names change; the log protocol remains the
     # installed autosave/native-capture contract.
     script = script.replace('DCSRECORDER', namespace)
@@ -449,7 +464,7 @@ def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, 
     namespace, index = allocate(mission, entries)
     edits = []
     role_edit(mission, row['unit'], 'skill', 'Player', edits)
-    script = record_script(row['unit']['name'], namespace, sha(blob), lineage, association)
+    script = record_script(row['unit']['name'], namespace, sha(blob), lineage, association, smoke=carries_smoke(row['unit']))
     append_start(mission, index, script, 'DCS Recorder: record selected authored Hornet')
     manifest = dict(profile='authored-recording-v1', build=BUILD, source_sha256=sha(blob),
                     selected_id=unit_id, selected_name=row['unit']['name'], namespace=namespace,

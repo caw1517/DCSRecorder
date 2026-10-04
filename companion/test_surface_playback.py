@@ -91,6 +91,18 @@ class SurfacePlayback(unittest.TestCase):
         self.assertFalse(stopped['eligible'])
         self.assertEqual(stopped['measured']['boundary_failure'], ['engines_not_running'])
 
+    @unittest.skipUnless((EVIDENCE/'source/Issue11-NightSmoke_Parking_V1.miz').exists(), 'needs the night mission')
+    def test_other_client_slots_are_kept_but_a_second_player_is_refused(self):
+        night = EVIDENCE/'source/Issue11-NightSmoke_Parking_V1.miz'
+        manifest = a.prepare_recording(night, 2, self.root/'record')
+        self.assertIn('Client slot "Aerial-2-1" (not flown in this session)', manifest['behavior']['preserved'])
+        mission = a.read_source(night)[2]
+        other = next(r for r in a.aircraft(mission) if r['unit']['unitId'] == 4)
+        self.assertEqual(other['unit']['skill'], 'Client')
+        other['unit']['skill'] = 'Player'
+        with self.assertRaisesRegex(ValueError, '"Aerial-2-1" is also set to Player'):
+            a.validate_supported(mission, [2])
+
     def test_scene_module_that_is_not_installed_is_refused(self):
         with self.assertRaisesRegex(ValueError, 'needs modules that are not installed: Blue Angels Mods'):
             self.build(saved_games=self.root/'empty')

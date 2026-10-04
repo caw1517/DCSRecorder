@@ -59,6 +59,15 @@ class ContactWorkflowTests(unittest.TestCase):
         self.assertTrue(script.startswith('DCSR_AUTHORED_2_CONTACT=true\nDCSR_AUTHORED_2_WHEELS=true\n'))
         self.assertIn("'\\ncontact_profile,hornet-contact-v1'", script)
         self.assertTrue((EXPERIMENT/'contact_state.py').exists())
+        self.assertNotIn('_SMOKE=true', script)
+
+    def test_authored_recorder_requests_smoke_only_with_white_pod(self):
+        pod = dict(payload=dict(pylons={10: dict(CLSID='{INV-SMOKE-WHITE}')}))
+        self.assertTrue(authored_missions.carries_smoke(pod))
+        self.assertFalse(authored_missions.carries_smoke(dict(payload=dict(pylons={10: dict(CLSID='<CLEAN>')}))))
+        self.assertFalse(authored_missions.carries_smoke({}))
+        script = authored_missions.record_script('Record Hornet', 'DCSR_AUTHORED_2', 'a'*64, smoke=True)
+        self.assertTrue(script.startswith('DCSR_AUTHORED_2_SMOKE=true\nDCSR_AUTHORED_2_CONTACT=true\n'))
 
 
 if __name__ == '__main__':
