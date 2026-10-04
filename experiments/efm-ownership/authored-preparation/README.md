@@ -144,3 +144,17 @@ files must match. Live (`results/.../companion-live/`): the companion installed
 only the new mission and hook; readiness armed at once, release and completion
 were clean, and the load model matched the sixth real load exactly.
 Tests: `companion/test_authored_playback.py`.
+
+## Enforcement (behavior, ownership and loaded-session approval)
+
+Work on [Enforce mission edit, behavior and loaded-session compatibility](https://github.com/caw1517/DCSRecorder/issues/26).
+`authored_missions.behavior_report` lists every conflicting or unclassified
+trigger/task by exact location, refuses with all of them at once and never
+removes them. It preserves only the exact automatic Mission Editor EPLRS and
+option-35 actions and reports unit/group-alive triggers on role aircraft as
+lifecycle consequences. Authored playback shows the approved recovery text when
+the hook cannot verify the loaded session. `expected.lua` binds the take,
+prepared copy and scene hashes, and the hook logs them per session.
+`check_authored_hook.lua` and `check_authored_mission.lua` run the generated hook
+and control for approval and ownership cases. Live evidence:
+[`results/enforcement-2026-10-03`](../results/enforcement-2026-10-03/README.md).

@@ -48,14 +48,72 @@ class AuthoredCopies(unittest.TestCase):
 
     def test_selected_task_is_not_silently_removed(self):
         a.selected(self.m,11)['group']['route']['points'][1]['task']=dict(id='Orbit',params={});self.write()
-        with self.assertRaisesRegex(ValueError,'unsupported task'):self.prepare()
+        with self.assertRaisesRegex(ValueError,'unit 11, route point 1: task Orbit'):self.prepare()
         self.assertFalse((self.root/'out').exists())
 
     def test_unknown_script_and_compiled_only_code_are_refused(self):
         self.m['trigrules']={1:dict(comment='Authored dynamic',predicate='triggerStart',rules={},actions={1:dict(predicate='a_do_script',text='arbitrary()')})};self.write()
-        with self.assertRaisesRegex(ValueError,'unclassified behavior'):self.prepare()
+        with self.assertRaisesRegex(ValueError,'Trigger 1 "Authored dynamic", action 1: unclassified a_do_script'):self.prepare()
         self.m['trigrules']={};self.m['trig']={'actions':{1:'arbitrary()'}};self.write()
         with self.assertRaisesRegex(ValueError,'indices differ'):self.prepare()
+
+    def me_defaults(self,uid):
+        # Exact automatic actions DCS 2.9.30 Mission Editor saved on newly placed Hornets.
+        gid=1  # datalink network number; DCS 2.9.30 saved 1 on a newly placed Hornet
+        wrapped=lambda n,action:dict(enabled=True,auto=True,id='WrappedAction',number=n,params=dict(action=action))
+        return {1:wrapped(1,dict(id='EPLRS',params=dict(value=True,groupId=gid))),
+                2:wrapped(2,dict(id='Option',params=dict(value=True,name=35)))}
+
+    def test_mission_editor_automatic_actions_are_preserved_and_reported(self):
+        for uid in (11,12):a.selected(self.m,uid)['group']['route']['points'][1]['task']['params']['tasks']=self.me_defaults(uid)
+        self.write();result=self.prepare()
+        self.assertEqual(result['behavior']['preserved'],['unit 11, route point 1, action 1: EPLRS datalink on (Mission Editor default)',
+                                                         'unit 11, route point 1, action 2: allow formation side swap (Mission Editor default)'])
+        prepared=a.LuaData(a.zip_entries((self.root/'out/prepared.miz').read_bytes())['mission'].decode()).mission()
+        self.assertEqual(a.selected(prepared,11)['group']['route'],a.selected(self.m,11)['group']['route'])
+        _,_,mission,manifest=self.playback()
+        self.assertEqual(len(manifest['behavior']['preserved']),4)
+        self.assertEqual(a.selected_row(mission,11)['group']['route']['points'][1]['task'],a.selected(self.m,11)['group']['route']['points'][1]['task'])
+
+    def test_edited_or_other_automatic_actions_are_refused_by_name(self):
+        tasks=self.me_defaults(11);a.selected(self.m,11)['group']['route']['points'][1]['task']['params']['tasks']=tasks
+        for edit in (lambda t:t[1]['params']['action']['params'].update(value=False),
+                     lambda t:t[1]['params']['action']['params'].update(groupId=100),
+                     lambda t:t[1]['params']['action']['params'].update(groupId='1'),
+                     lambda t:t[2].update(auto=False),
+                     lambda t:t[2]['params']['action']['params'].update(name=17)):
+            original=copy.deepcopy(tasks);edit(tasks);self.write()
+            with self.assertRaisesRegex(ValueError,'unit 11, route point 1, action [12]: WrappedAction'):self.prepare()
+            tasks.clear();tasks.update(original)
+        # The CAP task's automatic set includes an engagement task: refused, not preserved.
+        tasks[3]=dict(enabled=True,auto=True,id='EngageTargets',key='CAP',number=3,params=dict(targetTypes={1:'Air'},priority=0))
+        self.write()
+        with self.assertRaisesRegex(ValueError,r'action 3: EngageTargets \(added automatically by Mission Editor\)'):self.prepare()
+        self.assertFalse((self.root/'out').exists())
+
+    def test_every_conflict_is_listed_at_once(self):
+        a.selected(self.m,11)['group']['route']['points'][1]['task']['params']['tasks']={1:dict(id='Orbit',params={})}
+        a.selected(self.m,11)['group']['tasks']={1:dict(id='Follow')}
+        self.m['trigrules']={1:dict(comment='Respawn',predicate='triggerOnce',rules={},actions={1:dict(predicate='a_activate_group',group=111)}),
+                             2:dict(comment='Repeat',predicate='triggerContinious',rules={},actions={})}
+        vehicle=dict(groupId=500,name='trucks',units={},route=dict(points={1:dict(task=dict(id='ComboTask',params=dict(tasks={1:dict(id='WrappedAction',params=dict(action=dict(id='Script',params=dict(command='x()'))))})))}))
+        self.m['coalition']['blue']['country'][1]['vehicle']=dict(group={1:vehicle});self.write()
+        with self.assertRaises(ValueError) as caught:self.prepare()
+        text=str(caught.exception)
+        for part in ('unit 11, route point 1, action 1: Orbit','unit 11, group task 1: Follow',
+                     'Trigger 1 "Respawn", action 1: unclassified a_activate_group','Trigger 2 "Repeat": unsupported trigger type triggerContinious',
+                     'vehicle objects: script task','preserved, not removed'):
+            self.assertIn(part,text)
+
+    def test_lifecycle_consequence_of_selected_aircraft_triggers_is_reported(self):
+        rule=dict(comment='Lead alive',predicate='triggerOnce',rules={1:dict(predicate='c_unit_alive',unit=11),2:dict(predicate='c_group_alive',group=112)},
+                  actions={1:dict(predicate='a_set_flag',flag='5')})
+        self.m['trigrules']={1:rule}
+        for field,value in a.compiled_trigger(1,rule).items():self.m['trig'][field]={1:value}
+        self.write();manifest=self.playback()[3]
+        self.assertEqual(len(manifest['behavior']['lifecycle']),2)
+        self.assertIn('Trigger 1 "Lead alive" checks whether unit 11 exists',manifest['behavior']['lifecycle'][0])
+        self.assertIn('unit 12 exists',manifest['behavior']['lifecycle'][1])
 
     def test_duplicate_identity_is_refused(self):
         a.selected(self.m,12)['unit']['unitId']=11;self.write()
@@ -108,6 +166,25 @@ class AuthoredCopies(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'different stock Hornet'):self.playback(player=11)
         with self.assertRaisesRegex(ValueError,'exact authored source'):self.playback(source_hash='wrong')
         with self.assertRaisesRegex(ValueError,'missing'):self.playback(player=99)
+
+    def test_playback_owns_only_allocated_indices_flags_and_marker(self):
+        rule=dict(comment='Authored flag',predicate='triggerOnce',rules={1:dict(predicate='c_flag_is_true',flag='DCSR_AUTHORED_2_CLEANUP')},
+                  actions={1:dict(predicate='a_set_flag_value',flag='73',value=1)})
+        self.m['trigrules']={9:rule}
+        for field,value in a.compiled_trigger(9,rule).items():self.m['trig'][field]={9:value}
+        self.write();_,entries,mission,manifest=self.playback()
+        namespace,indices=manifest['namespace'],manifest['trigger_indices']
+        self.assertEqual((namespace,indices),('DCSR_AUTHORED_3',[10,11]))
+        self.assertEqual(mission['trigrules'][9],rule)
+        for field,values in mission['trig'].items():
+            self.assertEqual({k:v for k,v in values.items() if k not in indices},self.m['trig'].get(field,{}),field)
+        for i in indices:
+            self.assertIn(i,mission['trigrules'])
+            for field in ('actions','conditions','flag'):self.assertIn(i,mission['trig'][field])
+        flags=[item.get('flag') for i in indices for item in mission['trigrules'][i]['rules'].values()]
+        self.assertTrue(all(f.startswith(namespace+'_') for f in flags))
+        self.assertEqual(manifest['preservation']['added_members'],[a.MARKER])
+        self.assertEqual(sorted(r['unit']['unitId'] for r in a.aircraft(mission)),sorted(r['unit']['unitId'] for r in a.aircraft(self.m)))
 
     def test_mission_editor_lowercase_livery_is_the_same_livery(self):
         # Mission Editor 2.9.30 saved a newly added Blue Angels Hornet as 'blue angels jet team'.

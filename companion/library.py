@@ -17,6 +17,16 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def review_notes(behavior):
+    """Preserved Mission Editor defaults and lifecycle consequences, for review."""
+    text = ''
+    if behavior['preserved']:
+        text += '\n\nKept unchanged (they do not move the aircraft):\n- ' + '\n- '.join(behavior['preserved'])
+    if behavior['lifecycle']:
+        text += '\n\nAuthored triggers that will observe playback:\n- ' + '\n- '.join(behavior['lifecycle'])
+    return text
+
+
 def dcs_running():
     result = subprocess.run(['tasklist.exe', '/FI', 'IMAGENAME eq DCS.exe', '/FO', 'CSV', '/NH'],
                             capture_output=True, text=True, check=True,
@@ -193,7 +203,8 @@ class Library:
         if digest(destination) != manifest['prepared_sha256']:
             raise ValueError('Installed recording mission hash mismatch.')
         return {'mission':str(destination), 'package':generation,
-                'message':'Recording copy prepared for '+manifest['selected_name']+'. The authored source, briefing and embedded resources are preserved. Use F10 Start/Stop recording; confirm the take is saved before exiting.'}
+                'message':'Recording copy prepared for '+manifest['selected_name']+'. The authored source, briefing and embedded resources are preserved. Use F10 Start/Stop recording; confirm the take is saved before exiting.'
+                          + review_notes(manifest['behavior'])}
 
     def authored_source(self, sha256):
         """The exact authored source of a take: a saved recording package, else Missions."""
@@ -254,7 +265,8 @@ class Library:
         player = manifest['mission_manifest']['player_name']
         return {'mission': str(self.saved / 'Missions' / name),
                 'message': f'Playback mission ready. You fly {player} from its authored start. Load it, wait for Ready, '
-                           'then F10 > DCS Recorder playback > Start playback. Earlier authored playback missions now refuse to start.'}
+                           'then F10 > DCS Recorder playback > Start playback. Earlier authored playback missions now refuse to start.'
+                           + review_notes(manifest['mission_manifest']['behavior'])}
 
     def install_authored(self, output, manifest, generation):
         """Install only what this take changes. Shared module files must already

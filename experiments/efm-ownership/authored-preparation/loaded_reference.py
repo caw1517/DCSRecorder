@@ -61,6 +61,13 @@ def loaded(mission, dcs='D:/DCS World', custom_aircraft=None, custom_type='-'):
     start_parameters(m)
     resolved = defaults(m, dcs, custom_aircraft or Path(dcs)/'CoreMods/aircraft/FA-18C/FA-18C_hornet.lua', custom_type)
     for row in a.aircraft(m):
+        # me_mission.lua fixRadio (DCS 2.9.30) on load: a newly placed group saved
+        # without radioSet loads with radioSet=false (observed live, 061-Enforcement-Auto).
+        group = row['group']
+        if group.get('frequency') is None or group.get('modulation') is None:
+            raise ValueError(f"{row['unit']['name']}: group radio frequency is unset; its loaded default is unobserved.")
+        group.setdefault('communication', True)
+        group['radioSet'] = group.get('radioSet') or False
         unit = row['unit']
         unit.update(copy.deepcopy(resolved[unit['unitId']]))
         cartridge = unit.get('dataCartridge')

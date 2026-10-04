@@ -159,6 +159,119 @@ def inspect(path):
                          for r in rows], 'archive_members': len(entries)}
 
 
+RECOVERY = ('This mission copy changed, or its identity could not be verified. Open the authored mission in Mission Editor, '
+            'save it, and generate a new recording/playback copy in DCS Recorder. You can also use the scene saved with this take. '
+            'The recorded flight has not been changed.')
+TRIGGER_CONDITIONS = {'c_time_after', 'c_flag_is_true', 'c_flag_is_false', 'c_unit_alive', 'c_group_alive'}
+TRIGGER_ACTIONS = {'a_set_flag_value', 'a_set_flag', 'a_clear_flag', 'a_out_text_delay', 'a_out_sound'}
+
+
+def mission_editor_default(task, group):
+    """The two automatic first-waypoint actions DCS 2.9.30 Mission Editor adds to a
+    newly placed Hornet (me_action_db.lua: EPLRS; option 35 ALLOW_FORMATION_SIDE_SWAP).
+    Neither moves the aircraft or changes its lifecycle. Only these exact forms
+    qualify; edited or other automatic actions remain unclassified."""
+    if not isinstance(task, dict) or set(task) != {'enabled', 'auto', 'id', 'number', 'params'}:
+        return None
+    if task['enabled'] is not True or task['auto'] is not True or task['id'] != 'WrappedAction' or set(task['params']) != {'action'}:
+        return None
+    action = task['params']['action']
+    # EPLRS groupId is a datalink network number (getNewTblGroupIdForEPLRS: first
+    # free 1-99 among airborne groups, else 0), not the mission group ID.
+    eplrs = action.get('params') if action.get('id') == 'EPLRS' and set(action) == {'id', 'params'} else None
+    if isinstance(eplrs, dict) and set(eplrs) == {'value', 'groupId'} and eplrs['value'] is True \
+            and type(eplrs['groupId']) is int and 0 <= eplrs['groupId'] <= 99:
+        return 'EPLRS datalink on'
+    if action == {'id': 'Option', 'params': {'value': True, 'name': 35}}:
+        return 'allow formation side swap'
+    return None
+
+
+def task_label(task):
+    if not isinstance(task, dict):
+        return 'unknown task'
+    action = task.get('params', {}).get('action', {})
+    name = str(task.get('id') or 'unknown task')
+    if isinstance(action, dict) and action.get('id'):
+        name += ' ' + str(action['id'])
+        if action['id'] == 'Option':
+            name += ' ' + str(action.get('params', {}).get('name'))
+    return name + (' (added automatically by Mission Editor)' if task.get('auto') else '')
+
+
+def behavior_report(mission, role_ids):
+    """Every authored behavior conflict for these roles, not only the first.
+
+    Conflicts refuse preparation and are never removed; preserved Mission Editor
+    defaults and lifecycle consequences are reported for review. Unknown scripts
+    are never approved by scanning their text."""
+    conflicts, preserved, lifecycle = [], [], []
+    rows = [selected_row(mission, i) for i in role_ids]
+    for row in rows:
+        name, group = row['unit']['name'], row['group']
+        for p, point in group.get('route', {}).get('points', {}).items():
+            task = point.get('task', {})
+            if not task:
+                continue
+            if task.get('id') != 'ComboTask' or set(task.get('params', {})) - {'tasks'}:
+                conflicts.append(f'{name}, route point {p}: task {task_label(task)}')
+                continue
+            for n, item in task['params'].get('tasks', {}).items():
+                default = mission_editor_default(item, group)
+                if default:
+                    preserved.append(f'{name}, route point {p}, action {n}: {default} (Mission Editor default)')
+                else:
+                    conflicts.append(f'{name}, route point {p}, action {n}: {task_label(item)}')
+        for n, item in (group.get('tasks') or {}).items():
+            conflicts.append(f'{name}, group task {n}: {task_label(item)}')
+    units = {r['unit']['unitId']: r['unit']['name'] for r in rows}
+    groups = {r['group'].get('groupId'): r['unit']['name'] for r in rows}
+    for index, rule in mission.get('trigrules', {}).items():
+        label = f'Trigger {index} "{rule.get("comment") or "unnamed"}"'
+        if rule.get('predicate') not in ('triggerStart', 'triggerOnce'):
+            conflicts.append(f'{label}: unsupported trigger type {rule.get("predicate")}')
+        for kind, allowed, noun in (('rules', TRIGGER_CONDITIONS, 'condition'), ('actions', TRIGGER_ACTIONS, 'action')):
+            for n, item in rule.get(kind, {}).items():
+                pred = item.get('predicate')
+                if pred not in allowed:
+                    conflicts.append(f'{label}, {noun} {n}: unclassified {pred}')
+                    continue
+                who = (units.get(item.get('unit')) if pred == 'c_unit_alive' else
+                       groups.get(item.get('group')) if pred == 'c_group_alive' else None)
+                if who:
+                    lifecycle.append(f'{label} checks whether {who} exists. During playback it sees the playback aircraft, '
+                                     'which stays parked at parked completion and is removed at other endings.')
+    try:
+        verify_compiled_triggers(mission)
+    except ValueError as error:
+        conflicts.append(str(error))
+
+    def scripts(value, where):
+        if isinstance(value, dict):
+            if value.get('id') in ('Script', 'ScriptFile'):
+                conflicts.append(f'{where}: script task without a supported adapter')
+                return
+            for child in value.values():
+                scripts(child, where)
+    for row in aircraft(mission):
+        scripts(row['group'], f"{row['unit']['name']} (group {row['group'].get('name')})")
+    scripts({k: v for k, v in mission.items() if k != 'coalition'}, 'Mission data')
+    scripts({'coalition': {side: {k: v for k, v in c.items() if k != 'country'} if isinstance(c, dict) else c
+                           for side, c in mission.get('coalition', {}).items()}}, 'Coalition data')
+    for side, coalition in mission.get('coalition', {}).items():
+        for country in (coalition.get('country', {}) if isinstance(coalition, dict) else {}).values():
+            for kind, content in country.items():
+                if kind not in ('plane', 'helicopter'):
+                    scripts(content, f'{kind} objects')
+    return dict(conflicts=list(dict.fromkeys(conflicts)), preserved=preserved, lifecycle=lifecycle)
+
+
+def refusal(conflicts):
+    return ('Preparation refused. These authored triggers or tasks conflict with the selected aircraft or are unclassified. '
+            'They have been preserved, not removed:\n- ' + '\n- '.join(conflicts) +
+            '\nEdit them in Mission Editor, or select a different aircraft.')
+
+
 def validate_supported(mission, role_ids):
     wind = mission.get('weather', {}).get('wind', {})
     if mission.get('theatre') != 'Caucasus' or set(wind) != {'atGround', 'at2000', 'at8000'} or any(w.get('speed') != 0 for w in wind.values()):
@@ -167,37 +280,13 @@ def validate_supported(mission, role_ids):
     for row in rows:
         if not supported_livery(row['unit'].get('livery_id')):
             raise ValueError('The current playback profile requires the Blue Angels Jet Team livery.')
-        group = row['group']
-        for p, point in group.get('route', {}).get('points', {}).items():
-            task = point.get('task', {})
-            if task and (task.get('id') != 'ComboTask' or task.get('params', {}).get('tasks')):
-                raise ValueError(f"Selected aircraft {row['unit']['name']}: route point {p} has an unsupported task. Edit the source; tasks are not discarded.")
-        if group.get('tasks'):
-            raise ValueError(f"Selected aircraft {row['unit']['name']} has authored group tasks; review them before conversion.")
-    # Conservative initial subset. Unknown scripts are never approved by scanning
-    # their text. More behavior adapters and loaded enforcement are a later task.
-    conditions = {'c_time_after', 'c_flag_is_true', 'c_flag_is_false', 'c_unit_alive', 'c_group_alive'}
-    actions = {'a_set_flag_value', 'a_set_flag', 'a_clear_flag', 'a_out_text_delay', 'a_out_sound'}
-    for index, rule in mission.get('trigrules', {}).items():
-        label = rule.get('comment') or str(index)
-        if rule.get('predicate') not in ('triggerStart', 'triggerOnce'):
-            raise ValueError(f'Authored trigger "{label}" uses an unsupported trigger type.')
-        for kind, allowed in (('rules', conditions), ('actions', actions)):
-            for item in rule.get(kind, {}).values():
-                if item.get('predicate') not in allowed:
-                    raise ValueError(f'Authored trigger "{label}" contains unclassified behavior: {item.get("predicate")}. It has been preserved; preparation is refused.')
     for row in aircraft(mission):
         if row['unit'].get('skill') in ('Player', 'Client') and row['unit']['unitId'] not in role_ids:
             raise ValueError('An unrelated player/client slot would change roles. Select it explicitly or change its skill in Mission Editor.')
-    verify_compiled_triggers(mission)
-    def commands(value):
-        if isinstance(value, dict):
-            if value.get('id') in ('Script', 'ScriptFile'):
-                raise ValueError('An authored task contains script behavior without a supported adapter.')
-            for child in value.values():
-                commands(child)
-    commands(mission)
-    return rows
+    report = behavior_report(mission, role_ids)
+    if report['conflicts']:
+        raise ValueError(refusal(report['conflicts']))
+    return rows, report
 
 
 def compiled_trigger(index, rule):
@@ -350,7 +439,7 @@ def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, 
     if expected_sha and sha(blob) != expected_sha:
         raise ValueError('The authored mission changed after selection. Inspect it again.')
     mission, entries = copy.deepcopy(original), dict(original_entries)
-    row, = validate_supported(mission, [unit_id])
+    (row,), behavior = validate_supported(mission, [unit_id])
     namespace, index = allocate(mission, entries)
     edits = []
     role_edit(mission, row['unit'], 'skill', 'Player', edits)
@@ -359,7 +448,7 @@ def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, 
     manifest = dict(profile='authored-recording-v1', build=BUILD, source_sha256=sha(blob),
                     selected_id=unit_id, selected_name=row['unit']['name'], namespace=namespace,
                     lineage=lineage, association=association,
-                    trigger_indices=[index], role_edits=edits,
+                    trigger_indices=[index], role_edits=edits, behavior=behavior,
                     message='F10 > DCS Recorder > Start recording / Stop recording. Authored briefing and scene are preserved.')
     entries[MARKER] = json.dumps(manifest, sort_keys=True).encode()
     entries['mission'] = encoded('mission', mission)
@@ -381,7 +470,7 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     if metadata.get('authored_source_sha256') != sha(saved_blob):
         raise ValueError('This take does not belong to the exact authored source. Use the scene saved with it.')
     mission, entries = copy.deepcopy(original), dict(original_entries)
-    lead, player = validate_supported(mission, [unit_id, player_id])
+    (lead, player), behavior = validate_supported(mission, [unit_id, player_id])
     if saved:
         recorded = selected(read_source(saved)[2], int(metadata['source_unit_id']))
         if metadata.get('source') != recorded['unit']['name']:
@@ -427,6 +516,18 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     # Replace exact literals before inserting arbitrary authored names.
     script=script.replace("'StagedPlayback'",'__LEAD_NAME__').replace("'Observer'",'__PLAYER_NAME__')
     script=script.replace(";sample('SceneWitness')",'')
+    # Authored playback only: a release the hook could not verify (absent checker,
+    # mismatched loaded mission, stale request) is an identity refusal with the
+    # approved recovery text. Native readiness failures keep their diagnostic.
+    for old,new in (("'Release test: '","'DCS Recorder: '"),
+                    ("if now-s.started>10 then s.fail('bridge_or_native_readiness_timeout')",
+                     "if now-s.started>10 then s.fail(matched(u) and status==.125 and 'identity_unverified' or 'bridge_or_native_readiness_timeout')"),
+                    ("notice('FAILED: '..tostring(reason)..'. Exit normally and retain logs.')",
+                     "notice(IDENTITY[reason] and RECOVERY or 'FAILED: '..tostring(reason)..'. Exit normally and retain logs.')")):
+        if script.count(old)!=1:raise ValueError('Release mission script changed: '+old)
+        script=script.replace(old,new)
+    script=('local IDENTITY={identity_unverified=true,stale_or_mismatched_request=true}\n'
+            'local RECOVERY='+serialize('Playback blocked. '+RECOVERY)+'\n'+script)
     script=script.replace('DCSR_RELEASE',namespace).replace('DCS Recorder release test','DCS Recorder playback')
     script=script.replace('__LEAD_NAME__',serialize(lead['unit']['name'])).replace('__PLAYER_NAME__',serialize(player['unit']['name']))
     script=namespace+'_CONFIG='+serialize(config)+'\n'+script
@@ -445,7 +546,7 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     manifest=dict(profile='authored-playback-v1',build=BUILD,source_sha256=sha(blob),saved_scene_sha256=sha(saved_blob),selected_id=unit_id,
                   selected_name=lead['unit']['name'],player_id=player_id,player_name=player['unit']['name'],
                   namespace=namespace,trigger_indices=[index,cleanup],role_edits=edits,initial=config,
-                  player_authored_start_preserved=True)
+                  player_authored_start_preserved=True,behavior=behavior)
     # Check the entire player's authored group apart from the deliberate skill change.
     player_check=copy.deepcopy(player['group'])
     next(iter(player_check['units'].values()))['skill']=selected(original,player_id)['unit']['skill']

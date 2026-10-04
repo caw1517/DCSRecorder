@@ -70,6 +70,8 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     namespace = manifest['namespace']
     mission_lua = output/'mission.lua'; mission_lua.parent.mkdir(parents=True, exist_ok=True)
     mission_lua.write_bytes(entries['mission'])
+    control = output/'control.lua'
+    control.write_text(mission['trigrules'][manifest['trigger_indices'][0]]['actions'][2]['text'], encoding='utf-8')
     (payload/'Missions').mkdir(parents=True)
     miz = payload/'Missions'/mission_name
     miz.write_bytes(a.packed(entries))
@@ -79,14 +81,19 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     description = dictionary.get(mission['descriptionText'], mission['descriptionText'])
     reference = loaded_reference.loaded(mission, dcs, mod/'aircraft.lua', MODULE)
     fields = dict(enumerate(loaded_reference.FIELDS, 1))
+    # Approval is bound to this take, this prepared revision and its scene; the
+    # loaded-mission comparison and tape token enforce them, and the hook logs them.
     expected = dict(high=((token >> 40) & 0xffffff)/16777216, low=(token & 0xffffff)/16777216, fields=fields,
-                    mission=reference, description=description)
+                    mission=reference, description=description, take_sha256=digest(take),
+                    prepared_sha256=digest(miz), scene_sha256=manifest['saved_scene_sha256'])
     assert expected['high'] == manifest['initial']['token_high'] and expected['low'] == manifest['initial']['token_low']
     (hookdir/'expected.lua').write_text('return '+a.serialize(expected)+'\n', encoding='utf-8')
     shutil.copy2(REPO/'companion/session_guard.lua', hookdir/'session_guard.lua')
     hook = (EFM/'release-start/hook.lua').read_text(encoding='utf-8')
     for old, new in (('DCSRecorderReleaseControl', CONTROL), (seed['module'], MODULE), (seed['binary'], BINARY),
-                     (seed['mission'], mission_name), ('DCSR_RELEASE', namespace)):
+                     (seed['mission'], mission_name), ('DCSR_RELEASE', namespace),
+                     ("active=true;emit('START,'..session)",
+                      "active=true;emit('START,'..session..',take='..expected.take_sha256..',prepared='..expected.prepared_sha256..',scene='..expected.scene_sha256)")):
         if old not in hook: raise ValueError('Release hook changed: '+old)
         hook = hook.replace(old, new)
     (payload/'Scripts/Hooks').mkdir(parents=True)
@@ -95,7 +102,8 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     for args in ([HERE/'check_me_zones.lua', mission_lua],
                  [EFM/'verify_hornet_requirements.lua', mission_lua, dcs/'Mods/aircraft/FA-18C/entry.lua', dcs/'MissionEditor/modules/me_mission.lua', 'authored'],
                  [EFM/'verify_hornet_routes.lua', mission_lua, dcs/'MissionEditor/modules/me_route.lua', plane_groups(mission)],
-                 [HERE/'check_authored_hook.lua', payload, CONTROL, mission_name, namespace]):
+                 [HERE/'check_authored_hook.lua', payload, CONTROL, mission_name, namespace],
+                 [HERE/'check_authored_mission.lua', control, namespace, manifest['selected_name']]):
         subprocess.run([luae, *map(str, args)], check=True)
     refs, problems = check_resources.problems(miz.read_bytes())
     if problems: raise ValueError('Unresolved resources: '+'; '.join(problems))
