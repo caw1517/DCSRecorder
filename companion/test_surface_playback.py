@@ -149,6 +149,20 @@ class SurfacePlayback(unittest.TestCase):
         mission = a.LuaData((self.root/name/'mission.lua').read_text(encoding='utf-8')).assignment('mission')
         return next(r for r in a.aircraft(mission) if r['unit']['unitId'] == 2)['unit']['payload']['pylons']
 
+    def test_library_lists_authored_take_in_any_livery(self):
+        lib = Library(dict(saved_games=str(self.root/'saved'), dcs=str(DCS), build_trial=TRIAL_BUILD), running=lambda: False)
+        def livery(value, drop_authored=False):
+            rows = [r for r in csv.reader(io.StringIO(TAKE.read_text(encoding='utf-8')))
+                    if not (drop_authored and r and r[0] == 'authored_source_sha256')]
+            for r in rows:
+                if r and r[0] == 'livery': r[1] = value
+            path = lib.recordings/f'{value}-{drop_authored}.csv'
+            with path.open('w', newline='', encoding='utf-8') as f: csv.writer(f, lineterminator=chr(10)).writerows(rows)
+            return path
+        self.assertEqual(lib.validate(livery('vfa-64 400 cag'))['livery'], 'vfa-64 400 cag')
+        with self.assertRaisesRegex(ValueError, 'Only Blue Angels'):
+            lib.validate(livery('vfa-64 400 cag', drop_authored=True))  # legacy take
+
     def test_listed_mod_store_is_mirrored(self):
         result = self.build()
         self.assertEqual(result['notices'], [])

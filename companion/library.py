@@ -61,7 +61,9 @@ class Library:
     def validate(self, path):
         metadata, samples, raw = read(path)
         from authored_missions import supported_livery
-        if not supported_livery(metadata['livery']):
+        # Legacy playback modules carry only the Blue Angels livery. Authored takes
+        # play back their recorded livery; authored preparation resolves it.
+        if not metadata.get('authored_source_sha256') and not supported_livery(metadata['livery']):
             raise ValueError('Only Blue Angels Jet Team is currently supported.')
         # Old accepted baseline has no capture build/weather fields; only its exact
         # content hash is grandfathered. New practice missions capture these fields.
