@@ -209,6 +209,15 @@ class AuthoredCopies(unittest.TestCase):
         self.assertEqual(a.find_livery('VFA-37',dcs,saved),user)
         self.assertEqual(a.find_livery('blue angels jet team',dcs,saved),stock/'Blue Angels Jet Team.zip')
         with self.assertRaisesRegex(ValueError,'"Thunderbirds" was not found'):a.find_livery('Thunderbirds',dcs,saved)
+        # Installed DCS modules (campaigns) carry their own Hornet liveries, in any folder case.
+        campaign=dcs/'Mods/campaigns/FA-18C Raven One/Liveries/fa-18c_hornet';campaign.mkdir(parents=True)
+        (campaign/'VFA-64 400 CAG.zip').write_bytes(b'zip')
+        self.assertEqual(a.find_livery('vfa-64 400 cag',dcs,saved),campaign/'VFA-64 400 CAG.zip')
+        (campaign/'VFA-37.zip').write_bytes(b'zip')  # an earlier level (here the user's copy) still wins
+        self.assertEqual(a.find_livery('VFA-37',dcs,saved),user)
+        other=dcs/'Mods/campaigns/Another/Liveries/FA-18C_hornet';other.mkdir(parents=True)
+        (other/'VFA-64 400 CAG.zip').write_bytes(b'zip')
+        with self.assertRaisesRegex(ValueError,'"vfa-64 400 cag" exists more than once'):a.find_livery('vfa-64 400 cag',dcs,saved)
 
     def test_library_never_routes_authored_take_to_fixed_donor(self):
         from library import Library

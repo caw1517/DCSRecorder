@@ -33,20 +33,31 @@ def same_livery(a, b):
     return isinstance(a, str) and isinstance(b, str) and a.casefold() == b.casefold()
 
 
+def hornet_liveries(folder):
+    """The FA-18C_hornet livery folder inside `folder`, matched in any case."""
+    return [p for p in (folder.iterdir() if folder.is_dir() else []) if p.is_dir() and p.name.casefold() == 'fa-18c_hornet']
+
+
 def find_livery(livery_id, dcs, saved_games):
-    """The Hornet livery (folder or .zip) DCS loads for this ID: the user's Saved
-    Games livery, else the stock one. Refuses when neither exists."""
-    roots = (Path(saved_games)/'Liveries/FA-18C_hornet', Path(dcs)/'CoreMods/aircraft/FA-18C/Liveries/FA-18C_hornet')
-    for root in roots:
-        found = [p for p in (root.iterdir() if root.is_dir() else [])
+    """The Hornet livery (folder or .zip) DCS loads for this ID. Searched in order:
+    the user's Saved Games liveries, the stock Hornet's, then those of installed DCS
+    modules such as campaigns (Mods/<kind>/<module>/Liveries). Refuses when it is
+    missing, or found more than once at the same level."""
+    dcs = Path(dcs)
+    tiers = ((Path(saved_games)/'Liveries/FA-18C_hornet',), (dcs/'CoreMods/aircraft/FA-18C/Liveries/FA-18C_hornet',),
+             tuple(r for m in sorted((dcs/'Mods').glob('*/*')) for r in hornet_liveries(m/'Liveries')))
+    for roots in tiers:
+        found = [p for root in roots for p in (root.iterdir() if root.is_dir() else [])
                  if same_livery(p.name[:-4] if p.suffix.lower() == '.zip' and p.is_file() else p.name, livery_id)
                  and (p.is_dir() or p.suffix.lower() == '.zip')]
         if len(found) > 1:
-            raise ValueError(f'The livery "{livery_id}" exists more than once in {root}. Keep one copy.')
+            raise ValueError(f'The livery "{livery_id}" exists more than once ('
+                             + '; '.join(str(p) for p in found) + '). Keep one copy.')
         if found:
             return found[0]
-    raise ValueError(f'The livery "{livery_id}" was not found in the stock Hornet liveries or in '
-                     'Saved Games/DCS/Liveries/FA-18C_hornet. Install it there, or choose another livery in Mission Editor.')
+    raise ValueError(f'The livery "{livery_id}" was not found in the stock Hornet liveries, the liveries of installed '
+                     'DCS modules or Saved Games/DCS/Liveries/FA-18C_hornet. Install it there, or choose another livery '
+                     'in Mission Editor.')
 
 
 def sha(data):
