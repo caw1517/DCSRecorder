@@ -13,7 +13,7 @@ from recorded_flight import read, convert
 class LightsWorkflowTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
-        self.library=Library(dict(saved_games=str(self.root),dcs='D:/DCS World',engine_capture=True,
+        self.library=Library(dict(setup='legacy',saved_games=str(self.root),dcs='D:/DCS World',engine_capture=True,
             smoke_capture=True,lights_capture=True,
             baseline_mission=str(EXPERIMENT/'package/hornet-prototype/EFM-Probe-Hornet-left-roll-400KIAS.miz'),
             donor_mod=str(EXPERIMENT/'package/hornet-prototype/DCSRecorder-Hornet-Probe')),running=lambda:False)

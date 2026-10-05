@@ -13,7 +13,7 @@ from library import Library, EXPERIMENT, TRIAL_BUILD
 class BuildTrialTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name)
-        self.settings=dict(saved_games=str(self.root),dcs='D:/DCS World',build_trial=TRIAL_BUILD,
+        self.settings=dict(setup='legacy',saved_games=str(self.root),dcs='D:/DCS World',build_trial=TRIAL_BUILD,
             engine_capture=True,smoke_capture=True,lights_capture=True,canopy_capture=True,wheels_capture=True,
             baseline_mission=str(EXPERIMENT/'package/hornet-prototype/EFM-Probe-Hornet-left-roll-400KIAS.miz'),
             donor_mod=str(EXPERIMENT/'package/hornet-prototype/DCSRecorder-Hornet-Probe'))

@@ -15,7 +15,7 @@ class EngineWorkflowTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        self.library = Library({'saved_games': str(self.root), 'dcs': 'D:/DCS World'}, running=lambda: False)
+        self.library = Library({'setup': 'legacy', 'saved_games': str(self.root), 'dcs': 'D:/DCS World'}, running=lambda: False)
 
     def tearDown(self):
         self.temp.cleanup()

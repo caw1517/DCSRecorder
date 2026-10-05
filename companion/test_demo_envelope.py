@@ -4,7 +4,7 @@ from library import Library, SUPPORTED_BUILD
 class DemoEnvelopeTests(unittest.TestCase):
     def test_fast_roll_at_any_recorded_altitude(self):
         with tempfile.TemporaryDirectory() as folder:
-            library=Library({'saved_games': folder}, running=lambda: False)
+            library=Library({'setup': 'legacy', 'saved_games': folder}, running=lambda: False)
             for altitude in (-50, 0, 76.2, 152.4, 2000, 6000):
                 with self.subTest(altitude=altitude):
                     source=library.recordings/'demo.csv'

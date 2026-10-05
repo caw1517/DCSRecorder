@@ -11,7 +11,7 @@ class LibraryTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.dcs = self.root / 'dcs'; self.dcs.mkdir()
         (self.dcs / 'autoupdate.cfg').write_text(json.dumps({'version': SUPPORTED_BUILD}))
-        self.library = Library({'saved_games': str(self.root / 'saved'), 'dcs': str(self.dcs), 'accepted_baseline_sha256': digest(BASELINE)}, running=lambda: False)
+        self.library = Library({'setup': 'legacy', 'saved_games': str(self.root / 'saved'), 'dcs': str(self.dcs), 'accepted_baseline_sha256': digest(BASELINE)}, running=lambda: False)
         self.source = self.library.recordings / 'baseline.csv'; shutil.copy2(BASELINE, self.source)
 
     def tearDown(self):
@@ -23,6 +23,21 @@ class LibraryTests(unittest.TestCase):
         self.library.rename('baseline.csv', 'My first flight')
         self.assertEqual(self.library.entries()[0]['name'], 'My first flight')
         self.assertEqual(self.source.read_bytes(), original)
+
+    def test_normal_setup_lists_legacy_takes_but_offers_no_legacy_workflow(self):
+        original = self.source.read_bytes()
+        normal = Library({'saved_games': str(self.root / 'saved'), 'dcs': str(self.dcs),
+                          'accepted_baseline_sha256': digest(BASELINE)}, running=lambda: False)
+        entry = normal.entries()[0]
+        self.assertEqual((entry['supported'], entry['legacy'], entry['status_label']), (False, True, 'Legacy · Motion only'))
+        self.assertIn('play back only in the legacy setup', entry['reason'])
+        with patch('library.prepare') as prepare:
+            with self.assertRaisesRegex(ValueError, 'only in the legacy setup'): normal.playback('baseline.csv')
+            prepare.assert_not_called()
+        with self.assertRaisesRegex(ValueError, 'Practice missions belong to the legacy setup'): normal.practice()
+        self.assertEqual(self.source.read_bytes(), original)
+        with self.assertRaisesRegex(ValueError, 'Unknown companion setup'):
+            Library({'setup': 'other', 'saved_games': str(self.root / 'saved')}, running=lambda: False)
 
     def test_legacy_take_explains_missing_gear_before_and_after_generation(self):
         original = self.source.read_bytes()

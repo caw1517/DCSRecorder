@@ -10,7 +10,7 @@ class CaptureBatchTests(unittest.TestCase):
     def capture(self,mode):
         temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
         root=Path(temp.name);here=Path(__file__).parent
-        library=Library(dict(saved_games=str(root),dcs='D:/DCS World',build_trial=TRIAL_BUILD),running=lambda:False)
+        library=Library(dict(setup='legacy',saved_games=str(root),dcs='D:/DCS World',build_trial=TRIAL_BUILD),running=lambda:False)
         result=subprocess.run(['D:/DCS World/bin/luae.exe',str(here/'test_engine_sink.lua'),
             str(here/'recording_sink.lua'),str(here/'engine_capture.lua'),str(root),mode,
             str(here/'smoke_capture.lua'),'wheels',TRIAL_BUILD],capture_output=True,text=True)

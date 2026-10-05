@@ -62,7 +62,8 @@ def serve(settings, port=0, open_browser=True):
                     status_file = library.home / 'save-status.txt'
                     save_status = status_file.read_text(encoding='utf-8', errors='replace')[:1000] if status_file.exists() else ''
                     return self.reply(200, {'recordings': library.entries(), 'partial_count': len(list(library.recordings.glob('*.partial'))),
-                                           'hook_installed': hook_ok, 'save_status': save_status, 'directory': str(library.recordings)})
+                                           'hook_installed': hook_ok, 'save_status': save_status, 'directory': str(library.recordings),
+                                           'legacy_setup': library.legacy})
                 except Exception as exc:
                     return self.reply(400, {'error': str(exc)})
             return self.reply(404, {'error': 'Not found.'})

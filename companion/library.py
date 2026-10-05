@@ -9,6 +9,11 @@ sys.path.insert(0, str(EXPERIMENT / 'authored-preparation'))
 from recorded_flight import read
 from prepare_staged_playback import prepare, SUPPORTED_BUILD, TRIAL_BUILD
 
+# The normal setup records and plays back only through authored Mission Editor
+# scenes. Practice missions and legacy takes (recorded before authored scenes)
+# belong to the legacy/developer setup: settings "setup": "legacy".
+LEGACY_SETUP_NOTICE = ('Recorded before Mission Editor scenes. Legacy takes play back only in the legacy setup; '
+                       'this recording is kept unchanged.')
 LEGACY_STATE_NOTICE = ('Gear, flaps and control surfaces were not recorded and cannot replay. '
                        'Create a new practice mission and record again to capture them.')
 
@@ -40,6 +45,9 @@ class Library:
         if settings.get('build_trial') not in (None,TRIAL_BUILD):
             raise ValueError('Unknown companion build trial')
         self.build_trial=settings.get('build_trial')==TRIAL_BUILD
+        if settings.get('setup') not in (None, 'legacy'):
+            raise ValueError('Unknown companion setup')
+        self.legacy = settings.get('setup') == 'legacy'
         self.build=TRIAL_BUILD if self.build_trial else SUPPORTED_BUILD
         self.saved = Path(settings['saved_games'])
         self.home = self.saved / 'DCSRecorder'
@@ -122,6 +130,9 @@ class Library:
                     item.update(authored=True, status_label='Authored scene · '+item['status_label'],
                                 reason='Plays back inside its saved Mission Editor scene, or a newer revision where you confirmed this aircraft. Choose the stock Hornet you will fly; it keeps its authored start.'
                                 if record else 'Recorded before aircraft association: plays back only in its exact source mission. Choose the stock Hornet you will fly; it keeps its authored start.')
+                elif not self.legacy:
+                    item.update(supported=False, legacy=True, status_label='Legacy · ' + item['status_label'],
+                                reason=LEGACY_SETUP_NOTICE)
             except (ValueError, OSError, OverflowError) as exc:
                 item['reason'] = str(exc)
             result.append(item)
@@ -359,6 +370,8 @@ class Library:
                                                             'backup': str(backup)}, indent=2), encoding='utf-8')
 
     def practice(self):
+        if not self.legacy:
+            raise ValueError('Practice missions belong to the legacy setup. Record from your own Mission Editor mission instead.')
         dcs = self.check_environment()
         engine = self.settings.get('engine_capture', False)
         smoke = self.settings.get('smoke_capture', False)
@@ -437,7 +450,9 @@ class Library:
         source = self.source(key)
         metadata = self.validate(source)
         if metadata.get('authored_source_sha256'):
-            raise ValueError('This take belongs to an authored scene. Authored playback preparation is still being validated; the legacy practice-mission builder cannot preserve its scene.')
+            raise ValueError('This take belongs to an authored scene. Prepare it with its scene and player; the legacy practice-mission builder cannot preserve its scene.')
+        if not self.legacy:
+            raise ValueError(LEGACY_SETUP_NOTICE)
         dcs = self.check_environment()
         generation = uuid.uuid4().hex
         output = self.home / 'packages' / generation

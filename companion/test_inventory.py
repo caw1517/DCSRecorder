@@ -1,5 +1,6 @@
 """Inventory and snapshot against a small fake DCS installation."""
 import json, tempfile, unittest, zipfile
+from unittest.mock import patch
 from pathlib import Path
 import inventory
 
@@ -47,7 +48,10 @@ class Inventory(unittest.TestCase):
 
     def test_snapshot_copies_and_verifies_without_touching_originals(self):
         before = {p: p.read_bytes() for p in self.saved.rglob('*') if p.is_file()}
-        target, m, result = inventory.snapshot(Path(self.tmp.name)/'archive', self.settings)
+        with patch('inventory.dcs_running', return_value=True), self.assertRaisesRegex(SystemExit, 'Close DCS'):
+            inventory.snapshot(Path(self.tmp.name)/'archive', self.settings)
+        with patch('inventory.dcs_running', return_value=False):
+            target, m, result = inventory.snapshot(Path(self.tmp.name)/'archive', self.settings)
         self.assertTrue(result['verified'], result)
         self.assertEqual(result['files'], len(m['files']) - 1)
         self.assertEqual(result['listed_not_copied'], ['DCSRecorder/companion.lock'])
