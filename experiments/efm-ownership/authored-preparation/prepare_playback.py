@@ -44,32 +44,62 @@ def validate_take(metadata, raw, footer):
     if footer != 'user_stop': raise ValueError('Take did not end with F10 Stop')
 
 
-def mirror_stores(aircraft_lua, lead, dcs, saved_games):
-    """Make the playback module draw every store the authored lead carries.
+# Stores a mod adds by editing the installed stock Hornet that the playback
+# aircraft may draw: (CLSID, station) -> (plugin ID that declares it, display name).
+# Each entry was checked live once in DCS; add a store only after the same check.
+MOD_STORES = {('{HANHART}', 5): ('Blue Angels Mods by Razor, Coop & Thomaz', 'Hanhart stopwatch')}
 
-    The module declares the unmodified stock Hornet's stores. The Blue Angels mod
-    adds a HANHART centerline store by editing the installed stock Hornet; that
-    entry is mirrored verbatim when the mod declares the store. Any other store the
-    module cannot draw is refused by station rather than shown as a bare pylon.
+
+def plan_stores(aircraft_lua, lead, dcs, saved_games):
+    """Decide how the playback module draws each store the authored lead carries.
+
+    The module declares the unmodified stock Hornet's stores. A listed mod store is
+    mirrored verbatim from the installed stock Hornet when its mod still provides it.
+    When a DCS update or repair has undone the mod's edit (or the mod no longer
+    declares the store), the store is left off with a notice. Unlisted stores are
+    refused by station rather than shown as a bare pylon.
+    Returns (lines to mirror, {station: notice} for stores left off).
     """
     import re
-    text = aircraft_lua.read_text(encoding='utf-8')
-    declared = set(re.findall(r'CLSID\s*=\s*"([^"]+)"', text))
+    has = lambda text, clsid: re.search(r'CLSID\s*=\s*"' + re.escape(clsid) + '"', text)
+    declared = set(re.findall(r'CLSID\s*=\s*"([^"]+)"', aircraft_lua.read_text(encoding='utf-8')))
     stock = (dcs/'CoreMods/aircraft/FA-18C/FA-18C_hornet.lua').read_text(encoding='utf-8', errors='replace')
+    mirror, dropped = [], {}
     for station, store in sorted(((lead.get('payload') or {}).get('pylons') or {}).items()):
         clsid = (store or {}).get('CLSID')
         if not clsid or clsid in declared: continue
-        lines = [l for l in stock.splitlines() if re.search(r'CLSID\s*=\s*"' + re.escape(clsid) + '"', l)]
-        mod = any(re.search(r'CLSID\s*=\s*"' + re.escape(clsid) + '"', f.read_text(encoding='utf-8', errors='replace'))
-                  for f in (saved_games/'Mods/tech').glob('*/*.lua')) if (saved_games/'Mods/tech').exists() else False
-        if clsid != '{HANHART}' or station != 5 or len(lines) != 1 or not mod:
-            raise ValueError(f'Station {station} of the recorded Hornet carries {clsid}, which the playback aircraft cannot draw. '
-                             'Remove it in Mission Editor and save a new revision.')
-        clean = '\t{ CLSID = "<CLEAN>",\targ_value = 1, add_mass = -ctrPylonMass\t},'
-        if text.count(clean) != 1: raise ValueError('Playback module centerline layout changed')
-        text = text.replace(clean, lines[0].rstrip() + '\n' + clean)
-        declared.add(clsid)
-    aircraft_lua.write_text(text, encoding='utf-8')
+        if (clsid, station) not in MOD_STORES:
+            raise ValueError(f'Station {station} of the recorded Hornet carries {clsid}, which is not on the supported mod '
+                             'store list. Remove it in Mission Editor and save a new revision.')
+        plugin, name = MOD_STORES[clsid, station]
+        lines = [l for l in stock.splitlines() if has(l, clsid)]
+        if len(lines) > 1: raise ValueError(f'The installed stock Hornet declares {clsid} more than once')
+        folders = [e.parent for e in (saved_games/'Mods').glob('*/*/entry.lua') if has_plugin(e, plugin)] \
+            if (saved_games/'Mods').exists() else []
+        provided = any(has(f.read_text(encoding='utf-8', errors='replace'), clsid)
+                       for folder in folders for f in folder.glob('*.lua') if f.name != 'entry.lua')
+        if lines and provided:
+            mirror.append(lines[0].rstrip()); declared.add(clsid)
+        else:
+            dropped[station] = (f'The {name} ({clsid}, station {station}) is left off the playback aircraft: this DCS '
+                                'installation no longer provides it. A DCS update or repair can undo the mod\'s change '
+                                'to the stock Hornet; reinstall the mod to show it again.')
+    return mirror, dropped
+
+
+def has_plugin(entry, plugin):
+    import re
+    match = re.search(r'declare_plugin\s*\(\s*"([^"]+)"', entry.read_text(encoding='utf-8', errors='replace'))
+    return bool(match) and match.group(1) == plugin
+
+
+def mirror_stores(aircraft_lua, lines):
+    """Add planned mod store entries to the playback module's centerline list."""
+    if not lines: return
+    text = aircraft_lua.read_text(encoding='utf-8')
+    clean = '\t{ CLSID = "<CLEAN>",\targ_value = 1, add_mass = -ctrPylonMass\t},'
+    if text.count(clean) != 1: raise ValueError('Playback module centerline layout changed')
+    aircraft_lua.write_text(text.replace(clean, '\n'.join(lines) + '\n' + clean), encoding='utf-8')
 
 
 def plane_groups(mission):
@@ -131,7 +161,11 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
         shutil.copy2(oldmod/'bin'/f"{seed['binary']}.dll", mod/'bin'/f'{BINARY}.dll')
     convert(take, mod/'bin/recorded-flight.txt')
     token = fingerprint((mod/'bin/recorded-flight.txt').read_bytes())
-    blob, entries, mission, manifest = a.playback_entries(source, lead_id, player_id, metadata, samples[0], raw[0], MODULE, token, saved, faults)
+    # Stores left off are removed from the prepared mission (a declared edit), so
+    # the loaded-mission reference and prepared hash describe what DCS will load.
+    stores, dropped = plan_stores(mod/'aircraft.lua', a.selected(a.read_source(source)[2], lead_id)['unit'], dcs, Path(saved_games))
+    blob, entries, mission, manifest = a.playback_entries(source, lead_id, player_id, metadata, samples[0], raw[0], MODULE, token, saved, faults,
+                                                          drop_stations=sorted(dropped))
     namespace = manifest['namespace']
     mission_lua = output/'mission.lua'; mission_lua.parent.mkdir(parents=True, exist_ok=True)
     mission_lua.write_bytes(entries['mission'])
@@ -171,8 +205,7 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
                  [HERE/'check_authored_hook.lua', payload, CONTROL, mission_name, namespace],
                  [HERE/'check_authored_mission.lua', control, namespace, manifest['selected_name']]):
         subprocess.run([luae, *map(str, args)], check=True)
-    # After the scene-module check, so a missing mod is named as such.
-    mirror_stores(mod/'aircraft.lua', a.selected(a.read_source(source)[2], lead_id)['unit'], dcs, Path(saved_games))
+    mirror_stores(mod/'aircraft.lua', stores)
     refs, problems = check_resources.problems(miz.read_bytes())
     if problems: raise ValueError('Unresolved resources: '+'; '.join(problems))
     profile = 'authored-playback-ground-v1' if metadata.get('surface_available') else 'authored-playback-airborne-v1'
@@ -180,7 +213,7 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
                   controller_sha256=digest(mod/'bin'/f'{BINARY}.dll'), dcs_build=a.BUILD, module=MODULE, binary=BINARY,
                   control=CONTROL, mission=mission_name, take=take.name, take_sha256=digest(take),
                   source_sha256=manifest['source_sha256'], seed_manifest_sha256=digest(SEED/'manifest.json'),
-                  recording=metadata, mission_manifest=manifest,
+                  recording=metadata, mission_manifest=manifest, notices=[dropped[s] for s in sorted(dropped)],
                   status='Offline checked; live readiness, release and scene comparison pending',
                   files={p.relative_to(payload).as_posix(): digest(p) for p in sorted(payload.rglob('*')) if p.is_file()})
     (output/'manifest.json').write_text(json.dumps(result, indent=2, default=str)+'\n', encoding='utf-8')

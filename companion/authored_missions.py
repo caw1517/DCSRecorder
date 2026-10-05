@@ -477,13 +477,15 @@ def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, 
     return save_package(output, blob, entries, manifest)
 
 
-def playback_entries(source, unit_id, player_id, metadata, first, raw_first, module, token, saved=None, faults=False):
+def playback_entries(source, unit_id, player_id, metadata, first, raw_first, module, token, saved=None, faults=False, drop_stations=()):
     """Build playback mission data without touching a simulator installation.
 
     `saved` is the take's own saved scene when `source` is a newer, explicitly
     confirmed revision; `unit_id` is then the confirmed counterpart of the recorded
     aircraft, which must be authored identically apart from its name and IDs.
     `faults` adds the developer fault-injection menu (diagnostic packages only).
+    `drop_stations` are lead pylons whose mod store this installation no longer
+    provides; they are removed so the playback aircraft carries nothing there.
     """
     blob, original_entries, original = read_source(source)
     if unit_id == player_id:
@@ -535,6 +537,8 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
             for key in ('parking','parking_id','parking_landing','airdromeId','helipadId','linkUnit'):
                 if key in row:role_remove(mission,row,key,edits)
     role_edit(mission,player['unit'],'skill','Player',edits)
+    pylons=(lead['unit'].get('payload') or {}).get('pylons') or {}
+    for station in drop_stations:role_remove(mission,pylons,station,edits)
     expected={21:first[11],38:first[42]}
     for channels,values in (([0,3,5,9,10,11,12,13,14,15,16,17,18],first[12:25]),
                             ([28,29,89,90],first[25:29]),([88,190,191,192,193,210,212],first[35:42]),

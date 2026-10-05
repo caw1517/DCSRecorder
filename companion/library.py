@@ -273,7 +273,8 @@ class Library:
         return {'mission': str(self.saved / 'Missions' / name),
                 'message': f'Playback mission ready. You fly {player} from its authored start. Load it, wait for Ready, '
                            'then F10 > DCS Recorder playback > Start playback.' + ending + ' Earlier authored playback missions now refuse to start.'
-                           + review_notes(manifest['mission_manifest']['behavior'])}
+                           + review_notes(manifest['mission_manifest']['behavior'])
+                           + ''.join(' ' + n for n in manifest.get('notices', []))}
 
     def install_authored(self, output, manifest, generation):
         """Install only what this take changes. Shared module files must already

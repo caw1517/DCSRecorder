@@ -107,6 +107,39 @@ class SurfacePlayback(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'needs modules that are not installed: Blue Angels Mods'):
             self.build(saved_games=self.root/'empty')
 
+    def lead_pylons(self, name):
+        mission = a.LuaData((self.root/name/'mission.lua').read_text(encoding='utf-8')).assignment('mission')
+        return next(r for r in a.aircraft(mission) if r['unit']['unitId'] == 2)['unit']['payload']['pylons']
+
+    def test_listed_mod_store_is_mirrored(self):
+        result = self.build()
+        self.assertEqual(result['notices'], [])
+        self.assertIn('{HANHART}', (self.root/'ground/payload/Mods/aircraft'/MODULE/'aircraft.lua').read_text(encoding='utf-8'))
+        self.assertEqual(self.lead_pylons('ground')[5]['CLSID'], '{HANHART}')
+
+    def test_mod_store_no_longer_provided_is_left_off_with_notice(self):
+        # The mod is still installed (the scene needs it) but no longer provides
+        # the stopwatch, as when its edit or its store file is gone.
+        mod = self.root/'games/Mods/tech/Blue Angels Mods'; mod.mkdir(parents=True)
+        shutil.copy2(Path.home()/'Saved Games/DCS/Mods/tech/Blue Angels Mods/entry.lua', mod/'entry.lua')
+        result = self.build(saved_games=self.root/'games')
+        self.assertEqual(len(result['notices']), 1)
+        self.assertIn('Hanhart stopwatch ({HANHART}, station 5) is left off', result['notices'][0])
+        self.assertNotIn('{HANHART}', (self.root/'ground/payload/Mods/aircraft'/MODULE/'aircraft.lua').read_text(encoding='utf-8'))
+        self.assertNotIn(5, self.lead_pylons('ground'))
+        self.assertTrue(result['mission_manifest']['preservation']['restored_structure_equals_source'])
+
+    def test_unlisted_mod_store_is_refused_by_station(self):
+        from prepare_playback import plan_stores, SEED
+        seed = json.loads((SEED/'manifest.json').read_text(encoding='utf-8-sig'))
+        lua = SEED/'payload/Mods/aircraft'/seed['module']/'aircraft.lua'
+        lead = dict(payload=dict(pylons={5: dict(CLSID='{HANHART}'), 3: dict(CLSID='{SOME-MOD-POD}')}))
+        with self.assertRaisesRegex(ValueError, r'Station 3 .* \{SOME-MOD-POD\}, which is not on the supported mod store list'):
+            plan_stores(lua, lead, DCS, Path.home()/'Saved Games/DCS')
+        lead['payload']['pylons'] = {4: dict(CLSID='{HANHART}')}  # listed store, unlisted station
+        with self.assertRaisesRegex(ValueError, 'Station 4 '):
+            plan_stores(lua, lead, DCS, Path.home()/'Saved Games/DCS')
+
     @unittest.skipUnless((AIRBORNE/'recording-v4-live/20261003T174448Z-0001.csv').exists(), 'needs airborne evidence')
     def test_controller_switches_per_take_with_backup(self):
         saved = self.root/'saved'
