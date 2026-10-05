@@ -1,0 +1,37 @@
+﻿{
+    "Status":  "Authored playback installed; live readiness/release pending",
+    "UpdateFrom":  "../results/lifecycle-2026-10-04/packages/moving",
+    "Files":  [
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\059-Lifecycle-Airborne.miz",
+                      "Name":  "Missions/059-Lifecycle-Airborne.miz",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\airborne\\payload\\Missions\\059-Lifecycle-Airborne.miz",
+                      "Hash":  "106ae9d2e06f3a226d9af0d07ac967db3265252fa7558a633354665c422b24f0"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.json",
+                      "Name":  "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.json",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\airborne\\payload\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.json",
+                      "Hash":  "af76972cc6c6eb2afe4afc5e7996b153316ef95a7da2e97185f6bf253d252780"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.txt",
+                      "Name":  "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.txt",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\airborne\\payload\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.txt",
+                      "Hash":  "00f5e9e14e63545fa3e7906a04cc0b257ffce8ec434b2842dd2c4cb576b96ae2"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Name":  "Scripts/DCSRecorderAuthoredControl/expected.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\airborne\\payload\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Hash":  "d3201f86d74e8786297684e2d0896bf7bc9c62e59eb681dd83c8c026b290a08d"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Name":  "Scripts/Hooks/DCSRecorderAuthoredControl.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\airborne\\payload\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Hash":  "a6db201b8b91d8c2734d3a9b049e7dbbdd26e3b51ab2a9ce351076b3c8a8e54d"
+                  }
+              ],
+    "Utc":  "2026-10-05T00:01:50.5070596Z"
+}

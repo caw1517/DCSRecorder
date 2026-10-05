@@ -91,6 +91,10 @@ for _,edit in ipairs({'position','trigger','extra_aircraft','weather','briefing'
     assert(not run(edit),'Hook armed despite loaded edit: '..edit)
 end
 assert(not run(nil,'some-other-mission.miz'),'Hook armed for another mission')
+-- In-mission restart reloads DCS's temporary copy: selected only by exact content.
+local temp=[[C:\Users\pilot\AppData\Local\Temp\DCS\tempMission.miz]]
+assert(run(nil,temp),'Hook did not arm after an in-mission restart')
+assert(not run('position',temp),'Hook armed for an edited temporary copy')
 assert(not run(nil,nil,'NOT_READY,0,0,0'),'Hook armed without native readiness')
 local _,_,commits,dispatches=run(nil,nil,nil,'valid')
 assert(commits==1 and dispatches==1,'valid approval did not release exactly once')

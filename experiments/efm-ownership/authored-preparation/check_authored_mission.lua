@@ -9,8 +9,9 @@ local function run(mode)
     trigger={action={outText=function(text)notices[#notices+1]=text end,setUserFlag=function(k,v)flags[k]=v end}}
     timer={getTime=function()return now end,scheduleFunction=function(fn,param,t)queue[#queue+1]={fn,param,t}end}
     local menus={}
-    missionCommands={addSubMenu=function(name,parent)assert(parent==nil,'nested under an authored menu');menus[#menus+1]=name;return 1 end,
-        addCommand=function(name,menu,fn)assert(menu==1,'command outside the owned menu');commands[name]=fn end}
+    -- Only the owned top-level menu, and submenus nested inside it (diagnostic faults).
+    missionCommands={addSubMenu=function(name,parent)assert(parent==nil or parent==1,'nested under an authored menu');menus[#menus+1]=name;return #menus end,
+        addCommand=function(name,menu,fn)assert(menu and menu>=1 and menu<=#menus,'command outside the owned menu');commands[name]=fn end}
     local chunk=assert(loadfile(path))
     local function config()return _G[namespace..'_CONFIG']end
     local unit={}
@@ -40,7 +41,7 @@ local function run(mode)
     for k in pairs(_G)do
         assert(before[k] or k==namespace or k==namespace..'_CONFIG','generated control created unowned global '..tostring(k))
     end
-    assert(#menus==1 and menus[1]=='DCS Recorder playback','unexpected F10 menus')
+    assert(menus[1]=='DCS Recorder playback' and (#menus==1 or (#menus==2 and config().faults and menus[2]=='Fault injection (developer)')),'unexpected F10 menus')
     local function advance(to)
         while #queue>0 do
             table.sort(queue,function(a,b)return a[3]<b[3]end)

@@ -5,7 +5,9 @@ its module files and DLL bytes under a distinct module/binary name, its hook wit
 names substituted (as ground-start did), and release-start/mission.lua through
 authored_missions.playback_entries. The hook's exact loaded-mission reference is
 predicted by loaded_reference.py, which reproduces real DCS loads.
-Usage: python prepare_playback.py <take.csv> <source.miz> <lead id> <player id> <output dir>
+Usage: python prepare_playback.py <take.csv> <source.miz> <lead id> <player id> <output dir> [mission name] [--fault-injection]
+--fault-injection builds a diagnostic package: the fault-injection controller build
+and an F10 developer menu that removes the aircraft or fails the native clock/state.
 """
 from pathlib import Path
 import hashlib, json, math, shutil, subprocess, sys
@@ -23,6 +25,8 @@ SEED = EFM/'results/countdown-release-2026-10-01/gear-package-v5'
 # Takes with grounded samples use the separately built surface controller
 # (release control plus contact-driven ground pose restoration).
 SURFACE = EFM/'results/surface-start-2026-10-03/controller'
+# Same surface controller source plus HORNET_FAULT_INJECTION; never in normal packages.
+FAULT = EFM/'results/lifecycle-2026-10-04/fault-controller'
 MODULE, BINARY = 'DCSRecorder-Hornet-Authored-Test', 'HornetAuthoredProbe'
 CONTROL = 'DCSRecorderAuthoredControl'
 
@@ -97,7 +101,7 @@ def scene_plugins(mission, dcs, saved_games):
 
 
 def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved=None,
-          saved_games=Path.home()/'Saved Games/DCS'):
+          saved_games=Path.home()/'Saved Games/DCS', faults=False):
     """`saved` is the take's own scene when `source` is a confirmed newer revision."""
     dcs = Path(dcs)
     take, source, output = Path(take), Path(source), Path(output)
@@ -117,15 +121,17 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     (mod/'Liveries'/seed['module']).rename(mod/'Liveries'/MODULE)
     # Same accepted bytes; a distinct file name so Windows never shares the
     # loaded release-test DLL instance with this module.
+    if faults and not metadata.get('surface_available'): raise ValueError('Fault injection requires a ground-contact take')
     if metadata.get('surface_available'):
-        surface = json.loads((SURFACE/'manifest.json').read_text(encoding='utf-8'))
-        if digest(SURFACE/surface['binary']) != surface['sha256']: raise ValueError('Surface controller hash mismatch')
-        shutil.copy2(SURFACE/surface['binary'], mod/'bin'/f'{BINARY}.dll')
+        controller = FAULT if faults else SURFACE
+        surface = json.loads((controller/'manifest.json').read_text(encoding='utf-8'))
+        if digest(controller/surface['binary']) != surface['sha256']: raise ValueError('Surface controller hash mismatch')
+        shutil.copy2(controller/surface['binary'], mod/'bin'/f'{BINARY}.dll')
     else:
         shutil.copy2(oldmod/'bin'/f"{seed['binary']}.dll", mod/'bin'/f'{BINARY}.dll')
     convert(take, mod/'bin/recorded-flight.txt')
     token = fingerprint((mod/'bin/recorded-flight.txt').read_bytes())
-    blob, entries, mission, manifest = a.playback_entries(source, lead_id, player_id, metadata, samples[0], raw[0], MODULE, token, saved)
+    blob, entries, mission, manifest = a.playback_entries(source, lead_id, player_id, metadata, samples[0], raw[0], MODULE, token, saved, faults)
     namespace = manifest['namespace']
     mission_lua = output/'mission.lua'; mission_lua.parent.mkdir(parents=True, exist_ok=True)
     mission_lua.write_bytes(entries['mission'])
@@ -145,6 +151,7 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     expected = dict(high=((token >> 40) & 0xffffff)/16777216, low=(token & 0xffffff)/16777216, fields=fields,
                     mission=reference, description=description, take_sha256=digest(take),
                     prepared_sha256=digest(miz), scene_sha256=manifest['saved_scene_sha256'])
+    if faults: expected['faults'] = True
     assert expected['high'] == manifest['initial']['token_high'] and expected['low'] == manifest['initial']['token_low']
     (hookdir/'expected.lua').write_text('return '+a.serialize(expected)+'\n', encoding='utf-8')
     shutil.copy2(REPO/'companion/session_guard.lua', hookdir/'session_guard.lua')
@@ -168,7 +175,8 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     mirror_stores(mod/'aircraft.lua', a.selected(a.read_source(source)[2], lead_id)['unit'], dcs, Path(saved_games))
     refs, problems = check_resources.problems(miz.read_bytes())
     if problems: raise ValueError('Unresolved resources: '+'; '.join(problems))
-    result = dict(profile='authored-playback-ground-v1' if metadata.get('surface_available') else 'authored-playback-airborne-v1',
+    profile = 'authored-playback-ground-v1' if metadata.get('surface_available') else 'authored-playback-airborne-v1'
+    result = dict(profile=profile+('-fault-injection' if faults else ''),
                   controller_sha256=digest(mod/'bin'/f'{BINARY}.dll'), dcs_build=a.BUILD, module=MODULE, binary=BINARY,
                   control=CONTROL, mission=mission_name, take=take.name, take_sha256=digest(take),
                   source_sha256=manifest['source_sha256'], seed_manifest_sha256=digest(SEED/'manifest.json'),
@@ -184,5 +192,7 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
 
 
 if __name__ == '__main__':
-    t, s, lead, player, out = sys.argv[1:6]
-    build(t, s, int(lead), int(player), out, sys.argv[6] if len(sys.argv) > 6 else '056-Authored-Playback.miz')
+    args = [a for a in sys.argv[1:] if a != '--fault-injection']
+    t, s, lead, player, out = args[:5]
+    build(t, s, int(lead), int(player), out, args[5] if len(args) > 5 else '056-Authored-Playback.miz',
+          faults='--fault-injection' in sys.argv[1:])

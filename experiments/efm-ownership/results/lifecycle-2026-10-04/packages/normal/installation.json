@@ -1,0 +1,13 @@
+﻿{
+    "Status":  "Authored playback installed; live readiness/release pending",
+    "UpdateFrom":  "results/lifecycle-2026-10-04/installed-before-live-2",
+    "Files":  [
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Name":  "Scripts/Hooks/DCSRecorderAuthoredControl.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\normal\\payload\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Hash":  "1275052ca8a35ffb0c43169ca0e7324a66047d9ea95b114c0ee42584516d21ed"
+                  }
+              ],
+    "Utc":  "2026-10-04T23:25:43.7266754Z"
+}

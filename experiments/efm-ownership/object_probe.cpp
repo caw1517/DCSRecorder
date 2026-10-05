@@ -79,6 +79,10 @@ struct Observation {
     bool ground_flag_logged=false,taxi_mode_logged=false;
     int steps_since_sdk=0;uint64_t extra_restores=0;double native_step_dt=0.02,last_sdk_elapsed=0;
     bool exterior_pending=false,exterior_finished=false;
+#ifdef HORNET_FAULT_INJECTION
+    // Diagnostic build only: armed by the bridge to exercise runtime failure cleanup.
+    bool fault_clock=false,fault_state=false;
+#endif
     double exterior_elapsed=0;
     float snapshot_brake=0;
     uint64_t exterior_applied=0;
@@ -630,7 +634,11 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     }
 #ifdef HORNET_RELEASE_PROTOTYPE
     const bool was_playing=state.clock.playing();
+#ifdef HORNET_FAULT_INJECTION
+    if(!state.clock.update(state.fault_clock?std::nan(""):time)) {
+#else
     if(!state.clock.update(time)) {
+#endif
         state.motion_active=false;state.motion_attempted=true;stop_native_step(handle,state);
         staged_playback::publish(api,handle,state.token,staged_playback::failed);
         record("release_clock_invalid",handle,cookie,time,state.calls);return;
@@ -679,6 +687,9 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         if(state.path.has_lights)state.exterior_pending=hornet_appearance::apply_lights(api,handle,state.runtime_id,state.lights) && state.exterior_pending;
         if(state.path.has_wheels)state.exterior_pending=hornet_appearance::apply_wheels(api,handle,state.runtime_id,state.wheels) && state.exterior_pending;
         if(state.path.has_canopy)state.exterior_pending=hornet_appearance::apply_canopy(api,handle,state.runtime_id,state.canopy) && state.exterior_pending;
+#ifdef HORNET_FAULT_INJECTION
+        if(state.fault_state)state.exterior_pending=false;
+#endif
         if(!state.exterior_pending) {
             state.motion_attempted=true;state.motion_active=false;stop_native_step(handle,state);
             staged_playback::publish(api,handle,state.token,staged_playback::failed);

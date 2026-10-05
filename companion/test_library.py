@@ -94,6 +94,28 @@ class LibraryTests(unittest.TestCase):
         (self.library.recordings / 'unfinished.partial').write_text('partial')
         self.assertEqual(len(self.library.entries()), 1)
 
+    def test_damaged_files_are_refused_apart_from_stopped_takes(self):
+        # A take deliberately stopped with F10 Stop (at any point) stays playable;
+        # every damaged or unfinished form is refused before staging, each with its own reason.
+        text = self.source.read_text().replace('source,', f'capture_build,{SUPPORTED_BUILD}\nwind_ground,0\nwind_2000,0\nwind_8000,0\nsource,')
+        self.source.write_text(text)
+        self.assertTrue(self.library.entries()[0]['supported'])
+        lines = text.splitlines(keepends=True)
+        footer = next(i for i, line in enumerate(lines) if line.startswith('END,'))
+        middle = footer // 2 + 4
+        damaged = {
+            'Recording is incomplete': text[:text.rfind('END,')],
+            'Truncated sample row': ''.join(lines[:middle]) + lines[middle].rsplit(',', 3)[0] + '\n' + ''.join(lines[middle+1:]),
+            'footer/sample count mismatch': ''.join(lines[:middle] + lines[middle+1:]),
+            'aircraft loss/error': text.replace('END,user_stop,', 'END,aircraft_lost,'),
+            'not explicitly stopped': text.replace('END,user_stop,', 'END,mission_stop,'),
+        }
+        for reason, content in damaged.items():
+            self.source.write_text(content)
+            entry = self.library.entries()[0]
+            self.assertFalse(entry['supported'], reason)
+            self.assertIn(reason, entry['reason'])
+
     def test_new_recording_requires_build_and_weather(self):
         text = self.source.read_text()
         self.source.write_text(text.replace('source,', 'note,new\nsource,'))

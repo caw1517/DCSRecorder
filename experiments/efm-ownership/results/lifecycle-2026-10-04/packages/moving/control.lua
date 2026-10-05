@@ -1,12 +1,66 @@
+DCSR_AUTHORED_1_CONFIG={
+["expected"]={
+[21]=0.0,
+[38]=0.0,
+[0]=1.0,
+[3]=1.0,
+[5]=1.0,
+[9]=0.537896811962,
+[10]=0.537896811962,
+[11]=-0.540149331093,
+[12]=-0.540148258209,
+[13]=0.33962598443,
+[14]=0.33962598443,
+[15]=0.499966830015,
+[16]=0.499967604876,
+[17]=0.808984935284,
+[18]=-0.808981955051,
+[28]=0.0,
+[29]=0.0,
+[89]=0.763111829758,
+[90]=0.763111829758,
+[88]=0.0,
+[190]=0.0,
+[191]=0.0,
+[192]=0.0,
+[193]=0.0,
+[210]=0.0,
+[212]=0.0,
+[1]=0.776957988739,
+[6]=0.844613134861,
+[4]=0.844684243202,
+[101]=1.0,
+[103]=1.0,
+[102]=1.0,
+[2]=-0.0,
+},
+["token_high"]=0.7925503253936768,
+["token_low"]=0.3276286721229553,
+["duration"]=16.099999999999998,
+["smoke_events"]={
+[1]={
+["time"]=0.0,
+["on"]=false,
+},
+[2]={
+["time"]=13.344999999999999,
+["on"]=true,
+},
+},
+["contact"]=true,
+["parked"]=false,
+}
+local IDENTITY={identity_unverified=true,stale_or_mismatched_request=true}
+local RECOVERY="Playback blocked. This mission copy changed, or its identity could not be verified. Open the authored mission in Mission Editor, save it, and generate a new recording/playback copy in DCS Recorder. You can also use the scene saved with this take. The recorded flight has not been changed."
 -- Bounded airborne integration. The installed user hook commits the native
 -- one-shot latch and dispatches Active Pause release in the same hook callback.
-local c=assert(DCSR_RELEASE_CONFIG)
+local c=assert(DCSR_AUTHORED_1_CONFIG)
 local s={phase='preparing',held=true,started=timer.getTime(),smoke_index=0,last_replay=0}
-DCSR_RELEASE=s
-local function emit(text)env.info('DCSR_RELEASE '..text)end
-local function notice(text)trigger.action.outText('Release test: '..text,15)end
+DCSR_AUTHORED_1=s
+local function emit(text)env.info('DCSR_AUTHORED_1 '..text)end
+local function notice(text)trigger.action.outText('DCS Recorder: '..text,15)end
 local function flag(name,value)trigger.action.setUserFlag(name,value)end
-local function lead()local u=Unit.getByName('StagedPlayback');return u and u:isExist() and u or nil end
+local function lead()local u=Unit.getByName("Blue Angel #1 - Lead");return u and u:isExist() and u or nil end
 local function matched(u)
     return math.abs(u:getDrawArgumentValue(997)-c.token_high)<1e-8 and
         math.abs(u:getDrawArgumentValue(998)-c.token_low)<1e-8
@@ -30,10 +84,10 @@ local function remove(u)
 end
 function s.fail(reason)
     if s.phase=='failed' or s.phase=='complete' then return end
-    s.phase='failed';flag('DCSR_RELEASE_PENDING',0)
+    s.phase='failed';flag('DCSR_AUTHORED_1_PENDING',0)
     local u=lead();if u then remove(u)end
-    if s.held then flag('DCSR_RELEASE_CLEANUP',1)end
-    emit('FAILED,'..tostring(reason));notice('FAILED: '..tostring(reason)..'. The playback aircraft was removed; the mission continues. Logs were retained.')
+    if s.held then flag('DCSR_AUTHORED_1_CLEANUP',1)end
+    emit('FAILED,'..tostring(reason));notice(IDENTITY[reason] and RECOVERY or 'FAILED: '..tostring(reason)..'. The playback aircraft was removed; the mission continues. Logs were retained.')
 end
 function s.cleaned()s.held=false;emit('HOLD_CLEANED')end
 function s.arm(session,generation)
@@ -44,7 +98,7 @@ function s.arm(session,generation)
     s.session,s.generation=session,generation
     if s.phase~='waiting' then
         s.phase='waiting';emit('READY,'..session..','..generation)
-        notice('Ready. Inspect the held lead, then F10 > DCS Recorder release test > Start playback. Do not toggle Active Pause.')
+        notice('Ready. Inspect the held lead, then F10 > DCS Recorder playback > Start playback. Do not toggle Active Pause.')
     end
     return true
 end
@@ -52,7 +106,7 @@ function s.released(session,generation)
     if s.phase~='requested' or s.session~=session or s.generation~=generation then
         s.fail('unexpected_release_ack');return false
     end
-    s.held=false;flag('DCSR_RELEASE_PENDING',0)
+    s.held=false;flag('DCSR_AUTHORED_1_PENDING',0)
     s.phase='starting';s.release_time=timer.getTime()
     emit(string.format('PLAYER_RELEASED,%s,%d,%.9f',session,generation,s.release_time))
     notice('Released. Watch first movement and smoke, then let the short recording finish.')
@@ -67,7 +121,7 @@ local function sample(name)
     emit(string.format('SAMPLE,%s,%s,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9g,%s',
         s.phase,name,timer.getTime(),p.p.x,p.p.y,p.p.z,p.x.x,p.x.y,p.x.z,p.y.x,p.y.y,p.y.z,
         v.x,v.y,v.z,1000*u:getDrawArgumentValue(996),u:getDrawArgumentValue(999),table.concat(values,',')))
-    if c.contact and name=='StagedPlayback' then
+    if c.contact and name=="Blue Angel #1 - Lead" then
         -- Playback-side contact and health: in-air flag, terrain, origin clearance, life.
         local h=land.getHeight({x=p.p.x,y=p.p.z})
         emit(string.format('CONTACT,%s,%.9f,%d,%.12g,%.12g,%.12g,%.12g,%d',s.phase,timer.getTime(),u:inAir() and 1 or 0,
@@ -99,7 +153,7 @@ local function tick()
             if not initial(u) then s.fail('snapshot_mismatch');return end
             smoke(u)
         end
-        if now-s.started>10 then s.fail('bridge_or_native_readiness_timeout');return end
+        if now-s.started>10 then s.fail(matched(u) and status==.125 and 'identity_unverified' or 'bridge_or_native_readiness_timeout');return end
     elseif s.phase=='waiting' or s.phase=='countdown' then
         if not initial(u) then s.fail('initial_state_not_retained');return end
         smoke(u)
@@ -110,7 +164,7 @@ local function tick()
             if s.phase=='starting' then s.phase='playing';emit(string.format('NATIVE_RUNNING,%.9f,%.9f',now,1000*u:getDrawArgumentValue(996)))end
             smoke(u)
         elseif status==.5 and s.phase=='playing' then
-            smoke(u);sample('Observer');sample('StagedPlayback');remove(u);s.phase='complete'
+            smoke(u);sample("Aerial-2-1");sample("Blue Angel #1 - Lead");remove(u);s.phase='complete'
             emit('COMPLETE');notice('Recording ended. The playback aircraft was removed; the mission continues.');return
         elseif status==.375 and s.phase=='playing' then
             -- Native holds a grounded ending; keep it only when preparation measured
@@ -120,7 +174,7 @@ local function tick()
                 s.phase='parked';s.parked_time=now;emit(string.format('PARKED,%.9f,%.9f',now,1000*u:getDrawArgumentValue(996)))
                 notice('Recording ended. The aircraft stays parked with engines running until you exit or restart the mission.')
             else
-                sample('Observer');sample('StagedPlayback');remove(u);s.phase='complete'
+                sample("Aerial-2-1");sample("Blue Angel #1 - Lead");remove(u);s.phase='complete'
                 emit('COMPLETE,not_parked');notice('Recording ended away from an eligible parked position. The playback aircraft was removed; the mission continues.');return
             end
         elseif s.phase=='playing' or now-s.release_time>1 then s.fail('native_release_not_confirmed');return end
@@ -130,10 +184,10 @@ local function tick()
         smoke(u)
         if now-s.parked_time>75 then
             -- Long holds: keep evidence at one sample per second.
-            sample('Observer');sample('StagedPlayback');return now+1
+            sample("Aerial-2-1");sample("Blue Angel #1 - Lead");return now+1
         end
     end
-    sample('Observer');sample('StagedPlayback');sample('SceneWitness')
+    sample("Aerial-2-1");sample("Blue Angel #1 - Lead")
     return now+.02
 end
 local function checked_tick()
@@ -153,11 +207,11 @@ local function start()
         if remaining>0 then notice('Starting in '..remaining..'.');return timer.getTime()+1 end
         local current=lead()
         if not current or not initial(current) then s.fail('not_ready_at_release');return end
-        s.phase='requested';s.request_time=timer.getTime();flag('DCSR_RELEASE_PENDING',1)
+        s.phase='requested';s.request_time=timer.getTime();flag('DCSR_AUTHORED_1_PENDING',1)
         emit(string.format('REQUEST,%s,%d,%.9f',s.session,s.generation,s.request_time))
     end,nil,s.countdown_time+1)
 end
-local menu=missionCommands.addSubMenu('DCS Recorder release test')
+local menu=missionCommands.addSubMenu('DCS Recorder playback')
 missionCommands.addCommand('Start playback (3-second countdown)',menu,start)
 missionCommands.addCommand('Show status',menu,function()notice(s.phase)end)
 if c.faults then
@@ -170,7 +224,7 @@ if c.faults then
     missionCommands.addCommand('Native clock failure',faults,function()emit('FAULT,clock')end)
     missionCommands.addCommand('Native state failure',faults,function()emit('FAULT,state')end)
 end
-flag('DCSR_RELEASE_PENDING',0);flag('DCSR_RELEASE_CLEANUP',0)
+flag('DCSR_AUTHORED_1_PENDING',0);flag('DCSR_AUTHORED_1_CLEANUP',0)
 emit('INITIALIZED');notice('Player held. Waiting for the complete snapshot and release bridge.')
 checked_tick()
 if s.phase~='failed' then timer.scheduleFunction(checked_tick,nil,timer.getTime()+.02)end

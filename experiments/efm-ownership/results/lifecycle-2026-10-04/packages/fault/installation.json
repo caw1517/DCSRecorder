@@ -1,0 +1,31 @@
+﻿{
+    "Status":  "Authored playback installed; live readiness/release pending",
+    "UpdateFrom":  "packages/normal",
+    "Files":  [
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\057-Lifecycle-Fault.miz",
+                      "Name":  "Missions/057-Lifecycle-Fault.miz",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\fault\\payload\\Missions\\057-Lifecycle-Fault.miz",
+                      "Hash":  "649f1a23e85362458160ce2132222b5858b0c8e9214614f760735750f5b6c60a"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\HornetAuthoredProbe.dll",
+                      "Name":  "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/HornetAuthoredProbe.dll",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\fault\\payload\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\HornetAuthoredProbe.dll",
+                      "Hash":  "f60b9135c56f6877d3daafa26dca95a78002079b6dc25f18a7b507d695414a99"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Name":  "Scripts/DCSRecorderAuthoredControl/expected.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\fault\\payload\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Hash":  "6d55b050047ced29c1419ea9bc1940ee8d80efd462e0a8d3883f8f2a61461e66"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Name":  "Scripts/Hooks/DCSRecorderAuthoredControl.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\fault\\payload\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Hash":  "8e00d006391511e590aae209c5a04fcdca0f0ae45b5fa2dc336568e9a53722c3"
+                  }
+              ],
+    "Utc":  "2026-10-04T23:33:08.0815953Z"
+}

@@ -1,0 +1,43 @@
+﻿{
+    "Status":  "Authored playback installed; live readiness/release pending",
+    "UpdateFrom":  "../results/lifecycle-2026-10-04/packages/fault",
+    "Files":  [
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Missions\\058-Lifecycle-Moving.miz",
+                      "Name":  "Missions/058-Lifecycle-Moving.miz",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\moving\\payload\\Missions\\058-Lifecycle-Moving.miz",
+                      "Hash":  "70d1fe3b2804819f5fdfdbfee6b9c91c38d23274008db533ddf88e582e3150ce"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\HornetAuthoredProbe.dll",
+                      "Name":  "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/HornetAuthoredProbe.dll",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\moving\\payload\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\HornetAuthoredProbe.dll",
+                      "Hash":  "27dfc6ba4a11b4165af46eb162157e66da746e57a95de543942d234f79ee1e5d"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.json",
+                      "Name":  "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.json",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\moving\\payload\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.json",
+                      "Hash":  "11928498802cbb52e6581e6a822bd31e211152779f95c37f017ce7b4a0ecf12b"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.txt",
+                      "Name":  "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.txt",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\moving\\payload\\Mods\\aircraft\\DCSRecorder-Hornet-Authored-Test\\bin\\recorded-flight.txt",
+                      "Hash":  "dcd73a9ea5fdb22de985ae30a7cb061cdce4117edf9f8b1c375545752aa5aaa0"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Name":  "Scripts/DCSRecorderAuthoredControl/expected.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\moving\\payload\\Scripts\\DCSRecorderAuthoredControl\\expected.lua",
+                      "Hash":  "adca2d90dd896e1bf18a3c381f1d6809171a5f34e9f6ba686bf2a8dd8e11d1b6"
+                  },
+                  {
+                      "Target":  "C:\\Users\\w_can\\Saved Games\\DCS\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Name":  "Scripts/Hooks/DCSRecorderAuthoredControl.lua",
+                      "Source":  "E:\\Projects\\DCS_Recorder\\experiments\\efm-ownership\\results\\lifecycle-2026-10-04\\packages\\moving\\payload\\Scripts\\Hooks\\DCSRecorderAuthoredControl.lua",
+                      "Hash":  "4040697a9a22e8de41f7850540c1a3a21b4acc6e7a814c6683b901941149ee3f"
+                  }
+              ],
+    "Utc":  "2026-10-04T23:49:02.8239796Z"
+}

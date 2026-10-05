@@ -1,0 +1,530 @@
+{
+  "profile": "authored-playback-ground-v1",
+  "controller_sha256": "27dfc6ba4a11b4165af46eb162157e66da746e57a95de543942d234f79ee1e5d",
+  "dcs_build": "2.9.30.28536",
+  "module": "DCSRecorder-Hornet-Authored-Test",
+  "binary": "HornetAuthoredProbe",
+  "control": "DCSRecorderAuthoredControl",
+  "mission": "058-Lifecycle-Moving.miz",
+  "take": "20261004T234817Z-0001.csv",
+  "take_sha256": "d3d41098c44c1435257080d75484b1071152c815e1cf1593df3e6a88c22774a8",
+  "source_sha256": "eb20c7aa9313abaa9aa407850f7d112ae258459b155c8374edcd4c7551dfd14a",
+  "seed_manifest_sha256": "d87151a62ce44894532d7184f8ed4bc3f987c5635eda8310f8544f3cd4ab08ce",
+  "recording": {
+    "aircraft": "FA-18C_hornet",
+    "livery": "blue angels jet team",
+    "theatre": "Caucasus",
+    "state_profile": "hornet-exterior-v1",
+    "engine_profile": "hornet-native-engine-v1",
+    "smoke_profile": "hornet-native-smoke-v1",
+    "smoke_station": "10",
+    "smoke_clsid": "{INV-SMOKE-WHITE}",
+    "light_profile": "hornet-lights-v1",
+    "canopy_profile": "hornet-canopy-v1",
+    "wheel_profile": "hornet-wheels-v1",
+    "contact_profile": "hornet-contact-v1",
+    "source_unit_id": "2",
+    "source": "Blue Angel #1 - Lead",
+    "authored_source_sha256": "eb20c7aa9313abaa9aa407850f7d112ae258459b155c8374edcd4c7551dfd14a",
+    "authored_lineage": "be72024993e54941897721bdfef1072e",
+    "authored_association": "0880a8ec1d634879b829899628245c2b",
+    "capture_timing": "frame-batch-v1",
+    "capture_build": "2.9.30.28536",
+    "wind_ground": "0",
+    "wind_2000": "0",
+    "wind_8000": "0",
+    "contact": {
+      "profile": "hornet-contact-v1",
+      "grounded_samples": 806,
+      "airborne_samples": 0,
+      "first_grounded": true,
+      "last_grounded": true,
+      "health_unchanged": true,
+      "grounded_origin_agl": [
+        1.822974712899999,
+        1.8274897801000023
+      ],
+      "surfaces": [
+        5
+      ]
+    },
+    "parked_endpoint": {
+      "profile": "hornet-parked-endpoint-v1",
+      "eligible": false,
+      "criteria": {
+        "min_tail_seconds": 2.0,
+        "max_speed": 0.1,
+        "max_displacement": 0.05,
+        "max_heading_change": 0.2,
+        "min_engine_core": 0.5,
+        "health": "unchanged",
+        "contact": "grounded"
+      },
+      "measured": {
+        "tail_seconds": 0.0,
+        "samples": 0,
+        "boundary_failure": [
+          "moving"
+        ]
+      }
+    },
+    "smoke_events": [
+      {
+        "time": 0.0,
+        "on": false
+      },
+      {
+        "time": 13.344999999999999,
+        "on": true
+      }
+    ],
+    "duration": 16.099999999999998,
+    "samples": 806,
+    "source_time": 3.358,
+    "recording_version": 8,
+    "exterior_available": true,
+    "engine_available": true,
+    "smoke_available": true,
+    "lights_available": true,
+    "canopy_available": true,
+    "wheels_available": true,
+    "contact_available": true,
+    "surface_available": true
+  },
+  "mission_manifest": {
+    "profile": "authored-playback-v1",
+    "build": "2.9.30.28536",
+    "source_sha256": "eb20c7aa9313abaa9aa407850f7d112ae258459b155c8374edcd4c7551dfd14a",
+    "saved_scene_sha256": "eb20c7aa9313abaa9aa407850f7d112ae258459b155c8374edcd4c7551dfd14a",
+    "selected_id": 2,
+    "selected_name": "Blue Angel #1 - Lead",
+    "player_id": 4,
+    "player_name": "Aerial-2-1",
+    "namespace": "DCSR_AUTHORED_1",
+    "trigger_indices": [
+      1,
+      2
+    ],
+    "role_edits": [
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "type"
+        ],
+        "FA-18C_hornet"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "skill"
+        ],
+        "Client"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "livery_id"
+        ],
+        "blue angels jet team"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "x"
+        ],
+        -5178.087785425
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "y"
+        ],
+        242923.51909246
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "alt"
+        ],
+        43
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "alt_type"
+        ],
+        "BARO"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "speed"
+        ],
+        138.88888888889
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "heading"
+        ],
+        2.3038346126325
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "units",
+          1,
+          "psi"
+        ],
+        -2.3038346126325
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "x"
+        ],
+        -5178.087785425
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "y"
+        ],
+        242923.51909246
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "x"
+        ],
+        -5178.087785425
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "y"
+        ],
+        242923.51909246
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "alt"
+        ],
+        43
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "alt_type"
+        ],
+        "BARO"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "speed"
+        ],
+        138.88888888889
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "type"
+        ],
+        "TakeOffGroundHot"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          1,
+          "route",
+          "points",
+          1,
+          "action"
+        ],
+        "From Ground Area Hot"
+      ],
+      [
+        [
+          "coalition",
+          "blue",
+          "country",
+          1,
+          "plane",
+          "group",
+          2,
+          "units",
+          1,
+          "skill"
+        ],
+        "Client"
+      ]
+    ],
+    "initial": {
+      "expected": {
+        "21": 0.0,
+        "38": 0.0,
+        "0": 1.0,
+        "3": 1.0,
+        "5": 1.0,
+        "9": 0.537896811962,
+        "10": 0.537896811962,
+        "11": -0.540149331093,
+        "12": -0.540148258209,
+        "13": 0.33962598443,
+        "14": 0.33962598443,
+        "15": 0.499966830015,
+        "16": 0.499967604876,
+        "17": 0.808984935284,
+        "18": -0.808981955051,
+        "28": 0.0,
+        "29": 0.0,
+        "89": 0.763111829758,
+        "90": 0.763111829758,
+        "88": 0.0,
+        "190": 0.0,
+        "191": 0.0,
+        "192": 0.0,
+        "193": 0.0,
+        "210": 0.0,
+        "212": 0.0,
+        "1": 0.776957988739,
+        "6": 0.844613134861,
+        "4": 0.844684243202,
+        "101": 1.0,
+        "103": 1.0,
+        "102": 1.0,
+        "2": -0.0
+      },
+      "token_high": 0.7925503253936768,
+      "token_low": 0.3276286721229553,
+      "duration": 16.099999999999998,
+      "smoke_events": {
+        "1": {
+          "time": 0.0,
+          "on": false
+        },
+        "2": {
+          "time": 13.344999999999999,
+          "on": true
+        }
+      },
+      "contact": true,
+      "parked": false
+    },
+    "player_authored_start_preserved": true,
+    "behavior": {
+      "conflicts": [],
+      "preserved": [
+        "Blue Angel #1 - Lead, route point 1, action 1: EPLRS datalink on (Mission Editor default)",
+        "Blue Angel #1 - Lead, route point 1, action 2: allow formation side swap (Mission Editor default)",
+        "Aerial-2-1, route point 1, action 1: EPLRS datalink on (Mission Editor default)",
+        "Aerial-2-1, route point 1, action 2: allow formation side swap (Mission Editor default)"
+      ],
+      "lifecycle": []
+    },
+    "parked_endpoint": {
+      "profile": "hornet-parked-endpoint-v1",
+      "eligible": false,
+      "criteria": {
+        "min_tail_seconds": 2.0,
+        "max_speed": 0.1,
+        "max_displacement": 0.05,
+        "max_heading_change": 0.2,
+        "min_engine_core": 0.5,
+        "health": "unchanged",
+        "contact": "grounded"
+      },
+      "measured": {
+        "tail_seconds": 0.0,
+        "samples": 0,
+        "boundary_failure": [
+          "moving"
+        ]
+      }
+    },
+    "preservation": {
+      "restored_structure_equals_source": true,
+      "unchanged_archive_members": [
+        "l10n/DEFAULT/dictionary",
+        "l10n/DEFAULT/mapResource",
+        "warehouses",
+        "options",
+        "theatre"
+      ],
+      "changed_existing_members": [
+        "mission"
+      ],
+      "added_members": [
+        "DCSRecorder/preparation.json"
+      ]
+    }
+  },
+  "status": "Offline checked; live readiness, release and scene comparison pending",
+  "files": {
+    "Missions/058-Lifecycle-Moving.miz": "70d1fe3b2804819f5fdfdbfee6b9c91c38d23274008db533ddf88e582e3150ce",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/aircraft.lua": "250cdab4c6ba798e5823f92a34d69c88340ca20fc0a8db650fddffa0c60e9ba0",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/HornetAuthoredProbe.dll": "27dfc6ba4a11b4165af46eb162157e66da746e57a95de543942d234f79ee1e5d",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.json": "11928498802cbb52e6581e6a822bd31e211152779f95c37f017ce7b4a0ecf12b",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/bin/recorded-flight.txt": "dcd73a9ea5fdb22de985ae30a7cb061cdce4117edf9f8b1c375545752aa5aaa0",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Cockpit/Scripts/device_init.lua": "197073e97be4a1aee552ee43b91fd4c0c9db36aaa9907820d5f3a3b249e178a5",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Datalinks/AddProp.lua": "b21efd62fe7fa20ff8a72705b988386f92cf34604968c96ac1cb936d865a1070",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Datalinks/Link16.dlg": "7075e314bd0c4f0322c9e7d7cabfa9dc55bef2b708125768209e70b0bbceebeb",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Datalinks/Link16.lua": "daea8966237250d5efe619632d326bee1f2c3119c13a47d725889ef325cd3199",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/entry.lua": "d5081fdc8d9ec36f7573b42c23574a4e4227bce79cf620221a41e7a4c91713d1",
+    "Mods/aircraft/DCSRecorder-Hornet-Authored-Test/Liveries/DCSRecorder-Hornet-Authored-Test/Blue Angels Jet Team.zip": "2d7787d059a72d3f7ca10c9baa8ee4f5d3a330a12175cc1e20e4d8d33b95ef66",
+    "Scripts/DCSRecorderAuthoredControl/expected.lua": "adca2d90dd896e1bf18a3c381f1d6809171a5f34e9f6ba686bf2a8dd8e11d1b6",
+    "Scripts/DCSRecorderAuthoredControl/session_guard.lua": "fe494fd7f7de84ff1718ffa8f9c1249477a43039a8fadf30d7dd3adb61ba6bb7",
+    "Scripts/Hooks/DCSRecorderAuthoredControl.lua": "4040697a9a22e8de41f7850540c1a3a21b4acc6e7a814c6683b901941149ee3f"
+  }
+}

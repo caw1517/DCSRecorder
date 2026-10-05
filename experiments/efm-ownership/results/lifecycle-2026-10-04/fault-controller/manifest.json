@@ -1,0 +1,22 @@
+{
+  "binary": "HornetSurfaceFaultProbe.dll",
+  "sha256": "f60b9135c56f6877d3daafa26dca95a78002079b6dc25f18a7b507d695414a99",
+  "built_from": {
+    "base_commit": "9b544893af5dac541b89d84e3449a066bd916845",
+    "working_tree_sources": {
+      "object_probe.cpp": "10054923d378eebee95d57cd013e4e633a5335dac01d43c819055157bb1bef13",
+      "release-start/bridge.h": "a27228a60a3eb97789a3531cd121d684a4ee9029b5162c103fd513a277b83ee0",
+      "release-start/policy.h": "1e782727242a3726e5a6a3646d5573edbbfa8f2cf6748f95cf5a71172945c8d3",
+      "recorded_path.h": "752389dd436bee2ba3f3d06ab4c80001d1c33923cb08a38ca64714e739a75561",
+      "native_velocity.h": "33ee22a6834025aecd02370ee95a10dc4ae2d772552caa645632f76d0b4d71eb",
+      "native_motion.h": "c51691fcb28966653f03bbfe4624469c3061056388e1e0841735bb222073d129",
+      "staged_playback.h": "5d66341859d8bca6e142c4d706385100244171f68ba8b6354d2e13c93f7165af",
+      "CMakeLists.txt": "a5761fce260dfa4e4ea726cd8625a91cb42a6b0e61d9c22b90a8a7c29ed008dc",
+      "probe.cpp": "69589945fe6628c72aa18808be5d7a3a8dc20607e61bd45ad9fffb0d3e360a3f",
+      "surface-start/ai_ground.h": "a843f45b5ef047b67b1b97eb532eb17a08486b0c170aa0e8edb061b6eb64b1d9"
+    }
+  },
+  "definitions": "HORNET_PROTOTYPE HORNET_RECORDED_PROTOTYPE HORNET_STAGED_PROTOTYPE HORNET_ENGINE_STAGED_PROTOTYPE HORNET_RELEASE_PROTOTYPE HORNET_SURFACE_PROTOTYPE HORNET_FAULT_INJECTION DCSR_BUILD_2930",
+  "purpose": "Diagnostic only. Accepted surface controller source plus bridge commands fault_clock/fault_state, which arm a non-finite replay clock or a failed exterior write. Used only by prepare_playback --fault-injection; never in normal packages.",
+  "offline_checks": "ctest Release 50/50 including surface_fault_callback_contract and surface_fault_bridge_refusal"
+}

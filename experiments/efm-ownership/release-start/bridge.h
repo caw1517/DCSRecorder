@@ -37,6 +37,13 @@ extern "C" __declspec(dllexport) int dcs_release_control(lua_State* lua_state) {
                         state.motion_active=false;state.motion_attempted=true;stop_native_step(entry.first,state);
                         staged_playback::publish(api,entry.first,state.token,staged_playback::failed);
                         result<<"ABORTED,"<<state.generation;
+#ifdef HORNET_FAULT_INJECTION
+                    } else if((command=="fault_clock" || command=="fault_state") && !state.terminal) {
+                        (command=="fault_clock"?state.fault_clock:state.fault_state)=true;
+                        log_file<<command<<"_injected,"<<state.runtime_id<<','<<state.generation<<','<<state.clock.last<<','<<state.calls<<",1\n";
+                        log_file.flush();
+                        result<<"FAULT_ARMED,"<<state.generation<<','<<command;
+#endif
                     } else result<<"REFUSED,not_ready_or_consumed";
                     reply=result.str();
                 }

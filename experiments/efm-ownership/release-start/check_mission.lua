@@ -5,6 +5,9 @@ local function run(mode)
     DCSR_RELEASE_CONFIG={token_high=.2,token_low=.3,duration=8,expected={[21]=.7},smoke_events={{time=0,on=true},{time=2,on=false}}}
     local ground=mode:match('parked')~=nil
     if ground then DCSR_RELEASE_CONFIG.contact=true;DCSR_RELEASE_CONFIG.parked=mode~='not_parked' end
+    -- Smoke still on at the ending: removal must switch it off first.
+    if mode=='removed_smoking' then DCSR_RELEASE_CONFIG.smoke_events={{time=0,on=true}} end
+    if mode:match('^fault_') then DCSR_RELEASE_CONFIG.faults=true end
     land={getHeight=function()return 1990 end,getSurfaceType=function()return 5 end}
     env={info=function(s)logs[#logs+1]=s end}
     trigger={action={outText=function()end,setUserFlag=function(k,v)flags[k]=v end}}
@@ -26,7 +29,7 @@ local function run(mode)
     function unit:inAir()return false end
     function unit:getLife()return 20 end
     function unit:getLife0()return 20 end
-    function unit:getController()return {setCommand=function(_,c)assert(c.id=='SMOKE_ON_OFF');smoke=smoke+1 end}end
+    function unit:getController()return {setCommand=function(_,c)assert(c.id=='SMOKE_ON_OFF' and not removed);smoke=smoke+1 end}end
     Unit={getByName=function(name)if mode=='missing' and name=='StagedPlayback' then return nil end;return unit end}
     assert(loadfile(path))()
     local s=DCSR_RELEASE
@@ -46,6 +49,7 @@ local function run(mode)
         assert(s.phase=='failed' and flags.DCSR_RELEASE_CLEANUP==1,'unsafe initial readiness');return
     end
     if mode=='no_bridge' then advance(11);assert(s.phase=='failed' and removed);return end
+    assert((commands['Remove playback aircraft']~=nil)==(mode:match('^fault_')~=nil),'fault menu outside diagnostic packages')
     assert(s.arm('session',1) and s.phase=='waiting')
     advance(20);assert(elapsed==0 and smoke==1)
     commands['Start playback (3-second countdown)']()
@@ -65,9 +69,23 @@ local function run(mode)
     assert(flags.DCSR_RELEASE_PENDING==0 and smoke==1,'release toggled recorded smoke')
     commands['Start playback (3-second countdown)']();assert(s.phase=='playing')
     for i=1,100 do advance(23.04)end
-    elapsed=2;advance(23.08);assert(smoke==2,'smoke did not use native replay time')
+    elapsed=2;advance(23.08);assert(smoke==(mode=='removed_smoking' and 1 or 2),'smoke did not use native replay time')
     if mode=='playing_failure' then status=.75;advance(23.12);assert(s.phase=='failed' and flags.DCSR_RELEASE_CLEANUP==0);return end
     local function count(prefix)local n=0;for _,line in ipairs(logs)do if line:find(prefix,1,true)then n=n+1 end end;return n end
+    if mode=='fault_missing' then
+        commands['Remove playback aircraft']();advance(23.12)
+        assert(s.phase=='failed' and count('FAULT,missing_aircraft')==1 and count('FAILED,missing_aircraft')==1 and flags.DCSR_RELEASE_CLEANUP==0);return
+    end
+    if mode=='fault_native' then
+        -- The hook forwards these lines to the controller; native failure then publishes 0.75.
+        commands['Native clock failure']();commands['Native state failure']()
+        assert(count('DCSR_RELEASE FAULT,clock')==1 and count('DCSR_RELEASE FAULT,state')==1)
+        status=.75;advance(23.12);assert(s.phase=='failed' and removed and count('FAILED,native_readiness_lost')==1);return
+    end
+    if mode=='removed_smoking' then
+        status=.5;elapsed=8;advance(23.12)
+        assert(s.phase=='complete' and removed and smoke==2 and count('SMOKE_REMOVED,')==1 and count('AIRCRAFT_REMOVED')==1,'smoke outlived removal');return
+    end
     if ground then
         assert(count('DCSR_RELEASE CONTACT,')>0,'ground take logged no playback contact')
         status=.375;elapsed=8;advance(23.12)
@@ -83,5 +101,6 @@ local function run(mode)
     status=.5;elapsed=8;advance(23.12)
     assert(s.phase=='complete' and removed and flags.DCSR_RELEASE_CLEANUP==0)
 end
-for _,mode in ipairs({'success','mismatch','bad_snapshot','missing','no_bridge','readiness_lost','no_ack','playing_failure','parked','not_parked','parked_lost'})do run(mode)end
-print('PASS: mission countdown, native-clock smoke, repeated requests, pause, initial/readiness/ack failure, held cleanup, completion and parked hold/removal')
+for _,mode in ipairs({'success','mismatch','bad_snapshot','missing','no_bridge','readiness_lost','no_ack','playing_failure','parked','not_parked','parked_lost',
+    'removed_smoking','fault_missing','fault_native'})do run(mode)end
+print('PASS: mission countdown, native-clock smoke, repeated requests, pause, initial/readiness/ack failure, held cleanup, completion, parked hold/removal, smoke-off removal and diagnostic faults')

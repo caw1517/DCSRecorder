@@ -477,12 +477,13 @@ def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, 
     return save_package(output, blob, entries, manifest)
 
 
-def playback_entries(source, unit_id, player_id, metadata, first, raw_first, module, token, saved=None):
+def playback_entries(source, unit_id, player_id, metadata, first, raw_first, module, token, saved=None, faults=False):
     """Build playback mission data without touching a simulator installation.
 
     `saved` is the take's own saved scene when `source` is a newer, explicitly
     confirmed revision; `unit_id` is then the confirmed counterpart of the recorded
     aircraft, which must be authored identically apart from its name and IDs.
+    `faults` adds the developer fault-injection menu (diagnostic packages only).
     """
     blob, original_entries, original = read_source(source)
     if unit_id == player_id:
@@ -544,6 +545,7 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     if metadata.get('surface_available'):
         # Ground takes log playback-side contact; a measured eligible endpoint stays parked.
         config.update(contact=True,parked=bool((metadata.get('parked_endpoint') or {}).get('eligible')))
+    if faults:config['faults']=True
     script=(EFM/'release-start/mission.lua').read_text(encoding='utf-8')
     # Replace exact literals before inserting arbitrary authored names.
     script=script.replace("'StagedPlayback'",'__LEAD_NAME__').replace("'Observer'",'__PLAYER_NAME__')
@@ -554,8 +556,8 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     for old,new in (("'Release test: '","'DCS Recorder: '"),
                     ("if now-s.started>10 then s.fail('bridge_or_native_readiness_timeout')",
                      "if now-s.started>10 then s.fail(matched(u) and status==.125 and 'identity_unverified' or 'bridge_or_native_readiness_timeout')"),
-                    ("notice('FAILED: '..tostring(reason)..'. Exit normally and retain logs.')",
-                     "notice(IDENTITY[reason] and RECOVERY or 'FAILED: '..tostring(reason)..'. Exit normally and retain logs.')")):
+                    ("notice('FAILED: '..tostring(reason)..'. The playback aircraft was removed; the mission continues. Logs were retained.')",
+                     "notice(IDENTITY[reason] and RECOVERY or 'FAILED: '..tostring(reason)..'. The playback aircraft was removed; the mission continues. Logs were retained.')")):
         if script.count(old)!=1:raise ValueError('Release mission script changed: '+old)
         script=script.replace(old,new)
     script=('local IDENTITY={identity_unverified=true,stale_or_mismatched_request=true}\n'

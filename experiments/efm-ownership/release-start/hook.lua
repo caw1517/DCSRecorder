@@ -71,6 +71,11 @@ local function pump()
         end
         local released,released_gen=message:match('^DCSR_RELEASE PLAYER_RELEASED,([%w_]+),(%d+),')
         if released==session and tonumber(released_gen)==generation and consumed then ack=true;emit('ACK,'..message)end
+        -- Diagnostic packages only: forward the mission's injected native faults.
+        local fault=message:match('^DCSR_RELEASE FAULT,(%a+)%s*$')
+        if expected.faults and generation and (fault=='clock' or fault=='state') then
+            emit('FAULT,'..fault..','..native('fault_'..fault))
+        end
         if message:match('^DCSR_RELEASE FAILED,') then
             if generation then native('abort')end
             active=false;return
@@ -86,7 +91,16 @@ end
 function hooks.onMissionLoadBegin()reset()end
 function hooks.onSimulationStart()
     reset()
-    if not (DCS.getMissionFilename() or ''):find('043-Hornet-Countdown-Release.miz',1,true) then return end
+    -- An in-mission restart may reload DCS's temporary copy, so the file name alone
+    -- cannot select it there; the exact loaded-mission comparison still can. Other
+    -- names stay unselected, even with identical content.
+    local filename=DCS.getMissionFilename() or ''
+    if not filename:find('043-Hornet-Countdown-Release.miz',1,true) then
+        local ok,matches=pcall(matching)
+        if not (ok and matches) then return end
+        if not filename:lower():find('tempmission%.miz$') then emit('NOT_SELECTED,'..filename);return end
+        emit('SELECTED_BY_CONTENT,'..filename)
+    end
     serial=serial+1;session=string.format('%d_%d',os.time(),serial)
     local _,tail=DCS.getLogHistory(0);index=assert(tail)
     reader=assert(package.loadlib(lfs.writedir()..'Mods/aircraft/DCSRecorder-Hornet-Release-Test/bin/HornetReleaseProbe.dll','dcs_release_control'))
