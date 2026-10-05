@@ -27,7 +27,13 @@ SEED = EFM/'results/countdown-release-2026-10-01/gear-package-v5'
 SURFACE = EFM/'results/surface-start-2026-10-03/controller'
 # Same surface controller source plus HORNET_FAULT_INJECTION; never in normal packages.
 FAULT = EFM/'results/lifecycle-2026-10-04/fault-controller'
-MODULE, BINARY = 'DCSRecorder-Hornet-Authored-Test', 'HornetAuthoredProbe'
+# The one normal Hornet playback registration (type ID, controller DLL, Mission
+# Editor name). It never changes with recording or controller versions; those are
+# matched by the package manifest. Fault-injection packages use a developer-only
+# type so their controller is never installed under the normal one.
+NORMAL = ('DCSRecorder-Hornet', 'DCSRecorderHornet', 'DCS Recorder Hornet')
+DEVELOPER = ('DCSRecorder-Hornet-Dev', 'DCSRecorderHornetDev', 'DCS Recorder Hornet (developer)')
+MODULE, BINARY, DISPLAY = NORMAL
 CONTROL = 'DCSRecorderAuthoredControl'
 
 
@@ -36,7 +42,6 @@ def digest(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 def validate_take(metadata, raw, footer):
     # Same take gates as the companion's legacy path (library.Library.validate).
-    if not a.supported_livery(metadata.get('livery')): raise ValueError('Unsupported livery')
     if metadata.get('capture_build') != a.BUILD: raise ValueError('Take build differs')
     if any(metadata.get(k) != '0' for k in ('wind_ground', 'wind_2000', 'wind_8000')): raise ValueError('Take lacks verified zero wind')
     if abs(float(raw[0]['fy'])) > math.sin(math.radians(10)) or float(raw[0]['uy']) < math.cos(math.radians(10)):
@@ -142,13 +147,21 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     metadata, samples, raw = read(take)
     footer = take.read_text(encoding='utf-8').strip().splitlines()[-1].split(',')[1]
     validate_take(metadata, raw, footer)
+    MODULE, BINARY, DISPLAY = DEVELOPER if faults else NORMAL
+    livery = a.find_livery(metadata.get('livery'), dcs, saved_games)
     payload = output/'payload'; mod = payload/'Mods/aircraft'/MODULE
     oldmod = SEED/'payload/Mods/aircraft'/seed['module']
-    shutil.copytree(oldmod, mod, ignore=shutil.ignore_patterns('*.dll', 'recorded-flight.*'))
+    shutil.copytree(oldmod, mod, ignore=shutil.ignore_patterns('*.dll', 'recorded-flight.*', 'Liveries'))
     for name in ('entry.lua', 'aircraft.lua'):
         p = mod/name
-        p.write_text(p.read_text(encoding='utf-8-sig').replace(seed['module'], MODULE).replace(seed['binary'], BINARY), encoding='utf-8')
-    (mod/'Liveries'/seed['module']).rename(mod/'Liveries'/MODULE)
+        text = p.read_text(encoding='utf-8-sig').replace(seed['module'], MODULE).replace(seed['binary'], BINARY)
+        if name == 'entry.lua':
+            if text.count("displayName='DCS Recorder Hornet Prototype'") != 1: raise ValueError('Seed entry.lua changed')
+            text = text.replace("displayName='DCS Recorder Hornet Prototype'", f"displayName='{DISPLAY}'")
+        p.write_text(text, encoding='utf-8')
+    # Only the recorded livery, copied as DCS stores it (stock .zip or user folder).
+    (mod/'Liveries'/MODULE).mkdir(parents=True)
+    (shutil.copytree if livery.is_dir() else shutil.copy2)(livery, mod/'Liveries'/MODULE/livery.name)
     # Same accepted bytes; a distinct file name so Windows never shares the
     # loaded release-test DLL instance with this module.
     if faults and not metadata.get('surface_available'): raise ValueError('Fault injection requires a ground-contact take')
@@ -165,7 +178,7 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     # the loaded-mission reference and prepared hash describe what DCS will load.
     stores, dropped = plan_stores(mod/'aircraft.lua', a.selected(a.read_source(source)[2], lead_id)['unit'], dcs, Path(saved_games))
     blob, entries, mission, manifest = a.playback_entries(source, lead_id, player_id, metadata, samples[0], raw[0], MODULE, token, saved, faults,
-                                                          drop_stations=sorted(dropped))
+                                                          drop_stations=sorted(dropped), livery_name=livery.stem if livery.is_file() else livery.name)
     namespace = manifest['namespace']
     mission_lua = output/'mission.lua'; mission_lua.parent.mkdir(parents=True, exist_ok=True)
     mission_lua.write_bytes(entries['mission'])
@@ -202,7 +215,7 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
     for args in ([HERE/'check_me_zones.lua', mission_lua],
                  [EFM/'verify_hornet_requirements.lua', mission_lua, dcs/'Mods/aircraft/FA-18C/entry.lua', dcs/'MissionEditor/modules/me_mission.lua', 'authored', *scene_plugins(mission, dcs, Path(saved_games))],
                  [EFM/'verify_hornet_routes.lua', mission_lua, dcs/'MissionEditor/modules/me_route.lua', plane_groups(mission)],
-                 [HERE/'check_authored_hook.lua', payload, CONTROL, mission_name, namespace],
+                 [HERE/'check_authored_hook.lua', payload, CONTROL, mission_name, namespace, BINARY],
                  [HERE/'check_authored_mission.lua', control, namespace, manifest['selected_name']]):
         subprocess.run([luae, *map(str, args)], check=True)
     mirror_stores(mod/'aircraft.lua', stores)
@@ -213,7 +226,7 @@ def build(take, source, lead_id, player_id, output, mission_name, dcs=DCS, saved
                   controller_sha256=digest(mod/'bin'/f'{BINARY}.dll'), dcs_build=a.BUILD, module=MODULE, binary=BINARY,
                   control=CONTROL, mission=mission_name, take=take.name, take_sha256=digest(take),
                   source_sha256=manifest['source_sha256'], seed_manifest_sha256=digest(SEED/'manifest.json'),
-                  recording=metadata, mission_manifest=manifest, notices=[dropped[s] for s in sorted(dropped)],
+                  recording=metadata, livery=dict(source=str(livery), name=livery.name), mission_manifest=manifest, notices=[dropped[s] for s in sorted(dropped)],
                   status='Offline checked; live readiness, release and scene comparison pending',
                   files={p.relative_to(payload).as_posix(): digest(p) for p in sorted(payload.rglob('*')) if p.is_file()})
     (output/'manifest.json').write_text(json.dumps(result, indent=2, default=str)+'\n', encoding='utf-8')

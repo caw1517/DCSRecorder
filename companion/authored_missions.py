@@ -23,9 +23,30 @@ LIVERY = 'Blue Angels Jet Team'
 
 
 def supported_livery(value):
+    # The legacy staged playback modules carry only this livery.
     # Mission Editor saves the livery folder ID in lower case; Windows folder names
     # (and so DCS livery lookup) ignore case. Same livery, either spelling.
     return isinstance(value, str) and value.casefold() == LIVERY.casefold()
+
+
+def same_livery(a, b):
+    return isinstance(a, str) and isinstance(b, str) and a.casefold() == b.casefold()
+
+
+def find_livery(livery_id, dcs, saved_games):
+    """The Hornet livery (folder or .zip) DCS loads for this ID: the user's Saved
+    Games livery, else the stock one. Refuses when neither exists."""
+    roots = (Path(saved_games)/'Liveries/FA-18C_hornet', Path(dcs)/'CoreMods/aircraft/FA-18C/Liveries/FA-18C_hornet')
+    for root in roots:
+        found = [p for p in (root.iterdir() if root.is_dir() else [])
+                 if same_livery(p.name[:-4] if p.suffix.lower() == '.zip' and p.is_file() else p.name, livery_id)
+                 and (p.is_dir() or p.suffix.lower() == '.zip')]
+        if len(found) > 1:
+            raise ValueError(f'The livery "{livery_id}" exists more than once in {root}. Keep one copy.')
+        if found:
+            return found[0]
+    raise ValueError(f'The livery "{livery_id}" was not found in the stock Hornet liveries or in '
+                     'Saved Games/DCS/Liveries/FA-18C_hornet. Install it there, or choose another livery in Mission Editor.')
 
 
 def sha(data):
@@ -277,9 +298,6 @@ def validate_supported(mission, role_ids):
     if mission.get('theatre') != 'Caucasus' or set(wind) != {'atGround', 'at2000', 'at8000'} or any(w.get('speed') != 0 for w in wind.values()):
         raise ValueError('This preparation profile requires Caucasus and zero wind.')
     rows = [selected(mission, i) for i in role_ids]
-    for row in rows:
-        if not supported_livery(row['unit'].get('livery_id')):
-            raise ValueError('The current playback profile requires the Blue Angels Jet Team livery.')
     # Authors may place every aircraft ahead of time. Other Client slots stay
     # unchanged (single player does not fly them); only one Player can exist.
     others = []
@@ -477,13 +495,16 @@ def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, 
     return save_package(output, blob, entries, manifest)
 
 
-def playback_entries(source, unit_id, player_id, metadata, first, raw_first, module, token, saved=None, faults=False, drop_stations=()):
+def playback_entries(source, unit_id, player_id, metadata, first, raw_first, module, token, saved=None, faults=False, drop_stations=(),
+                     livery_name=None):
     """Build playback mission data without touching a simulator installation.
 
     `saved` is the take's own saved scene when `source` is a newer, explicitly
     confirmed revision; `unit_id` is then the confirmed counterpart of the recorded
     aircraft, which must be authored identically apart from its name and IDs.
     `faults` adds the developer fault-injection menu (diagnostic packages only).
+    `livery_name` is the recorded livery as installed in the playback module; the
+    lead names it exactly (Mission Editor may save the ID in another case).
     `drop_stations` are lead pylons whose mod store this installation no longer
     provides; they are removed so the playback aircraft carries nothing there.
     """
@@ -505,7 +526,8 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
                              + ', '.join(changed[:4]) + '). Use the saved scene; the recorded flight is never moved.')
     elif metadata.get('source') != lead['unit']['name']:
         raise ValueError('Selected playback aircraft does not match the recorded source name.')
-    if not (supported_livery(metadata.get('livery')) and supported_livery(lead['unit'].get('livery_id'))) or metadata.get('aircraft') != lead['unit']['type']:
+    # The recorded livery plays back; the authored aircraft must carry the same one.
+    if not same_livery(metadata.get('livery'), lead['unit'].get('livery_id')) or metadata.get('aircraft') != lead['unit']['type']:
         raise ValueError('Recorded aircraft configuration differs from the source selection.')
     if not all(metadata.get(k) for k in ('exterior_available','engine_available','lights_available','canopy_available','wheels_available')):
         raise ValueError('Authored playback requires the complete supported snapshot.')
@@ -519,7 +541,7 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     first=list(first);first[1:4]=map(g12,first[1:4])
     speed=g12(math.sqrt(sum(v*v for v in first[8:11])))
     heading=g12(math.atan2(float(raw_first['fz']),float(raw_first['fx'])))
-    for key,value in dict(type=module,skill='High',livery_id=LIVERY,x=first[1],y=first[3],alt=first[2],
+    for key,value in dict(type=module,skill='High',x=first[1],y=first[3],alt=first[2],
                           alt_type='BARO',speed=speed,heading=heading,psi=-heading).items():
         role_edit(mission,lead['unit'],key,value,edits)
     for key,value in dict(x=first[1],y=first[3]).items():role_edit(mission,lead['group'],key,value,edits)
@@ -537,6 +559,9 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
             for key in ('parking','parking_id','parking_landing','airdromeId','helipadId','linkUnit'):
                 if key in row:role_remove(mission,row,key,edits)
     role_edit(mission,player['unit'],'skill','Player',edits)
+    if livery_name and lead['unit'].get('livery_id')!=livery_name:
+        if not same_livery(livery_name,lead['unit'].get('livery_id')):raise ValueError('Installed livery differs from the recorded one.')
+        role_edit(mission,lead['unit'],'livery_id',livery_name,edits)
     pylons=(lead['unit'].get('payload') or {}).get('pylons') or {}
     for station in drop_stations:role_remove(mission,pylons,station,edits)
     expected={21:first[11],38:first[42]}

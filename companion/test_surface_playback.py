@@ -12,7 +12,7 @@ EXPANDED = EVIDENCE/'source/Issue11-Parking_Test_V2.miz'  # adds a player Hornet
 CONTROLLER = EVIDENCE/'controller'
 AIRBORNE = EXPERIMENT/'results/authored-preparation-2026-10-02'
 DCS = Path('D:/DCS World')
-MODULE, CONTROL = 'DCSRecorder-Hornet-Authored-Test', 'DCSRecorderAuthoredControl'
+MODULE, CONTROL = 'DCSRecorder-Hornet', 'DCSRecorderAuthoredControl'
 sys.path.insert(0, str(EXPERIMENT/'authored-preparation'))
 
 
@@ -24,10 +24,48 @@ class SurfacePlayback(unittest.TestCase):
 
     def tearDown(self): self.tmp.cleanup()
 
-    def build(self, name='ground', saved_games=Path.home()/'Saved Games/DCS'):
+    def build(self, name='ground', saved_games=Path.home()/'Saved Games/DCS', faults=False):
         from prepare_playback import build
-        return build(TAKE, EXPANDED, 2, 4, self.root/name, 'DCSRecorder-Authored-Playback-test.miz',
-                     dcs=DCS, saved=SAVED, saved_games=saved_games)
+        return build(TAKE, EXPANDED, 2, 4, self.root/name, f'DCSRecorder-Authored-Playback-{name}.miz',
+                     dcs=DCS, saved=SAVED, saved_games=saved_games, faults=faults)
+
+    def test_normal_registration_carries_only_the_recorded_livery(self):
+        result = self.build()
+        mod = self.root/'ground/payload/Mods/aircraft/DCSRecorder-Hornet'
+        self.assertEqual((result['module'], result['binary']), ('DCSRecorder-Hornet', 'DCSRecorderHornet'))
+        self.assertIn("displayName='DCS Recorder Hornet',", (mod/'entry.lua').read_text(encoding='utf-8'))
+        self.assertEqual([p.name for p in (mod/'Liveries').rglob('*')], ['DCSRecorder-Hornet', 'Blue Angels Jet Team.zip'])
+        self.assertEqual(digest(mod/'Liveries/DCSRecorder-Hornet/Blue Angels Jet Team.zip'),
+                         digest(DCS/'CoreMods/aircraft/FA-18C/Liveries/FA-18C_hornet/Blue Angels Jet Team.zip'))
+        self.assertTrue((mod/'bin/DCSRecorderHornet.dll').exists())
+
+    @unittest.skipUnless((EXPERIMENT/'results/lifecycle-2026-10-04/fault-controller/manifest.json').exists(), 'needs the fault controller')
+    def test_fault_injection_uses_the_developer_type(self):
+        result = self.build('fault', faults=True)
+        self.assertEqual((result['module'], result['binary']), ('DCSRecorder-Hornet-Dev', 'DCSRecorderHornetDev'))
+        mods = [p.name for p in (self.root/'fault/payload/Mods/aircraft').iterdir()]
+        self.assertEqual(mods, ['DCSRecorder-Hornet-Dev'])
+        self.assertIn("displayName='DCS Recorder Hornet (developer)'",
+                      (self.root/'fault/payload/Mods/aircraft/DCSRecorder-Hornet-Dev/entry.lua').read_text(encoding='utf-8'))
+
+    def test_livery_folder_is_replaced_per_take_with_backup(self):
+        installed_mod = Path.home()/'Saved Games/DCS/Mods/tech/Blue Angels Mods'
+        games = self.root/'games'; mod = games/'Mods/tech/Blue Angels Mods'; mod.mkdir(parents=True)
+        for name in ('entry.lua', 'Blues.lua'): shutil.copy2(installed_mod/name, mod/name)
+        user = games/'Liveries/FA-18C_hornet/Blue Angels Jet Team'; user.mkdir(parents=True)
+        (user/'description.lua').write_text('livery = {}', encoding='utf-8')
+        saved = self.root/'saved'
+        lib = Library(dict(saved_games=str(saved), dcs=str(DCS), build_trial=TRIAL_BUILD), running=lambda: False)
+        lib.install_authored(self.root/'stock', self.build('stock'), 'g1')
+        livery = saved/'Mods/aircraft/DCSRecorder-Hornet/Liveries/DCSRecorder-Hornet'
+        self.assertEqual([p.name for p in livery.iterdir()], ['Blue Angels Jet Team.zip'])
+        lib.install_authored(self.root/'user', self.build('user', saved_games=games), 'g2')
+        self.assertEqual([p.relative_to(livery).as_posix() for p in livery.rglob('*')],
+                         ['Blue Angels Jet Team', 'Blue Angels Jet Team/description.lua'])
+        backup = lib.home/'backups/g2/Mods/aircraft/DCSRecorder-Hornet/Liveries/DCSRecorder-Hornet/Blue Angels Jet Team.zip'
+        self.assertEqual(digest(backup), digest(DCS/'CoreMods/aircraft/FA-18C/Liveries/FA-18C_hornet/Blue Angels Jet Team.zip'))
+        self.assertEqual(json.loads((self.root/'user/activation.json').read_text(encoding='utf-8'))['removed'],
+                         ['Mods/aircraft/DCSRecorder-Hornet/Liveries/DCSRecorder-Hornet/Blue Angels Jet Team.zip'])
 
     def test_recorded_speed_is_never_limited(self):
         metadata, samples, _ = read(TAKE)
@@ -151,13 +189,13 @@ class SurfacePlayback(unittest.TestCase):
         options = lib.authored_playback_options(take.name)
         player = next(p['id'] for p in options['players'] if p['name'] == 'Wing Hornet')
         lib.authored_playback(take.name, player, options['source_sha256'])
-        dll = saved/'Mods/aircraft'/MODULE/'bin/HornetAuthoredProbe.dll'
+        dll = saved/'Mods/aircraft'/MODULE/'bin/DCSRecorderHornet.dll'
         airborne = digest(dll)
         manifest = self.build()
         lib.install_authored(self.root/'ground', manifest, 'ground-generation')
         self.assertEqual(digest(dll), manifest['controller_sha256'])
         self.assertNotEqual(airborne, manifest['controller_sha256'])
-        backup = lib.home/'backups/ground-generation/Mods/aircraft'/MODULE/'bin/HornetAuthoredProbe.dll'
+        backup = lib.home/'backups/ground-generation/Mods/aircraft'/MODULE/'bin/DCSRecorderHornet.dll'
         self.assertEqual(digest(backup), airborne)
 
 

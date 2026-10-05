@@ -143,12 +143,12 @@ class AuthoredCopies(unittest.TestCase):
         self.m['trig']['events']={1:'arbitrary()'};self.write()
         with self.assertRaisesRegex(ValueError,'Unknown compiled trigger table'):self.prepare('event')
 
-    def playback(self,player=12,source_hash=None):
+    def playback(self,player=12,source_hash=None,livery='Blue Angels Jet Team',installed='Blue Angels Jet Team'):
         first=[0.0]*50;first[1:4]=[100,1800,200];first[8:11]=[140,0,0]
         metadata=dict(authored_source_sha256=source_hash or a.sha(self.source.read_bytes()),source='unit 11',
-                      livery='Blue Angels Jet Team',aircraft='FA-18C_hornet',capture_build=a.BUILD,duration=8.7,
+                      livery=livery,aircraft='FA-18C_hornet',capture_build=a.BUILD,duration=8.7,
                       exterior_available=True,engine_available=True,lights_available=True,canopy_available=True,wheels_available=True)
-        return a.playback_entries(self.source,11,player,metadata,first,dict(fx=1,fz=0),'DCSRecorder-Hornet-Authored-Test',42)
+        return a.playback_entries(self.source,11,player,metadata,first,dict(fx=1,fz=0),'DCSRecorder-Hornet',42,livery_name=installed)
 
     def test_playback_retains_player_start_and_all_unselected_content(self):
         before=copy.deepcopy(a.selected(self.m,12)['group'])
@@ -193,8 +193,22 @@ class AuthoredCopies(unittest.TestCase):
         self.assertEqual(a.selected_row(mission,11)['unit']['livery_id'],'Blue Angels Jet Team')  # module's installed name
         self.assertEqual(a.selected_row(mission,12)['unit']['livery_id'],'blue angels jet team')  # player untouched
         self.assertTrue(manifest['preservation']['restored_structure_equals_source'])
-        a.selected(self.m,12)['unit']['livery_id']='default';self.write()
-        with self.assertRaisesRegex(ValueError,'Blue Angels Jet Team livery'):self.playback()
+
+    def test_recorded_livery_plays_back_and_player_livery_is_free(self):
+        a.selected(self.m,11)['unit']['livery_id']='vfa-37';a.selected(self.m,12)['unit']['livery_id']='default';self.write()
+        _,_,mission,_=self.playback(livery='VFA-37',installed='VFA-37')
+        self.assertEqual(a.selected_row(mission,11)['unit']['livery_id'],'VFA-37')
+        self.assertEqual(a.selected_row(mission,12)['unit']['livery_id'],'default')
+        with self.assertRaisesRegex(ValueError,'configuration differs'):self.playback(livery='Blue Angels Jet Team')
+
+    def test_find_livery_prefers_user_copy_and_refuses_missing(self):
+        root=Path(self.tmp.name);dcs,saved=root/'dcs',root/'games'
+        stock=dcs/'CoreMods/aircraft/FA-18C/Liveries/FA-18C_hornet';stock.mkdir(parents=True)
+        (stock/'VFA-37.zip').write_bytes(b'zip');(stock/'Blue Angels Jet Team.zip').write_bytes(b'zip')
+        user=saved/'Liveries/FA-18C_hornet/vfa-37';user.mkdir(parents=True)
+        self.assertEqual(a.find_livery('VFA-37',dcs,saved),user)
+        self.assertEqual(a.find_livery('blue angels jet team',dcs,saved),stock/'Blue Angels Jet Team.zip')
+        with self.assertRaisesRegex(ValueError,'"Thunderbirds" was not found'):a.find_livery('Thunderbirds',dcs,saved)
 
     def test_library_never_routes_authored_take_to_fixed_donor(self):
         from library import Library

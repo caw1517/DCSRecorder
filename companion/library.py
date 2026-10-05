@@ -184,15 +184,18 @@ class Library:
         return result
 
     def authored_recording(self, path, unit_id, source_sha256):
-        from authored_missions import prepare_recording, read_source, validate_supported, BUILD
-        self.check_environment()
+        from authored_missions import prepare_recording, read_source, validate_supported, selected, find_livery, BUILD
+        dcs = self.check_environment()
         if self.build != BUILD or not self.settings.get('wheels_capture'):
             raise ValueError('Authored preparation requires the installed complete-state capture profile for '+BUILD)
         revision = self.lineage.find_revision(source_sha256)
         if not revision:
             raise ValueError('Save this mission revision in DCS Recorder before recording.')
         snapshot = self.lineage.snapshot(revision)
-        validate_supported(read_source(snapshot)[2], [int(unit_id)])  # before any association is created
+        scene = read_source(snapshot)[2]
+        validate_supported(scene, [int(unit_id)])  # before any association is created
+        # Playback carries the recorded livery; refuse now rather than after flying.
+        find_livery(selected(scene, int(unit_id))['unit'].get('livery_id'), dcs, self.saved)
         association = self.lineage.association_for(revision, int(unit_id))
         generation = uuid.uuid4().hex
         output = self.home / 'authored' / generation
@@ -280,32 +283,49 @@ class Library:
         """Install only what this take changes. Shared module files must already
         match exactly; per-take files are replaced after a backup, with rollback."""
         payload, module, control = output / 'payload', manifest['module'], manifest['control']
-        # The controller differs between airborne and ground (surface) takes, and
-        # aircraft.lua mirrors the lead's mod stores (Blue Angels HANHART).
+        # The controller differs between airborne and ground (surface) takes,
+        # aircraft.lua mirrors the lead's mod stores (Blue Angels HANHART), and the
+        # module carries only the take's recorded livery.
+        liveries = f'Mods/aircraft/{module}/Liveries/'
         per_take = {f'Mods/aircraft/{module}/bin/recorded-flight.txt', f'Mods/aircraft/{module}/bin/recorded-flight.json',
                     f'Mods/aircraft/{module}/aircraft.lua',
                     f"Mods/aircraft/{module}/bin/{manifest['binary']}.dll",
                     f'Scripts/{control}/expected.lua', f'Scripts/Hooks/{control}.lua'}
         mission = 'Missions/' + manifest['mission']
-        fresh = not (self.saved/'Mods/aircraft'/module).exists() and not (self.saved/'Scripts'/control).exists()
+        # The module and its control scripts are each new or already installed;
+        # a new normal module is installed beside an existing control folder.
+        roots = {f'Mods/aircraft/{module}/': not (self.saved/'Mods/aircraft'/module).exists(),
+                 f'Scripts/{control}/': not (self.saved/'Scripts'/control).exists()}
+        roots[f'Scripts/Hooks/{control}.lua'] = roots[f'Scripts/{control}/']
         plan = []
         for name, expected in manifest['files'].items():
             source, target = payload / name, self.saved / name
             if digest(source) != expected:
                 raise ValueError('Prepared package changed; nothing was installed.')
-            if name == mission or fresh:
+            fresh = any(name.startswith(r) and new for r, new in roots.items())
+            if name == mission or fresh or (name.startswith(liveries) and not target.exists()):
                 if target.exists():
                     raise ValueError('An existing file would be overwritten: ' + name)
                 plan.append((name, source, target, False))
             elif not target.is_file():
                 raise ValueError('The installed authored playback module is incomplete: ' + name)
             elif digest(target) != expected:
-                if name not in per_take:
+                if name not in per_take and not name.startswith(liveries):
                     raise ValueError('Installed playback module differs from this app: ' + name)
                 plan.append((name, source, target, True))
+        # Liveries of earlier takes leave the module (backed up, restored on failure).
+        installed = self.saved / liveries
+        stale = sorted(p for p in installed.rglob('*') if p.is_file()
+                       and p.relative_to(self.saved).as_posix() not in manifest['files']) if installed.exists() else []
         backup = self.home / 'backups' / generation
-        done = []
+        done, removed = [], []
         try:
+            for target in stale:
+                name = target.relative_to(self.saved).as_posix()
+                (backup / name).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(target, backup / name)
+                target.unlink()
+                removed.append((name, target))
             for name, source, target, existed in plan:
                 if existed:
                     (backup / name).parent.mkdir(parents=True, exist_ok=True)
@@ -326,8 +346,15 @@ class Library:
                     shutil.copy2(backup / name, target)
                 elif target.exists():
                     target.unlink()
+            for name, target in removed:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(backup / name, target)
             raise
-        (output / 'activation.json').write_text(json.dumps({'installed': [n for n, *_ in plan], 'backup': str(backup)}, indent=2), encoding='utf-8')
+        for folder in sorted({t.parent for _, t in removed}, key=lambda f: len(f.parts), reverse=True):
+            while folder != installed and folder.is_dir() and not any(folder.iterdir()):
+                folder.rmdir(); folder = folder.parent
+        (output / 'activation.json').write_text(json.dumps({'installed': [n for n, *_ in plan], 'removed': [n for n, _ in removed],
+                                                            'backup': str(backup)}, indent=2), encoding='utf-8')
 
     def practice(self):
         dcs = self.check_environment()

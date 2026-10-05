@@ -7,7 +7,7 @@ EVIDENCE = EXPERIMENT/'results/authored-preparation-2026-10-02'
 TAKE = EVIDENCE/'recording-v4-live/20261003T174448Z-0001.csv'
 SOURCE = EVIDENCE/'source-v4/054-Authored-Scene.miz'
 DCS = Path('D:/DCS World')
-MODULE, CONTROL = 'DCSRecorder-Hornet-Authored-Test', 'DCSRecorderAuthoredControl'
+MODULE, CONTROL = 'DCSRecorder-Hornet', 'DCSRecorderAuthoredControl'
 
 
 @unittest.skipUnless(TAKE.exists() and (DCS/'bin/luae.exe').exists(), 'needs the authored evidence and DCS')
@@ -39,7 +39,7 @@ class AuthoredPlayback(unittest.TestCase):
         first = Path(self.lib.authored_playback(TAKE.name, self.player('Wing Hornet'), sha)['mission'])
         self.assertTrue(first.exists())
         module = self.saved/'Mods/aircraft'/MODULE
-        dll, expected = module/'bin/HornetAuthoredProbe.dll', self.saved/'Scripts'/CONTROL/'expected.lua'
+        dll, expected = module/'bin/DCSRecorderHornet.dll', self.saved/'Scripts'/CONTROL/'expected.lua'
         dll_hash, expected_hash, first_hash = digest(dll), digest(expected), digest(first)
         second = Path(self.lib.authored_playback(TAKE.name, self.player('Scene Witness'), sha)['mission'])
         self.assertNotEqual(first, second)

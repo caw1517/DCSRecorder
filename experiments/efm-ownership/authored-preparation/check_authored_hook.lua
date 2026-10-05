@@ -1,6 +1,6 @@
 -- Exercise a generated authored playback hook with stubbed DCS callbacks.
--- Usage: luae.exe check_authored_hook.lua <payload dir> <control> <mission file> <namespace>
-local payload,control,mission_file,namespace=assert(arg[1]),assert(arg[2]),assert(arg[3]),assert(arg[4])
+-- Usage: luae.exe check_authored_hook.lua <payload dir> <control> <mission file> <namespace> <binary>
+local payload,control,mission_file,namespace,binary=assert(arg[1]),assert(arg[2]),assert(arg[3]),assert(arg[4]),assert(arg[5])
 local dir=payload..'/Scripts/'..control..'/'
 local expected=dofile(dir..'expected.lua')
 local guard=dofile(dir..'session_guard.lua')
@@ -40,7 +40,7 @@ local function run(edit,filename,native_reply,request)
         getLogHistory=function(index)local r={};for i=index+1,#history do r[#r+1]=history[i]end;return r,#history end,
         setUserCallbacks=function(c)callbacks=c end}
     e.package={loadlib=function(path,export)
-        assert(path:find('/'..control,1,true)==nil and path:find('HornetAuthoredProbe.dll',1,true),'unexpected DLL '..path)
+        assert(path:find('/'..control,1,true)==nil and path:find('/'..binary..'.dll',1,true),'unexpected DLL '..path)
         return function(command)
             if command=='inspect' then return native_reply or ('READY,1,'..now..',0')end
             if command=='commit' then commits=commits+1;return 'COMMITTED,1,'..now end
