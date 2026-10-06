@@ -1,22 +1,22 @@
 {
   "binary": "HornetSurfaceProbe.dll",
-  "sha256": "27dfc6ba4a11b4165af46eb162157e66da746e57a95de543942d234f79ee1e5d",
+  "sha256": "49a6be2b7821f8ba7872c3764186d999d6fb1433fbe74fe5ae8294a55522a75d",
   "built_from": {
-    "base_commit": "d0ece6a9a0f8bc7593dbc136eb4af0e4a6663ff8",
+    "base_commit": "b8626237bcbcc30cea4b9a593d84d061efe07b01",
     "working_tree_sources": {
-      "object_probe.cpp": "fbdcb1d9bfa3b4b26238d9bc20f8485b8ba375cd6c065d6b9687bc86aaa00229",
-      "recorded_path.h": "752389dd436bee2ba3f3d06ab4c80001d1c33923cb08a38ca64714e739a75561",
+      "object_probe.cpp": "72a9b04537d7ac2742ca49aa6f4d8349a47dfa84799dc7e38e6929d762526b9f",
+      "recorded_path.h": "0676db3f4b5068fd4c8afbb004b37cf92792d711beae99d85b49af328d6a7698",
       "native_velocity.h": "33ee22a6834025aecd02370ee95a10dc4ae2d772552caa645632f76d0b4d71eb",
       "native_motion.h": "c51691fcb28966653f03bbfe4624469c3061056388e1e0841735bb222073d129",
-      "staged_playback.h": "5d66341859d8bca6e142c4d706385100244171f68ba8b6354d2e13c93f7165af",
-      "CMakeLists.txt": "5cc16373f5d05ab4dd2b4a1a0eb596355ee7a29dcbe7a781c124e013af87ddbc",
+      "staged_playback.h": "258c5d4da3bc0bfc166b964e4bf59e308be991854834a3cd99eae52f8caa7a54",
+      "CMakeLists.txt": "177a9831a9f73944bf1bd02e35dc05b9e92391d5b006e39880c6f97ffd8817bb",
       "surface-start/check_path.cpp": "dba7ec9b88fb24ca7076ef22fca1adee55bd13b97a367e8245efeba548730dd4",
       "probe.cpp": "69589945fe6628c72aa18808be5d7a3a8dc20607e61bd45ad9fffb0d3e360a3f",
       "surface-start/ai_ground.h": "a843f45b5ef047b67b1b97eb532eb17a08486b0c170aa0e8edb061b6eb64b1d9"
     }
   },
   "definitions": "HORNET_PROTOTYPE HORNET_RECORDED_PROTOTYPE HORNET_STAGED_PROTOTYPE HORNET_ENGINE_STAGED_PROTOTYPE HORNET_RELEASE_PROTOTYPE HORNET_SURFACE_PROTOTYPE DCSR_BUILD_2930",
-  "offline_checks": "ctest Release surface/release/mission tests 14/14; surface_path_check passes on the real takeoff/landing tape",
-  "revision": "takeoff/landing: no recorded speed limits; tape pose restored before every native step, and before extra steps in one SDK tick; on grounded samples holds woAIPlane ground flag +0x26D3=1 and AI taxi mode 51 (touchdown crash and 25 Hz rollout, takeoff-landing live-2..9); read-only AI phase log and destroy stack; parked hold unchanged. Disproven experiments (gear post state, sink limit, immortality, EFM damage callbacks) removed.",
-  "previous_sha256": "d7c806c2b96c1ce44ee1c400dfa3feec31a5e4d7800940b29fc66a48088fa7c1"
+  "offline_checks": "ctest Release 51/51 including surface_long_tape_check; results/full-flight-duration-2026-10-06/check_long_take.py",
+  "revision": "full-flight duration: no upper take length (user decision 6 October 2026; header count and 300 s limits removed), replay clock arg 996 carries seconds/100000, block-read tape fingerprint, per-tick evidence logs flushed at most once a second. Earlier: takeoff/landing: no recorded speed limits; tape pose restored before every native step, and before extra steps in one SDK tick; on grounded samples holds woAIPlane ground flag +0x26D3=1 and AI taxi mode 51 (touchdown crash and 25 Hz rollout, takeoff-landing live-2..9); read-only AI phase log and destroy stack; parked hold unchanged. Disproven experiments (gear post state, sink limit, immortality, EFM damage callbacks) removed.",
+  "previous_sha256": "27dfc6ba4a11b4165af46eb162157e66da746e57a95de543942d234f79ee1e5d"
 }

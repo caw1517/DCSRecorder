@@ -1,6 +1,9 @@
 -- Bounded airborne integration. The installed user hook commits the native
 -- one-shot latch and dispatches Active Pause release in the same hook callback.
 local c=assert(DCSR_RELEASE_CONFIG)
+-- Arg 996 carries replay seconds divided by this scale. The surface controller
+-- uses 100000 so takes of any practical length stay below 1; older controllers 1000.
+local replay=c.replay_scale or 1000
 local s={phase='preparing',held=true,started=timer.getTime(),smoke_index=0,last_replay=0}
 DCSR_RELEASE=s
 local function emit(text)env.info('DCSR_RELEASE '..text)end
@@ -66,7 +69,7 @@ local function sample(name)
     end
     emit(string.format('SAMPLE,%s,%s,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9g,%s',
         s.phase,name,timer.getTime(),p.p.x,p.p.y,p.p.z,p.x.x,p.x.y,p.x.z,p.y.x,p.y.y,p.y.z,
-        v.x,v.y,v.z,1000*u:getDrawArgumentValue(996),u:getDrawArgumentValue(999),table.concat(values,',')))
+        v.x,v.y,v.z,replay*u:getDrawArgumentValue(996),u:getDrawArgumentValue(999),table.concat(values,',')))
     if c.contact and name=='StagedPlayback' then
         -- Playback-side contact and health: in-air flag, terrain, origin clearance, life.
         local h=land.getHeight({x=p.p.x,y=p.p.z})
@@ -75,7 +78,7 @@ local function sample(name)
     end
 end
 local function smoke(u)
-    local elapsed=1000*u:getDrawArgumentValue(996)
+    local elapsed=replay*u:getDrawArgumentValue(996)
     assert(elapsed==elapsed and elapsed>=s.last_replay and elapsed<=c.duration+.1,'invalid_replay_clock')
     s.last_replay=elapsed
     while c.smoke_events[s.smoke_index+1] and c.smoke_events[s.smoke_index+1].time<=elapsed do
@@ -107,7 +110,7 @@ local function tick()
         if now-s.request_time>1 then s.fail('release_ack_timeout');return end
     elseif s.phase=='starting' or s.phase=='playing' then
         if status==.25 then
-            if s.phase=='starting' then s.phase='playing';emit(string.format('NATIVE_RUNNING,%.9f,%.9f',now,1000*u:getDrawArgumentValue(996)))end
+            if s.phase=='starting' then s.phase='playing';emit(string.format('NATIVE_RUNNING,%.9f,%.9f',now,replay*u:getDrawArgumentValue(996)))end
             smoke(u)
         elseif status==.5 and s.phase=='playing' then
             smoke(u);sample('Observer');sample('StagedPlayback');remove(u);s.phase='complete'
@@ -117,7 +120,7 @@ local function tick()
             -- an eligible stationary, grounded, engines-running endpoint.
             smoke(u)
             if c.parked then
-                s.phase='parked';s.parked_time=now;emit(string.format('PARKED,%.9f,%.9f',now,1000*u:getDrawArgumentValue(996)))
+                s.phase='parked';s.parked_time=now;emit(string.format('PARKED,%.9f,%.9f',now,replay*u:getDrawArgumentValue(996)))
                 notice('Recording ended. The aircraft stays parked with engines running until you exit or restart the mission.')
             else
                 sample('Observer');sample('StagedPlayback');remove(u);s.phase='complete'

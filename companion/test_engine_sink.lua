@@ -5,6 +5,7 @@ if smoke_path=='-' then smoke_path=nil end
 local contact=arg[6]=='contact'
 local wheels=arg[6]=='wheels' or contact
 local capture_build=arg[7] or '2.9.29.27468'
+local last_row=tonumber(arg[8] or 300) -- 300 is 6 s; long-take checks pass more rows
 local canopy=arg[6]=='canopy' or wheels
 local lights=arg[6]=='lights' or canopy
 root=root:gsub('\\','/')..'/'
@@ -61,7 +62,8 @@ if contact then metadata=metadata:gsub('DCSREC,7','DCSREC,8')..'contact_profile,
 if mode:match('^batch') then metadata=metadata..'capture_timing,frame-batch-v1\n'end
 local hex=metadata:gsub('.',function(c)return string.format('%02x',c:byte())end)
 emit('BEGIN,1,'..hex)
-for i=0,300 do
+for i=0,last_row do
+    local w=i%301 -- bounded state channels repeat their 6 s pattern
     local t=10+i*.02;now=t+(mode=='late' and .1 or .01)
     env.defer_pump=(mode=='batch' and i>=100 and i<103) or
         (mode=='batch_initial' and i<3) or (mode=='batch_long' and i>=100 and i<110)
@@ -71,9 +73,9 @@ for i=0,300 do
     for c=1,13 do values[#values+1]=c<=3 and 0 or -.2 end
     for _,v in ipairs({.8,.7,.5,.4})do values[#values+1]=v end
     if lights then for c=1,7 do values[#values+1]=(mode=='invalid_light' and c==1) and 1.1 or (c==5 and (i%4<2 and 0 or .9) or c/10) end end
-    if canopy then values[#values+1]=mode=='invalid_canopy' and 'nan' or (.9*i/300)end
+    if canopy then values[#values+1]=mode=='invalid_canopy' and 'nan' or (.9*w/300)end
     if wheels then
-        for _,v in ipairs({.71+i/3000,.82+i/10000,.83-i/10000,(.97+i*.03)%1,(.98+i*.02)%1,(.99+i*.01)%1,-.7+i/300*1.4})do values[#values+1]=v end
+        for _,v in ipairs({.71+w/3000,.82+w/10000,.83-w/10000,(.97+i*.03)%1,(.98+i*.02)%1,(.99+i*.01)%1,-.7+w/300*1.4})do values[#values+1]=v end
         if mode=='invalid_wheel' then values[#values]='nan' end
     end
     if contact then
@@ -83,5 +85,5 @@ for i=0,300 do
     for j,v in ipairs(values)do values[j]=tostring(v)end
     emit('DATA,1,'..(i+1)..','..table.concat(values,','))
 end
-emit('END,1,user_stop,301');callbacks.onSimulationStop()
+emit('END,1,user_stop,'..(last_row+1));callbacks.onSimulationStop()
 print('PASS: native engine sink fixture finished: '..mode)

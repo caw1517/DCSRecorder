@@ -356,3 +356,10 @@ foreach(NAME IN ITEMS surface_path_check surface_refusal_check)
   add_test(NAME ${NAME} COMMAND ${NAME} "${SURFACE_TAPE}")
 endforeach()
 target_compile_definitions(surface_path_check PRIVATE HORNET_SURFACE_PROTOTYPE)
+# Full-flight duration: any-length V7 tape, controller fingerprint and replay cost.
+# Longer tapes are checked by results/full-flight-duration-2026-10-06/check_long_take.py.
+add_executable(surface_long_tape_check surface-start/check_long_tape.cpp)
+target_include_directories(surface_long_tape_check PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${DCS_ROOT}/API/include")
+target_compile_definitions(surface_long_tape_check PRIVATE HORNET_SURFACE_PROTOTYPE NOMINMAX)
+target_compile_features(surface_long_tape_check PRIVATE cxx_std_17)
+add_test(NAME surface_long_tape_check COMMAND surface_long_tape_check "${SURFACE_TAPE}" 10220e1f8a3b716f)

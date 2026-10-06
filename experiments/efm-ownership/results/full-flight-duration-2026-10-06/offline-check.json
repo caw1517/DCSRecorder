@@ -1,0 +1,40 @@
+[
+  {
+    "target_seconds": 1800,
+    "sink_save_s": 26.52,
+    "sink_read_s": 152.92,
+    "sink_read_peak_mb": 527,
+    "sink_library_first_s": 11.87,
+    "sink_library_again_s": 0.01,
+    "sink_bytes": 28027738,
+    "sink_duration": 1800.0,
+    "sink_samples": 90001,
+    "sink_convert_s": 13.93,
+    "sink_tape_bytes": 23723626,
+    "sink_replay": "PASS: 90001 samples, 1800 s, 200 grounded steps; load 3.32207 s; fingerprint 0.1249 s; first-minute step cost 1.3497 ms, last-minute 1.2717 ms; clock error 2.27374e-13 s",
+    "circuit_prepare_s": 47.43,
+    "circuit_duration": 1800.0,
+    "circuit_samples": 90001,
+    "circuit_tape_bytes": 50003746,
+    "circuit_replay": "PASS: 90001 samples, 1800 s, 80569 grounded steps; load 4.66849 s; fingerprint 0.392011 s; first-minute step cost 1.7364 ms, last-minute 1.7256 ms; clock error 2.27374e-13 s"
+  },
+  {
+    "target_seconds": 3600,
+    "sink_save_s": 34.55,
+    "sink_read_s": 205.68,
+    "sink_read_peak_mb": 1053,
+    "sink_library_first_s": 13.47,
+    "sink_library_again_s": 0.0,
+    "sink_bytes": 56628973,
+    "sink_duration": 3600.0,
+    "sink_samples": 180001,
+    "sink_convert_s": 17.59,
+    "sink_tape_bytes": 47914861,
+    "sink_replay": "PASS: 180001 samples, 3600 s, 200 grounded steps; load 3.47815 s; fingerprint 0.182718 s; first-minute step cost 1.701 ms, last-minute 1.7567 ms; clock error 4.54747e-13 s",
+    "circuit_prepare_s": 46.07,
+    "circuit_duration": 3600.0000000000005,
+    "circuit_samples": 180001,
+    "circuit_tape_bytes": 100023721,
+    "circuit_replay": "PASS: 180001 samples, 3600 s, 170569 grounded steps; load 4.4908 s; fingerprint 0.304691 s; first-minute step cost 3.1947 ms, last-minute 1.27 ms; clock error 4.54747e-13 s"
+  }
+]

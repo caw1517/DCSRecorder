@@ -16,7 +16,8 @@ Offline capture, packaging and activation checks pass; a user-operated normal
 record-to-playback run is still required. The app displays a trial banner.
 
 DCS 2.9.29.27468, stock F/A-18C, Blue Angels Jet Team livery, Caucasus, zero wind,
-airborne recordings of 5 to 300 seconds and 70 to 260 m/s. Initial attitude must
+recordings of at least 5 seconds. Ground-contact (version 8) takes have no upper
+length or speed limit; older airborne takes keep their 300-second limit. Initial attitude must
 be within 10 degrees of level. Staged playback no longer imposes an altitude
 floor/ceiling or angular-rate cap; the final hard-turn take passed live review.
 Finite-data, continuity, orientation, ownership and build checks remain.

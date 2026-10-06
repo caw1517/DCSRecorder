@@ -33,13 +33,28 @@ local function write_status(text)
         checked(file.write,file,text);checked(file.flush,file);checked(file.close,file)
     end)
 end
+-- Takes have no length limit, so saved bytes are verified block by block while
+-- recording through a second read handle, instead of being kept in memory.
+local function verify_block(reader,offset,expected)
+    checked(reader.seek,reader,'set',offset)
+    local ok,data=pcall(function() return reader:read(#expected) end)
+    return ok and data==expected
+end
 local function storage_check()
     local stem=root..'.autosave-check-'..os.date('!%Y%m%dT%H%M%SZ')
     local count=0
     while lfs.attributes(stem..'.tmp') or lfs.attributes(stem..'.done') do count=count+1;stem=stem..'-'..count end
-    local expected='DCS Recorder storage check'
+    -- Exercise the same write, flush, seek and block read used while recording.
+    local first,second='DCS Recorder storage check',' while still writing'
+    local expected=first..second
     local file=assert(io.open(stem..'.tmp','wb'))
-    checked(file.write,file,expected);checked(file.flush,file);checked(file.close,file)
+    checked(file.write,file,first);checked(file.flush,file)
+    local reader=assert(io.open(stem..'.tmp','rb'))
+    local blocks=verify_block(reader,0,first)
+    checked(file.write,file,second);checked(file.flush,file)
+    blocks=blocks and verify_block(reader,#first,second)
+    checked(reader.close,reader);checked(file.close,file)
+    assert(blocks,'Storage block verification failed')
     assert(read_bytes(stem..'.tmp')==expected,'Storage write/read verification failed')
     checked(os.rename,stem..'.tmp',stem..'.done')
     assert(not lfs.attributes(stem..'.tmp') and read_bytes(stem..'.done')==expected,'Storage rename verification failed')
@@ -47,7 +62,17 @@ local function storage_check()
 end
 
 local function abandon(reason)
-    if active then pcall(function() active.file:flush(); active.file:close() end); active = nil; announce('Incomplete recording retained: ' .. reason) end
+    if active then
+        pcall(function() active.file:flush(); active.file:close() end); pcall(function() active.reader:close() end)
+        active = nil; announce('Incomplete recording retained: ' .. reason)
+    end
+end
+-- Flush and verify everything written since the last verified block.
+local function commit()
+    checked(active.file.flush,active.file)
+    local block=table.concat(active.pending)
+    assert(verify_block(active.reader,active.verified,block),'Saved recording verification failed; partial retained')
+    active.verified=active.verified+#block;active.pending={}
 end
 local function open_take(id, hex)
     abandon('new take')
@@ -85,9 +110,10 @@ local function open_take(id, hex)
         filename = directory .. os.date('!%Y%m%dT%H%M%SZ') .. '-' .. string.format('%04d',serial)
     until not lfs.attributes(filename .. '.partial') and not lfs.attributes(filename .. '.csv')
     local file = assert(io.open(filename .. '.partial', 'wb'))
-    active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, version=version,source_id=source_id,capture_build=capture_build,capture_timing=capture_timing,
+    active = {id=id, rows=0, file=file, name=filename, pending={metadata,header}, verified=0, version=version,source_id=source_id,capture_build=capture_build,capture_timing=capture_timing,
         has_engine=has_engine,has_smoke=has_smoke,commas=version=='8' and 55 or version=='7' and 50 or tonumber(version)>=6 and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
-    checked(file.write,file,metadata,header); checked(file.flush,file)
+    checked(file.write,file,metadata,header)
+    active.reader=assert(io.open(filename..'.partial','rb'));commit()
     write_status('RECORDING\nRecording in progress; use F10 Stop to save.')
 end
 local function consume(line)
@@ -101,7 +127,7 @@ local function consume(line)
     if id and active and id == active.id then
         assert(tonumber(count) == active.rows + 1, 'Missing or duplicate sample')
         local _,commas = data:gsub(',','')
-        assert(commas == active.commas and #data < 4096 and active.rows < 20000, 'Malformed or oversized recording')
+        assert(commas == active.commas and #data < 4096,'Malformed or oversized recording')
         local light_data=''
         if tonumber(active.version)>=5 then
             local fields={};for value in (data..','):gmatch('(.-),')do fields[#fields+1]=value end
@@ -119,8 +145,8 @@ local function consume(line)
         if active.has_engine then data=capture_engine(data,active) end
         if active.has_smoke then data=capture_smoke(data,active) end
         data=data..light_data
-        checked(active.file.write,active.file,data,'\n');active.parts[#active.parts+1]=data..'\n';active.rows = active.rows + 1
-        if active.rows % 50 == 0 then checked(active.file.flush,active.file) end
+        checked(active.file.write,active.file,data,'\n');active.pending[#active.pending+1]=data..'\n';active.rows = active.rows + 1
+        if active.rows % 50 == 0 then commit() end
         return
     end
     local reason
@@ -129,13 +155,15 @@ local function consume(line)
         assert(tonumber(count) == active.rows, 'Recording footer count mismatch')
         if reason ~= 'user_stop' or active.rows < 2 then abandon(reason); return end
         local footer='END,user_stop,'..active.rows..'\n'
-        checked(active.file.write,active.file,footer);checked(active.file.flush,active.file);checked(active.file.close,active.file)
-        active.parts[#active.parts+1]=footer
-        local expected=table.concat(active.parts)
-        assert(read_bytes(active.name..'.partial')==expected,'Saved recording verification failed; partial retained')
-        local completed=active.name
+        checked(active.file.write,active.file,footer);active.pending[#active.pending+1]=footer;commit()
+        checked(active.reader.close,active.reader);checked(active.file.close,active.file)
+        local completed,size=active.name,active.verified
         checked(os.rename,completed..'.partial',completed..'.csv')
-        assert(not lfs.attributes(completed..'.partial') and read_bytes(completed..'.csv')==expected,'Completed recording verification failed')
+        assert(not lfs.attributes(completed..'.partial'),'Completed recording verification failed')
+        local saved=assert(io.open(completed..'.csv','rb'))
+        local same=checked(saved.seek,saved,'end')==size and verify_block(saved,size-#footer,footer)
+        checked(saved.close,saved)
+        assert(same,'Completed recording verification failed')
         if active.has_engine then
             announce(string.format('Capture timing: rows=%d engine_max_delay_ms=%.3f smoke_max_delay_ms=%.3f',
                 active.rows,(active.max_engine_delay or 0)*1000,(active.max_smoke_delay or 0)*1000))

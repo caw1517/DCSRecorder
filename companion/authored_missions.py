@@ -584,7 +584,7 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
                 smoke_events=dict(enumerate(metadata.get('smoke_events') or [dict(time=0,on=False)],1)))
     if metadata.get('surface_available'):
         # Ground takes log playback-side contact; a measured eligible endpoint stays parked.
-        config.update(contact=True,parked=bool((metadata.get('parked_endpoint') or {}).get('eligible')))
+        config.update(contact=True,parked=bool((metadata.get('parked_endpoint') or {}).get('eligible')),replay_scale=100000)
     if faults:config['faults']=True
     script=(EFM/'release-start/mission.lua').read_text(encoding='utf-8')
     # Replace exact literals before inserting arbitrary authored names.

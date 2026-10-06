@@ -95,7 +95,10 @@ def read(path, *, ground_trial_log=None):
             if math.dist(p,[prev[k]+dt*(prev[k+7]+v[k-1])/2 for k in range(1,4)])>max(0.5,dt*8):
                 raise ValueError('Position/velocity discontinuity in recorded flight')
         samples.append([t,*p,*q,*v,brake,*exterior])
-    if len(samples)<2 or not 5<=samples[-1][0]-samples[0][0]<=300: raise ValueError('Record between 5 and 300 seconds')
+    # Takes have no upper length limit (user decision, 6 October 2026).
+    if len(samples)<2 or samples[-1][0]-samples[0][0]<5: raise ValueError('Record at least 5 seconds')
+    # Older takes play on the airborne controller, which keeps its 300 s limit.
+    if version<8 and samples[-1][0]-samples[0][0]>300: raise ValueError('Takes recorded before ground contact are limited to 300 seconds')
     start=samples[0][0]
     if version>=3:
         for sample,engine in zip(samples,engine_state.align(raw,.15 if timing=='frame-batch-v1' else .05)):sample.extend(engine)

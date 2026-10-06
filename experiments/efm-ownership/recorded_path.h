@@ -63,7 +63,7 @@ struct Path {
 #ifdef HORNET_SURFACE_PROTOTYPE
             && header!="DCSREC_PLAYBACK_V7"
 #endif
-            ) || n<2 || n>100000) return "recording_header_rejected";
+            ) || n<2) return "recording_header_rejected";
         // V7 adds one source contact flag per sample: 1 grounded, 0 airborne.
         const bool contact=header=="DCSREC_PLAYBACK_V7";
         const bool wheels=header=="DCSREC_PLAYBACK_V6" || contact;
@@ -77,7 +77,8 @@ struct Path {
         if(canopy) {std::string profile;if(!(f>>profile) || profile!=hornet_canopy::profile)return "recording_canopy_profile_rejected";}
         if(wheels) {std::string profile;if(!(f>>profile) || profile!=hornet_wheels::profile)return "recording_wheel_profile_rejected";}
         if(contact) {std::string profile;if(!(f>>profile) || profile!="hornet-contact-v1")return "recording_contact_profile_rejected";}
-        std::vector<Sample> loaded;loaded.reserve(n);
+        // Takes have no upper length limit; the header count only sizes the first reservation.
+        std::vector<Sample> loaded;loaded.reserve(std::min<size_t>(n,size_t{1}<<18));
         for(size_t i=0;i<n;++i) {
             Sample s;f>>s.t;for(auto& v:s.p)f>>v;for(auto& v:s.q)f>>v;for(auto& v:s.v)f>>v;f>>s.brake;
             if(exterior) {for(auto& v:s.exterior)f>>v;if(!f || !hornet_exterior::valid(s.exterior))return "recording_exterior_rejected";}
@@ -109,7 +110,7 @@ struct Path {
             loaded.push_back(s);
         }
         std::string extra;if(f>>extra)return "recording_trailing_data_rejected";
-        if(loaded.back().t<5 || loaded.back().t>300)return "recording_duration_rejected";
+        if(loaded.back().t<5)return "recording_duration_rejected";
         samples=std::move(loaded);has_exterior=exterior;has_engine=engine;has_lights=lights;has_canopy=canopy;has_wheels=wheels;has_contact=contact;initial_q=samples.front().q;return "recording_loaded";
     }
     bool initialize_exact(const Pose& initial) {

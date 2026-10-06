@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 #include "ed_object_access.h"
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -61,6 +62,13 @@ std::ofstream ai_phase_file; // read-only woAIPlane phase fields (research #36)
 #ifdef HORNET_STAGED_PROTOTYPE
 std::ofstream exterior_file,engine_file;
 #endif
+// Per-tick evidence logs grow with take length; flush each at most once a
+// second so long takes do not pay a file write per tick (callers hold lock).
+void flush_trace(std::ofstream& file) {
+    static std::unordered_map<const std::ofstream*,std::chrono::steady_clock::time_point> next;
+    const auto now=std::chrono::steady_clock::now();auto& due=next[&file];
+    if(now>=due) {file.flush();due=now+std::chrono::seconds(1);}
+}
 struct Observation {
     uint64_t calls = 0; double next_log = 0; bool motion_attempted=false, motion_active=false;
     double start_time=0, last_time=0, last_x=0, last_z=0, measured_speed=145; playback_path::Path path;
@@ -127,7 +135,7 @@ void drain_engine(Observation& state,double time) {
             ',' << module << ',' << rva << ','
             << call.engine << ',' << call.channel << ',' << call.overridden << ',' << call.original << ',' << call.returned << '\n';
     }
-    engine_file.flush();
+    flush_trace(engine_file);
     if(lost || !engine_file) {state.motion_active=false;log_file << "engine_trace_failed," << state.runtime_id << ',' << time << '\n';log_file.flush();}
 }
 #ifdef HORNET_GROUND_TRACE
@@ -145,7 +153,7 @@ void trace_ground_pose(const char* phase,const void* handle,const Observation& s
     for(double v:target.p)ground_pose_file<<','<<v;
     for(double v:precise)ground_pose_file<<','<<v;
     for(int k=0;k<3;++k)ground_pose_file<<','<<pose[12+k];
-    ground_pose_file<<'\n';ground_pose_file.flush();
+    ground_pose_file<<'\n';flush_trace(ground_pose_file);
     // Offsets from the woAIPlane complete object (SDK handle - 8), DCS 2.9.30 static
     // reading in docs/research/dcs-ai-plane-ground-phase.md. Guarded reads only.
     if(ai_phase_file) {
@@ -158,7 +166,7 @@ void trace_ground_pose(const char* phase,const void* handle,const Observation& s
         ai_phase_file<<phase<<','<<state.calls<<','<<state.step_calls<<','<<state.clock.last<<','<<state.clock.elapsed<<','
             <<state.path.ground_at(state.clock.elapsed)<<','<<ok<<','<<mode<<','<<height<<','<<y<<','<<int(b7cb)<<','
             <<int(b26d3)<<','<<q5568<<','<<int(b5591)<<','<<int(gate)<<'\n';
-        ai_phase_file.flush();
+        flush_trace(ai_phase_file);
     }
 }
 void after_ground_native_step(const void* handle) {
@@ -256,7 +264,7 @@ void after_native_animation(const void* handle) {
         for(size_t i=0;i<before.size();++i)exterior_file << state.runtime_id << ',' << state.calls << ','
             << state.exterior_elapsed << ',' << hornet_exterior::channels[i] << ',' << state.exterior[i]
             << ',' << before[i] << ',' << after.data[hornet_exterior::channels[i]] << '\n';
-        exterior_file.flush();
+        flush_trace(exterior_file);
     }
     if(!applied || !exterior_file) {
         state.motion_active=false;state.exterior_pending=false;
@@ -681,7 +689,12 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #endif
         const auto sampled=state.path.at_sample(state.exterior_elapsed);
         state.exterior=sampled.exterior;state.engine=sampled.engine;state.lights=sampled.lights;state.canopy=sampled.canopy;state.wheels=sampled.wheels;
+#ifdef HORNET_SURFACE_PROTOTYPE
+        // Takes have no length limit: replay seconds/100000 stays below 1 for 27 hours.
+        api->ed_set_single_arg(handle,996,static_cast<float>(state.exterior_elapsed/100000));
+#else
         api->ed_set_single_arg(handle,996,static_cast<float>(state.exterior_elapsed/1000));
+#endif
         state.exterior_pending=hornet_appearance::apply_exterior(api,handle,state.runtime_id,state.exterior);
         if(state.path.has_engine)state.exterior_pending=hornet_appearance::apply_engine(api,handle,state.runtime_id,state.engine) && state.exterior_pending;
         if(state.path.has_lights)state.exterior_pending=hornet_appearance::apply_lights(api,handle,state.runtime_id,state.lights) && state.exterior_pending;
@@ -746,7 +759,7 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         }
         motion_file << motion_id << ',' << time << ',' << status;
         for(int i=0;i<72;++i) motion_file << ',';
-        motion_file << '\n'; motion_file.flush();
+        motion_file << '\n'; flush_trace(motion_file);
     }
     if(state.motion_active) {
 #ifdef HORNET_RELEASE_PROTOTYPE
@@ -856,7 +869,7 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
 #else
         motion_file << ",0,0,inactive";
 #endif
-        motion_file << '\n'; motion_file.flush();
+        motion_file << '\n'; flush_trace(motion_file);
         if(release || std::string(status)!="called") state.motion_active=false;
 #ifdef HORNET_STAGED_PROTOTYPE
         if(state.motion_active) {
@@ -898,7 +911,7 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
             else body_file << ",,,";
         } else body_file << ",,,,,,";
         body_file << '\n';
-        body_file.flush();
+        flush_trace(body_file);
         state.next_log = time + 0.1;
     }
 }
@@ -924,7 +937,7 @@ extern "C" __declspec(dllexport) void ed_on_object_destroy(ED_OBJECT_HANDLE hand
             if(m)GetModuleFileNameW(m,name,MAX_PATH);
             ai_phase_file<<','<<std::filesystem::path(name).filename().string()<<"+0x"<<std::hex<<(reinterpret_cast<uintptr_t>(frames[i])-reinterpret_cast<uintptr_t>(m))<<std::dec;
         }
-        ai_phase_file<<'\n';ai_phase_file.flush();
+        ai_phase_file<<'\n';flush_trace(ai_phase_file);
     }
 #endif
     observed.erase(handle);

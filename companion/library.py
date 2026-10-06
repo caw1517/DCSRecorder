@@ -67,6 +67,20 @@ class Library:
         return path
 
     def validate(self, path):
+        # Takes have no length limit and a 30-minute take takes seconds to read, so
+        # each unchanged file is validated once per companion session.
+        import copy
+        stat = Path(path).stat()
+        key = (str(Path(path).resolve()), stat.st_size, stat.st_mtime_ns)
+        cache = self.__dict__.setdefault('_validated', {})
+        if key not in cache:
+            try: cache[key] = (True, self._validate(path))
+            except ValueError as error: cache[key] = (False, str(error))
+        ok, value = cache[key]
+        if not ok: raise ValueError(value)
+        return copy.deepcopy(value)
+
+    def _validate(self, path):
         metadata, samples, raw = read(path)
         from authored_missions import supported_livery
         # Legacy playback modules carry only the Blue Angels livery. Authored takes
@@ -85,8 +99,9 @@ class Library:
             raise ValueError('Begin recording nearly level (within 10 degrees).')
         # The UI offers only explicitly stopped takes, even if the legacy converter
         # permits older non-user-stop footers.
-        with Path(path).open(encoding='utf-8-sig', newline='') as stream:
-            footer = list(csv.reader(stream))[-1]
+        with Path(path).open('rb') as stream:
+            stream.seek(max(0, stream.seek(0, 2)-256))
+            footer = next(csv.reader([stream.read().decode('utf-8', 'replace').splitlines()[-1]]))
         if footer[1] != 'user_stop':
             raise ValueError('Recording was not explicitly stopped using F10 Stop.')
         return metadata

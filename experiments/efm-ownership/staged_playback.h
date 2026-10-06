@@ -16,7 +16,12 @@ inline uint64_t fingerprint(const std::filesystem::path& path) {
     std::ifstream file(path,std::ios::binary);
     if(!file)return 0;
     uint64_t value=14695981039346656037ull;
-    char c;while(file.get(c)) {value^=static_cast<unsigned char>(c);value*=1099511628211ull;}
+    // Block reads: long-take tapes are tens of megabytes.
+    char block[1<<16];
+    while(file.read(block,sizeof block) || file.gcount()>0) {
+        for(std::streamsize i=0;i<file.gcount();++i) {value^=static_cast<unsigned char>(block[i]);value*=1099511628211ull;}
+        if(file.eof())break;
+    }
     return file.bad()?0:value;
 }
 inline float high(uint64_t value) {return static_cast<float>((value>>40)&0xffffff)/16777216.0f;}
