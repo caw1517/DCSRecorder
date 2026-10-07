@@ -49,3 +49,39 @@ Reading the table:
 - The 4 to 5 s tape load at object creation, against the mission's 10 s readiness timeout.
 - Evidence-log volume: about 1 GB per 30 minutes of probe logs plus the mission log.
 - Simulator frame time across the whole flight.
+
+## Live acceptance (6 October 2026)
+
+**Take:** `20261007T012523Z-0001.csv`, an authored hot start in the TAKEOFF_LANDING_TEST scene, recorded with the minimal sink (`e869935`: the proven sink with only its 20,000-row limit removed).
+
+- 883.5 s, 44,175 samples, saved complete.
+- Liftoff at 65.26 s, touchdown at 830.94 s.
+- Ends stationary, grounded, engines running; the parked ending is eligible.
+- Recorded with the on-screen Sync 1–10 count for external spoken comms.
+
+### First replay
+
+- **What happened:** it failed 1.5 s after liftoff with `native_readiness_lost`.
+- **Cause:** `command_step_too_large`. For about 2.6 s after liftoff, DCS's taxiing AI pulls the aircraft straight down to the runway before every step. The tape pose is restored each time, but on this steep climb the gap reached 10.09 m, over the 10 m limit. The accepted circuit had peaked at 9.1 m.
+- **Fix (`f653d9e`):** the surface controller allows a native pose directly below the tape, within 150 m. All 3,649 steps of the failed run had 0 m horizontal offset. Step failures are now logged by reason.
+
+### Replays with the fix
+
+Two replays ran the full take and held parked:
+- PID 46520: parked at mission time 889.14 s.
+- PID 49200: parked at 891.20 s.
+
+Five more were ended early by the user, with no failure logged. The user flew alongside several times and accepted the playback visually and by audio.
+
+Position accuracy comes from `ground-pose-*.csv`. The native pose after animation is compared with the tape at replay time + 20 ms (fitted). The DCS logs for these sessions were overwritten, so attitude, velocity and state were not re-measured by `analyze_run.py`.
+
+| Run | Steps | Horizontal p99 / max | Vertical p99 / max |
+|---|---|---|---|
+| 49200, full 885.6 s | 44,665 | 0.044 / 0.483 m | 0.010 / 0.029 m |
+| 46520, second run to 749.8 s | 37,775 | 0.065 / 0.483 m | 0.011 / 0.029 m |
+
+- **Grounded steps:** 0 of 6,276 exceed 0.10 m.
+- **Airborne steps:** 334 of 38,284 exceed 0.10 m, all within 67.1–74.2 s, just after liftoff, at about 110 m/s. The maximum is 0.48 m.
+- **User decision (6 October 2026):** the user accepted this post-liftoff horizontal residual as a known limitation, tracked separately. Everywhere else, the agreed limits are met.
+
+Track replays are refused with `identity_unverified`, as designed: a track is a different loaded session.
