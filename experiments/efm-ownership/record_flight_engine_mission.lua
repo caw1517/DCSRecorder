@@ -103,6 +103,14 @@ missionCommands.addCommand('Start recording',menu,function()
         if r.take~=take then return nil end
         return tick()
     end,nil,timer.getTime()+0.02)
+    -- Audio sync aid: count 1 to 10 seconds from Start, to count aloud with.
+    -- Playback shows the same count on its replay clock.
+    local started=timer.getTime()
+    for count=1,10 do
+        timer.scheduleFunction(function()
+            if r.take==take and r.state=='recording' then trigger.action.outText('Sync '..count,1) end
+        end,nil,started+count)
+    end
     trigger.action.outText('Recording take '..r.take..' into DCS.log. Use F10 > DCS Recorder > Stop recording before leaving the mission.',15)
 end)
 missionCommands.addCommand('Stop recording',menu,function()

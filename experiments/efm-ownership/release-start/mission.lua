@@ -81,6 +81,9 @@ local function smoke(u)
     local elapsed=replay*u:getDrawArgumentValue(996)
     assert(elapsed==elapsed and elapsed>=s.last_replay and elapsed<=c.duration+.1,'invalid_replay_clock')
     s.last_replay=elapsed
+    -- Audio sync aid: the recording's 1 to 10 count, shown on the replay clock.
+    local count=math.min(10,math.floor(elapsed))
+    if count>(s.sync_count or 0) then s.sync_count=count;trigger.action.outText('Sync '..count,1) end
     while c.smoke_events[s.smoke_index+1] and c.smoke_events[s.smoke_index+1].time<=elapsed do
         s.smoke_index=s.smoke_index+1
     end
