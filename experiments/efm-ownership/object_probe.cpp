@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 #include "ed_object_access.h"
-#include <chrono>
+
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -62,13 +62,9 @@ std::ofstream ai_phase_file; // read-only woAIPlane phase fields (research #36)
 #ifdef HORNET_STAGED_PROTOTYPE
 std::ofstream exterior_file,engine_file;
 #endif
-// Per-tick evidence logs grow with take length; flush each at most once a
-// second so long takes do not pay a file write per tick (callers hold lock).
-void flush_trace(std::ofstream& file) {
-    static std::unordered_map<const std::ofstream*,std::chrono::steady_clock::time_point> next;
-    const auto now=std::chrono::steady_clock::now();auto& due=next[&file];
-    if(now>=due) {file.flush();due=now+std::chrono::seconds(1);}
-}
+// Evidence logs flush every tick, so the last tick before a failure is on disk
+// while DCS is still running.
+void flush_trace(std::ofstream& file) {file.flush();}
 struct Observation {
     uint64_t calls = 0; double next_log = 0; bool motion_attempted=false, motion_active=false;
     double start_time=0, last_time=0, last_x=0, last_z=0, measured_speed=145; playback_path::Path path;
@@ -314,7 +310,11 @@ void restore_extra_step(const void* handle,Observation& state) {
     native_body::Sample before{},after{};
     const char* status=native_motion::apply(handle,id,before,after,&target,nullptr,false,&motion,state.runtime_id,true);
     if(std::strcmp(status,"called")==0) {++state.extra_restores;trace_ground_pose("before_extra_step_restored",handle,state);}
-    else {state.step_status=status;state.motion_active=false;staged_playback::publish(api,reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle)),state.token,staged_playback::failed);}
+    else {
+        const auto sdk_handle=reinterpret_cast<ED_OBJECT_HANDLE>(const_cast<void*>(handle));
+        state.step_status=status;state.motion_active=false;record(status,sdk_handle,0,state.clock.last,state.calls);
+        staged_playback::publish(api,sdk_handle,state.token,staged_playback::failed);
+    }
 }
 #endif
 void before_native_step(const void* handle) {
@@ -393,6 +393,7 @@ void before_native_step(const void* handle) {
     else {
         state.motion_active=false;
 #ifdef HORNET_GROUND_TRACE
+        record(state.step_status,sdk_handle,0,state.clock.last,state.calls);
         staged_playback::publish(api,sdk_handle,state.token,staged_playback::failed);
 #endif
     }

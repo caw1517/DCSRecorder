@@ -64,7 +64,18 @@ inline const char* apply(const void* handle, uint32_t object_id,
     for(double v:*commanded) if(!std::isfinite(v)) return "nonfinite_command";
     double distance2=0;
     for(int i=0;i<3;++i) distance2+=std::pow((*commanded)[12+i]-pose[12+i],2);
+#ifdef HORNET_SURFACE_PROTOTYPE
+    // For about 2.6 s after liftoff, DCS's taxiing AI pulls the aircraft straight
+    // down to the runway before every step; the tape pose is restored each time.
+    // The gap equals the height climbed: 9.1 m on the accepted circuit, over 10 m
+    // on a steeper climb (6 October 2026). Allow only that pattern: native pose
+    // directly below the command, within a bounded height.
+    const double horizontal2=std::pow((*commanded)[12]-pose[12],2)+std::pow((*commanded)[14]-pose[14],2);
+    const double below=(*commanded)[13]-pose[13];
+    if(distance2>100 && !(horizontal2<=100 && below>0 && below<=150)) return "command_step_too_large";
+#else
     if(distance2>100) return "command_step_too_large";
+#endif
     if(motion) {
         const auto validation=native_velocity::validate(handle,*motion,ground);
         if(std::strcmp(validation,"valid")!=0) return validation;

@@ -1,15 +1,15 @@
 {
   "binary": "HornetSurfaceFaultProbe.dll",
-  "sha256": "bed422da2759d6f7b312928bce41ee8dcbb507ccf0166b6e25471c82f85a7680",
+  "sha256": "b966827cc041dcee26fe8840b167e9f1939dbd80a5f689ece76e908d6d596689",
   "built_from": {
-    "base_commit": "b8626237bcbcc30cea4b9a593d84d061efe07b01",
+    "base_commit": "0d13a5c35e14640fd06fa83830d4a3ceca4e8ae4",
     "working_tree_sources": {
-      "object_probe.cpp": "72a9b04537d7ac2742ca49aa6f4d8349a47dfa84799dc7e38e6929d762526b9f",
+      "object_probe.cpp": "bc23291d91f7168aa78d00004809b99d206201bd92f19e01a243ba62cb10f3ba",
       "release-start/bridge.h": "a27228a60a3eb97789a3531cd121d684a4ee9029b5162c103fd513a277b83ee0",
       "release-start/policy.h": "1e782727242a3726e5a6a3646d5573edbbfa8f2cf6748f95cf5a71172945c8d3",
       "recorded_path.h": "0676db3f4b5068fd4c8afbb004b37cf92792d711beae99d85b49af328d6a7698",
       "native_velocity.h": "33ee22a6834025aecd02370ee95a10dc4ae2d772552caa645632f76d0b4d71eb",
-      "native_motion.h": "c51691fcb28966653f03bbfe4624469c3061056388e1e0841735bb222073d129",
+      "native_motion.h": "40ef4749021b6911d1899fc21a27c57320214284ad6adf103bb993aeb5f3b27b",
       "staged_playback.h": "258c5d4da3bc0bfc166b964e4bf59e308be991854834a3cd99eae52f8caa7a54",
       "CMakeLists.txt": "177a9831a9f73944bf1bd02e35dc05b9e92391d5b006e39880c6f97ffd8817bb",
       "probe.cpp": "69589945fe6628c72aa18808be5d7a3a8dc20607e61bd45ad9fffb0d3e360a3f",
@@ -19,5 +19,5 @@
   "definitions": "HORNET_PROTOTYPE HORNET_RECORDED_PROTOTYPE HORNET_STAGED_PROTOTYPE HORNET_ENGINE_STAGED_PROTOTYPE HORNET_RELEASE_PROTOTYPE HORNET_SURFACE_PROTOTYPE HORNET_FAULT_INJECTION DCSR_BUILD_2930",
   "purpose": "Diagnostic only. Accepted surface controller source plus bridge commands fault_clock/fault_state, which arm a non-finite replay clock or a failed exterior write. Used only by prepare_playback --fault-injection; never in normal packages. Rebuilt 6 October 2026 with the full-flight duration controller changes.",
   "offline_checks": "ctest Release 51/51 including surface_long_tape_check; results/full-flight-duration-2026-10-06/check_long_take.py",
-  "previous_sha256": "f60b9135c56f6877d3daafa26dca95a78002079b6dc25f18a7b507d695414a99"
+  "previous_sha256": "bed422da2759d6f7b312928bce41ee8dcbb507ccf0166b6e25471c82f85a7680"
 }
