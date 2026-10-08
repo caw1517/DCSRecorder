@@ -20,6 +20,13 @@ These features are explicitly deferred to V2 and do not block V1:
 
 ## Current milestone
 
+On 8 October 2026 the user declared the single-aircraft Hornet work complete for
+the purposes of starting layers. The physics question ([#3](https://github.com/caw1517/DCSRecorder/issues/3)) is closed by decision, and
+[Layered playback](https://github.com/caw1517/DCSRecorder/issues/9) is next. Engine sound, smoke colors, the companion UI
+redesign and release preparation remain for later, before V1 release.
+
+The paragraphs below record how the single-aircraft milestone was reached.
+
 The normal airborne companion workflow is accepted on DCS 2.9.30.28536 after
 the compatibility update and capture-batching fix. The user confirmed working
 gear, spoilers and smoke, fluid playback and smooth formation flying; a
@@ -115,9 +122,9 @@ milestone, not the full one-aircraft product milestone.
 | --- | --- |
 | [Complete Hornet mission setup and hot-start parking-to-parking playback](https://github.com/caw1517/DCSRecorder/issues/11) | Mission Editor integration, original authored placement, visible held staging, synchronized initial state, complete ground-to-ground playback, parked completion and concise aircraft registration. Preserve the measured speed-brake retention follow-up and coordinate the existing envelope/physics gates. |
 | [Flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7) | Accepted 8 October 2026. See [Supported envelope](../README.md#supported-envelope) and the [envelope results](../experiments/efm-ownership/results/envelope-2026-10-07/README.md). The post-liftoff drift continues in [#37](https://github.com/caw1517/DCSRecorder/issues/37). |
-| [Essential physical interactions](https://github.com/caw1517/DCSRecorder/issues/3) | Ground contact, collision/damage and wake in both directions; decide how physical disturbances affect the recorded path. |
+| [Essential physical interactions](https://github.com/caw1517/DCSRecorder/issues/3) | Closed 8 October 2026 by user decision. The playback aircraft stays on the recorded path after damage (observed live: it lost a wing and kept flying the path). Wake is not wanted, because it would make formation flying impossible. Ground contact is measured under #7 and #28. |
 | [Installation and compatibility](https://github.com/caw1517/DCSRecorder/issues/8) | Portable setup, local asset preparation, supported-build maintenance, rollback and performance. |
-| [Layered playback](https://github.com/caw1517/DCSRecorder/issues/9) | After one-aircraft gates: independently identified takes sharing a playback clock while another is recorded. Preserve originals and verify timing/performance. |
+| [Layered playback](https://github.com/caw1517/DCSRecorder/issues/9) | Unblocked 8 October 2026; next. Independently identified takes sharing a playback clock while another is recorded. Preserve originals and verify timing/performance. |
 | [Recorded lead calls](https://github.com/caw1517/DCSRecorder/issues/10) | Research audio capture/delivery, onset/latency, drift, pause alignment and synchronization. Ordering relative to layers remains open. |
 
 ## Historical checkpoints
@@ -261,5 +268,7 @@ does not establish F-16 or F-15 support. Preserve exact module/variant identity.
 
 The demonstrated envelope is in the [README](../README.md#supported-envelope), accepted under [Validate the single-aircraft flight envelope through takeoff and landing](https://github.com/caw1517/DCSRecorder/issues/7) on 8 October 2026. The old 5–300 s and 70–260 m/s bounds are retired. Finite-data, continuity, object ownership and build-signature checks remain. The implementation still uses private, build-specific native access; another DCS update is not automatically compatible.
 
-Position, attitude, velocity, timing and state limits were agreed in [#28](https://github.com/caw1517/DCSRecorder/issues/28). Decide behavior after impacts or wake disturbances using physical evidence.
+Position, attitude, velocity, timing and state limits were agreed in [#28](https://github.com/caw1517/DCSRecorder/issues/28). After impacts, the playback aircraft keeps flying the recorded path; wake is not wanted ([#3](https://github.com/caw1517/DCSRecorder/issues/3)).
+
+Two known residuals do not block layers. The post-liftoff horizontal drift ([#37](https://github.com/caw1517/DCSRecorder/issues/37)) appears only after a roll on takeoff, peaks at 0.48 m and returns within limits by itself. The wrong DCS `inAir()` report ([#38](https://github.com/caw1517/DCSRecorder/issues/38)) affects only mission scripts and takeoff/land events, which formation demonstrations do not use.
 Portable distribution and broader flight/aircraft state remain unfinished.
