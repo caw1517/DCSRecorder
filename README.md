@@ -68,21 +68,33 @@ attitude through inverted flight; fast rolls use spherical interpolation.
 See the [validation record](docs/validation/workflow-2026-09-26.md) for evidence
 and limits. Smooth motion is not a claim of complete collision, wake or ground physics.
 
-## Current support and follow-up work
+## Supported envelope
 
-DCS **2.9.29.27468**, F/A-18C, Blue Angels Jet Team livery, Caucasus and zero wind.
-Recordings currently span 5–300 seconds and 70–260 m/s, starting within ten degrees
-of level. The staged playback path has no altitude floor/ceiling or angular-rate
-cap. Build, ownership, finite-data, orientation and continuity checks remain.
-There is no G-load rejection. Low-altitude numeric acceptance is not terrain-contact
-validation; the latest real hard-turn take reached roughly 572 m MSL.
+| | Demonstrated | Evidence |
+|---|---|---|
+| Build, theatre, wind | DCS 2.9.30.28536, Caucasus, zero wind (earlier evidence on 2.9.29.27468) | |
+| Aircraft | F/A-18C; Blue Angels and VFA-64 liveries recorded | [#33](https://github.com/caw1517/DCSRecorder/issues/33) |
+| Starts and endings | Hot parking with engines running, or airborne. Parked completion with engines running, or removal at other endings | [#27](https://github.com/caw1517/DCSRecorder/issues/27), [#31](https://github.com/caw1517/DCSRecorder/issues/31) |
+| Ground phases | Taxi, takeoff roll, liftoff, touchdown, rollout, taxi back to parking | [#28](https://github.com/caw1517/DCSRecorder/issues/28), [#34](https://github.com/caw1517/DCSRecorder/issues/34) |
+| Duration | 883.5 s live. 30 and 60 min offline. No upper limit | [#34](https://github.com/caw1517/DCSRecorder/issues/34) |
+| Speed | 0 to 488 kt | [envelope results](experiments/efm-ownership/results/envelope-2026-10-07/README.md) |
+| Load factor | 7.8 G at 415 kt, averaged over 0.5 s | same |
+| Low flight | 41 m (135 ft) above the runway; inverted passes at 55–70 m | same |
+| Inverted | 18 s continuous inverted pass | same |
+| Rolls | Dirty roll on takeoff, rolling series, about 205°/s | same |
+| Vertical | Cuban 8 (loops through ±90° pitch), straight-down dive, vertical climbing roll | same |
+| Lighting | Landing/taxi light illuminates the ramp (user comparison at dusk) | [#27](https://github.com/caw1517/DCSRecorder/issues/27) |
 
-Stationary ground starts, taxi, takeoff, landing/rollout, custom aircraft placement,
-gear/flaps, smoke, engine/afterburner appearance and sound remain required follow-up
-work. A full demonstration must eventually work from ground start to landing,
-including low passes and hard maneuvers. Current speed/duration bounds are prototype
-limitations, not the final product requirement. Layers and synchronized lead-call
-voice remain deferred. No complete cockpit-system reconstruction is claimed.
+Every phase and manoeuvre above meets the limits agreed in [#28](https://github.com/caw1517/DCSRecorder/issues/28): horizontal 0.10 m, vertical 0.05 m, attitude 0.5°, velocity 0.25 m/s on the ground and 2.0 m/s in the air, timing one tick, state 1e-3. Known exceptions:
+
+- **Post-liftoff drift:** up to 0.48 m horizontal for about 7 s after liftoff when a roll is flown right after takeoff. A normal takeoff stays within 0.014 m. Tracked in [#37](https://github.com/caw1517/DCSRecorder/issues/37).
+- **Rollout wheel rotation:** up to 0.0022 revolution against the 1e-3 limit, probably a measurement artifact. Accepted by the user.
+- **In-air report:** DCS `inAir()` disagrees with the recording on the ground. Tracked in [#38](https://github.com/caw1517/DCSRecorder/issues/38).
+- **Collision:** contact from the player damages the playback aircraft, which keeps its recorded path. Policy is under [#3](https://github.com/caw1517/DCSRecorder/issues/3).
+
+Anything outside this table is **not demonstrated**, not refused. There are no altitude, speed, G or rate caps. Other theatres, wind, other aircraft types and other DCS builds have not been tested.
+
+Layers and synchronized lead-call voice remain deferred. No complete cockpit-system reconstruction is claimed.
 
 ## Build and checks
 

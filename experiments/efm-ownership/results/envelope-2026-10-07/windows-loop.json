@@ -1,0 +1,10 @@
+[
+ {"name": "post-liftoff exception window (#37)", "from": 79.86, "to": 86.96},
+ {"name": "all airborne", "from": 79.86, "to": 480.0},
+ {"name": "Cuban 8 (both loops and dive)", "from": 105.0, "to": 185.0},
+ {"name": "  first vertical pull", "from": 108.1, "to": 115.1},
+ {"name": "  second vertical pull", "from": 159.6, "to": 165.9},
+ {"name": "  straight-down dive", "from": 177.2, "to": 183.7},
+ {"name": "inverted pass at 709 m", "from": 421.7, "to": 428.5},
+ {"name": "vertical climbing roll", "from": 461.2, "to": 476.0}
+]

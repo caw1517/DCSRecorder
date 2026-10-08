@@ -1,0 +1,9 @@
+[
+ {"name": "post-liftoff exception window (#37)", "from": 67.1, "to": 74.2},
+ {"name": "dirty roll on takeoff", "from": 70.9, "to": 73.9},
+ {"name": "airborne excluding exception", "from": 65.26, "to": 830.94, "exclude": true},
+ {"name": "inverted low pass", "from": 395.0, "to": 414.0},
+ {"name": "7.8 G turn (+/-10 s)", "from": 468.7, "to": 488.7},
+ {"name": "rolling series", "from": 630.0, "to": 643.0},
+ {"name": "low passes (55-70 m) 197-198/293-306", "from": 290.0, "to": 307.0}
+]
