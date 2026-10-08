@@ -14,6 +14,10 @@ _Avoid_: AI pilot (which implies independent flying decisions).
 **Layered playback**:
 Playing previously recorded flights together while flying and recording another aircraft, allowing a formation to be built one flight at a time.
 
+**Formation**:
+A saved, named set of recorded flights that play together on one clock, starting at the shared countdown release. Each recorded flight in a formation is flown from a different aircraft association. Building a formation never alters its recorded flights.
+_Avoid_: layer set, stack.
+
 **Flight library**:
 The user's collection of saved recorded flights, available to name and select for playback.
 

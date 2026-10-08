@@ -537,6 +537,49 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
                              + ', '.join(changed[:4]) + '). Use the saved scene; the recorded flight is never moved.')
     elif metadata.get('source') != lead['unit']['name']:
         raise ValueError('Selected playback aircraft does not match the recorded source name.')
+    check_playback_take(lead, metadata)
+    namespace, index = allocate(mission, entries)
+    edits=[]
+    config=place_playback(mission,lead,player,metadata,first,raw_first,module,token,edits,drop_stations,livery_name)
+    if faults:config['faults']=True
+    script=(EFM/'release-start/mission.lua').read_text(encoding='utf-8')
+    # Replace exact literals before inserting arbitrary authored names.
+    script=script.replace("'StagedPlayback'",'__LEAD_NAME__').replace("'Observer'",'__PLAYER_NAME__')
+    script=script.replace(";sample('SceneWitness')",'')
+    # Authored playback only: a release the hook could not verify (absent checker,
+    # mismatched loaded mission, stale request) is an identity refusal with the
+    # approved recovery text. Native readiness failures keep their diagnostic.
+    for old,new in (("'Release test: '","'DCS Recorder: '"),
+                    ("if now-s.started>10 then s.fail('bridge_or_native_readiness_timeout')",
+                     "if now-s.started>10 then s.fail(matched(u) and status==.125 and 'identity_unverified' or 'bridge_or_native_readiness_timeout')"),
+                    ("notice('FAILED: '..tostring(reason)..'. The playback aircraft was removed; the mission continues. Logs were retained.')",
+                     "notice(IDENTITY[reason] and RECOVERY or 'FAILED: '..tostring(reason)..'. The playback aircraft was removed; the mission continues. Logs were retained.')")):
+        if script.count(old)!=1:raise ValueError('Release mission script changed: '+old)
+        script=script.replace(old,new)
+    script=('local IDENTITY={identity_unverified=true,stale_or_mismatched_request=true}\n'
+            'local RECOVERY='+serialize('Playback blocked. '+RECOVERY)+'\n'+script)
+    script=script.replace('DCSR_RELEASE',namespace).replace('DCS Recorder release test','DCS Recorder playback')
+    script=script.replace('__LEAD_NAME__',serialize(lead['unit']['name'])).replace('__PLAYER_NAME__',serialize(player['unit']['name']))
+    script=namespace+'_CONFIG='+serialize(config)+'\n'+script
+    cleanup=install_control(mission,index,namespace,script)
+    manifest=dict(profile='authored-playback-v1',build=BUILD,source_sha256=sha(blob),saved_scene_sha256=sha(saved_blob),selected_id=unit_id,
+                  selected_name=lead['unit']['name'],player_id=player_id,player_name=player['unit']['name'],
+                  namespace=namespace,trigger_indices=[index,cleanup],role_edits=edits,initial=config,
+                  player_authored_start_preserved=True,behavior=behavior,
+                  parked_endpoint=metadata.get('parked_endpoint'))
+    # Check the entire player's authored group apart from the deliberate skill change.
+    player_check=copy.deepcopy(player['group'])
+    next(iter(player_check['units'].values()))['skill']=selected(original,player_id)['unit']['skill']
+    if player_check!=selected(original,player_id)['group']:
+        raise ValueError('Player authored placement or configuration changed.')
+    entries[MARKER]=json.dumps(manifest,sort_keys=True).encode()
+    entries['mission']=encoded('mission',mission)
+    manifest['preservation']=verify_preservation(original_entries,original,entries,mission,edits,[index,cleanup])
+    return blob,entries,mission,manifest
+
+
+def check_playback_take(lead, metadata):
+    """Refuse a take its authored aircraft cannot play back exactly."""
     # The recorded livery plays back; the authored aircraft must carry the same one.
     if not same_livery(metadata.get('livery'), lead['unit'].get('livery_id')) or metadata.get('aircraft') != lead['unit']['type']:
         raise ValueError('Recorded aircraft configuration differs from the source selection.')
@@ -544,8 +587,11 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
         raise ValueError('Authored playback requires the complete supported snapshot.')
     if metadata.get('capture_build') != BUILD:
         raise ValueError('Recording build differs from the supported profile.')
-    namespace, index = allocate(mission, entries)
-    edits=[]
+
+
+def place_playback(mission, lead, player, metadata, first, raw_first, module, token, edits, drop_stations=(), livery_name=None):
+    """Make `lead` a playback aircraft at its take's first pose and, when given,
+    `player` the player's aircraft; returns the lead's control configuration."""
     # 12 significant digits survive DCS's load/save serialization unchanged, so the
     # loaded mission can be compared exactly. Native playback uses the tape pose.
     g12=lambda v:float(format(v,'.12g'))
@@ -569,7 +615,7 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
         for row in (lead['unit'],point):
             for key in ('parking','parking_id','parking_landing','airdromeId','helipadId','linkUnit'):
                 if key in row:role_remove(mission,row,key,edits)
-    role_edit(mission,player['unit'],'skill','Player',edits)
+    if player:role_edit(mission,player['unit'],'skill','Player',edits)
     if livery_name and lead['unit'].get('livery_id')!=livery_name:
         if not same_livery(livery_name,lead['unit'].get('livery_id')):raise ValueError('Installed livery differs from the recorded one.')
         role_edit(mission,lead['unit'],'livery_id',livery_name,edits)
@@ -585,26 +631,12 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     if metadata.get('surface_available'):
         # Ground takes log playback-side contact; a measured eligible endpoint stays parked.
         config.update(contact=True,parked=bool((metadata.get('parked_endpoint') or {}).get('eligible')),replay_scale=100000)
-    if faults:config['faults']=True
-    script=(EFM/'release-start/mission.lua').read_text(encoding='utf-8')
-    # Replace exact literals before inserting arbitrary authored names.
-    script=script.replace("'StagedPlayback'",'__LEAD_NAME__').replace("'Observer'",'__PLAYER_NAME__')
-    script=script.replace(";sample('SceneWitness')",'')
-    # Authored playback only: a release the hook could not verify (absent checker,
-    # mismatched loaded mission, stale request) is an identity refusal with the
-    # approved recovery text. Native readiness failures keep their diagnostic.
-    for old,new in (("'Release test: '","'DCS Recorder: '"),
-                    ("if now-s.started>10 then s.fail('bridge_or_native_readiness_timeout')",
-                     "if now-s.started>10 then s.fail(matched(u) and status==.125 and 'identity_unverified' or 'bridge_or_native_readiness_timeout')"),
-                    ("notice('FAILED: '..tostring(reason)..'. The playback aircraft was removed; the mission continues. Logs were retained.')",
-                     "notice(IDENTITY[reason] and RECOVERY or 'FAILED: '..tostring(reason)..'. The playback aircraft was removed; the mission continues. Logs were retained.')")):
-        if script.count(old)!=1:raise ValueError('Release mission script changed: '+old)
-        script=script.replace(old,new)
-    script=('local IDENTITY={identity_unverified=true,stale_or_mismatched_request=true}\n'
-            'local RECOVERY='+serialize('Playback blocked. '+RECOVERY)+'\n'+script)
-    script=script.replace('DCSR_RELEASE',namespace).replace('DCS Recorder release test','DCS Recorder playback')
-    script=script.replace('__LEAD_NAME__',serialize(lead['unit']['name'])).replace('__PLAYER_NAME__',serialize(player['unit']['name']))
-    script=namespace+'_CONFIG='+serialize(config)+'\n'+script
+    return config
+
+
+def install_control(mission, index, namespace, script):
+    """Install the hold/release control at trigger `index` and its failure cleanup
+    at the next index; returns the cleanup index."""
     append_start(mission,index,script,'DCS Recorder: hold and release selected playback aircraft')
     mission['trigrules'][index]['actions']={1:dict(predicate='a_set_command',command=816),
                                            2:dict(predicate='a_do_script',text=script)}
@@ -617,20 +649,7 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     trig['actions'][cleanup]='a_set_command(816);a_do_script('+serialize(namespace+'.cleaned()')+f');mission.trig.func[{cleanup}]=nil;'
     trig['func'][cleanup]=f'if mission.trig.conditions[{cleanup}]() then mission.trig.actions[{cleanup}]() end'
     trig['flag'][cleanup]=True
-    manifest=dict(profile='authored-playback-v1',build=BUILD,source_sha256=sha(blob),saved_scene_sha256=sha(saved_blob),selected_id=unit_id,
-                  selected_name=lead['unit']['name'],player_id=player_id,player_name=player['unit']['name'],
-                  namespace=namespace,trigger_indices=[index,cleanup],role_edits=edits,initial=config,
-                  player_authored_start_preserved=True,behavior=behavior,
-                  parked_endpoint=metadata.get('parked_endpoint'))
-    # Check the entire player's authored group apart from the deliberate skill change.
-    player_check=copy.deepcopy(player['group'])
-    next(iter(player_check['units'].values()))['skill']=selected(original,player_id)['unit']['skill']
-    if player_check!=selected(original,player_id)['group']:
-        raise ValueError('Player authored placement or configuration changed.')
-    entries[MARKER]=json.dumps(manifest,sort_keys=True).encode()
-    entries['mission']=encoded('mission',mission)
-    manifest['preservation']=verify_preservation(original_entries,original,entries,mission,edits,[index,cleanup])
-    return blob,entries,mission,manifest
+    return cleanup
 
 
 def save_package(output, source, entries, manifest):

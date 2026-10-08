@@ -19,8 +19,20 @@ extern "C" __declspec(dllexport) int dcs_release_control(lua_State* lua_state) {
             const std::string command=raw;
             const double high=number(lua_state,2),low=number(lua_state,3),generation=number(lua_state,4);
             reply="REFUSED,object_or_package";
+#ifdef HORNET_FORMATION_PROTOTYPE
+            // Formation: `assign` passes the runtime ID in the generation slot. Every
+            // other command addresses the one aircraft that owns this take.
+            std::pair<const ED_OBJECT_HANDLE,Observation>* selected=nullptr;
+            if(command=="assign" && !observed.empty())reply=assign_take(high,low,generation);
+            else for(auto& entry:observed)
+                if(entry.second.assigned && entry.second.token && high==staged_playback::high(entry.second.token) &&
+                   low==staged_playback::low(entry.second.token))selected=&entry;
+            if(selected) {
+                auto& entry=*selected;auto& state=entry.second;
+#else
             if(observed.size()==1) {
                 auto& entry=*observed.begin();auto& state=entry.second;
+#endif
                 if(state.token && high==staged_playback::high(state.token) && low==staged_playback::low(state.token) &&
                    (command=="inspect" || generation==static_cast<double>(state.generation))) {
                     const bool ready=state.motion_active && !state.terminal && state.step_hook && state.step_applied>0 &&

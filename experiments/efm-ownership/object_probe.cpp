@@ -77,6 +77,13 @@ struct Observation {
     release_start::Clock clock;
     uint64_t generation=0;
 #endif
+#ifdef HORNET_FORMATION_PROTOTYPE
+    // Formation: the control hook assigns this aircraft's take by runtime ID.
+    // Until then the spawn pose is held with zero motion.
+    bool assigned=false,hold_captured=false;
+    double hold_since=-1;
+    std::array<double,16> hold_pose{};
+#endif
     // Surface controller: the take ended on a grounded sample. Ownership, ground
     // pose restoration and the final supported state continue until destroy.
     bool parked=false;
@@ -105,16 +112,22 @@ struct Observation {
 #endif
 };
 std::unordered_map<ED_OBJECT_HANDLE, Observation> observed;
+#ifdef HORNET_FORMATION_PROTOTYPE
+// Every take this module may play, from bin/takes/*.txt, by tape fingerprint.
+// Reloaded when the first object of a new mission is created.
+struct Take {std::filesystem::path file;playback_path::Path path;};
+std::unordered_map<uint64_t,Take> takes;
+#endif
 #ifdef HORNET_RELEASE_PROTOTYPE
 uint64_t release_generation=0;
 #endif
 
 #ifdef HORNET_RECORDED_PROTOTYPE
 #ifdef HORNET_STAGED_PROTOTYPE
-void drain_engine(Observation& state,double time) {
+void drain_engine(const void* handle,Observation& state,double time) {
     if(!state.path.has_engine)return;
     uint64_t lost=0;
-    for(const auto& call:native_step_hook::drain_engine(lost)) {
+    for(const auto& call:native_step_hook::drain_engine(reinterpret_cast<uintptr_t>(handle)-8,lost)) {
         MEMORY_BASIC_INFORMATION region{};std::string module="unknown";uintptr_t rva=0;
         if(VirtualQuery(reinterpret_cast<void*>(call.caller),&region,sizeof(region)) && region.Type==MEM_IMAGE) {
             char path[32768]{};GetModuleFileNameA(static_cast<HMODULE>(region.AllocationBase),path,sizeof(path));
@@ -445,7 +458,7 @@ void stop_native_step(const void* handle,Observation& state) {
     state.step_pending=false;
 #ifdef HORNET_STAGED_PROTOTYPE
     state.exterior_pending=false;
-    drain_engine(state,state.start_time+state.exterior_elapsed);
+    drain_engine(handle,state,state.start_time+state.exterior_elapsed);
     const auto presentation_status=native_presentation_pitch::restore(handle,state.presentation);
     if(state.presentation.active) {
         state.step_status=presentation_status;state.motion_active=false;
@@ -541,6 +554,77 @@ void record_identity(ED_OBJECT_HANDLE handle) {
 }
 }
 
+#ifdef HORNET_FORMATION_PROTOTYPE
+void load_takes() {
+    takes.clear();
+    HMODULE module=nullptr;wchar_t path[32768]{};
+    if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<LPCWSTR>(&open_log),&module) || !GetModuleFileNameW(module,path,32768))return;
+    const auto folder=std::filesystem::path(path).parent_path()/"takes";
+    std::error_code error;std::vector<uint64_t> duplicates;
+    for(const auto& entry:std::filesystem::directory_iterator(folder,error)) {
+        if(!entry.is_regular_file() || entry.path().extension()!=".txt")continue;
+        Take take{entry.path(),{}};
+        const char* status=take.path.load(take.file);
+        const auto token=staged_playback::fingerprint(take.file);
+        open_log();
+        log_file<<"formation_take,"<<take.file.filename().string()<<','<<std::hex<<token<<std::dec<<','<<status<<'\n';
+        const auto& p=take.path;
+        if(std::string(status)!="recording_loaded" || !token ||
+           !p.has_exterior || !p.has_engine || !p.has_lights || !p.has_canopy || !p.has_wheels)continue;
+        // Two takes on one 48-bit bridge key cannot be told apart; refuse both.
+        bool clash=false;
+        for(const auto& [other,unused]:takes)
+            if(staged_playback::high(other)==staged_playback::high(token) && staged_playback::low(other)==staged_playback::low(token))clash=true;
+        if(clash)duplicates.push_back(token);
+        else takes.emplace(token,std::move(take));
+    }
+    for(const auto token:duplicates)
+        for(auto it=takes.begin();it!=takes.end();)
+            it=staged_playback::high(it->first)==staged_playback::high(token) && staged_playback::low(it->first)==staged_playback::low(token)?takes.erase(it):std::next(it);
+    log_file<<"formation_takes_loaded,"<<takes.size()<<','<<duplicates.size()<<'\n';log_file.flush();
+}
+// Formation aircraft wait for the hook's assignment at their spawn pose. Ten
+// seconds of model time without one fails this aircraft alone.
+void hold_unassigned(ED_OBJECT_HANDLE handle,Observation& state,uint64_t motion_id,uint64_t cookie,double time) {
+    native_body::Sample before{},after{};
+    if(!state.hold_captured) {
+        const auto status=native_motion::apply(handle,motion_id,before,after,nullptr,&state.hold_pose,false,nullptr,state.runtime_id);
+        state.hold_captured=std::strcmp(status,"captured")==0;state.hold_since=time;
+        record(state.hold_captured?"formation_hold_captured":status,handle,cookie,time,state.calls);
+        if(!state.hold_captured)state.motion_attempted=true;
+        return;
+    }
+    if(time-state.hold_since>10) {
+        state.motion_attempted=true;record("formation_assignment_timeout",handle,cookie,time,state.calls);return;
+    }
+    const turn_path::Motion still{};
+    const auto status=native_motion::apply(handle,motion_id,before,after,&state.hold_pose,nullptr,false,&still,state.runtime_id);
+    if(std::strcmp(status,"called")) {state.motion_attempted=true;record(status,handle,cookie,time,state.calls);}
+}
+// Bridge: give the object with this runtime ID the take with this bridge key.
+std::string assign_take(double high,double low,double runtime_id) {
+    const Take* take=nullptr;uint64_t token=0;
+    for(const auto& [key,value]:takes)
+        if(high==staged_playback::high(key) && low==staged_playback::low(key)) {take=&value;token=key;}
+    if(!take)return "REFUSED,take_unavailable";
+    std::pair<const ED_OBJECT_HANDLE,Observation>* target=nullptr;
+    for(auto& entry:observed) {
+        if(entry.second.assigned && entry.second.token==token)return "REFUSED,take_already_assigned";
+        if(static_cast<double>(entry.second.runtime_id)==runtime_id)target=&entry;
+    }
+    if(!target)return "REFUSED,object_unavailable";
+    auto& state=target->second;
+    if(state.assigned)return "REFUSED,object_already_assigned";
+    if(state.motion_attempted || state.terminal)return "REFUSED,object_failed";
+    state.path=take->path;state.token=token;state.assigned=true;
+    open_log();
+    log_file<<"formation_assigned,"<<state.runtime_id<<','<<std::hex<<token<<std::dec<<','<<take->file.filename().string()
+            <<','<<state.generation<<'\n';log_file.flush();
+    std::ostringstream result;result<<"ASSIGNED,"<<state.generation<<','<<state.runtime_id;
+    return result.str();
+}
+#endif
 extern "C" __declspec(dllexport) void ed_setup_object_api(const ed_object_api_entry* value) {
     std::lock_guard<std::mutex> guard(lock);
     api = value;
@@ -565,9 +649,12 @@ extern "C" __declspec(dllexport) void ed_setup_object_api(const ed_object_api_en
 }
 extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handle, uint64_t& cookie) {
     std::lock_guard<std::mutex> guard(lock);
-#ifdef HORNET_STAGED_PROTOTYPE
+#if defined(HORNET_STAGED_PROTOTYPE) && !defined(HORNET_FORMATION_PROTOTYPE)
     // Only one registered playback object can own the per-object native hook.
     const bool another_object=!observed.empty();
+#endif
+#ifdef HORNET_FORMATION_PROTOTYPE
+    if(observed.empty())load_takes();
 #endif
     observed[handle] = {};
 #ifdef HORNET_RELEASE_PROTOTYPE
@@ -576,10 +663,14 @@ extern "C" __declspec(dllexport) void ed_on_object_create(ED_OBJECT_HANDLE handl
 #ifdef HORNET_STAGED_PROTOTYPE
     auto& created=observed[handle];
     created.runtime_id=api && api->ed_get_object_id ? api->ed_get_object_id(handle) : 0;
+#ifdef HORNET_FORMATION_PROTOTYPE
+    if(!created.runtime_id)created.motion_attempted=true;
+#else
     if(another_object || !created.runtime_id)created.motion_attempted=true;
 #endif
+#endif
     record("create", handle, cookie, 0, 0);
-#ifdef HORNET_RECORDED_PROTOTYPE
+#if defined(HORNET_RECORDED_PROTOTYPE) && !defined(HORNET_FORMATION_PROTOTYPE)
     HMODULE module=nullptr;wchar_t path[32768]{};
     if(GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
         reinterpret_cast<LPCWSTR>(&open_log),&module) && GetModuleFileNameW(module,path,32768)) {
@@ -614,7 +705,7 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     trace_ground_pose("sdk_entry",handle,state);
 #endif
 #ifdef HORNET_STAGED_PROTOTYPE
-    drain_engine(state,time);
+    drain_engine(handle,state,time);
 #endif
     if (state.calls == 1) record_identity(handle);
     const auto motion_id=handle && api && api->ed_get_object_id ? api->ed_get_object_id(handle) : 0;
@@ -636,6 +727,9 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
         record("staged_status_arguments_unavailable",handle,cookie,time,state.calls);
         return;
     }
+#ifdef HORNET_FORMATION_PROTOTYPE
+    if(!state.assigned) {hold_unassigned(handle,state,motion_id,cookie,time);return;}
+#endif
     if(state.path.has_exterior && state.motion_active && time-state.start_time>1 && state.exterior_applied==0) {
         state.motion_active=false;stop_native_step(handle,state);
         staged_playback::publish(api,handle,state.token,staged_playback::failed);

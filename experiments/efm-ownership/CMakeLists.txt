@@ -363,3 +363,25 @@ target_include_directories(surface_long_tape_check PRIVATE "${CMAKE_CURRENT_SOUR
 target_compile_definitions(surface_long_tape_check PRIVATE HORNET_SURFACE_PROTOTYPE NOMINMAX)
 target_compile_features(surface_long_tape_check PRIVATE cxx_std_17)
 add_test(NAME surface_long_tape_check COMMAND surface_long_tape_check "${SURFACE_TAPE}" 10220e1f8a3b716f)
+
+# Formation prototype (layered playback): one module, N playback aircraft, each
+# assigned its own take by the control hook. Deployed separately from the normal module.
+add_executable(formation_owner_check formation-prototype/check_owners.cpp)
+target_compile_features(formation_owner_check PRIVATE cxx_std_17)
+target_compile_definitions(formation_owner_check PRIVATE NOMINMAX)
+add_test(NAME formation_owner_isolation COMMAND formation_owner_check)
+add_library(HornetFormationProbe SHARED probe.cpp object_probe.cpp)
+target_include_directories(HornetFormationProbe PRIVATE "${DCS_ROOT}/API/ExternalFMTemplate/ED_FM_Template" "${DCS_ROOT}/API/include")
+target_compile_definitions(HornetFormationProbe PRIVATE HORNET_PROTOTYPE HORNET_RECORDED_PROTOTYPE HORNET_STAGED_PROTOTYPE HORNET_ENGINE_STAGED_PROTOTYPE HORNET_RELEASE_PROTOTYPE HORNET_SURFACE_PROTOTYPE HORNET_FORMATION_PROTOTYPE DCSR_BUILD_2930 ED_FM_TEMPLATE_EXPORTS NOMINMAX _CRT_SECURE_NO_WARNINGS)
+target_compile_features(HornetFormationProbe PRIVATE cxx_std_17)
+set_property(TARGET HornetFormationProbe PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_test(NAME formation_bridge_refusal COMMAND "${DCS_ROOT}/bin/luae.exe" "${CMAKE_CURRENT_SOURCE_DIR}/release-start/check_bridge.lua" $<TARGET_FILE:HornetFormationProbe>)
+# Test-only lua.dll stub so the harness can call the real bridge export.
+add_library(formation_stub_lua SHARED formation-prototype/stub_lua.cpp)
+set_target_properties(formation_stub_lua PROPERTIES OUTPUT_NAME lua RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/formation-stub")
+add_executable(formation_assign_check formation-prototype/check_assign.cpp)
+target_include_directories(formation_assign_check PRIVATE "${DCS_ROOT}/API/include")
+target_compile_features(formation_assign_check PRIVATE cxx_std_17)
+target_compile_definitions(formation_assign_check PRIVATE NOMINMAX)
+add_dependencies(formation_assign_check HornetFormationProbe formation_stub_lua)
+add_test(NAME formation_take_assignment COMMAND formation_assign_check $<TARGET_FILE:HornetFormationProbe> $<TARGET_FILE:formation_stub_lua> "${SURFACE_TAPE}")
