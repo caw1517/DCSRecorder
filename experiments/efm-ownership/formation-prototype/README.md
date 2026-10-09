@@ -36,11 +36,27 @@ its aircraft:
   keep playing, and the formation fails as a whole only when no aircraft is left
   before release.
 - The hook commits every ready aircraft in one callback, and the player is
-  released in that same callback. A truly shared clock is
-  [a separate ticket](https://github.com/caw1517/DCSRecorder/issues/40).
+  released in that same callback.
+
+## Shared epoch
+
+Decided in [Release all playback aircraft on one shared clock](https://github.com/caw1517/DCSRecorder/issues/40#issuecomment-6090016306).
+The hook passes its model time at the commit to every aircraft as a fifth
+`commit` argument. Each aircraft's replay time is `now - epoch`, so an aircraft
+whose first callback after the commit lands frames late starts at its shared
+replay time instead of zero, and never runs behind. The bridge refuses an epoch
+that is not finite or is more than 0.1 s from the aircraft's last callback (the
+hook's own readiness window). The hook logs the epoch once (`COMMIT`); the
+controller logs `formation_epoch` per aircraft and, at the first played callback,
+`release_epoch` (the epoch) and `release_first_step` (that callback's model time).
+Single-aircraft playback keeps its solo commit unchanged.
 
 ## Offline checks (passing)
 
+- `formation_shared_epoch` (`check_epoch.cpp`): two aircraft commit on one epoch.
+  One aircraft's first callback is delayed five frames and it is then stepped at
+  10 Hz; at every shared tick both replay times are exactly equal. The solo
+  commit's lag in the same schedule is shown, along with refusals and restart.
 - `formation_owner_isolation` (`check_owners.cpp`): two owners share one table,
   with separate callbacks, engine values and traces. Removing one leaves the
   other's override running, and a replaced vptr is never overwritten.

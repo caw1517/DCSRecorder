@@ -32,8 +32,8 @@ local function run(mode)
         setUserCallbacks=function(c)callbacks=c end}
     e.package={loadlib=function(path,export)
         assert(export=='dcs_release_control' and path:find('/'..expected.binary..'.dll',1,true),'unexpected DLL '..path)
-        return function(command,high,low,third)
-            local i=key(high,low);calls[#calls+1]={command,i,third}
+        return function(command,high,low,third,epoch)
+            local i=key(high,low);calls[#calls+1]={command,i,third,epoch}
             if not i then return 'REFUSED,object_or_package' end
             if command=='assign' then
                 assert(third==16777216+i*256,'take assigned to the wrong runtime ID')
@@ -44,6 +44,7 @@ local function run(mode)
             if command=='inspect' then return 'READY,'..o.generation..','..now..',0' end
             if third~=o.generation then return 'REFUSED,object_or_package' end
             if command=='commit' then
+                assert(epoch==now,'commit epoch is not the model time of the commit callback')
                 if mode=='commit_refused' and i==1 then return 'REFUSED,not_ready_or_consumed' end
                 o.committed=true;return 'COMMITTED,'..o.generation..','..now
             end
@@ -91,9 +92,15 @@ local function run(mode)
     if mode~='normal' and mode~='late_runtime' then assert(not objects[1].committed,'dropped aircraft committed')end
     if mode=='commit_refused' then assert(objects[1].aborted and sent('fail_position('),'refused commit not dropped alone')end
     assert(sent('a_set_command(816)'),'player release not dispatched')
+    local epochs={}
+    for _,c in ipairs(calls)do if c[1]=='commit' then epochs[c[4]]=true end end
+    local shared=0;for _ in pairs(epochs)do shared=shared+1 end
+    assert(shared==1,'aircraft committed on more than one epoch')
+    local commits=0;for _,m in ipairs(logs)do if m:match('^COMMIT,')then commits=commits+1 end end
+    assert(commits==1,'formation epoch not logged exactly once')
     for i in ipairs(expected.positions)do assert(count('assign',i)==1,'repeated assignment')end
     frame(now+2)
     for _,m in ipairs(missions)do if m:find('.fail(',1,true)then error(mode..': released formation failed: '..m..' | '..table.concat(logs,' ; '))end end
 end
 for _,mode in ipairs({'normal','late_runtime','abort','commit_refused','mismatch'})do run(mode)end
-print('PASS: formation hook assigns each take to its runtime ID, arms only when all are ready, and releases or drops aircraft individually')
+print('PASS: formation hook assigns each take to its runtime ID, arms only when all are ready, commits every aircraft on one shared epoch, and releases or drops aircraft individually')

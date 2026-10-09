@@ -24,8 +24,8 @@ local function matching()
     if expected.description~=DCS.getMissionDescription() then return false,'localized_description:value' end
     return true,'matched'
 end
-local function native(command,p,third)
-    return reader(command,p.high,p.low,third or p.generation or 0)
+local function native(command,p,third,epoch)
+    return reader(command,p.high,p.low,third or p.generation or 0,epoch)
 end
 -- One aircraft leaves the formation; the others continue.
 local function drop(p,reason)
@@ -94,11 +94,12 @@ local function release(now,stamp)
     for _,p in ipairs(live())do
         local inspect=native('inspect',p,0)
         local generation,native_time=inspect:match('^READY,(%d+),([^,]+),0$')
-        local result=tonumber(generation)==p.generation and math.abs(now-tonumber(native_time or '-99'))<=.1 and native('commit',p) or inspect
+        local result=tonumber(generation)==p.generation and math.abs(now-tonumber(native_time or '-99'))<=.1 and native('commit',p,nil,now) or inspect
         if result:match('^COMMITTED,'..p.generation..',')then committed[#committed+1]=p.name..'='..result
         else drop(p,'commit_refused:'..result) end
     end
     if #committed==0 then fail('native_commit_refused');return end
+    -- One formation epoch: every committed aircraft and the player share it.
     emit(string.format('COMMIT,%s,%.9f,%s',session,now,table.concat(committed,'|')))
     -- Same callback as the commits: the player's hold ends with the aircraft's.
     bridge('if c_flag_is_true("DCSR_FORMATION_PENDING") then a_set_command(816); '..

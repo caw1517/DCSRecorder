@@ -40,7 +40,14 @@ extern "C" __declspec(dllexport) int dcs_release_control(lua_State* lua_state) {
                     std::ostringstream result;result<<std::setprecision(17);
                     if(command=="inspect") {
                         result<<(ready?"READY":"WAIT")<<','<<state.generation<<','<<state.clock.last<<','<<state.clock.elapsed;
+#ifdef HORNET_FORMATION_PROTOTYPE
+                    // Formation: the fifth argument is the shared epoch, the same for
+                    // every aircraft committed in one hook callback.
+                    } else if(command=="commit" && type(lua_state,5)==3 && state.clock.commit(ready,number(lua_state,5))) {
+                        log_file<<"formation_epoch,"<<state.runtime_id<<','<<state.generation<<','<<state.clock.epoch<<'\n';
+#else
                     } else if(command=="commit" && state.clock.commit(ready)) {
+#endif
                         result<<"COMMITTED,"<<state.generation<<','<<state.clock.last;
                         log_file<<"release_committed,"<<state.runtime_id<<','<<state.generation<<','<<state.clock.last<<','<<state.calls<<",1\n";
                         log_file.flush();

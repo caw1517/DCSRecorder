@@ -748,7 +748,9 @@ extern "C" __declspec(dllexport) void ed_on_object_simulate(ED_OBJECT_HANDLE han
     }
     if(!was_playing && state.clock.playing()) {
         state.start_time=time;
-        record("release_epoch",handle,cookie,time,state.calls);
+        record("release_epoch",handle,cookie,state.clock.epoch,state.calls);
+        // A late first callback starts at its shared replay time, not zero.
+        if(state.clock.shared)record("release_first_step",handle,cookie,time,state.calls);
     }
 #endif
 #endif
