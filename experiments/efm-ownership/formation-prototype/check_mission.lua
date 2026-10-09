@@ -1,7 +1,7 @@
 -- Exercise a generated formation control script with stubbed mission APIs.
 -- Usage: luae.exe check_mission.lua <control.lua> <namespace>
 local path,namespace=assert(arg[1]),assert(arg[2])
-local function run(mode)
+local function run(mode,record)
     local now,queue,logs,notices,flags,commands=0,{},{},{},{},{}
     env={info=function(text)logs[#logs+1]=text end}
     trigger={action={outText=function(text)notices[#notices+1]=text end,setUserFlag=function(k,v)flags[k]=v end}}
@@ -42,14 +42,27 @@ local function run(mode)
     local before={};for k in pairs(_G)do before[k]=true end
     if mode=='one_never_ready' then state[2]=0 end
     if mode=='none_ready' then state[1],state[2]=0,0 end
+    -- Recording against the formation: a stub recorder stands in for the injected
+    -- one (its own global guard then skips it) and keeps what it is told.
+    local recorder={began={},events={}}
+    if record then
+        _G[namespace..'_REC']={begin_formation=function(extra)recorder.began[#recorder.began+1]={extra,now};return true end,
+            event=function(kind,association,t)recorder.events[#recorder.events+1]={kind,association,t}end}
+    end
     chunk()
     local s=_G[namespace]
     local c=config()
-    assert(s and c and #c.positions>=2,'formation config missing')
+    assert(s and c and #c.positions>=1,'formation config missing')
     for k in pairs(_G)do
-        assert(before[k] or k==namespace or k==namespace..'_CONFIG','created unowned global '..tostring(k))
+        assert(before[k] or k:sub(1,#namespace)==namespace,'created unowned global '..tostring(k))
     end
-    local a,b=c.positions[1].name,c.positions[2].name
+    -- The injected recorder itself is exercised by check_recorder.lua.
+    if not record then c.record=nil end
+    if record then
+        c.record={formation=string.rep('f',32),version=3}
+        for i,p in ipairs(c.positions)do p.association=string.rep(tostring(i),32)end
+    end
+    local a,b=c.positions[1].name,c.positions[2] and c.positions[2].name
     local function advance(to)
         while #queue>0 do
             table.sort(queue,function(x,y)return x[3]<y[3]end)
@@ -66,7 +79,13 @@ local function run(mode)
         commands['Start playback (3-second countdown)']()
         advance(now+3.05)
         assert(s.phase=='requested' and flags[namespace..'_PENDING']==1,'countdown did not request release')
-        assert(s.released('sess_1',1) and s.phase=='running','release acknowledgment')
+        assert(s.released('sess_1',1,now) and s.phase=='running','release acknowledgment')
+        if record then
+            assert(#recorder.began==1 and recorder.began[1][2]==now,'recording did not begin once at the release')
+            assert(recorder.began[1][1]==string.format('formation_id,%s\nformation_version,3\nformation_epoch,%.9f\n',string.rep('f',32),now),
+                'recording metadata: '..recorder.began[1][1])
+            recorder.epoch=now
+        end
         for i in ipairs(c.positions)do state[i]=.25 end
         advance(now+.1)
     end
@@ -83,11 +102,25 @@ local function run(mode)
         assert(s.positions[1].phase=='ready' and s.phase=='preparing','other aircraft disturbed')
         release()
         assert(s.positions[1].phase=='playing','remaining aircraft did not play')
+        if record then
+            assert(#recorder.events==1 and recorder.events[1][1]=='not_ready' and recorder.events[1][2]==c.positions[2].association and
+                recorder.events[1][3]==nil,'not-ready aircraft not recorded')
+        end
         return
     end
     for _,p in ipairs(s.positions)do assert(p.phase=='ready','aircraft not ready: '..p.name)end
     release()
     for _,p in ipairs(s.positions)do assert(p.phase=='playing','aircraft not playing: '..p.name)end
+    if mode=='single' then
+        state[1]=c.positions[1].parked and .375 or .5
+        advance(now+.1)
+        assert(s.positions[1].phase==(c.positions[1].parked and 'parked' or 'complete'),'aircraft did not reach its own ending')
+        if record then
+            assert(#recorder.events==1 and recorder.events[1][1]=='ended' and recorder.events[1][2]==c.positions[1].association,'ending not recorded')
+        end
+        _G[namespace..'_REC']=nil
+        return
+    end
     if mode=='destroy' then
         commands['Destroy: '..a]()
         advance(now+.1)
@@ -107,6 +140,17 @@ local function run(mode)
     advance(now+.1)
     assert(s.positions[2].phase==(c.positions[2].parked and 'parked' or 'complete'),'remaining aircraft did not reach its own ending')
     assert(flags[namespace..'_CLEANUP']~=1,'a released formation requested hold cleanup')
+    if record then
+        local failed,ended=recorder.events[1],recorder.events[2]
+        assert(#recorder.events==2 and failed[1]=='failed' and failed[2]==c.positions[1].association and
+            failed[3]>.09 and failed[3]<.25,'failure not recorded with its replay time')
+        assert(ended[1]=='ended' and ended[2]==c.positions[2].association and ended[3]>failed[3],'ending not recorded')
+    end
+    _G[namespace..'_REC']=nil
 end
-for _,mode in ipairs({'destroy','abort','one_never_ready','none_ready'})do run(mode) end
-print('PASS: formation control releases every ready aircraft; destroy, native abort and readiness timeouts remove one aircraft alone')
+-- A formation of one playing aircraft (recording #2 against version 1): `single`.
+local modes,recording={'destroy','abort','one_never_ready','none_ready'},{'destroy','one_never_ready'}
+if arg[3]=='single' then modes,recording={'single'},{'single'} end
+for _,mode in ipairs(modes)do run(mode) end
+for _,mode in ipairs(recording)do run(mode,true) end
+print('PASS: formation control releases every ready aircraft on the shared epoch; destroy, native abort and readiness timeouts remove one aircraft alone; a recording begins at the release and records not-ready, failed and ended aircraft')

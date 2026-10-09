@@ -103,7 +103,7 @@ local function release(now,stamp)
     emit(string.format('COMMIT,%s,%.9f,%s',session,now,table.concat(committed,'|')))
     -- Same callback as the commits: the player's hold ends with the aircraft's.
     bridge('if c_flag_is_true("DCSR_FORMATION_PENDING") then a_set_command(816); '..
-        script('DCSR_FORMATION.released('..q(session)..',1)')..'; end')
+        script('DCSR_FORMATION.released('..q(session)..',1,'..string.format('%.9f',now)..')')..'; end')
 end
 local function pump()
     if not active then return end

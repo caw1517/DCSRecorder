@@ -91,18 +91,46 @@ local function tick()
     end
     return now+0.02
 end
-local menu=missionCommands.addSubMenu('DCS Recorder')
-missionCommands.addCommand('Start recording',menu,function()
-    if r.state=='recording' then return end
+-- Starts a take; `extra` appends metadata rows. Returns false when refused.
+local function begin(extra)
+    if r.state=='recording' then return false end
     local metadata=r.metadata()
-    if not metadata then trigger.action.outText('Recorder: player aircraft metadata unavailable. Enter the cockpit first.',15);return end
+    if not metadata then trigger.action.outText('Recorder: player aircraft metadata unavailable. Enter the cockpit first.',15);return false end
+    metadata=metadata..(extra or '')
     r.take=r.take+1;r.state='recording';r.rows=0;r.last_time=nil
     emit('BEGIN,'..r.take..','..metadata:gsub('.',function(c)return string.format('%02x',string.byte(c)) end))
     local take=r.take
-    timer.scheduleFunction(function()
+    local function scheduled()
         if r.take~=take then return nil end
         return tick()
-    end,nil,timer.getTime()+0.02)
+    end
+    if DCSRECORDER_FORMATION then
+        -- Formation takes start at the shared release: the first sample is the
+        -- held start, taken in the release callback itself.
+        local next_time=tick()
+        if next_time then timer.scheduleFunction(scheduled,nil,next_time) end
+    else
+        timer.scheduleFunction(scheduled,nil,timer.getTime()+0.02)
+    end
+    return true
+end
+-- Formation events: kind is not_ready, failed or ended; t is replay time.
+function r.event(kind,association,t)
+    if r.state~='recording' then return end
+    emit('EVENT,'..r.take..','..kind..','..association..','..(t and string.format('%.3f',t) or ''))
+end
+local menu=missionCommands.addSubMenu('DCS Recorder')
+if DCSRECORDER_FORMATION then
+    -- No F10 Start: the formation control begins the take at the countdown release.
+    function r.begin_formation(extra)
+        if not begin(extra) then return false end
+        trigger.action.outText('Recording take '..r.take..' from the release. Use F10 > DCS Recorder > Stop recording before leaving the mission.',15)
+        return true
+    end
+else
+missionCommands.addCommand('Start recording',menu,function()
+    if not begin() then return end
+    local take=r.take
     -- Audio sync aid: count 1 to 10 seconds from Start, to count aloud with.
     -- Playback shows the same count on its replay clock.
     local started=timer.getTime()
@@ -113,7 +141,10 @@ missionCommands.addCommand('Start recording',menu,function()
     end
     trigger.action.outText('Recording take '..r.take..' into DCS.log. Use F10 > DCS Recorder > Stop recording before leaving the mission.',15)
 end)
+end
 missionCommands.addCommand('Stop recording',menu,function()
     stop('user_stop')
 end)
+if not DCSRECORDER_FORMATION then
 trigger.action.outText('Fly your own Hornet. F10 > DCS Recorder > Start recording. Start with 5 seconds straight and level, then fly a gentle turn or roll. Stop recording through the same menu.',25)
+end

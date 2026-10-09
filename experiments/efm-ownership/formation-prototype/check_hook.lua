@@ -4,7 +4,7 @@ local payload,control,namespace=assert(arg[1]),assert(arg[2]),assert(arg[3])
 local dir=payload..'/Scripts/'..control..'/'
 local expected=dofile(dir..'expected.lua')
 local guard=dofile(dir..'session_guard.lua')
-assert(#expected.positions>=2,'expected.lua lists fewer than two positions')
+assert(#expected.positions>=1,'expected.lua lists no positions')
 local function copy(v)
     if type(v)~='table' then return v end
     local out={};for k,x in pairs(v)do out[k]=copy(x)end;return out
@@ -54,7 +54,8 @@ local function run(mode)
         assert(target=='mission' and code:find(namespace,1,true),'bridge call outside the owned namespace')
         missions[#missions+1]=code
         if code:find('a_set_command(816)',1,true)then
-            local session=code:match('released%(\\?"([%w_]+)\\?",1%)')
+            local session,epoch=code:match('released%(\\?"([%w_]+)\\?",1,([%d.]+)%)')
+            assert(math.abs(tonumber(epoch)-now)<1e-9,'player release not on the formation epoch')
             history[#history+1]={message=namespace..' PLAYER_RELEASED,'..session..',1,'..now}
         end
     end}
@@ -87,7 +88,8 @@ local function run(mode)
     end
     history[#history+1]={message=namespace..' REQUEST,'..session..',1,'..string.format('%.9f',now)}
     frame(now+.01);frame(now+.02)
-    local released=mode=='abort' and {2} or mode=='commit_refused' and {2} or {1,2}
+    local released=mode=='abort' and {2} or mode=='commit_refused' and {2} or {}
+    if #released==0 then for i in ipairs(expected.positions)do released[i]=i end end
     for _,i in ipairs(released)do assert(objects[i].committed,'aircraft '..i..' not committed')end
     if mode~='normal' and mode~='late_runtime' then assert(not objects[1].committed,'dropped aircraft committed')end
     if mode=='commit_refused' then assert(objects[1].aborted and sent('fail_position('),'refused commit not dropped alone')end
@@ -102,5 +104,7 @@ local function run(mode)
     frame(now+2)
     for _,m in ipairs(missions)do if m:find('.fail(',1,true)then error(mode..': released formation failed: '..m..' | '..table.concat(logs,' ; '))end end
 end
-for _,mode in ipairs({'normal','late_runtime','abort','commit_refused','mismatch'})do run(mode)end
+-- A formation of one playing aircraft (recording #2 against version 1) has no pair to isolate.
+local modes=#expected.positions>1 and {'normal','late_runtime','abort','commit_refused','mismatch'} or {'normal','mismatch'}
+for _,mode in ipairs(modes)do run(mode)end
 print('PASS: formation hook assigns each take to its runtime ID, arms only when all are ready, commits every aircraft on one shared epoch, and releases or drops aircraft individually')

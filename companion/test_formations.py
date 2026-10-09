@@ -165,5 +165,31 @@ class FormationStore(unittest.TestCase):
         self.assertEqual(playable[0]['units'], {self.lead: 11, self.two: 12, self.three: 13})
 
 
+class RemoveAircraft(unittest.TestCase):
+    def mission(self):
+        groups = {i: group(10+i, 1000*i) for i in range(1, 5)}
+        groups[2]['units'][2] = dict(groups[2]['units'][1], unitId=99, name='unit 99')  # a two-ship
+        return dict(coalition=dict(blue=dict(country={1: dict(id=2, plane=dict(group=groups))})), trigrules={}, trig={})
+
+    def test_removal_is_declared_renumbered_and_restorable(self):
+        import copy
+        source = self.mission(); mission = copy.deepcopy(source); edits = []
+        removed = a.remove_aircraft(mission, {11, 12, 14}, edits)
+        self.assertEqual(sorted(removed), ['unit 13', 'unit 99'])
+        groups = mission['coalition']['blue']['country'][1]['plane']['group']
+        self.assertEqual(sorted(groups), [1, 2, 3])
+        self.assertEqual([list(g['units']) for g in groups.values()], [[1], [1], [1]])
+        self.assertTrue(a.verify_preservation({}, source, {}, mission, edits, [])['restored_structure_equals_source'])
+
+    def test_a_reference_to_a_removed_aircraft_is_refused(self):
+        mission = self.mission()
+        mission['trigrules'] = {1: dict(rules={1: dict(predicate='c_unit_alive', unit=13)})}
+        with self.assertRaisesRegex(ValueError, 'still refers to an aircraft'):
+            a.remove_aircraft(mission, {11, 12, 14, 99}, [])
+        mission = self.mission()
+        mission['trigrules'] = {1: dict(rules={1: dict(predicate='c_group_alive', group=13)})}  # unit 13's ID, not a group
+        self.assertEqual(a.remove_aircraft(mission, {11, 12, 14, 99}, []), ['unit 13'])
+
+
 if __name__ == '__main__':
     unittest.main()

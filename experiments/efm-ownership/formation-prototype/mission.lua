@@ -2,7 +2,7 @@
 -- released together. Generalizes release-start/mission.lua; a failed or removed
 -- aircraft is removed alone and every other aircraft keeps playing.
 local c=assert(DCSR_FORMATION_CONFIG)
-local s={phase='preparing',held=true,started=timer.getTime(),positions={}}
+local s={phase='preparing',held=true,started=timer.getTime(),positions={},not_ready={}}
 DCSR_FORMATION=s
 local function emit(text)env.info('DCSR_FORMATION '..text)end
 local function notice(text)trigger.action.outText('DCS Recorder formation: '..text,15)end
@@ -11,6 +11,13 @@ for i,cfg in ipairs(c.positions)do
     s.positions[i]={cfg=cfg,name=cfg.name,phase='preparing',smoke_index=0,last_replay=0}
 end
 local function unit(p)local u=Unit.getByName(p.name);return u and u:isExist() and u or nil end
+-- Recording against the formation: the recorder (injected beside this script)
+-- begins at the release on the shared epoch; events carry the replay time.
+local function event(kind,p)
+    if not c.record or not p.cfg.association then return end
+    if kind=='not_ready' then s.not_ready[#s.not_ready+1]=p.cfg.association;return end
+    if s.recording then DCSR_FORMATION_REC.event(kind,p.cfg.association,timer.getTime()-s.epoch)end
+end
 local function replay(p)return (p.cfg.replay_scale or 1000)end
 local function matched(p,u)
     return math.abs(u:getDrawArgumentValue(997)-p.cfg.token_high)<1e-8 and
@@ -52,6 +59,7 @@ function s.fail_position(name,reason)
     for _,p in ipairs(s.positions)do
         if p.name==name and not ended(p)then
             p.phase='failed';local u=unit(p);if u then remove(p,u)end
+            event(s.held and 'not_ready' or 'failed',p)
             emit('POSITION_FAILED,'..p.name..','..tostring(reason))
             notice(p.name..' removed: '..tostring(reason)..'. Other aircraft continue.')
         end
@@ -82,14 +90,20 @@ function s.arm(session,generation)
     end
     return true
 end
-function s.released(session,generation)
-    if s.phase~='requested' or s.session~=session or s.generation~=generation then
+function s.released(session,generation,epoch)
+    if s.phase~='requested' or s.session~=session or s.generation~=generation or type(epoch)~='number' then
         s.fail('unexpected_release_ack');return false
     end
     s.held=false;flag('DCSR_FORMATION_PENDING',0)
-    s.phase='running';s.release_time=timer.getTime()
-    emit(string.format('PLAYER_RELEASED,%s,%d,%.9f',session,generation,s.release_time))
+    s.phase='running';s.release_time=timer.getTime();s.epoch=epoch
+    emit(string.format('PLAYER_RELEASED,%s,%d,%.9f,%.9f',session,generation,s.release_time,epoch))
     notice('Released. Each aircraft flies its own recorded flight.')
+    if c.record then
+        s.recording=DCSR_FORMATION_REC.begin_formation(string.format('formation_id,%s\nformation_version,%d\nformation_epoch,%.9f\n',
+            c.record.formation,c.record.version,epoch))
+        emit(string.format('RECORDING,%s,%.9f',s.recording and 'started' or 'refused',epoch))
+        if s.recording then for _,association in ipairs(s.not_ready)do DCSR_FORMATION_REC.event('not_ready',association)end end
+    end
     return true
 end
 local function sample(name,p)
@@ -138,15 +152,15 @@ local function step(p,now)
             if p.phase=='ready' then p.phase='playing';emit(string.format('NATIVE_RUNNING,%s,%.9f,%.9f',p.name,now,replay(p)*u:getDrawArgumentValue(996)))end
             smoke(p,u)
         elseif status==.5 and p.phase=='playing' then
-            smoke(p,u);sample(p.name,p);remove(p,u);p.phase='complete';emit('COMPLETE,'..p.name)
+            smoke(p,u);sample(p.name,p);remove(p,u);p.phase='complete';event('ended',p);emit('COMPLETE,'..p.name)
             notice(p.name..': recording ended; aircraft removed.')
         elseif status==.375 and p.phase=='playing' then
             smoke(p,u)
             if p.cfg.parked then
-                p.phase='parked';p.parked_time=now;emit(string.format('PARKED,%s,%.9f',p.name,now))
+                p.phase='parked';p.parked_time=now;event('ended',p);emit(string.format('PARKED,%s,%.9f',p.name,now))
                 notice(p.name..': recording ended; parked with engines running.')
             else
-                sample(p.name,p);remove(p,u);p.phase='complete';emit('COMPLETE,'..p.name..',not_parked')
+                sample(p.name,p);remove(p,u);p.phase='complete';event('ended',p);emit('COMPLETE,'..p.name..',not_parked')
             end
         elseif p.phase=='playing' or now-s.release_time>1 then return 'native_release_not_confirmed' end
         if p.phase=='playing' and now-s.release_time>p.cfg.duration+2 then return 'completion_timeout' end

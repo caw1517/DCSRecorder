@@ -409,7 +409,7 @@ def carries_smoke(unit):
     return (((unit.get('payload') or {}).get('pylons') or {}).get(10) or {}).get('CLSID') == '{INV-SMOKE-WHITE}'
 
 
-def record_script(name, namespace, source_sha, lineage=None, association=None, smoke=False):
+def record_script(name, namespace, source_sha, lineage=None, association=None, smoke=False, formation=False):
     script = (EFM/'record_flight_engine_mission.lua').read_text(encoding='utf-8-sig')
     script = script.replace("source='Observer'", 'source=' + serialize(name))
     old = "csv(r.source)..'\\n'"
@@ -419,7 +419,8 @@ def record_script(name, namespace, source_sha, lineage=None, association=None, s
     assert script.count(old) == 1
     script = script.replace(old, 'csv(r.source)..' + serialize(extra.replace('\\n', '\n')))
     # White smoke is captured only when the aircraft carries the smoke pod (V1: white only).
-    script = ('DCSRECORDER_SMOKE=true\n' if smoke else '') + ('DCSRECORDER_CONTACT=true\nDCSRECORDER_WHEELS=true\nDCSRECORDER_CANOPY=true\nDCSRECORDER_LIGHTS=true\n' + script)
+    # Formation recordings have no F10 Start: the formation control begins them at release.
+    script = ('DCSRECORDER_FORMATION=true\n' if formation else '') + ('DCSRECORDER_SMOKE=true\n' if smoke else '') + ('DCSRECORDER_CONTACT=true\nDCSRECORDER_WHEELS=true\nDCSRECORDER_CANOPY=true\nDCSRECORDER_LIGHTS=true\n' + script)
     # Only this capture's Lua global names change; the log protocol remains the
     # installed autosave/native-capture contract.
     script = script.replace('DCSRECORDER', namespace)
@@ -482,6 +483,57 @@ def role_remove(mission, row, key, edits):
     """Declared removal of one role field; verify_preservation restores it."""
     role_edit(mission, row, key, None, edits)
     del row[key]
+
+
+UNIT_KEYS, GROUP_KEYS = ('unitId', 'unit', 'linkUnit'), ('groupId', 'group')
+
+
+def remove_aircraft(mission, keep_ids, edits):
+    """Declared removal of every aircraft not in `keep_ids` (muted or take-less
+    formation positions); verify_preservation restores each changed container.
+    Groups and units are renumbered contiguously. Refuses when anything left in
+    the mission still refers to a removed aircraft. Returns the removed names."""
+    removed, removed_units, removed_groups = [], set(), set()
+    for side, coalition in mission.get('coalition', {}).items():
+        if not isinstance(coalition, dict):
+            continue
+        for country_key, country in coalition.get('country', {}).items():
+            for kind in ('plane', 'helicopter'):
+                container = country.get(kind, {}).get('group')
+                if not container:
+                    continue
+                kept, changed = [], False
+                for group in container.values():
+                    units = list(group.get('units', {}).values())
+                    staying = [u for u in units if u.get('unitId') in keep_ids]
+                    for unit in units:
+                        if unit not in staying:
+                            removed.append(unit.get('name')); removed_units.add(unit.get('unitId'))
+                    if len(staying) != len(units):
+                        changed = True
+                        if not staying:
+                            removed_groups.add(group.get('groupId'))
+                    if staying:
+                        kept.append((group, staying, len(staying) != len(units)))
+                if not changed:
+                    continue
+                edits.append((['coalition', side, 'country', country_key, kind, 'group'], copy.deepcopy(container)))
+                for group, staying, partial in kept:
+                    if partial:
+                        group['units'] = {i: u for i, u in enumerate(staying, 1)}
+                country[kind]['group'] = {i: g for i, (g, _, _) in enumerate(kept, 1)}
+    def references(node, path=()):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                ids = removed_units if key in UNIT_KEYS else removed_groups if key in GROUP_KEYS else ()
+                if not isinstance(value, (dict, list)) and value in ids:
+                    yield '/'.join(map(str, path + (key,)))
+                yield from references(value, path + (key,))
+    found = list(references(mission))
+    if found:
+        raise ValueError('Preparation refused. The mission still refers to an aircraft that is left out of this formation '
+                         '(muted or without a take): ' + ', '.join(found[:6]) + '. Edit it in Mission Editor, or record that position first.')
+    return removed
 
 
 def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, association=None):

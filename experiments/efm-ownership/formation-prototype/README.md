@@ -51,6 +51,35 @@ controller logs `formation_epoch` per aircraft and, at the first played callback
 `release_epoch` (the epoch) and `release_first_step` (that callback's model time).
 Single-aircraft playback keeps its solo commit unchanged.
 
+## Prepared formation copy and recording against it
+
+Decided in [Record a new flight while a formation plays](https://github.com/caw1517/DCSRecorder/issues/41)
+and [Store formations and their versions in the flight library](https://github.com/caw1517/DCSRecorder/issues/44).
+
+- **Removal.** Every authored aircraft that is neither playing nor the player
+  (muted, or without a take) is removed from the prepared copy
+  (`authored_missions.remove_aircraft`). The edit is declared: preservation
+  restores each changed aircraft container and compares the result with the source.
+  Preparation is refused when anything left in the mission (a trigger, a task)
+  still refers to a removed aircraft. The manifest lists the removed names.
+- **Takes from earlier revisions.** A take can play in a newer revision if its own
+  saved scene is given and its aircraft is authored identically there.
+- **Recording.** With `record=`, the recorder is injected for the player's aircraft
+  in formation mode (`record_script(..., formation=True)`). It has no F10 Start.
+  At the release, the hook passes the epoch to the mission's `released()`, which
+  begins the take with `formation_id`, `formation_version` and `formation_epoch`.
+  The first sample is taken in that callback, so it is the held start. F10 Stop
+  saves as usual. A take interrupted by a restart or exit stays incomplete.
+- **Events.** An aircraft dropped before the release is `not_ready`. An aircraft
+  that fails afterwards is `failed@<replay s>`, and one that reaches its ending is
+  `ended@<replay s>`. The recorder logs them as `EVENT` lines. The save hook
+  (`companion/recording_sink.lua`) writes them into the take's `formation_events`
+  row when the take is saved.
+- **Manifest.** The recording copy's manifest carries `association`, `lineage`,
+  `prepared_sha256` and the `formation` block (version, takes played, muted).
+  Take binding joins this with the take's own metadata
+  (`formations.flown_against`).
+
 ## Offline checks (passing)
 
 - `formation_shared_epoch` (`check_epoch.cpp`): two aircraft commit on one epoch.
@@ -69,7 +98,17 @@ Single-aircraft playback keeps its solo commit unchanged.
 - `test_prepare.py` packages the authored fixture scene with two positions. The
   second take is a relabelled copy, so this is packaging only. The generated
   mission passes the DCS validators, `check_mission.lua` (destroy, native abort and
-  readiness timeouts each remove one aircraft) and `check_hook.lua`.
+  readiness timeouts each remove one aircraft) and `check_hook.lua`. It also builds
+  recording copies: one playing aircraft, the take-less one removed, a muted
+  position, and a plan that doesn't match. `check_mission.lua` runs its `single`
+  mode for one playing aircraft, and its recording modes check the begin at the
+  release and the not-ready, failed and ended events.
+- `check_recorder.lua` runs the real injected recorder. In formation mode it has
+  no F10 Start, takes its first sample at the release, logs events and stops. In
+  solo mode, F10 Start and the first sample on the next frame are unchanged.
+- `companion/test_formation_recording.py`: the save hook writes events into the
+  saved take's metadata, a restart leaves it incomplete, and a malformed event
+  fails the take.
 - The full CTest suite and the companion tests still pass.
 
 ## Live check (Hornet, Caucasus, zero wind)

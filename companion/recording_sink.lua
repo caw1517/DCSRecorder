@@ -78,6 +78,14 @@ local function open_take(id, hex)
     if tonumber(version)>=6 then assert(metadata:find('\ncanopy_profile,hornet-canopy-v1\n',1,true),'Invalid canopy profile')end
     if tonumber(version)>=7 then assert(metadata:find('\nwheel_profile,hornet-wheels-v1\n',1,true),'Invalid wheel profile')end
     if version=='8' then assert(metadata:find('\ncontact_profile,hornet-contact-v1\n',1,true),'Invalid contact profile')end
+    -- A formation take carries its shared epoch; events arrive during the take and
+    -- are written into its metadata when it is saved.
+    local formation=metadata:match('\nformation_id,(%x+)\n')
+    if formation then
+        assert(#formation==32 and metadata:match('\nformation_version,%d+\n') and
+            tonumber(metadata:match('\nformation_epoch,([%d.]+)\n')),'Invalid formation metadata')
+        assert(not metadata:find('\nformation_events,',1,true),'Invalid formation metadata')
+    end
     local header=columns..(version~='1' and exterior or '')..(has_engine and engine or '')..(has_smoke and ',smoke_time,smoke_on' or '')..(tonumber(version)>=5 and lights or '')..(tonumber(version)>=6 and ',arg_38' or '')..(tonumber(version)>=7 and wheels or '')..(version=='8' and contact or '')..'\n'
     local filename
     repeat
@@ -86,7 +94,7 @@ local function open_take(id, hex)
     until not lfs.attributes(filename .. '.partial') and not lfs.attributes(filename .. '.csv')
     local file = assert(io.open(filename .. '.partial', 'wb'))
     active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, version=version,source_id=source_id,capture_build=capture_build,capture_timing=capture_timing,
-        has_engine=has_engine,has_smoke=has_smoke,commas=version=='8' and 55 or version=='7' and 50 or tonumber(version)>=6 and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
+        has_engine=has_engine,has_smoke=has_smoke,formation=formation~=nil,events={},commas=version=='8' and 55 or version=='7' and 50 or tonumber(version)>=6 and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
     checked(file.write,file,metadata,header); checked(file.flush,file)
     write_status('RECORDING\nRecording in progress; use F10 Stop to save.')
 end
@@ -123,6 +131,14 @@ local function consume(line)
         if active.rows % 50 == 0 then checked(active.file.flush,active.file) end
         return
     end
+    local kind,association,at
+    id,kind,association,at = event:match('^EVENT,(%d+),([%w_]+),(%x+),([%d.]*)$')
+    if id and active and id == active.id then
+        assert(active.formation and #active.events < 256,'Unexpected formation event')
+        assert(#association==32 and ((kind=='not_ready' and at=='') or ((kind=='failed' or kind=='ended') and tonumber(at))),'Invalid formation event')
+        active.events[#active.events+1]=kind..':'..association..(at~='' and '@'..at or '')
+        return
+    end
     local reason
     id,reason,count = event:match('^END,(%d+),([%w_]+),(%d+)$')
     if id and active and id == active.id then
@@ -134,7 +150,19 @@ local function consume(line)
         local expected=table.concat(active.parts)
         assert(read_bytes(active.name..'.partial')==expected,'Saved recording verification failed; partial retained')
         local completed=active.name
-        checked(os.rename,completed..'.partial',completed..'.csv')
+        if active.formation then
+            -- Events join the metadata rows; the verified partial is rewritten once.
+            active.parts[1]=active.parts[1]..'formation_events,'..table.concat(active.events,';')..'\n'
+            expected=table.concat(active.parts)
+            assert(not lfs.attributes(completed..'.final'),'Recording name collision')
+            local file=assert(io.open(completed..'.final','wb'))
+            checked(file.write,file,expected);checked(file.flush,file);checked(file.close,file)
+            assert(read_bytes(completed..'.final')==expected,'Saved formation recording verification failed; partial retained')
+            checked(os.rename,completed..'.final',completed..'.csv')
+            checked(os.remove,completed..'.partial')
+        else
+            checked(os.rename,completed..'.partial',completed..'.csv')
+        end
         assert(not lfs.attributes(completed..'.partial') and read_bytes(completed..'.csv')==expected,'Completed recording verification failed')
         if active.has_engine then
             announce(string.format('Capture timing: rows=%d engine_max_delay_ms=%.3f smoke_max_delay_ms=%.3f',

@@ -60,6 +60,9 @@ if canopy then metadata=metadata:gsub('DCSREC,5','DCSREC,6')..'canopy_profile,ho
 if wheels then metadata=metadata:gsub('DCSREC,6','DCSREC,7')..'wheel_profile,hornet-wheels-v1\n'end
 if contact then metadata=metadata:gsub('DCSREC,7','DCSREC,8')..'contact_profile,hornet-contact-v1'..string.char(10) end
 if mode:match('^batch') then metadata=metadata..'capture_timing,frame-batch-v1\n'end
+-- Formation takes: shared epoch in the metadata, events during the take.
+local lead,wing=string.rep('a',32),string.rep('b',32)
+if mode:match('^formation') then metadata=metadata..'formation_id,'..string.rep('f',32)..'\nformation_version,3\nformation_epoch,10.000000000\n'end
 local hex=metadata:gsub('.',function(c)return string.format('%02x',c:byte())end)
 emit('BEGIN,1,'..hex)
 for i=0,last_row do
@@ -84,6 +87,11 @@ for i=0,last_row do
     end
     for j,v in ipairs(values)do values[j]=tostring(v)end
     emit('DATA,1,'..(i+1)..','..table.concat(values,','))
+    if mode:match('^formation') then
+        if i==0 then emit('EVENT,1,not_ready,'..string.rep('c',32)..',')end
+        if i==100 then emit('EVENT,1,failed,'..lead..','..(mode=='formation_bad_event' and 'soon' or '2.000'))end
+        if i==150 then emit('EVENT,1,ended,'..wing..',3.000')end
+    end
 end
-emit('END,1,user_stop,'..(last_row+1));callbacks.onSimulationStop()
+emit('END,1,'..(mode=='formation_restart' and 'mission_restart' or 'user_stop')..','..(last_row+1));callbacks.onSimulationStop()
 print('PASS: native engine sink fixture finished: '..mode)
