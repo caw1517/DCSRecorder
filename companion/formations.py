@@ -57,7 +57,7 @@ def flown_against(metadata, manifest):
     if any(e['association'] not in played for e in happened):
         raise ValueError('The take names an aircraft that did not play in its recording copy.')
     not_ready = sorted({e['association'] for e in happened if e['kind'] == 'not_ready'})
-    return dict(formation=plan['formation'], version=plan['version'], position=plan['position'], epoch=epoch,
+    return dict(formation=plan['formation'], version=plan['version'], position=manifest['association'], epoch=epoch,
                 played={k: v for k, v in played.items() if k not in not_ready}, muted=sorted(plan['muted']),
                 not_ready=not_ready, events=[e for e in happened if e['kind'] != 'not_ready'])
 

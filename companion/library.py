@@ -108,6 +108,10 @@ class Library:
 
     def entries(self):
         result = []
+        badges = {}
+        for lineage in self.lineage.lineages():
+            for take, labels in self.formation_store().memberships(lineage['id']).items():
+                badges.setdefault(take, []).extend(labels)
         for path in sorted(self.recordings.glob('*.csv'), reverse=True):
             if path.is_symlink():
                 continue
@@ -145,6 +149,13 @@ class Library:
                     item.update(authored=True, status_label='Authored scene · '+item['status_label'],
                                 reason='Plays back inside its saved Mission Editor scene, or a newer revision where you confirmed this aircraft. Choose the stock Hornet you will fly; it keeps its authored start.'
                                 if record else 'Recorded before aircraft association: plays back only in its exact source mission. Choose the stock Hornet you will fly; it keeps its authored start.')
+                    # Formations: badge, whether it can start one, and a pending version offer.
+                    item['in_formations'] = badges.get(path.name, [])
+                    item['can_start_formation'] = bool(record) and not record.get('flown_against')
+                    try:
+                        item['offer'] = self.formation_offer(record)
+                    except ValueError:
+                        item['offer'] = None
                 elif not self.legacy:
                     item.update(supported=False, legacy=True, status_label='Legacy · ' + item['status_label'],
                                 reason=LEGACY_SETUP_NOTICE)
@@ -307,15 +318,19 @@ class Library:
                            + review_notes(manifest['mission_manifest']['behavior'])
                            + ''.join(' ' + n for n in manifest.get('notices', []))}
 
-    def install_authored(self, output, manifest, generation):
+    def install_authored(self, output, manifest, generation, per_take=None, stale_roots=None):
         """Install only what this take changes. Shared module files must already
-        match exactly; per-take files are replaced after a backup, with rollback."""
+        match exactly; per-take files are replaced after a backup, with rollback.
+        A formation passes its own per-take files and the folders (its takes) whose
+        earlier files leave the module."""
         payload, module, control = output / 'payload', manifest['module'], manifest['control']
         # The controller differs between airborne and ground (surface) takes,
         # aircraft.lua mirrors the lead's mod stores (Blue Angels HANHART), and the
         # module carries only the take's recorded livery.
         liveries = f'Mods/aircraft/{module}/Liveries/'
-        per_take = {f'Mods/aircraft/{module}/bin/recorded-flight.txt', f'Mods/aircraft/{module}/bin/recorded-flight.json',
+        # A formation's take set changes size: its new per-take files are added.
+        added = set(per_take or ())
+        per_take = per_take or {f'Mods/aircraft/{module}/bin/recorded-flight.txt', f'Mods/aircraft/{module}/bin/recorded-flight.json',
                     f'Mods/aircraft/{module}/aircraft.lua',
                     f"Mods/aircraft/{module}/bin/{manifest['binary']}.dll",
                     f'Scripts/{control}/expected.lua', f'Scripts/Hooks/{control}.lua'}
@@ -331,7 +346,7 @@ class Library:
             if digest(source) != expected:
                 raise ValueError('Prepared package changed; nothing was installed.')
             fresh = any(name.startswith(r) and new for r, new in roots.items())
-            if name == mission or fresh or (name.startswith(liveries) and not target.exists()):
+            if name == mission or fresh or ((name.startswith(liveries) or name in added) and not target.exists()):
                 if target.exists():
                     raise ValueError('An existing file would be overwritten: ' + name)
                 plan.append((name, source, target, False))
@@ -342,9 +357,10 @@ class Library:
                     raise ValueError('Installed playback module differs from this app: ' + name)
                 plan.append((name, source, target, True))
         # Liveries of earlier takes leave the module (backed up, restored on failure).
-        installed = self.saved / liveries
-        stale = sorted(p for p in installed.rglob('*') if p.is_file()
-                       and p.relative_to(self.saved).as_posix() not in manifest['files']) if installed.exists() else []
+        installed = self.saved / f'Mods/aircraft/{module}'
+        stale = sorted(p for root in (stale_roots or [liveries]) if (self.saved / root).exists()
+                       for p in (self.saved / root).rglob('*') if p.is_file()
+                       and p.relative_to(self.saved).as_posix() not in manifest['files'])
         backup = self.home / 'backups' / generation
         done, removed = [], []
         try:
@@ -383,6 +399,226 @@ class Library:
                 folder.rmdir(); folder = folder.parent
         (output / 'activation.json').write_text(json.dumps({'installed': [n for n, *_ in plan], 'removed': [n for n, _ in removed],
                                                             'backup': str(backup)}, indent=2), encoding='utf-8')
+
+    # Formations ------------------------------------------------------------------
+
+    def formation_store(self):
+        from formations import Formations
+        return Formations(self.lineage)
+
+    def formation_builder(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('formation_prepare', EXPERIMENT/'formation-prototype'/'prepare.py')
+        module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        return module
+
+    def take_records(self):
+        """take filename -> take-provenance record, for every associated take."""
+        records, packages = {}, self.authored_packages()
+        for path in sorted(self.recordings.glob('*.csv')):
+            try:
+                metadata = self.validate(path)
+                record = self.lineage.bind_take(path, metadata, packages) if metadata.get('authored_source_sha256') else None
+            except (ValueError, OSError, OverflowError):
+                continue
+            if record:
+                records[path.name] = record
+        return records
+
+    def take_names(self):
+        return {e['id']: e for e in self.entries()}
+
+    def formations(self):
+        """Formations grouped by authored mission, each version with its positions,
+        derived flags and the revisions it can play in."""
+        store, records, takes = self.formation_store(), self.take_records(), self.take_names()
+        result = []
+        for lineage in self.lineage.lineages():
+            items = []
+            for formation in store.formations(lineage['id']):
+                associations = self.lineage.associations(lineage['id'])
+                versions = []
+                for version in formation['versions']:
+                    try:
+                        flags = store.flags(version, records)
+                    except ValueError as error:
+                        flags, problem = {}, str(error)
+                    else:
+                        problem = None
+                    playable, missing = store.scenes(lineage['id'], version)
+                    positions = []
+                    for association, take in version['positions'].items():
+                        entry = takes.get(take['take'], {})
+                        pairs = flags.get(association, {})
+                        not_flown = [associations.get(o, {}).get('created_name', o) for o, f in pairs.items() if f['state'] == 'not_flown_against']
+                        until = [f"{associations.get(o, {}).get('created_name', o)} until {f['t']:.1f} s" for o, f in pairs.items()
+                                 if f['state'] == 'flown_against_until']
+                        positions.append(dict(association=association, aircraft=associations.get(association, {}).get('created_name', association),
+                                              take=take['take'], take_name=entry.get('name', take['take']), duration=entry.get('duration'),
+                                              flags={associations.get(o, {}).get('created_name', o): f for o, f in pairs.items()},
+                                              summary='; '.join((['not flown against ' + ', '.join(not_flown)] if not_flown else []) +
+                                                                (['flown against ' + ', '.join(until)] if until else [])) or
+                                                      ('solo' if len(version['positions']) == 1 else 'flown against all')))
+                    created = [p for p in positions if p['take'] == version['created_by']['take']]
+                    base = store.version(lineage['id'], formation['id'], version['base'])['positions'] if version['base'] else {}
+                    label = f"v{version['number']}" + (f" · from v{version['base']}" if version['base'] else ' · started')
+                    if version['base'] and created:
+                        label += (' · re-flew ' if created[0]['association'] in base else ' · added ') + created[0]['aircraft']
+                    versions.append(dict(number=version['number'], base=version['base'], label=label, positions=positions, problem=problem,
+                                         scenes=[dict(sha256=s['sha256'], label=s['label']) for s in playable],
+                                         missing=[dict(label=m['label'], missing=[associations.get(a, {}).get('created_name', a) for a in m['missing']])
+                                                  for m in missing]))
+                items.append(dict(id=formation['id'], name=formation['name'], versions=versions))
+            if items:
+                result.append(dict(lineage=lineage['id'], mission=lineage['name'], formations=items))
+        return result
+
+    def formation_start(self, key, name):
+        _, _, record = self.authored_take(key)
+        if record and record.get('flown_against'):
+            raise ValueError('This take was flown against a formation. Use Make version from this take instead.')
+        version = self.formation_store().start(record, name)
+        return {'message': f'Formation started: version {version["number"]} holds this take. Record a position to add the next aircraft.'}
+
+    def formation_rename(self, lineage, formation, name):
+        self.formation_store().rename(lineage, formation, name)
+        return {'message': 'Formation renamed. Its versions are unchanged.'}
+
+    def formation_make_version(self, key):
+        _, _, record = self.authored_take(key)
+        version = self.formation_store().make_version(record)
+        return {'message': f"Version {version['number']} created from version {version['base']} with this take. "
+                           'Earlier versions and every take are unchanged.'}
+
+    def formation_decline(self, key):
+        """Keep only the take; the offer stays available as Make version from this take."""
+        _, _, record = self.authored_take(key)
+        self.formation_store().offer(record)
+        from mission_lineage import write_once, now
+        try:
+            write_once(self.home / 'formation-declined' / (record['take'] + '.json'), dict(take=record['take'], declined_at=now()))
+        except FileExistsError:
+            pass
+        return {'message': 'Kept the take only. You can still make the version later from this take.'}
+
+    def formation_offer(self, record):
+        """None, or how the library shows a take's pending/accepted/declined version."""
+        if not record or not record.get('flown_against'):
+            return None
+        store, against = self.formation_store(), record['flown_against']
+        made = [v['number'] for v in store.versions(record['lineage'], against['formation'])
+                if v['created_by'] == dict(take=record['take'], sha256=record['take_sha256'])]
+        name = store.formation(record['lineage'], against['formation'])['name']
+        declined = (self.home / 'formation-declined' / (record['take'] + '.json')).exists()
+        return dict(formation=name, base=against['version'], made=made[0] if made else None, declined=declined and not made)
+
+    def _formation_scene(self, lineage, formation, number, scene_sha):
+        store = self.formation_store()
+        version = store.version(lineage, formation, number)
+        playable, missing = store.scenes(lineage, version)
+        chosen = [s for s in playable if s['sha256'] == scene_sha]
+        if not chosen:
+            names = self.lineage.associations(lineage)
+            hint = '; '.join(m['label'] + ' is missing ' + ', '.join(names.get(a, {}).get('created_name', a) for a in m['missing'])
+                             for m in missing if m['sha256'] == scene_sha)
+            raise ValueError(hint + '. Confirm that aircraft in a saved revision.' if hint else 'Choose a scene where every position is confirmed.')
+        return store, version, chosen[0]
+
+    def formation_options(self, lineage, formation, number):
+        """Per playable scene: its stock Hornets, and which hold a take in this version."""
+        from authored_missions import inspect
+        store = self.formation_store()
+        version = store.version(lineage, formation, number)
+        playable, missing = store.scenes(lineage, version)
+        names = self.lineage.associations(lineage)
+        scenes = []
+        for scene in playable:
+            mapping = self.lineage.mapping(scene['revision'])
+            by_unit = {d['unit_id']: a for a, d in mapping.items() if d['unit_id'] is not None}
+            aircraft = []
+            for item in inspect(self.lineage.snapshot(scene['revision']))['aircraft']:
+                if item['type'] != 'FA-18C_hornet':
+                    continue
+                association = by_unit.get(item['id'])
+                aircraft.append(dict(id=item['id'], name=item['name'], group=item['group'], start=item['start'],
+                                     position=association if association in version['positions'] else None))
+            scenes.append(dict(sha256=scene['sha256'], label=scene['label'], aircraft=aircraft))
+        positions = [dict(association=a, aircraft=names.get(a, {}).get('created_name', a)) for a in version['positions']]
+        return {'scenes': scenes, 'positions': positions,
+                'missing': [dict(label=m['label'], missing=[names.get(a, {}).get('created_name', a) for a in m['missing']]) for m in missing]}
+
+    def _formation_takes(self, version, scene, playing):
+        """(take path, unit id in this scene, the take's own saved scene or None)."""
+        records, result = self.take_records(), []
+        for association in playing:
+            take = version['positions'][association]
+            record = records.get(take['take'])
+            if not record or record['take_sha256'] != take['sha256']:
+                raise ValueError(f"The take {take['take']} is missing or changed; this formation version cannot play.")
+            original = self.lineage.find_revision(record['source_sha256'])
+            saved = None if original['sha256'] == scene['sha256'] else self.lineage.snapshot(original)
+            result.append((self.source(take['take']), scene['units'][association], saved))
+        return result
+
+    def _formation_install(self, builder, output, result, generation):
+        module, control = result['module'], result['control']
+        per_take = {n for n in result['files'] if n.startswith(f'Mods/aircraft/{module}/bin/')}
+        per_take |= {f'Mods/aircraft/{module}/aircraft.lua', f'Scripts/{control}/expected.lua', f'Scripts/Hooks/{control}.lua',
+                     f'Scripts/{control}/session_guard.lua'}
+        self.install_authored(output, result, generation, per_take=per_take,
+                              stale_roots=[f'Mods/aircraft/{module}/Liveries/', f'Mods/aircraft/{module}/bin/takes/'])
+
+    def formation_recording(self, lineage, formation, number, scene_sha, unit_id, muted=()):
+        """Prepare a copy that records `unit_id`'s position against a formation version."""
+        store, version, scene = self._formation_scene(lineage, formation, number, scene_sha)
+        dcs = self.check_environment()
+        revision = scene['revision']
+        unit_id = int(unit_id)
+        association = self.lineage.association_for(revision, unit_id)
+        muted = set(muted or ())
+        if not muted <= set(version['positions']) - {association}:
+            raise ValueError('Only other positions of this version can be muted.')
+        playing = [a for a in version['positions'] if a != association and a not in muted]
+        if not playing:
+            raise ValueError('Every other position is muted. Record a solo take instead.')
+        builder = self.formation_builder()
+        generation = uuid.uuid4().hex
+        output = self.home / 'authored' / generation
+        name = 'DCSRecorder-Formation-Recording-' + generation[:8] + '.miz'
+        takes = self._formation_takes(version, scene, playing)
+        plan = dict(formation=formation, version=version['number'], lineage=lineage, association=association,
+                    associations={scene['units'][a]: a for a in playing}, played={a: version['positions'][a] for a in playing},
+                    muted=sorted(muted))
+        result = builder.build(self.lineage.snapshot(revision), unit_id, output, name, takes, dcs=dcs, saved_games=self.saved, record=plan)
+        self.check_environment()
+        self._formation_install(builder, output, result, generation)
+        refly = association in version['positions']
+        return {'mission': str(self.saved / 'Missions' / name),
+                'message': ('Re-fly' if refly else 'New position') + f" recording copy ready against version {version['number']}. "
+                           f"You fly {result['mission_manifest']['player_name']} from its authored start, held until the release. "
+                           'Recording starts automatically at the release; use F10 > DCS Recorder > Stop recording to save. '
+                           + (f"Left out: {', '.join(result['removed'])}." if result['removed'] else '')}
+
+    def formation_play(self, lineage, formation, number, scene_sha, unit_id):
+        """Play a version (nothing is saved) while flying an aircraft with no take in it."""
+        store, version, scene = self._formation_scene(lineage, formation, number, scene_sha)
+        dcs = self.check_environment()
+        unit_id = int(unit_id)
+        if unit_id in scene['units'].values():
+            raise ValueError('That aircraft holds a take in this version. Choose a free stock Hornet, or add one in Mission Editor.')
+        builder = self.formation_builder()
+        generation = uuid.uuid4().hex
+        output = self.home / 'authored-playback' / generation
+        output.parent.mkdir(parents=True, exist_ok=True)
+        name = 'DCSRecorder-Formation-Playback-' + generation[:8] + '.miz'
+        takes = self._formation_takes(version, scene, list(version['positions']))
+        result = builder.build(self.lineage.snapshot(scene['revision']), unit_id, output, name, takes, dcs=dcs, saved_games=self.saved)
+        self.check_environment()
+        self._formation_install(builder, output, result, generation)
+        return {'mission': str(self.saved / 'Missions' / name),
+                'message': f"Formation playback ready (version {version['number']}). You fly {result['mission_manifest']['player_name']} "
+                           'from its authored start. Wait for Ready, then F10 > DCS Recorder formation > Start playback. Nothing is recorded.'
+                           + (f" Left out: {', '.join(result['removed'])}." if result['removed'] else '')}
 
     def practice(self):
         if not self.legacy:

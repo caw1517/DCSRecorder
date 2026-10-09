@@ -63,7 +63,7 @@ def serve(settings, port=0, open_browser=True):
                     save_status = status_file.read_text(encoding='utf-8', errors='replace')[:1000] if status_file.exists() else ''
                     return self.reply(200, {'recordings': library.entries(), 'partial_count': len(list(library.recordings.glob('*.partial'))),
                                            'hook_installed': hook_ok, 'save_status': save_status, 'directory': str(library.recordings),
-                                           'legacy_setup': library.legacy})
+                                           'legacy_setup': library.legacy, 'formations': library.formations()})
                 except Exception as exc:
                     return self.reply(400, {'error': str(exc)})
             return self.reply(404, {'error': 'Not found.'})
@@ -91,6 +91,25 @@ def serve(settings, port=0, open_browser=True):
                     result = library.authored_playback_options(args['id'])
                 elif self.path == '/api/authored/playback':
                     result = library.authored_playback(args['id'], args['player_id'], args['source_sha256'])
+                elif self.path == '/api/formation/start':
+                    result = library.formation_start(args['id'], args['name'])
+                elif self.path == '/api/formation/rename':
+                    result = library.formation_rename(args['lineage'], args['formation'], args['name'])
+                elif self.path == '/api/formation/options':
+                    result = library.formation_options(args['lineage'], args['formation'], int(args['version']))
+                elif self.path == '/api/formation/record':
+                    muted = args.get('muted') or []
+                    if not isinstance(muted, list) or not all(isinstance(m, str) for m in muted):
+                        raise ValueError('Choose positions to mute from the list.')
+                    result = library.formation_recording(args['lineage'], args['formation'], int(args['version']), args['scene'],
+                                                         int(args['unit_id']), muted)
+                elif self.path == '/api/formation/play':
+                    result = library.formation_play(args['lineage'], args['formation'], int(args['version']), args['scene'],
+                                                    int(args['unit_id']))
+                elif self.path == '/api/formation/make-version':
+                    result = library.formation_make_version(args['id'])
+                elif self.path == '/api/formation/decline':
+                    result = library.formation_decline(args['id'])
                 elif self.path == '/api/rename':
                     library.rename(args['id'], args['name'])
                     result = {'message': 'Recording renamed. Original flight data preserved.'}

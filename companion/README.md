@@ -139,6 +139,34 @@ prepared DLL, keeps a copy of the previous tape and restores it on activation
 failure. Each generated mission/package gets its own ID; original recordings are
 never edited. Names are separate sidecar files.
 
+### Formations (layered playback, developer build)
+
+A formation belongs to one authored mission. It starts from a solo take that has an
+aircraft association: select the take, name the formation and choose **Start
+formation…**. That creates version 1.
+
+- **Record a position.** In the Formations section, pick a version and choose
+  **Record a position or play…**. Then pick a scene where every position is
+  confirmed, and the Hornet you will fly. Choosing a position that already has a
+  take is a re-fly: its take does not play. Mute any other positions you want left
+  out. **Create recording copy** prepares and installs a copy in which only the
+  playing aircraft and you are on the ramp. Recording starts automatically at the
+  countdown release, so there is no F10 Start. Use F10 Stop to save.
+- **Version offer.** The saved take is flagged *New version offered*. Select it and
+  choose **Create the new version**, or **Keep take only**. A take you kept can still
+  make the version later with **Make version from this take**.
+- **Play formation.** Plays every take of a version while you fly a Hornet that holds
+  no take in it. Nothing is saved.
+- **Flags.** Each position shows which of the version's other takes it was actually
+  flown against. A take is *not flown against* when it was muted, not ready, or
+  recorded later (including a re-fly). A position also shows *flown against only
+  until t s* when that aircraft failed during the take.
+
+Formation copies use the developer-only `DCSRecorder-Hornet-Formation` module and
+the locally built `HornetFormationProbe.dll`. They are written under
+`DCSRecorder/authored` (recording copies) and `DCSRecorder/authored-playback`. Storage
+is `lineages/<mission>/formations/` and is write-once, except the formation name.
+
 ## Persistence contract
 
 The mission emits the established BEGIN/DATA/END recording protocol into DCS.log.
