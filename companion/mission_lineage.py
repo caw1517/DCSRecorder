@@ -261,14 +261,18 @@ class Registry:
         decision = self.mapping(revision).get(association)
         if not decision or str(decision['unit_id']) != metadata.get('source_unit_id'):
             raise ValueError('The recorded aircraft does not match its saved association.')
-        prepared = {m['prepared_sha256']: generation for generation, m in packages
+        prepared = {m['prepared_sha256']: (generation, m) for generation, m in packages
                     if m.get('source_sha256') == revision['sha256'] and m.get('association') == association}
         if len(prepared) != 1:
             raise ValueError('The recording copy for this take is missing or ambiguous.')
-        (prepared_sha, generation), = prepared.items()
+        (prepared_sha, (generation, manifest)), = prepared.items()
+        from formations import flown_against
         record = dict(profile=PROFILE, take=take.name, take_sha256=digest, lineage=lineage_id, association=association,
                       source_sha256=revision['sha256'], prepared_sha256=prepared_sha, recording_package=generation,
                       unit_id=decision['unit_id'], unit_name=decision['unit_name'], bound_at=now())
+        against = flown_against(metadata, manifest)  # refuses a take whose package does not match
+        if against is not None:
+            record['flown_against'] = against
         try:
             write_once(record_path, record)
         except FileExistsError:
