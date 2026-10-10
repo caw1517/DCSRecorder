@@ -261,8 +261,15 @@ class Registry:
         decision = self.mapping(revision).get(association)
         if not decision or str(decision['unit_id']) != metadata.get('source_unit_id'):
             raise ValueError('The recorded aircraft does not match its saved association.')
-        prepared = {m['prepared_sha256']: (generation, m) for generation, m in packages
-                    if m.get('source_sha256') == revision['sha256'] and m.get('association') == association}
+        candidates = [(generation, m) for generation, m in packages
+                      if m.get('source_sha256') == revision['sha256'] and m.get('association') == association]
+        if metadata.get('authored_package'):
+            candidates = [(g, m) for g, m in candidates if g == metadata['authored_package']]
+        prepared = {m['prepared_sha256']: (generation, m) for generation, m in candidates}
+        if len(prepared) > 1 and not metadata.get('authored_package'):
+            # Older takes name no copy: only a copy still installed unchanged could
+            # have been loaded. Anything else stays refused, never guessed.
+            prepared = {sha: item for sha, item in prepared.items() if item[1].get('installed')}
         if len(prepared) != 1:
             raise ValueError('The recording copy for this take is missing or ambiguous.')
         (prepared_sha, (generation, manifest)), = prepared.items()

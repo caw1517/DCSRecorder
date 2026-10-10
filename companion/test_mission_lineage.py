@@ -145,6 +145,22 @@ class Lineages(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'changed after it was saved'):
             self.bind(self.metadata(), [self.package()])
 
+    def test_the_take_names_its_recording_copy(self):
+        other = ('other', dict(self.package()[1], prepared_sha256='q'*64))
+        record = self.bind(self.metadata(authored_package='other'), [self.package(), other])
+        self.assertEqual((record['recording_package'], record['prepared_sha256']), ('other', 'q'*64))
+
+    def test_an_older_take_binds_only_to_the_copy_still_installed(self):
+        old, new = self.package(), ('new', dict(self.package()[1], prepared_sha256='q'*64, installed=True))
+        self.assertEqual(self.bind(self.metadata(), [old, new])['recording_package'], 'new')
+
+    def test_two_installed_copies_stay_ambiguous(self):
+        a = ('a', dict(self.package()[1], installed=True)); b = ('b', dict(self.package()[1], prepared_sha256='q'*64, installed=True))
+        with self.assertRaisesRegex(ValueError, 'missing or ambiguous'):
+            self.bind(self.metadata(), [a, b])
+        with self.assertRaisesRegex(ValueError, 'missing or ambiguous'):
+            self.bind(self.metadata(authored_package='gone'), [a, b])
+
     def test_takes_without_or_with_inconsistent_provenance(self):
         self.assertIsNone(self.bind(dict(authored_source_sha256=self.revision['sha256'], source_unit_id='11'), []))
         with self.assertRaisesRegex(ValueError, 'does not match its saved association'):

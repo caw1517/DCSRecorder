@@ -409,12 +409,14 @@ def carries_smoke(unit):
     return (((unit.get('payload') or {}).get('pylons') or {}).get(10) or {}).get('CLSID') == '{INV-SMOKE-WHITE}'
 
 
-def record_script(name, namespace, source_sha, lineage=None, association=None, smoke=False, formation=False):
+def record_script(name, namespace, source_sha, lineage=None, association=None, smoke=False, formation=False, package=None):
     script = (EFM/'record_flight_engine_mission.lua').read_text(encoding='utf-8-sig')
     script = script.replace("source='Observer'", 'source=' + serialize(name))
     old = "csv(r.source)..'\\n'"
     # Lineage/association IDs let the companion bind the saved take to its history.
     provenance = f'\\nauthored_lineage,{lineage}\\nauthored_association,{association}' if association else ''
+    # The recording copy that produced the take, so binding never has to choose.
+    provenance += f'\\nauthored_package,{package}' if package else ''
     extra = f'\\nauthored_source_sha256,{source_sha}{provenance}\\ncapture_timing,frame-batch-v1\\ncapture_build,{BUILD}\\nwind_ground,0\\nwind_2000,0\\nwind_8000,0\\n'
     assert script.count(old) == 1
     script = script.replace(old, 'csv(r.source)..' + serialize(extra.replace('\\n', '\n')))
@@ -536,7 +538,7 @@ def remove_aircraft(mission, keep_ids, edits):
     return removed
 
 
-def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, association=None):
+def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, association=None, package=None):
     blob, original_entries, original = read_source(source)
     if expected_sha and sha(blob) != expected_sha:
         raise ValueError('The authored mission changed after selection. Inspect it again.')
@@ -545,7 +547,7 @@ def prepare_recording(source, unit_id, output, expected_sha=None, lineage=None, 
     namespace, index = allocate(mission, entries)
     edits = []
     role_edit(mission, row['unit'], 'skill', 'Player', edits)
-    script = record_script(row['unit']['name'], namespace, sha(blob), lineage, association, smoke=carries_smoke(row['unit']))
+    script = record_script(row['unit']['name'], namespace, sha(blob), lineage, association, smoke=carries_smoke(row['unit']), package=package)
     append_start(mission, index, script, 'DCS Recorder: record selected authored Hornet')
     manifest = dict(profile='authored-recording-v1', build=BUILD, source_sha256=sha(blob),
                     selected_id=unit_id, selected_name=row['unit']['name'], namespace=namespace,

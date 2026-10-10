@@ -144,7 +144,8 @@ def build(source, player_id, output, mission_name, takes, dcs=DCS, saved_games=P
             raise ValueError('The playing positions differ from the formation plan')
         # The recorder runs first, in its own function scope and namespace.
         recorder = a.record_script(player['unit']['name'], namespace+'_REC', a.sha(blob), record['lineage'],
-                                   record['association'], smoke=a.carries_smoke(player['unit']), formation=True)
+                                   record['association'], smoke=a.carries_smoke(player['unit']), formation=True,
+                                   package=record.get('package'))
         script = '(function()\n'+recorder+'\nend)()\n'+script
     script = namespace+'_CONFIG='+a.serialize(config)+'\n'+script
     cleanup = a.install_control(mission, index, namespace, script)

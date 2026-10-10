@@ -217,9 +217,15 @@ class Library:
         result = []
         for path in sorted((self.home / 'authored').glob('*/manifest.json')):
             try:
-                result.append((path.parent.name, json.loads(path.read_text(encoding='utf-8'))))
+                manifest = json.loads(path.read_text(encoding='utf-8'))
             except (ValueError, OSError):
                 continue
+            # Whether its prepared mission is still installed, unchanged: the only
+            # copy DCS could have loaded when older takes name no copy.
+            name = manifest.get('mission') or 'DCSRecorder-Authored-Recording-' + path.parent.name[:8] + '.miz'
+            installed = self.saved / 'Missions' / name
+            manifest['installed'] = installed.is_file() and digest(installed) == manifest.get('prepared_sha256')
+            result.append((path.parent.name, manifest))
         return result
 
     def authored_recording(self, path, unit_id, source_sha256):
@@ -239,7 +245,7 @@ class Library:
         generation = uuid.uuid4().hex
         output = self.home / 'authored' / generation
         # Prepared from the immutable saved scene, so the take's revision always exists.
-        manifest = prepare_recording(snapshot, int(unit_id), output, source_sha256, revision['lineage'], association)
+        manifest = prepare_recording(snapshot, int(unit_id), output, source_sha256, revision['lineage'], association, generation)
         self.check_environment()
         destination = self.saved / 'Missions' / ('DCSRecorder-Authored-Recording-'+generation[:8]+'.miz')
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -586,7 +592,7 @@ class Library:
         output = self.home / 'authored' / generation
         name = 'DCSRecorder-Formation-Recording-' + generation[:8] + '.miz'
         takes = self._formation_takes(version, scene, playing)
-        plan = dict(formation=formation, version=version['number'], lineage=lineage, association=association,
+        plan = dict(formation=formation, version=version['number'], lineage=lineage, association=association, package=generation,
                     associations={scene['units'][a]: a for a in playing}, played={a: version['positions'][a] for a in playing},
                     muted=sorted(muted))
         result = builder.build(self.lineage.snapshot(revision), unit_id, output, name, takes, dcs=dcs, saved_games=self.saved, record=plan)
