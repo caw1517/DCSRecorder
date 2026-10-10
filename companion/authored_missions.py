@@ -673,13 +673,23 @@ def place_playback(mission, lead, player, metadata, first, raw_first, module, to
     # Once past the last waypoint it heads home to land and lowers its own gear,
     # opening gear doors the tape never recorded (Diamond, 9 October 2026). An
     # endless orbit at the last waypoint keeps the route from ever finishing.
-    points=lead['group']['route']['points'];last=points[max(points)]
-    task=copy.deepcopy(last.get('task') or {'id':'ComboTask','params':{'tasks':{}}})
-    if task.get('id')!='ComboTask':task={'id':'ComboTask','params':{'tasks':{1:dict(task,number=1)}}}
-    tasks=task['params'].setdefault('tasks',{});number=max(tasks,default=0)+1
-    tasks[number]=dict(number=number,auto=False,enabled=True,id='Orbit',
-                       params=dict(pattern='Circle',altitude=last.get('alt',first[2]),speed=last.get('speed',speed)))
-    role_edit(mission,last,'task',task,edits)
+    # Playback aircraft are also immortal: a damaged one's AI ejected its pilot
+    # while the tape flew on (Diamond, 10 October 2026), and damage slowed its
+    # stepping to 10 Hz. Bumps still happen; the aircraft stays intact.
+    points=lead['group']['route']['points'];first_point,last=points[min(points)],points[max(points)]
+    def added(point,entries):
+        task=copy.deepcopy(point.get('task') or {'id':'ComboTask','params':{'tasks':{}}})
+        if task.get('id')!='ComboTask':task={'id':'ComboTask','params':{'tasks':{1:dict(task,number=1)}}}
+        tasks=task['params'].setdefault('tasks',{})
+        for entry in entries:
+            number=max(tasks,default=0)+1;tasks[number]=dict(entry,number=number,auto=False,enabled=True)
+        return task
+    immortal=dict(id='WrappedAction',params=dict(action=dict(id='SetImmortal',params=dict(value=True))))
+    orbit=dict(id='Orbit',params=dict(pattern='Circle',altitude=last.get('alt',first[2]),speed=last.get('speed',speed)))
+    if first_point is last:role_edit(mission,last,'task',added(last,[immortal,orbit]),edits)
+    else:
+        role_edit(mission,first_point,'task',added(first_point,[immortal]),edits)
+        role_edit(mission,last,'task',added(last,[orbit]),edits)
     if player:role_edit(mission,player['unit'],'skill','Player',edits)
     if livery_name and lead['unit'].get('livery_id')!=livery_name:
         if not same_livery(livery_name,lead['unit'].get('livery_id')):raise ValueError('Installed livery differs from the recorded one.')
