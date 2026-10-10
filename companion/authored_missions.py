@@ -417,7 +417,7 @@ def record_script(name, namespace, source_sha, lineage=None, association=None, s
     provenance = f'\\nauthored_lineage,{lineage}\\nauthored_association,{association}' if association else ''
     # The recording copy that produced the take, so binding never has to choose.
     provenance += f'\\nauthored_package,{package}' if package else ''
-    extra = f'\\nauthored_source_sha256,{source_sha}{provenance}\\ncapture_timing,frame-batch-v1\\ncapture_build,{BUILD}\\nwind_ground,0\\nwind_2000,0\\nwind_8000,0\\n'
+    extra = f'\\nauthored_source_sha256,{source_sha}{provenance}\\ncapture_timing,frame-batch-v1\\ncapture_hitch_tolerance,1.0\\ncapture_build,{BUILD}\\nwind_ground,0\\nwind_2000,0\\nwind_8000,0\\n'
     assert script.count(old) == 1
     script = script.replace(old, 'csv(r.source)..' + serialize(extra.replace('\\n', '\n')))
     # White smoke is captured only when the aircraft carries the smoke pod (V1: white only).

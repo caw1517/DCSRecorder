@@ -4,11 +4,12 @@ local function finite(v)return type(v)=='number' and v==v and math.abs(v)<math.h
 return function(data,active)
     local motion_time=tonumber(data:match('^([^,]+),'))
     local t=Export.LoGetModelTime()
-    local max_delay=active.capture_timing=='frame-batch-v1' and active.smoke_time and .15 or .05
+    local limit=active.smoke_time and active.hitch_limit or .15
+    local max_delay=active.capture_timing=='frame-batch-v1' and active.smoke_time and limit or .05
     assert(finite(t) and motion_time and t>=motion_time and t-motion_time<=max_delay,
         'Smoke sample delayed over '..math.floor(max_delay*1000+.5)..' ms')
     assert(not active.smoke_time or t>=active.smoke_time,'Reversed smoke sample time')
-    assert(not active.smoke_time or t-active.smoke_time<=.15,'Smoke sample clock gap over 150 ms')
+    assert(not active.smoke_time or t-active.smoke_time<=limit,'Smoke sample clock gap over '..math.floor(limit*1000+.5)..' ms')
     local id=Export.LoGetPlayerPlaneId()
     assert(id==active.engine_player_id,'Smoke/engine player mismatch')
     if not reader or reader_build~=active.capture_build then

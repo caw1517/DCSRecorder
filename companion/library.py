@@ -141,6 +141,9 @@ class Library:
                 if metadata['wheels_available']:
                     item['status_label'] += ' + wheels'
                     item['reason'] += ' Wheel rotation, suspension and nose-wheel steering are recorded.'
+                if int(metadata.get('capture_hitches') or 0):
+                    item['reason'] += (f" {metadata['capture_hitches']} rendering hitch(es) during capture (longest "
+                                       f"{metadata['capture_max_hitch_ms']} ms): motion is exact; engine sound and smoke timing are approximate there.")
                 if metadata.get('surface_available'):
                     item['status_label'] += ' + ground'
                     item['reason'] += ' Ground contact is recorded; grounded segments play back on the ground controller.'

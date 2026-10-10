@@ -86,6 +86,14 @@ local function open_take(id, hex)
             tonumber(metadata:match('\nformation_epoch,([%d.]+)\n')),'Invalid formation metadata')
         assert(not metadata:find('\nformation_events,',1,true),'Invalid formation metadata')
     end
+    -- New takes declare a hitch tolerance (seconds of sim time, at most 1).
+    local tolerance=metadata:match('\ncapture_hitch_tolerance,([%d.]+)\n')
+    local hitch_limit=.15
+    if tolerance then
+        hitch_limit=tonumber(tolerance)
+        assert(hitch_limit and hitch_limit>=.15 and hitch_limit<=1 and capture_timing=='frame-batch-v1','Invalid capture hitch tolerance')
+        assert(not metadata:find('\ncapture_hitches,',1,true),'Invalid capture hitch metadata')
+    end
     local header=columns..(version~='1' and exterior or '')..(has_engine and engine or '')..(has_smoke and ',smoke_time,smoke_on' or '')..(tonumber(version)>=5 and lights or '')..(tonumber(version)>=6 and ',arg_38' or '')..(tonumber(version)>=7 and wheels or '')..(version=='8' and contact or '')..'\n'
     local filename
     repeat
@@ -94,7 +102,8 @@ local function open_take(id, hex)
     until not lfs.attributes(filename .. '.partial') and not lfs.attributes(filename .. '.csv')
     local file = assert(io.open(filename .. '.partial', 'wb'))
     active = {id=id, rows=0, file=file, name=filename, parts={metadata,header}, version=version,source_id=source_id,capture_build=capture_build,capture_timing=capture_timing,
-        has_engine=has_engine,has_smoke=has_smoke,formation=formation~=nil,events={},commas=version=='8' and 55 or version=='7' and 50 or tonumber(version)>=6 and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
+        has_engine=has_engine,has_smoke=has_smoke,formation=formation~=nil,events={},hitch_limit=hitch_limit,declared_hitches=tolerance~=nil,hitches=0,max_hitch=0,commas=version=='8' and 55 or version=='7' and 50 or tonumber(version)>=6 and 43 or version=='5' and 42 or has_engine and 35 or (version=='2' and 31 or 18)}
+    function active.note_hitch(gap) active.hitches=active.hitches+1;active.max_hitch=math.max(active.max_hitch,gap) end
     checked(file.write,file,metadata,header); checked(file.flush,file)
     write_status('RECORDING\nRecording in progress; use F10 Stop to save.')
 end
@@ -150,14 +159,18 @@ local function consume(line)
         local expected=table.concat(active.parts)
         assert(read_bytes(active.name..'.partial')==expected,'Saved recording verification failed; partial retained')
         local completed=active.name
-        if active.formation then
-            -- Events join the metadata rows; the verified partial is rewritten once.
-            active.parts[1]=active.parts[1]..'formation_events,'..table.concat(active.events,';')..'\n'
+        if active.formation or active.declared_hitches then
+            -- Events and hitch counts join the metadata rows; the verified
+            -- partial is rewritten once.
+            if active.formation then active.parts[1]=active.parts[1]..'formation_events,'..table.concat(active.events,';')..'\n' end
+            if active.declared_hitches then
+                active.parts[1]=active.parts[1]..'capture_hitches,'..active.hitches..'\ncapture_max_hitch_ms,'..math.floor(active.max_hitch*1000+.5)..'\n'
+            end
             expected=table.concat(active.parts)
             assert(not lfs.attributes(completed..'.final'),'Recording name collision')
             local file=assert(io.open(completed..'.final','wb'))
             checked(file.write,file,expected);checked(file.flush,file);checked(file.close,file)
-            assert(read_bytes(completed..'.final')==expected,'Saved formation recording verification failed; partial retained')
+            assert(read_bytes(completed..'.final')==expected,'Saved recording verification failed; partial retained')
             checked(os.rename,completed..'.final',completed..'.csv')
             checked(os.remove,completed..'.partial')
         else
@@ -165,8 +178,8 @@ local function consume(line)
         end
         assert(not lfs.attributes(completed..'.partial') and read_bytes(completed..'.csv')==expected,'Completed recording verification failed')
         if active.has_engine then
-            announce(string.format('Capture timing: rows=%d engine_max_delay_ms=%.3f smoke_max_delay_ms=%.3f',
-                active.rows,(active.max_engine_delay or 0)*1000,(active.max_smoke_delay or 0)*1000))
+            announce(string.format('Capture timing: rows=%d engine_max_delay_ms=%.3f smoke_max_delay_ms=%.3f hitches=%d max_hitch_ms=%.0f',
+                active.rows,(active.max_engine_delay or 0)*1000,(active.max_smoke_delay or 0)*1000,active.hitches,active.max_hitch*1000))
         end
         active=nil
         write_status('READY\nLast saved: '..completed..'.csv')

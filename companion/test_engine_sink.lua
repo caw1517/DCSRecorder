@@ -60,6 +60,7 @@ if canopy then metadata=metadata:gsub('DCSREC,5','DCSREC,6')..'canopy_profile,ho
 if wheels then metadata=metadata:gsub('DCSREC,6','DCSREC,7')..'wheel_profile,hornet-wheels-v1\n'end
 if contact then metadata=metadata:gsub('DCSREC,7','DCSREC,8')..'contact_profile,hornet-contact-v1'..string.char(10) end
 if mode:match('^batch') then metadata=metadata..'capture_timing,frame-batch-v1\n'end
+if mode:match('^batch_hitch') then metadata=metadata..'capture_hitch_tolerance,1.0\n'end
 -- Formation takes: shared epoch in the metadata, events during the take.
 local lead,wing=string.rep('a',32),string.rep('b',32)
 if mode:match('^formation') then metadata=metadata..'formation_id,'..string.rep('f',32)..'\nformation_version,3\nformation_epoch,10.000000000\n'end
@@ -69,7 +70,8 @@ for i=0,last_row do
     local w=i%301 -- bounded state channels repeat their 6 s pattern
     local t=10+i*.02;now=t+(mode=='late' and .1 or .01)
     env.defer_pump=(mode=='batch' and i>=100 and i<103) or
-        (mode=='batch_initial' and i<3) or (mode=='batch_long' and i>=100 and i<110)
+        (mode=='batch_initial' and i<3) or (mode=='batch_long' and i>=100 and i<110) or
+        (mode=='batch_hitch' and i>=150 and i<170) or (mode=='batch_hitch_over' and i>=150 and i<210)
     if mode=='changed_player' and i>0 then id=123 end
     if mode=='invalid_player' then id=0 end
     local values={t,(t-10)*220,2000,0,1,0,0,0,1,0,0,0,1,220,0,0,0,'',''}

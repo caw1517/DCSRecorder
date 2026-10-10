@@ -8,11 +8,15 @@ return function(data,active)
     local motion_time=tonumber(row[1])
     -- Keep the first snapshot strict. A declared trial profile may retain a
     -- short midflight batch, using actual native timestamps for later alignment.
-    local max_delay=active.capture_timing=='frame-batch-v1' and active.engine_time and .15 or .05
+    -- A declared hitch tolerance lets a rendering hitch delay later samples up to
+    -- its limit; each hitch over 150 ms is counted in the take instead of failing it.
+    local limit=active.engine_time and active.hitch_limit or .15
+    local max_delay=active.capture_timing=='frame-batch-v1' and active.engine_time and limit or .05
     assert(finite(t) and motion_time and t>=motion_time and t-motion_time<=max_delay,
         'Engine sample delayed over '..math.floor(max_delay*1000+.5)..' ms (observed '..tostring(motion_time and (t-motion_time)*1000)..' ms)')
     assert(not active.engine_time or t>=active.engine_time,'Reversed engine sample time')
-    assert(not active.engine_time or t-active.engine_time<=.15,'Engine sample clock gap over 150 ms')
+    assert(not active.engine_time or t-active.engine_time<=limit,'Engine sample clock gap over '..math.floor(limit*1000+.5)..' ms')
+    if active.engine_time and t-active.engine_time>.15 then active.note_hitch(t-active.engine_time) end
     local own=Export.LoGetSelfData()
     assert(own and own.Name=='FA-18C_hornet','Native engine capture requires stock Hornet')
     local id=Export.LoGetPlayerPlaneId()

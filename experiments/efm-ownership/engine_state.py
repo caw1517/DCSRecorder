@@ -9,14 +9,14 @@ NATIVE = [f'engine_{channel}_{side}' for side in ('left', 'right')
 COLUMNS = APPEARANCE + ['engine_time'] + NATIVE
 
 
-def align(raw, max_delay=.05):
+def align(raw, max_delay=.05, gap_limit=.15):
     times = [float(r['engine_time']) for r in raw]
     values = [[float(r[c]) for c in NATIVE] for r in raw]
     for i, (t, v) in enumerate(zip(times, values)):
         delay_limit = max_delay if i else .05
         if not math.isfinite(t) or not 0 <= t - float(raw[i]['t']) <= delay_limit:
             raise ValueError(f'Native engine sample must be within {delay_limit*1000:g} ms after its motion sample')
-        if i and not 0 <= t - times[i-1] <= .15:
+        if i and not 0 <= t - times[i-1] <= gap_limit:
             raise ValueError('Native engine clock gap or reversal')
         if i and t == times[i-1] and v != values[i-1]:
             raise ValueError('Native engine values disagree at the same timestamp')

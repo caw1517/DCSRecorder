@@ -101,7 +101,10 @@ def read(path, *, ground_trial_log=None):
     if version<8 and samples[-1][0]-samples[0][0]>300: raise ValueError('Takes recorded before ground contact are limited to 300 seconds')
     start=samples[0][0]
     if version>=3:
-        for sample,engine in zip(samples,engine_state.align(raw,.15 if timing=='frame-batch-v1' else .05)):sample.extend(engine)
+        # Motion stays strict; engine/smoke may carry declared capture hitches.
+        hitch=float(metadata.get('capture_hitch_tolerance',.15))
+        if not .15<=hitch<=1 or (hitch>.15 and timing!='frame-batch-v1'): raise ValueError('Unsupported capture hitch tolerance')
+        for sample,engine in zip(samples,engine_state.align(raw,hitch if timing=='frame-batch-v1' else .05,hitch)):sample.extend(engine)
     if version>=5:
         for sample,row in zip(samples,raw):
             lights=[float(row[k]) for k in light_state.COLUMNS]
