@@ -119,26 +119,29 @@ function r.event(kind,association,t)
     if r.state~='recording' then return end
     emit('EVENT,'..r.take..','..kind..','..association..','..(t and string.format('%.3f',t) or ''))
 end
+-- Audio sync aid: count 1 to 10 seconds from the start of the take, to count
+-- aloud with. Playback shows the same count on its replay clock.
+local function sync_count()
+    local take,started=r.take,timer.getTime()
+    for count=1,10 do
+        timer.scheduleFunction(function()
+            if r.take==take and r.state=='recording' then trigger.action.outText('Sync '..count,1) end
+        end,nil,started+count)
+    end
+end
 local menu=missionCommands.addSubMenu('DCS Recorder')
 if DCSRECORDER_FORMATION then
     -- No F10 Start: the formation control begins the take at the countdown release.
     function r.begin_formation(extra)
         if not begin(extra) then return false end
+        sync_count()
         trigger.action.outText('Recording take '..r.take..' from the release. Use F10 > DCS Recorder > Stop recording before leaving the mission.',15)
         return true
     end
 else
 missionCommands.addCommand('Start recording',menu,function()
     if not begin() then return end
-    local take=r.take
-    -- Audio sync aid: count 1 to 10 seconds from Start, to count aloud with.
-    -- Playback shows the same count on its replay clock.
-    local started=timer.getTime()
-    for count=1,10 do
-        timer.scheduleFunction(function()
-            if r.take==take and r.state=='recording' then trigger.action.outText('Sync '..count,1) end
-        end,nil,started+count)
-    end
+    sync_count()
     trigger.action.outText('Recording take '..r.take..' into DCS.log. Use F10 > DCS Recorder > Stop recording before leaving the mission.',15)
 end)
 end
