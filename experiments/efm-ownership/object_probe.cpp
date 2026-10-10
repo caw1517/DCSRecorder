@@ -11,6 +11,8 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <chrono>
+#include <map>
 #include "native_identity.h"
 #include "static_image_snapshot.h"
 #include "native_body.h"
@@ -64,7 +66,19 @@ std::ofstream exterior_file,engine_file;
 #endif
 // Evidence logs flush every tick, so the last tick before a failure is on disk
 // while DCS is still running.
+#ifdef HORNET_FORMATION_PROTOTYPE
+// Formation: several aircraft write traces on the sim thread while the player
+// records, and a 150 ms stall fails the take. Traces flush about once a second
+// per file instead of every row (the stream still flushes when closed).
+void flush_trace(std::ofstream& file) {
+    static std::map<const std::ofstream*,std::chrono::steady_clock::time_point> last;
+    const auto now=std::chrono::steady_clock::now();
+    auto& at=last[&file];
+    if(now-at>=std::chrono::seconds(1)) {file.flush();at=now;}
+}
+#else
 void flush_trace(std::ofstream& file) {file.flush();}
+#endif
 struct Observation {
     uint64_t calls = 0; double next_log = 0; bool motion_attempted=false, motion_active=false;
     double start_time=0, last_time=0, last_x=0, last_z=0, measured_speed=145; playback_path::Path path;
