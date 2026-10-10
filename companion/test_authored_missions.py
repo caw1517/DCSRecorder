@@ -73,7 +73,12 @@ class AuthoredCopies(unittest.TestCase):
         self.assertEqual(a.selected(prepared,11)['group']['route'],a.selected(self.m,11)['group']['route'])
         _,_,mission,manifest=self.playback()
         self.assertEqual(len(manifest['behavior']['preserved']),4)
-        self.assertEqual(a.selected_row(mission,11)['group']['route']['points'][1]['task'],a.selected(self.m,11)['group']['route']['points'][1]['task'])
+        # Authored actions are kept; the only addition is the orbit that stops the
+        # AI from finishing its route and lowering its own gear.
+        tasks=dict(a.selected_row(mission,11)['group']['route']['points'][1]['task']['params']['tasks'])
+        orbit=tasks.pop(max(tasks))
+        self.assertEqual((orbit['id'],orbit['params']['pattern'],orbit['auto']),('Orbit','Circle',False))
+        self.assertEqual(tasks,a.selected(self.m,11)['group']['route']['points'][1]['task']['params']['tasks'])
 
     def test_edited_or_other_automatic_actions_are_refused_by_name(self):
         tasks=self.me_defaults(11);a.selected(self.m,11)['group']['route']['points'][1]['task']['params']['tasks']=tasks
