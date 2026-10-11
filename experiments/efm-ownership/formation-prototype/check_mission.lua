@@ -22,7 +22,7 @@ local function run(mode,record)
         function u:getController()return {setCommand=function()end}end
         function u:getDrawArgumentValue(i)
             local cfg=config().positions[self.index]
-            local status=state[self.index] or .125
+            local status=state[self.index] or (mode=='none_ready' and 0 or .125)  -- every position, however many
             if status==0 then return 0 end
             if i==997 then return cfg.token_high end
             if i==998 then return cfg.token_low end
@@ -41,7 +41,7 @@ local function run(mode,record)
     end}
     local before={};for k in pairs(_G)do before[k]=true end
     if mode=='one_never_ready' then state[2]=0 end
-    if mode=='none_ready' then state[1],state[2]=0,0 end
+
     -- Recording against the formation: a stub recorder stands in for the injected
     -- one (its own global guard then skips it) and keeps what it is told.
     local recorder={began={},events={}}
