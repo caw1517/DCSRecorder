@@ -36,6 +36,11 @@ class CaptureHitches(unittest.TestCase):
         self.assertEqual(saved, [])
         self.assertIn('over 1000 ms', status)
 
+    def test_a_turning_aircraft_stays_associated_across_a_hitch(self):
+        here = Path(__file__).parent
+        run = subprocess.run([str(LUAE), str(here/'test_engine_association.lua'), str(here/'engine_capture.lua')], capture_output=True, text=True)
+        self.assertEqual(run.returncode, 0, run.stdout+run.stderr)
+
     def test_without_the_declaration_the_strict_limit_holds(self):
         saved, status = self.capture('batch_long')  # a 0.2 s batch on an undeclared take
         self.assertEqual(saved, [])

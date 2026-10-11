@@ -14,9 +14,9 @@ from library import dcs_running, digest
 HERE = Path(__file__).resolve().parent
 # Installed path -> (source, commits whose version may be replaced).
 FILES = {
-    'Scripts/Hooks/dcs-recorder-autosave.lua': ('recording_sink.lua', ('e869935', 'e79d241')),
-    'Scripts/DCSRecorderEngineCapture/engine_capture.lua': ('engine_capture.lua', ('e869935',)),
-    'Scripts/DCSRecorderSmokeCapture/smoke_capture.lua': ('smoke_capture.lua', ('e869935',)),
+    'Scripts/Hooks/dcs-recorder-autosave.lua': ('recording_sink.lua', ('e869935', 'e79d241', 'b0c753b')),
+    'Scripts/DCSRecorderEngineCapture/engine_capture.lua': ('engine_capture.lua', ('e869935', 'b0c753b')),
+    'Scripts/DCSRecorderSmokeCapture/smoke_capture.lua': ('smoke_capture.lua', ('e869935', 'b0c753b')),
 }
 
 

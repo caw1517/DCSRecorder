@@ -53,7 +53,10 @@ return function(data,active)
         assert(p and finite(p[key]),'Invalid Export position')
         error2=error2+(p[key]-expected)^2
     end
-    assert(error2<=.25,'Engine/motion position association failed')
+    -- Straight-line extrapolation holds to 0.5 m over a frame. A sample delayed by
+    -- a declared hitch may be off by up to 9 g of acceleration over the delay.
+    local radius=dt<=.15 and .5 or .5+45*dt*dt
+    assert(error2<=radius*radius,'Engine/motion position association failed')
     active.engine_time=t;active.engine_identity=identity;active.engine_player_id=id
     active.max_engine_delay=math.max(active.max_engine_delay or 0,t-motion_time)
     local appended={string.format('%.12g',t)}
