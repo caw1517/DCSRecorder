@@ -43,6 +43,26 @@ Baseline: DCS 2.9.30.28536, Hornet, Caucasus, zero wind, authored scene `Diamond
    - The offered v4 names base v3. Its derived flags show #3 *not flown against* #2′ (recorded later), #2′ flown against Lead and #3, and the solo Lead not flown against either.
    - Mute, declined offer and Make version from this take: still to do.
 
+## Second scene: four jets plus a cold player (13 October 2026)
+
+Formation `Rolls` was built on a short variant of the diamond, from a Lead solo, #2 against v1, #3 against v2, and #4 against v3. That gave v4, with four positions. Every formation take had 0 hitches, and each one recorded the earlier aircraft ending (`formation_events`). v4 was then played with the player in a cold-start spare, #5, which `f2db6e0` allows for playback only. In that playback, all four aircraft released on one epoch (76.342 s).
+
+Fidelity, using `analyze_formation.py` with a fitted offset of 20 ms:
+
+| Aircraft | Horizontal max / p95 (m) | Attitude max / p95 (°) |
+|---|---|---|
+| Lead | 0.010 / 0.008 | 0.157 / 0.047 |
+| #2 | 0.023 / 0.010 | 0.586 / 0.040 |
+| #3 | 0.018 / 0.009 | 0.627 / 0.044 |
+| #4 | 0.196 / 0.023 | 0.703 / 0.067 |
+
+The exceedances are an accepted envelope limit, not a defect. Each one falls inside a deliberate, aggressive manoeuvre that the user confirmed:
+
+- **#4 at 50–58 s:** a hard left rudder kick right after takeoff, to shift from fingertip to diamond, then a hard opposite kick. The error is cross-track, +0.19 m and then −0.18 m, at 130–175 m/s. Along-track error stays under 3 cm. The aircraft recovers by itself within about 3 s.
+- **#2, #3 and #4 at 234–238 s:** the break. #2 went hard right, #3 hard left, and #4 inverted and pulled. The attitude blips of 0.5–0.7° each last 0.1–0.2 s.
+
+In practice, the controller can lag by up to 0.2 m and 0.7° in hard rudder and break transients; elsewhere it stays inside the #28 limits. Separation reproduced to within 0.009–0.015 m p95 for every pair. The only larger values come from the comparison itself, at the Lead's last sample, because its take is the shortest. The user reports that the playback looked and sounded right with no stutter.
+
 ## Issues found and fixed during the run
 
 - **Gear doors opened on the Lead** (`e31e9ed`). The AI finished its authored route and switched to landing. Prepared copies now add an endless orbit at the last waypoint.
