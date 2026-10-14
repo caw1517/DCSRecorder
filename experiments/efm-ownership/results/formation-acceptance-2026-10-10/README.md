@@ -13,6 +13,10 @@ Baseline: DCS 2.9.30.28536, Hornet, Caucasus, zero wind, authored scene `Diamond
 | v3 | #3 against v2 | `20261011T003030Z-0003` | 43,645 | Lead, #2 | Epoch 19.495 s. Lead `ended@858.165`, #2 `ended@860.605`. 0 hitches |
 | v4 (offered) | #2 re-fly against v3 | `20261011T005737Z-0001` | 43,054 | Lead, #3 | Epoch 25.256 s. Lead `ended@858.164`. 0 hitches. Offer: base v3 |
 
+## Outcome
+
+Accepted on 13 October 2026. The user waived the remaining live checks: destroy while recording, mute, and the declined offer with Make version. Offline checks still cover all of them: `check_mission.lua` covers destroy and not-ready while recording, and `test_formations.py`, `test_formation_recording.py` and `test_formation_library.py` cover mute, decline and make-version. A four-jet second scene (below) added three more formation recordings and a cold-player playback.
+
 ## Gates
 
 1. **Shared timing: pass.**
