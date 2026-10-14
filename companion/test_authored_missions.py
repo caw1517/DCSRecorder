@@ -156,6 +156,13 @@ class AuthoredCopies(unittest.TestCase):
                       exterior_available=True,engine_available=True,lights_available=True,canopy_available=True,wheels_available=True)
         return a.playback_entries(self.source,11,player,metadata,first,dict(fx=1,fz=0),'DCSRecorder-Hornet',42,livery_name=installed)
 
+    def test_cold_start_is_allowed_only_for_the_playback_player(self):
+        point=a.selected(self.m,12)['group']['route']['points'][1];point.update(type='TakeOffParking',action='From Parking Area');self.write()
+        _,_,mission,_=self.playback()
+        self.assertEqual(a.selected_row(mission,12)['group']['route']['points'][1]['type'],'TakeOffParking')  # kept as authored
+        with self.assertRaisesRegex(ValueError,'only for the Hornet you fly while playing back'):
+            a.prepare_recording(self.source,12,self.root/'cold-recording')
+
     def test_playback_retains_player_start_and_all_unselected_content(self):
         before=copy.deepcopy(a.selected(self.m,12)['group'])
         blob,entries,mission,manifest=self.playback()

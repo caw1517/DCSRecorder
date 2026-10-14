@@ -98,6 +98,21 @@ class FormationPackage(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'differ from the formation plan'):
             prepare.build(SOURCE, 12202, self.root/'bad', 'x.miz', [(TAKE, 12201)], allow_airborne=True, record=self.plan(played=False))
 
+    def cold_witness(self):
+        """The fixture scene with the spare Scene Witness on a cold parking start."""
+        blob, entries, mission = prepare.a.read_source(SOURCE)
+        point = prepare.a.selected_row(mission, 12203)['group']['route']['points'][1]
+        point.update(type='TakeOffParking', action='From Parking Area')
+        path = self.root/'cold.miz'; path.write_bytes(prepare.a.packed(dict(entries, mission=prepare.a.encoded('mission', mission))))
+        return path
+
+    def test_a_cold_player_can_play_but_not_record(self):
+        cold = self.cold_witness()
+        prepare.build(cold, 12203, self.root/'play', '073-Formation-Cold.miz', [(TAKE, 12201, SOURCE), (self.wing, 12202, SOURCE)], allow_airborne=True)
+        plan = dict(self.plan(played=True), association='c'*32, associations={12201: 'a'*32})
+        with self.assertRaisesRegex(ValueError, 'only for the Hornet you fly while playing back'):
+            prepare.build(cold, 12203, self.root/'rec', 'x.miz', [(TAKE, 12201, SOURCE)], allow_airborne=True, record=plan)
+
     def test_formation_recorder_samples_at_release(self):
         script = self.root/'recorder.lua'
         script.write_text(prepare.a.record_script('Wing Hornet', 'DCSR_TEST_REC', 'd'*64, 'e'*32, 'b'*32, formation=True),

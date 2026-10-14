@@ -163,7 +163,13 @@ def compatibility(old_row, new_row):
     return differences(identity_free(old_row), identity_free(new_row))
 
 
-def selected(mission, unit_id):
+HOT_STARTS = ('Turning Point', 'TakeOffParkingHot', 'TakeOffGroundHot', 'TakeOff')
+COLD_STARTS = ('TakeOffParking', 'TakeOffGround')
+
+
+def selected(mission, unit_id, cold=False):
+    """`cold` allows a cold parking or ground start: only for the player during
+    playback, who keeps the authored start and is not recorded (startup is V2)."""
     row = selected_row(mission, unit_id)
     if row['kind'] != 'plane' or row['unit']['type'] != 'FA-18C_hornet':
         raise ValueError('Select an ordinary stock F/A-18C Hornet.')
@@ -172,8 +178,9 @@ def selected(mission, unit_id):
     if row['group'].get('lateActivation') or row['group'].get('uncontrolled'):
         raise ValueError('Selected Hornets must be active at mission start, with engines running.')
     start = row['group'].get('route', {}).get('points', {}).get(1, {})
-    if start.get('type') not in ('Turning Point', 'TakeOffParkingHot', 'TakeOffGroundHot', 'TakeOff'):
-        raise ValueError('Use an airborne or hot start for the selected Hornet.')
+    if start.get('type') not in HOT_STARTS + (COLD_STARTS if cold else ()):
+        raise ValueError('Use an airborne or hot start for the selected Hornet.' + ('' if cold else
+                         ' Cold starts are allowed only for the Hornet you fly while playing back.'))
     return row
 
 
@@ -304,11 +311,11 @@ def refusal(conflicts):
             '\nEdit them in Mission Editor, or select a different aircraft.')
 
 
-def validate_supported(mission, role_ids):
+def validate_supported(mission, role_ids, cold_ids=()):
     wind = mission.get('weather', {}).get('wind', {})
     if mission.get('theatre') != 'Caucasus' or set(wind) != {'atGround', 'at2000', 'at8000'} or any(w.get('speed') != 0 for w in wind.values()):
         raise ValueError('This preparation profile requires Caucasus and zero wind.')
-    rows = [selected(mission, i) for i in role_ids]
+    rows = [selected(mission, i, cold=i in cold_ids) for i in role_ids]
     # Authors may place every aircraft ahead of time. Other Client slots stay
     # unchanged (single player does not fly them); only one Player can exist.
     others = []
@@ -580,7 +587,7 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
     if metadata.get('authored_source_sha256') != sha(saved_blob):
         raise ValueError('This take does not belong to the exact authored source. Use the scene saved with it.')
     mission, entries = copy.deepcopy(original), dict(original_entries)
-    (lead, player), behavior = validate_supported(mission, [unit_id, player_id])
+    (lead, player), behavior = validate_supported(mission, [unit_id, player_id], cold_ids=[player_id])
     if saved:
         recorded = selected(read_source(saved)[2], int(metadata['source_unit_id']))
         if metadata.get('source') != recorded['unit']['name']:
@@ -623,8 +630,8 @@ def playback_entries(source, unit_id, player_id, metadata, first, raw_first, mod
                   parked_endpoint=metadata.get('parked_endpoint'))
     # Check the entire player's authored group apart from the deliberate skill change.
     player_check=copy.deepcopy(player['group'])
-    next(iter(player_check['units'].values()))['skill']=selected(original,player_id)['unit']['skill']
-    if player_check!=selected(original,player_id)['group']:
+    next(iter(player_check['units'].values()))['skill']=selected(original,player_id,cold=True)['unit']['skill']
+    if player_check!=selected(original,player_id,cold=True)['group']:
         raise ValueError('Player authored placement or configuration changed.')
     entries[MARKER]=json.dumps(manifest,sort_keys=True).encode()
     entries['mission']=encoded('mission',mission)

@@ -63,7 +63,8 @@ def build(source, player_id, output, mission_name, takes, dcs=DCS, saved_games=P
 
     blob, original_entries, original = a.read_source(source)
     mission, entries = a.copy.deepcopy(original), dict(original_entries)
-    rows, behavior = a.validate_supported(mission, unit_ids+[player_id])
+    # Playing (not recording) lets the player keep a cold authored start.
+    rows, behavior = a.validate_supported(mission, unit_ids+[player_id], cold_ids=[] if record else [player_id])
     leads, player = rows[:-1], rows[-1]
     edits = []
     # Muted and take-less aircraft are left out: the ramp holds only the playing
@@ -153,8 +154,9 @@ def build(source, player_id, output, mission_name, takes, dcs=DCS, saved_games=P
                     positions=records, player_id=player_id, player_name=player['unit']['name'], namespace=namespace,
                     trigger_indices=[index, cleanup], role_edits=edits[removals:], initial=config, behavior=behavior, removed=removed)
     player_check = a.copy.deepcopy(player['group'])
-    next(iter(player_check['units'].values()))['skill'] = a.selected(original, player_id)['unit']['skill']
-    if player_check != a.selected(original, player_id)['group']:
+    authored_player = a.selected(original, player_id, cold=not record)
+    next(iter(player_check['units'].values()))['skill'] = authored_player['unit']['skill']
+    if player_check != authored_player['group']:
         raise ValueError('Player authored placement or configuration changed.')
     entries[a.MARKER] = json.dumps(manifest, sort_keys=True).encode()
     entries['mission'] = a.encoded('mission', mission)
